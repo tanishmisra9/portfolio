@@ -17,6 +17,7 @@ export function WarpGridBackground() {
   const pointsRef = useRef<Point[]>([]);
   const gridDimsRef = useRef({ rows: 0, cols: 0 });
   const rafRef = useRef(0);
+  /** True only while desktop RAF + pointermove are active */
   const runningRef = useRef(false);
   const cssSizeRef = useRef({ w: 0, h: 0 });
 
@@ -59,46 +60,13 @@ export function WarpGridBackground() {
       buildGrid(cssW, cssH);
     }
 
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-
-    function onResize() {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        debounceTimer = undefined;
-        resizeCanvas(canvasEl);
-      }, RESIZE_DEBOUNCE_MS);
-    }
-
-    function onPointerMove(e: PointerEvent) {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
-    }
-
     const idx = (r: number, c: number, cols: number) => r * cols + c;
 
-    function tick() {
-      if (!runningRef.current) return;
-
+    function draw() {
       const { rows, cols } = gridDimsRef.current;
       const points = pointsRef.current;
-      const mouse = mouseRef.current;
       const { w: cw, h: ch } = cssSizeRef.current;
-
-      for (let i = 0; i < points.length; i++) {
-        const p = points[i];
-        p.x += (p.rx - p.x) * DAMPING;
-        p.y += (p.ry - p.y) * DAMPING;
-        if (mouse) {
-          const dx = p.x - mouse.x;
-          const dy = p.y - mouse.y;
-          const d = Math.hypot(dx, dy);
-          if (d < REPULSE_RADIUS && d > 1e-6) {
-            const t = 1 - d / REPULSE_RADIUS;
-            const f = MAX_FORCE * t * t;
-            p.x += (dx / d) * f;
-            p.y += (dy / d) * f;
-          }
-        }
-      }
+      if (cols === 0 || rows === 0 || cw === 0 || ch === 0) return;
 
       c2d.clearRect(0, 0, cw, ch);
       c2d.strokeStyle = LINE_COLOR;
@@ -124,7 +92,49 @@ export function WarpGridBackground() {
           c2d.stroke();
         }
       }
+    }
 
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+    function onResize() {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        debounceTimer = undefined;
+        resizeCanvas(canvasEl);
+        if (!runningRef.current) {
+          draw();
+        }
+      }, RESIZE_DEBOUNCE_MS);
+    }
+
+    function onPointerMove(e: PointerEvent) {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    }
+
+    function tick() {
+      if (!runningRef.current) return;
+
+      const points = pointsRef.current;
+      const mouse = mouseRef.current;
+
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        p.x += (p.rx - p.x) * DAMPING;
+        p.y += (p.ry - p.y) * DAMPING;
+        if (mouse) {
+          const dx = p.x - mouse.x;
+          const dy = p.y - mouse.y;
+          const d = Math.hypot(dx, dy);
+          if (d < REPULSE_RADIUS && d > 1e-6) {
+            const t = 1 - d / REPULSE_RADIUS;
+            const f = MAX_FORCE * t * t;
+            p.x += (dx / d) * f;
+            p.y += (dy / d) * f;
+          }
+        }
+      }
+
+      draw();
       rafRef.current = requestAnimationFrame(tick);
     }
 
@@ -136,18 +146,29 @@ export function WarpGridBackground() {
       mouseRef.current = null;
     }
 
-    function start() {
-      if (runningRef.current) return;
+    function startDesktop() {
       runningRef.current = true;
-      resizeCanvas(canvasEl);
       window.addEventListener("pointermove", onPointerMove, { passive: true });
       window.addEventListener("resize", onResize);
+      resizeCanvas(canvasEl);
       rafRef.current = requestAnimationFrame(tick);
     }
 
+    function startMobile() {
+      runningRef.current = false;
+      mouseRef.current = null;
+      window.addEventListener("resize", onResize);
+      resizeCanvas(canvasEl);
+      draw();
+    }
+
     function applyMq() {
-      if (mq.matches) start();
-      else stop();
+      stop();
+      if (mq.matches) {
+        startDesktop();
+      } else {
+        startMobile();
+      }
     }
 
     const onMqChange = () => applyMq();
@@ -162,7 +183,7 @@ export function WarpGridBackground() {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed inset-0 -z-10 hidden md:block">
+    <div className="pointer-events-none fixed inset-0 -z-10">
       <canvas
         ref={canvasRef}
         className="block h-full w-full"
