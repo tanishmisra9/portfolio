@@ -49,9 +49,7 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
     const sx = useSpring(tx, springConfig);
     const sy = useSpring(ty, springConfig);
 
-    const displayX = useTransform([sx, ox], ([a, b]) => Number(a) + Number(b));
-    const displayY = useTransform([sy, oy], ([a, b]) => Number(a) + Number(b));
-    const filterBlur = useTransform(blurMv, (b) => `blur(${b}px)`);
+    const filterBlur = useTransform(blurMv, (b) => `blur(${Number(b)}px)`);
 
     const onKeyDown = (e: React.KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -60,28 +58,38 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
       }
     };
 
+    /* Outer = magnet spring; inner = pit-stop offset + color/blur. Nested
+     * transforms avoid useTransform([spring, mv]) which can throw in FM 12 + RSC. */
     return (
       <motion.span
         ref={ref}
-        role="button"
-        tabIndex={0}
-        aria-label={`Letter ${char}, pit-stop animation`}
-        className={`cursor-pointer select-none ${className ?? ""}`}
+        className={`inline-block ${className ?? ""}`}
         style={{
-          x: displayX,
-          y: displayY,
-          color: colorMv,
-          filter: filterBlur,
-          display: "inline-block",
-          willChange: "transform, filter",
+          x: sx,
+          y: sy,
+          willChange: "transform",
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onLetterActivate();
-        }}
-        onKeyDown={onKeyDown}
       >
-        {char}
+        <motion.span
+          role="button"
+          tabIndex={0}
+          aria-label={`Letter ${char}, pit-stop animation`}
+          className="inline-block cursor-pointer select-none"
+          style={{
+            x: ox,
+            y: oy,
+            color: colorMv,
+            filter: filterBlur,
+            willChange: "transform, filter",
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onLetterActivate();
+          }}
+          onKeyDown={onKeyDown}
+        >
+          {char}
+        </motion.span>
       </motion.span>
     );
   },
