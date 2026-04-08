@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f4f4f5;
+  --fg: #09090b;
+  --muted: #52525b;
+  --border: rgba(0, 0, 0, 0.1);
+  --surface: #ececf0;
+  --accent: #0f0f0f;
+  --accent-dim: rgba(15, 15, 15, 0.08);
+  --accent-glow: rgba(15, 15, 15, 0.16);
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --fg: #f3f4f6;
+  --muted: #b4b4b8;
+  --border: rgba(255, 255, 255, 0.12);
+  --surface: #141414;
+  --accent: #f3f4f6;
+  --accent-dim: rgba(243, 244, 246, 0.08);
+  --accent-glow: rgba(243, 244, 246, 0.12);
+}
+
+html {
+  scroll-behavior: auto;
+  font-size: 16px;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 17px;
+  }
+}
+
+body {
+  color: var(--fg);
+  background-color: var(--bg);
+  background-image: radial-gradient(
+      rgba(128, 128, 128, 0.12) 1px,
+      transparent 1px
+    ),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
+  background-size: 24px 24px, auto;
+}
+
+.dark body {
+  background-image: radial-gradient(
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+}
+
+::selection {
+  background: rgba(15, 15, 15, 0.22);
+  color: var(--fg);
+}
+
+.dark ::selection {
+  background: rgba(243, 244, 246, 0.2);
+}
+
