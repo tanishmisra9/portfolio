@@ -32,9 +32,12 @@ export function ProjectsSection({ projects }: Props) {
               <p className="mt-4 leading-relaxed text-neutral-400">
                 {project.description}
               </p>
-              <ul className="mt-auto pt-10 font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+              <ul className="mt-auto flex flex-wrap gap-2 pt-10 font-mono text-[10px] uppercase tracking-widest">
                 {project.techStack.map((tag) => (
-                  <li key={tag} className="mr-4 inline-block">
+                  <li
+                    key={tag}
+                    className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-neutral-400 select-none cursor-default"
+                  >
                     {tag}
                   </li>
                 ))}

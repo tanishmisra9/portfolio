@@ -25,7 +25,7 @@ export function SkillsSection({ skills, certifications }: Props) {
                 {group.items.map((skill) => (
                   <li
                     key={skill}
-                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[11px] text-[var(--muted)]"
+                    className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-[11px] text-neutral-400 select-none cursor-default"
                   >
                     {skill}
                   </li>
