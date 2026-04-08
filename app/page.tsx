@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
     <PageEnter>
       <SiteHeader />
-      <main>
+      <main className="relative z-0 isolate">
         <Hero subtitle={portfolio.heroSubtitle} />
         <ExperienceSection entries={portfolio.experience} />
         <EducationSection entries={portfolio.education} />
