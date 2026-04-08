@@ -14,7 +14,7 @@ export function ProjectsSection({ projects }: Props) {
           {projects.map((project) => (
             <article
               key={project.id}
-              className="relative flex min-h-[300px] flex-col rounded-md border border-neutral-800 bg-black p-8 font-sans transition-colors duration-200 hover:border-neutral-400"
+              className="relative flex min-h-[300px] flex-col rounded-md border border-white/10 bg-black/40 backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-neutral-400"
             >
               <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">
                 PROJECT

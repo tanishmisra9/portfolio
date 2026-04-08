@@ -8,24 +8,28 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import {
-  forwardRef,
-  useCallback,
-  useMemo,
-  useRef,
-} from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react";
 
-const springConfig = {
+const magnetSpringConfig = {
   type: "spring" as const,
   stiffness: 250,
   damping: 20,
   mass: 0.8,
 };
 
-const LAUNCH_DURATION = 0.41;
+const returnSpringConfig = {
+  type: "spring" as const,
+  stiffness: 400,
+  damping: 24,
+  mass: 0.52,
+};
+
+const LAUNCH_DURATION = 0.24;
 const LAUNCH_DISTANCE = 1800;
 /** Peak motion blur (px) during pit launch / return */
-const BLUR_MAX = 100;
+const BLUR_MAX = 25;
+/** Start SFX this many ms before the return snap so the clip’s peak lands near the letter settling */
+const WHEELGUN_LEAD_MS = 103;
 
 type LineId = "tanish" | "misra";
 
@@ -37,26 +41,18 @@ type ScatterLetterProps = {
   oy: MotionValue<number>;
   blurMv: MotionValue<number>;
   lineId: LineId;
-  onLetterActivate: () => void;
   className?: string;
 };
 
 const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
   function ScatterLetter(
-    { char, tx, ty, ox, oy, blurMv, lineId, onLetterActivate, className },
+    { char, tx, ty, ox, oy, blurMv, lineId, className },
     ref,
   ) {
-    const sx = useSpring(tx, springConfig);
-    const sy = useSpring(ty, springConfig);
+    const sx = useSpring(tx, magnetSpringConfig);
+    const sy = useSpring(ty, magnetSpringConfig);
 
     const filterBlur = useTransform(blurMv, (b) => `blur(${Number(b)}px)`);
-
-    const onKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        onLetterActivate();
-      }
-    };
 
     const lineColorClass =
       lineId === "tanish" ? "text-white" : "text-neutral-600";
@@ -74,21 +70,14 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
         }}
       >
         <motion.span
-          role="button"
-          tabIndex={0}
-          aria-label={`Letter ${char}, pit-stop animation`}
-          className={`inline-block cursor-pointer select-none ${lineColorClass}`}
+          aria-hidden
+          className={`inline-block select-none ${lineColorClass}`}
           style={{
             x: ox,
             y: oy,
             filter: filterBlur,
             willChange: "transform, filter",
           }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onLetterActivate();
-          }}
-          onKeyDown={onKeyDown}
         >
           {char}
         </motion.span>
@@ -124,13 +113,35 @@ function buildTokens(line: string): Token[] {
   return tokens;
 }
 
+function shuffleInPlace<T>(arr: T[]): void {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 type ScatterNameProps = {
   text: string;
   lineId: LineId;
+  scatterTrigger: number;
+  /** One shared queue across both lines — each letter awaits this before SFX + return */
+  queueGlobalReturnGap: () => Promise<void>;
+  onScatterComplete?: () => void;
   className?: string;
 };
 
-export function ScatterName({ text, lineId, className }: ScatterNameProps) {
+export function ScatterName({
+  text,
+  lineId,
+  scatterTrigger,
+  queueGlobalReturnGap,
+  onScatterComplete,
+  className,
+}: ScatterNameProps) {
   const tokens = useMemo(() => buildTokens(text), [text]);
   const letterCount = tokens.filter((t) => t.kind === "char").length;
 
@@ -157,6 +168,25 @@ export function ScatterName({ text, lineId, className }: ScatterNameProps) {
 
   const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const pitStopLettersRef = useRef<Set<string>>(new Set());
+  const audioBufferRef = useRef<HTMLAudioElement | null>(null);
+  const sequenceGenerationRef = useRef(0);
+
+  useEffect(() => {
+    const el = new Audio("/pitstop.mp3");
+    el.preload = "auto";
+    audioBufferRef.current = el;
+    return () => {
+      audioBufferRef.current = null;
+    };
+  }, []);
+
+  const playWheelGun = useCallback(() => {
+    const src = audioBufferRef.current;
+    if (!src) return;
+    const sfx = src.cloneNode() as HTMLAudioElement;
+    sfx.volume = 0.5;
+    void sfx.play().catch(() => {});
+  }, []);
 
   const pitKey = useCallback(
     (letterIndex: number) => `${lineId}-${letterIndex}`,
@@ -202,67 +232,107 @@ export function ScatterName({ text, lineId, className }: ScatterNameProps) {
     [pitKey, tokens, txs, tys],
   );
 
-  const runPitStop = useCallback(
-    async (letterIndex: number) => {
-      const key = pitKey(letterIndex);
-      if (pitStopLettersRef.current.has(key)) return;
+  useEffect(() => {
+    if (scatterTrigger === 0 || letterCount === 0) return;
 
-      pitStopLettersRef.current.add(key);
-      txs[letterIndex].set(0);
-      tys[letterIndex].set(0);
+    const gen = ++sequenceGenerationRef.current;
+    const pitLetters = pitStopLettersRef.current;
+    let cancelled = false;
 
+    const returnSingleLetter = async (
+      letterIndex: number,
+      target: { x: number; y: number },
+    ) => {
+      if (cancelled) return;
+      await queueGlobalReturnGap();
+      if (cancelled) return;
+      playWheelGun();
+      await sleep(WHEELGUN_LEAD_MS);
+      if (cancelled) return;
       const ox = oxs[letterIndex];
       const oy = oys[letterIndex];
       const blurMv = blurMvs[letterIndex];
-
-      const angle = Math.random() * Math.PI * 2;
-      const targetX = Math.cos(angle) * LAUNCH_DISTANCE;
-      const targetY = Math.sin(angle) * LAUNCH_DISTANCE;
-
-      await Promise.all([
-        animate(ox, targetX, {
-          duration: LAUNCH_DURATION,
-          ease: "easeIn",
-        }),
-        animate(oy, targetY, {
-          duration: LAUNCH_DURATION,
-          ease: "easeIn",
-        }),
-        animate(blurMv, BLUR_MAX, {
-          duration: LAUNCH_DURATION,
-          ease: "easeIn",
-        }),
-      ]);
-
-      ox.set(-targetX);
-      oy.set(-targetY);
+      ox.set(-target.x);
+      oy.set(-target.y);
       blurMv.set(BLUR_MAX * 0.55);
-
       await Promise.all([
-        animate(ox, 0, {
-          type: "spring",
-          stiffness: 250,
-          damping: 20,
-          mass: 0.8,
-        }),
-        animate(oy, 0, {
-          type: "spring",
-          stiffness: 250,
-          damping: 20,
-          mass: 0.8,
-        }),
-        animate(blurMv, 0, {
-          type: "spring",
-          stiffness: 250,
-          damping: 20,
-          mass: 0.8,
-        }),
+        animate(ox, 0, returnSpringConfig),
+        animate(oy, 0, returnSpringConfig),
+        animate(blurMv, 0, returnSpringConfig),
       ]);
+      if (!cancelled) {
+        pitStopLettersRef.current.delete(pitKey(letterIndex));
+      }
+    };
 
-      pitStopLettersRef.current.delete(key);
-    },
-    [blurMvs, oxs, oys, pitKey, txs, tys],
-  );
+    void (async () => {
+      const targets: { x: number; y: number }[] = [];
+
+      for (let i = 0; i < letterCount; i++) {
+        pitStopLettersRef.current.add(pitKey(i));
+        txs[i].set(0);
+        tys[i].set(0);
+        const angle = Math.random() * Math.PI * 2;
+        const targetX = Math.cos(angle) * LAUNCH_DISTANCE;
+        const targetY = Math.sin(angle) * LAUNCH_DISTANCE;
+        targets[i] = { x: targetX, y: targetY };
+      }
+
+      const launchAnims: Promise<unknown>[] = [];
+      for (let i = 0; i < letterCount; i++) {
+        launchAnims.push(
+          animate(oxs[i], targets[i].x, {
+            duration: LAUNCH_DURATION,
+            ease: "easeIn",
+          }) as unknown as Promise<unknown>,
+          animate(oys[i], targets[i].y, {
+            duration: LAUNCH_DURATION,
+            ease: "easeIn",
+          }) as unknown as Promise<unknown>,
+          animate(blurMvs[i], BLUR_MAX, {
+            duration: LAUNCH_DURATION,
+            ease: "easeIn",
+          }) as unknown as Promise<unknown>,
+        );
+      }
+      await Promise.all(launchAnims);
+      if (cancelled) return;
+
+      const order = Array.from({ length: letterCount }, (_, i) => i);
+      shuffleInPlace(order);
+
+      for (const li of order) {
+        if (cancelled) return;
+        await returnSingleLetter(li, targets[li]);
+      }
+
+      if (!cancelled && gen === sequenceGenerationRef.current) {
+        onScatterComplete?.();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      for (let i = 0; i < letterCount; i++) {
+        pitLetters.delete(pitKey(i));
+        oxs[i].set(0);
+        oys[i].set(0);
+        blurMvs[i].set(0);
+      }
+    };
+  }, [
+    scatterTrigger,
+    letterCount,
+    blurMvs,
+    oxs,
+    oys,
+    txs,
+    tys,
+    pitKey,
+    playWheelGun,
+    queueGlobalReturnGap,
+    onScatterComplete,
+  ]);
 
   return (
     <div
@@ -296,9 +366,6 @@ export function ScatterName({ text, lineId, className }: ScatterNameProps) {
             oy={oys[li]}
             blurMv={blurMvs[li]}
             lineId={lineId}
-            onLetterActivate={() => {
-              void runPitStop(li);
-            }}
             className="font-display"
           />
         );

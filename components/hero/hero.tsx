@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import { ScatterName } from "./scatter-name";
 import { HeroNameMotion } from "./hero-name-motion";
 
@@ -7,8 +8,40 @@ type HeroProps = {
   subtitle: string;
 };
 
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
 export function Hero({ subtitle }: HeroProps) {
   const [topLine = "", bottomLine = ""] = subtitle.split("\n");
+  const [scatterTrigger, setScatterTrigger] = useState(0);
+  const scatterBusyRef = useRef(false);
+  const scatterDoneRef = useRef(0);
+  /** Serializes return starts across both name lines so two letters never fire together */
+  const returnGapChainRef = useRef(Promise.resolve());
+
+  const queueGlobalReturnGap = useCallback(() => {
+    const gapMs = 38 + Math.random() * 92;
+    const next = returnGapChainRef.current.then(() => sleep(gapMs));
+    returnGapChainRef.current = next.catch(() => {});
+    return next;
+  }, []);
+
+  const onLineScatterComplete = useCallback(() => {
+    scatterDoneRef.current += 1;
+    if (scatterDoneRef.current >= 2) {
+      scatterDoneRef.current = 0;
+      scatterBusyRef.current = false;
+    }
+  }, []);
+
+  const onNameClick = () => {
+    if (scatterBusyRef.current) return;
+    scatterBusyRef.current = true;
+    scatterDoneRef.current = 0;
+    returnGapChainRef.current = Promise.resolve();
+    setScatterTrigger((t) => t + 1);
+  };
 
   return (
     <section
@@ -18,12 +51,36 @@ export function Hero({ subtitle }: HeroProps) {
       <div className="mx-auto w-full max-w-6xl text-left">
         <div className="ml-[11vw] md:ml-[9vw]">
           <HeroNameMotion>
-            <div className="cursor-default select-none font-display text-[clamp(3.45rem,13.8vw,13.34rem)] font-black uppercase leading-none tracking-tighter">
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Play name pit-stop animation"
+              className="cursor-pointer select-none font-display text-[clamp(3.45rem,13.8vw,13.34rem)] font-black uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              onClick={onNameClick}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onNameClick();
+                }
+              }}
+            >
               <div className="text-white translate-x-8 md:translate-x-10">
-                <ScatterName text="TANISH" lineId="tanish" />
+                <ScatterName
+                  text="TANISH"
+                  lineId="tanish"
+                  scatterTrigger={scatterTrigger}
+                  queueGlobalReturnGap={queueGlobalReturnGap}
+                  onScatterComplete={onLineScatterComplete}
+                />
               </div>
               <div className="-mt-3 -translate-x-2 text-neutral-600 md:-mt-5 md:-translate-x-3">
-                <ScatterName text="MISRA" lineId="misra" />
+                <ScatterName
+                  text="MISRA"
+                  lineId="misra"
+                  scatterTrigger={scatterTrigger}
+                  queueGlobalReturnGap={queueGlobalReturnGap}
+                  onScatterComplete={onLineScatterComplete}
+                />
               </div>
             </div>
           </HeroNameMotion>

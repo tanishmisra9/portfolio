@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import { SmoothScroll } from "@/components/smooth-scroll";
-import { WarpGridBackground } from "@/components/warp-grid-background";
 import "./globals.css";
 import "lenis/dist/lenis.css";
 
@@ -36,7 +35,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-black text-neutral-200 text-base font-sans antialiased md:text-lg">
-        <WarpGridBackground />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
