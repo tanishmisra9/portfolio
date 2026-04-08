@@ -13,7 +13,7 @@ export function Hero({ subtitle }: HeroProps) {
   return (
     <section
       id="top"
-      className="relative flex min-h-[82vh] items-center overflow-hidden px-6 py-24"
+      className="relative z-0 flex min-h-[82vh] items-center overflow-hidden px-6 py-24"
     >
       <div className="mx-auto w-full max-w-6xl text-left">
         <div className="ml-[11vw] md:ml-[9vw]">

@@ -69,7 +69,7 @@ export function SiteHeader() {
     "font-display text-xl font-extrabold tracking-tight text-white transition-colors hover:text-neutral-300";
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
+    <header className="relative sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
         <Link href="#top" className={`shrink-0 ${logoClassName}`}>
           TM
@@ -112,7 +112,7 @@ export function SiteHeader() {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation"
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col md:hidden"
+            className="fixed inset-0 z-[9999] flex flex-col bg-black md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
