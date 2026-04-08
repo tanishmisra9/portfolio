@@ -4,7 +4,6 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ThemeToggle } from "./theme-toggle";
 
 const NAV = [
   { href: "#experience", label: "EXPERIENCE" },
@@ -15,23 +14,32 @@ const NAV = [
   { href: "#about", label: "ABOUT" },
 ] as const;
 
-const listVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.07, delayChildren: 0.08 },
-  },
-  exit: { opacity: 0, transition: { duration: 0.2 } },
+const mobileSpring = {
+  type: "spring" as const,
+  stiffness: 250,
+  damping: 25,
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 28 },
+const mobileListVariants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.05, delayChildren: 0.05 },
+  },
+  exit: {},
+};
+
+const mobileItemVariants = {
+  hidden: { opacity: 0, y: 100 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] as const },
+    transition: mobileSpring,
   },
-  exit: { opacity: 0, y: 16, transition: { duration: 0.2 } },
+  exit: {
+    opacity: 0,
+    y: 50,
+    transition: mobileSpring,
+  },
 };
 
 export function SiteHeader() {
@@ -83,8 +91,6 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <ThemeToggle />
-
           <button
             type="button"
             className="flex shrink-0 items-center justify-center rounded-md p-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white md:hidden"
@@ -106,11 +112,11 @@ export function SiteHeader() {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation"
-            className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-md md:hidden"
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
+            transition={{ duration: 0.4 }}
           >
             <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-6">
               <Link
@@ -130,26 +136,26 @@ export function SiteHeader() {
               </button>
             </div>
 
-            <motion.nav
-              className="flex flex-1 flex-col items-center justify-center gap-6 px-6 pb-24"
-              variants={listVariants}
+            <motion.ul
+              className="list-none grow flex flex-col items-center justify-center gap-8 px-6"
+              variants={mobileListVariants}
               initial="hidden"
               animate="show"
               exit="hidden"
               aria-label="Mobile sections"
             >
               {NAV.map((item) => (
-                <motion.div key={item.href} variants={itemVariants}>
+                <motion.li key={item.href} variants={mobileItemVariants}>
                   <Link
                     href={item.href}
-                    className="block text-center text-4xl font-bold text-white"
+                    className="block text-center text-4xl font-bold uppercase text-white"
                     onClick={closeMenu}
                   >
                     {item.label}
                   </Link>
-                </motion.div>
+                </motion.li>
               ))}
-            </motion.nav>
+            </motion.ul>
           </motion.div>
         ) : null}
       </AnimatePresence>
