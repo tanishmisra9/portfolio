@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent,
+} from "react";
 import { ScatterName } from "./scatter-name";
 import { HeroNameMotion } from "./hero-name-motion";
 
@@ -19,6 +25,30 @@ export function Hero({ subtitle }: HeroProps) {
   const scatterDoneRef = useRef(0);
   /** Serializes return starts across both name lines so two letters never fire together */
   const returnGapChainRef = useRef(Promise.resolve());
+  const isDesktopRef = useRef(false);
+
+  const tanishMagnetRef = useRef<
+    ((clientX: number, clientY: number) => void) | null
+  >(null);
+  const tanishResetRef = useRef<(() => void) | null>(null);
+  const misraMagnetRef = useRef<
+    ((clientX: number, clientY: number) => void) | null
+  >(null);
+  const misraResetRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    isDesktopRef.current = mq.matches;
+    const onChange = () => {
+      isDesktopRef.current = mq.matches;
+      if (!mq.matches) {
+        tanishResetRef.current?.();
+        misraResetRef.current?.();
+      }
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   const queueGlobalReturnGap = useCallback(() => {
     const gapMs = 38 + Math.random() * 92;
@@ -43,6 +73,18 @@ export function Hero({ subtitle }: HeroProps) {
     setScatterTrigger((t) => t + 1);
   };
 
+  const onNamePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!isDesktopRef.current) return;
+    tanishMagnetRef.current?.(e.clientX, e.clientY);
+    misraMagnetRef.current?.(e.clientX, e.clientY);
+  };
+
+  const onNamePointerLeaveOrCancel = () => {
+    if (!isDesktopRef.current) return;
+    tanishResetRef.current?.();
+    misraResetRef.current?.();
+  };
+
   return (
     <section
       id="top"
@@ -56,6 +98,9 @@ export function Hero({ subtitle }: HeroProps) {
               tabIndex={0}
               aria-label="Play name pit-stop animation"
               className="cursor-pointer select-none font-display text-[clamp(3.45rem,13.8vw,13.34rem)] font-black uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              onPointerMove={onNamePointerMove}
+              onPointerLeave={onNamePointerLeaveOrCancel}
+              onPointerCancel={onNamePointerLeaveOrCancel}
               onClick={onNameClick}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -70,6 +115,8 @@ export function Hero({ subtitle }: HeroProps) {
                   lineId="tanish"
                   scatterTrigger={scatterTrigger}
                   queueGlobalReturnGap={queueGlobalReturnGap}
+                  magnetPullRef={tanishMagnetRef}
+                  magnetResetRef={tanishResetRef}
                   onScatterComplete={onLineScatterComplete}
                 />
               </div>
@@ -79,6 +126,8 @@ export function Hero({ subtitle }: HeroProps) {
                   lineId="misra"
                   scatterTrigger={scatterTrigger}
                   queueGlobalReturnGap={queueGlobalReturnGap}
+                  magnetPullRef={misraMagnetRef}
+                  magnetResetRef={misraResetRef}
                   onScatterComplete={onLineScatterComplete}
                 />
               </div>

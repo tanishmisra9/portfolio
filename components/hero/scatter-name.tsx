@@ -8,7 +8,14 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type MutableRefObject,
+} from "react";
 
 const magnetSpringConfig = {
   type: "spring" as const,
@@ -130,6 +137,10 @@ type ScatterNameProps = {
   scatterTrigger: number;
   /** One shared queue across both lines — each letter awaits this before SFX + return */
   queueGlobalReturnGap: () => Promise<void>;
+  magnetPullRef?: MutableRefObject<
+    ((clientX: number, clientY: number) => void) | null
+  >;
+  magnetResetRef?: MutableRefObject<(() => void) | null>;
   onScatterComplete?: () => void;
   className?: string;
 };
@@ -139,6 +150,8 @@ export function ScatterName({
   lineId,
   scatterTrigger,
   queueGlobalReturnGap,
+  magnetPullRef,
+  magnetResetRef,
   onScatterComplete,
   className,
 }: ScatterNameProps) {
@@ -231,6 +244,15 @@ export function ScatterName({
     },
     [pitKey, tokens, txs, tys],
   );
+
+  useEffect(() => {
+    if (magnetPullRef) magnetPullRef.current = applyMagnetPull;
+    if (magnetResetRef) magnetResetRef.current = resetOffsets;
+    return () => {
+      if (magnetPullRef) magnetPullRef.current = null;
+      if (magnetResetRef) magnetResetRef.current = null;
+    };
+  }, [applyMagnetPull, magnetPullRef, magnetResetRef, resetOffsets]);
 
   useEffect(() => {
     if (scatterTrigger === 0 || letterCount === 0) return;
@@ -335,13 +357,7 @@ export function ScatterName({
   ]);
 
   return (
-    <div
-      role="presentation"
-      className={className}
-      onPointerMove={(e) => applyMagnetPull(e.clientX, e.clientY)}
-      onPointerLeave={resetOffsets}
-      onPointerCancel={resetOffsets}
-    >
+    <div role="presentation" className={className}>
       {tokens.map((t) => {
         if (t.kind === "space") {
           return (
