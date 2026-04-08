@@ -124,7 +124,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Inspiration
 
-Layout and README structure influenced by [Lakshya Chaudhry](https://www.laksh.us)’s portfolio work.
+Layout influenced by [Lakshya Chaudhry](https://www.laksh.us)’s portfolio work.
 
 ## Acknowledgments
 
