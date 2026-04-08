@@ -77,7 +77,7 @@ export function SiteHeader() {
   return (
     <>
       <header className="relative sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-6">
+        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-6">
           <Link href="#top" className={`shrink-0 ${logoClassName}`}>
             TM
           </Link>
@@ -128,7 +128,7 @@ export function SiteHeader() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-6">
+                  <div className="flex h-20 shrink-0 items-center justify-between border-b border-white/10 px-6">
                     <Link
                       href="#top"
                       className={logoClassName}

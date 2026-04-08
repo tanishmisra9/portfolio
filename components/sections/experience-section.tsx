@@ -6,7 +6,7 @@ export function ExperienceSection({ entries }: Props) {
   return (
     <section id="experience" className="scroll-mt-20 px-6 py-20 md:py-24">
       <div className="mx-auto max-w-6xl">
-        <h2 className="mb-8 text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-700">
+        <h2 className="mb-8 text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-600">
           EXPERIENCE
         </h2>
         <ul className="mt-8 flex flex-col gap-16 md:gap-20">

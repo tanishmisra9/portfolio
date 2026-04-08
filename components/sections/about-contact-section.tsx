@@ -46,7 +46,7 @@ export function AboutContactSection({ bio, social }: Props) {
   return (
     <section id="about" className="scroll-mt-20 px-6 py-20 md:py-24">
       <div className="mx-auto max-w-6xl">
-        <h2 className="mb-16 text-center text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-700 md:mb-20">
+        <h2 className="mb-16 text-center text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-600 md:mb-20">
           ABOUT
         </h2>
         <div className="mx-auto max-w-3xl px-6 text-center">

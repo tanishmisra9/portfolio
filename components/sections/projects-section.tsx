@@ -7,7 +7,7 @@ export function ProjectsSection({ projects }: Props) {
   return (
     <section id="projects" className="scroll-mt-20 py-20 md:py-24">
       <div className="mx-auto w-full max-w-7xl px-8 md:px-16 lg:px-32">
-        <h2 className="mb-8 text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-700">
+        <h2 className="mb-8 text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-600">
           PROJECTS
         </h2>
         <div className="mt-10 grid gap-5 sm:grid-cols-2">

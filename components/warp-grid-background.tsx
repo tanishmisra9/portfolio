@@ -2,11 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-const CELL = 44;
-const REPULSE_RADIUS = 175;
-const MAX_FORCE = 14;
+const CELL = 40;
+const REPULSE_RADIUS = 200;
+const MAX_FORCE = 24;
 const DAMPING = 0.1;
-const LINE_COLOR = "rgba(255, 255, 255, 0.04)";
+const LINE_COLOR = "rgba(255, 255, 255, 0.09)";
 const RESIZE_DEBOUNCE_MS = 150;
 
 type Point = { rx: number; ry: number; x: number; y: number };
@@ -102,7 +102,7 @@ export function WarpGridBackground() {
 
       c2d.clearRect(0, 0, cw, ch);
       c2d.strokeStyle = LINE_COLOR;
-      c2d.lineWidth = 1;
+      c2d.lineWidth = 1.25;
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols - 1; c++) {
