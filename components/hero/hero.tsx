@@ -91,7 +91,7 @@ export function Hero({ subtitle }: HeroProps) {
       className="relative z-0 isolate flex min-h-[82vh] items-center overflow-hidden px-6 py-24"
     >
       <div className="mx-auto w-full max-w-6xl text-left">
-        <div className="ml-[11vw] md:ml-[9vw]">
+        <div className="mb-16 ml-[11vw] md:mb-32 md:ml-[9vw]">
           <HeroNameMotion>
             <div
               role="button"

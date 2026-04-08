@@ -12,7 +12,7 @@ export function SkillsSection({ skills, certifications }: Props) {
       className="scroll-mt-20 px-6 py-20 md:py-24"
     >
       <div className="mx-auto max-w-6xl">
-        <h2 className="mb-8 text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-600">
+        <h2 className="mb-8 text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-600 md:mb-12">
           SKILLS
         </h2>
         <div className="mt-10 grid gap-8 md:grid-cols-2">

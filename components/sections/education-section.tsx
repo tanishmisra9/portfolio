@@ -6,10 +6,10 @@ export function EducationSection({ entries }: Props) {
   return (
     <section id="education" className="scroll-mt-20 px-6 py-20 md:py-24">
       <div className="mx-auto max-w-6xl">
-        <h2 className="mb-8 text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-600">
+        <h2 className="mb-8 text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-600 md:mb-12">
           EDUCATION
         </h2>
-        <ul className="mt-8 flex flex-col gap-16 md:gap-20">
+        <ul className="mt-8 flex flex-col gap-10 md:gap-16">
           {entries.map((edu) => (
             <li key={edu.id} className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
               <span className="font-mono text-sm uppercase tracking-wider text-neutral-500">
