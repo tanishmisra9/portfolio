@@ -72,26 +72,31 @@ export function SiteHeader() {
   const closeMenu = () => setMenuOpen(false);
 
   const logoClassName =
-    "font-display text-xl font-extrabold tracking-tight text-white transition-colors hover:text-neutral-300";
+    "font-display text-xl font-bold tracking-tight text-white transition-colors hover:text-neutral-300";
 
   return (
     <>
-      <header className="relative sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md">
-        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-6">
+      <motion.header
+        className="relative sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.3, duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 pl-6 pr-3 sm:pr-4">
           <Link href="#top" className={`shrink-0 ${logoClassName}`}>
             TM
           </Link>
 
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-x-8">
+          <div className="flex min-w-0 flex-1 items-center justify-end">
             <nav
-              className="hidden items-center gap-x-8 md:flex"
+              className="hidden items-center gap-x-1 md:flex md:-mr-1"
               aria-label="Primary"
             >
               {NAV.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-sm font-medium uppercase tracking-wide text-neutral-400 transition-colors hover:text-white"
+                  className="inline-flex items-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                 >
                   {item.label}
                 </Link>
@@ -110,7 +115,7 @@ export function SiteHeader() {
             </button>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {mounted
         ? createPortal(
@@ -158,7 +163,7 @@ export function SiteHeader() {
                       <motion.li key={item.href} variants={mobileItemVariants}>
                         <Link
                           href={item.href}
-                          className="block text-center text-4xl font-bold uppercase text-white"
+                          className="block text-center text-4xl font-semibold uppercase text-white"
                           onClick={closeMenu}
                         >
                           {item.label}

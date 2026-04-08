@@ -1,5 +1,4 @@
 import { Hero } from '@/components/hero/hero';
-import { PageEnter } from '@/components/page-enter';
 import { SiteHeader } from '@/components/site-header';
 import { AboutContactSection } from '@/components/sections/about-contact-section';
 import { EducationSection } from '@/components/sections/education-section';
@@ -10,7 +9,7 @@ import { portfolio } from '@/data/portfolio';
 
 export default function HomePage() {
   return (
-    <PageEnter>
+    <>
       <SiteHeader />
       <main className="relative z-0 isolate">
         <Hero subtitle={portfolio.heroSubtitle} />
@@ -20,6 +19,6 @@ export default function HomePage() {
         <ProjectsSection projects={portfolio.projects} />
         <AboutContactSection bio={portfolio.aboutBio} social={portfolio.social} />
       </main>
-    </PageEnter>
+    </>
   );
 }

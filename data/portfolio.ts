@@ -9,7 +9,7 @@ export const portfolio: PortfolioContent = {
       id: 'exp-01',
       date: 'Incoming, Summer 2026',
       org: 'Toyota Connected Technologies',
-      role: 'Incoming Co-op Intern',
+      role: 'Incoming STEM Co-op Intern',
       tags: ['AI/ML', 'Software Engineering'],
     },
     {
@@ -31,21 +31,21 @@ export const portfolio: PortfolioContent = {
       date: 'Aug 2025 - Present',
       org: 'Purdue Electric Vehicle Club',
       role: 'OpenCV Developer',
-      tags: ['Python', 'OpenCV', 'NumPy', 'Docker'],
+      tags: ['Python', 'OpenCV', 'Docker'],
     },
     {
       id: 'exp-05',
       date: 'June 2023 - August 2025',
       org: "Karen Dillard's College Prep",
       role: 'Student Worker',
-      tags: ['CRM', 'Operations'],
+      tags: ['CRM', 'Operations', 'Customer Service', 'Office Administration'],
     },
     {
       id: 'exp-06',
       date: 'Mar 2024 - Jul 2025',
       org: 'Q Spark Group',
       role: 'Data, Analytics, and AI Intern',
-      tags: ['Python', 'SQL', 'Pandas', 'NER Models'],
+      tags: ['NER Models', 'Python', 'SQL', 'Pandas'],
     },
   ],
   education: [

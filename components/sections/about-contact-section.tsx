@@ -1,3 +1,4 @@
+import { ScrollReveal } from '@/components/scroll-reveal';
 import { Github, Linkedin, Mail } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { SocialLink } from '@/types/content';
@@ -26,6 +27,10 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/** Shared typography for both bio blocks; color applied per paragraph. (~8% smaller than 2xl/3xl scale.) */
+const bioBodyClass =
+  "text-[1.38rem] leading-[1.486] md:text-[1.725rem] md:leading-[1.53]";
+
 function renderHighlightedParagraph(paragraph: string): ReactNode {
   const pattern = new RegExp(`(${HIGHLIGHT_TERMS.map(escapeRegExp).join('|')})`, 'g');
   return paragraph.split(pattern).map((part, index) => {
@@ -36,7 +41,11 @@ function renderHighlightedParagraph(paragraph: string): ReactNode {
         </strong>
       );
     }
-    return <span key={`text-${index}`}>{part}</span>;
+    return (
+      <span key={`text-${index}`} className="text-inherit">
+        {part}
+      </span>
+    );
   });
 }
 
@@ -44,45 +53,53 @@ export function AboutContactSection({ bio, social }: Props) {
   const [paragraphOne = '', paragraphTwo = ''] = bio.split('\n\n');
 
   return (
-    <section id="about" className="scroll-mt-20 px-6 py-20 md:py-24">
+    <section id="about" className="scroll-mt-20 px-6 pb-[4.6rem] pt-9 md:pb-[5.52rem] md:pt-11">
       <div className="mx-auto max-w-6xl">
-        <h2 className="mb-16 text-center text-[8.8vw] font-black uppercase leading-none tracking-tighter text-neutral-600 md:mb-20">
-          ABOUT
-        </h2>
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <p className="text-2xl leading-relaxed text-neutral-400 md:text-3xl">
-            {renderHighlightedParagraph(paragraphOne)}
+        <ScrollReveal variant="fade">
+          <h2 className="mb-7 text-center font-display text-[8.74vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 [text-shadow:0.55px_0_0_currentColor,-0.55px_0_0_currentColor] md:mb-11">
+            ABOUT
+          </h2>
+        </ScrollReveal>
+        <ScrollReveal>
+          <div className="mx-auto max-w-[min(44.16rem,calc(100vw-3rem))] px-6 text-center">
+            <p className={`${bioBodyClass} text-white`}>
+              {renderHighlightedParagraph(paragraphOne)}
+            </p>
+            <p className={`${bioBodyClass} mt-7 text-neutral-400 md:mt-9`}>
+              {renderHighlightedParagraph(paragraphTwo)}
+            </p>
+          </div>
+        </ScrollReveal>
+        <ScrollReveal>
+          <div className="mt-14 flex flex-wrap items-center justify-center gap-9 md:mt-[4.6rem]">
+            {social.map((link) => {
+              const Icon = iconFor(link.label);
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  aria-label={link.label}
+                  title={link.label}
+                  className="rounded-md p-2 text-neutral-400 transition-colors hover:text-white"
+                  {...(link.href.startsWith('http')
+                    ? { target: '_blank', rel: 'noopener noreferrer' }
+                    : {})}
+                >
+                  <Icon
+                    className="size-[1.3225rem]"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
+                </a>
+              );
+            })}
+          </div>
+        </ScrollReveal>
+        <ScrollReveal variant="fade">
+          <p className="mt-14 text-center text-[0.805rem] text-neutral-500 md:mt-[4.6rem]">
+            © 2026 Tanish Misra
           </p>
-          <p className="mt-8 text-lg leading-relaxed text-neutral-400 md:mt-10 md:text-xl">
-            {renderHighlightedParagraph(paragraphTwo)}
-          </p>
-        </div>
-        <div className="mt-16 flex flex-wrap items-center justify-center gap-10 md:mt-20">
-          {social.map((link) => {
-            const Icon = iconFor(link.label);
-            return (
-              <a
-                key={link.href}
-                href={link.href}
-                aria-label={link.label}
-                title={link.label}
-                className="rounded-md p-2 text-neutral-400 transition-colors hover:text-white"
-                {...(link.href.startsWith('http')
-                  ? { target: '_blank', rel: 'noopener noreferrer' }
-                  : {})}
-              >
-                <Icon
-                  className="size-[1.4375rem]"
-                  strokeWidth={1.75}
-                  aria-hidden
-                />
-              </a>
-            );
-          })}
-        </div>
-        <p className="mt-16 text-center text-sm text-neutral-500 md:mt-20">
-          © 2026 Tanish Misra
-        </p>
+        </ScrollReveal>
       </div>
     </section>
   );

@@ -7,6 +7,7 @@ import {
   useState,
   type PointerEvent,
 } from "react";
+import { motion } from "framer-motion";
 import { ScatterName } from "./scatter-name";
 import { HeroNameMotion } from "./hero-name-motion";
 
@@ -88,16 +89,16 @@ export function Hero({ subtitle }: HeroProps) {
   return (
     <section
       id="top"
-      className="relative z-0 isolate flex min-h-[82vh] items-center overflow-hidden px-6 py-24"
+      className="relative z-0 isolate flex min-h-[82vh] items-center overflow-hidden px-6 pb-12 pt-24 md:py-24"
     >
       <div className="mx-auto w-full max-w-6xl text-left">
-        <div className="mb-16 ml-[11vw] md:mb-32 md:ml-[9vw]">
+        <div className="mb-10 ml-[11vw] md:mb-32 md:ml-[9vw]">
           <HeroNameMotion>
             <div
               role="button"
               tabIndex={0}
               aria-label="Play name pit-stop animation"
-              className="cursor-pointer select-none font-display text-[clamp(3.45rem,13.8vw,13.34rem)] font-black uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              className="cursor-pointer select-none font-display text-[clamp(3.45rem,13.8vw,13.34rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               onPointerMove={onNamePointerMove}
               onPointerLeave={onNamePointerLeaveOrCancel}
               onPointerCancel={onNamePointerLeaveOrCancel}
@@ -113,6 +114,7 @@ export function Hero({ subtitle }: HeroProps) {
                 <ScatterName
                   text="TANISH"
                   lineId="tanish"
+                  entranceDelay={100}
                   scatterTrigger={scatterTrigger}
                   queueGlobalReturnGap={queueGlobalReturnGap}
                   magnetPullRef={tanishMagnetRef}
@@ -124,6 +126,7 @@ export function Hero({ subtitle }: HeroProps) {
                 <ScatterName
                   text="MISRA"
                   lineId="misra"
+                  entranceDelay={100 + 6 * 55}
                   scatterTrigger={scatterTrigger}
                   queueGlobalReturnGap={queueGlobalReturnGap}
                   magnetPullRef={misraMagnetRef}
@@ -133,10 +136,19 @@ export function Hero({ subtitle }: HeroProps) {
               </div>
             </div>
           </HeroNameMotion>
-          <div className="-translate-x-2 mt-12 flex max-w-4xl flex-col gap-3 text-left font-sans text-xl font-medium leading-relaxed md:-translate-x-3 md:mt-14 md:text-2xl">
+          <motion.div
+            className="-translate-x-2 mt-12 flex max-w-4xl flex-col gap-3 text-left font-sans text-xl leading-relaxed md:-translate-x-3 md:mt-14 md:text-2xl"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: 1.1,
+              duration: 0.5,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
             <span className="block text-white">{topLine}</span>
             <span className="block text-neutral-400">{bottomLine}</span>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

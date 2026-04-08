@@ -34,7 +34,7 @@ export default function RootLayout({
       className={`dark ${inter.variable} ${spaceMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-black text-neutral-200 text-base font-sans antialiased md:text-lg">
+      <body className="min-h-screen bg-black text-neutral-200 text-base font-sans font-[120] antialiased md:text-lg">
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* YD Gothic 130 only — public/fonts/yd-gothic-130.woff2 */
+@font-face {
+  font-family: "YD Gothic";
+  src: url("/fonts/yd-gothic-130.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "YD Gothic";
+  src: url("/fonts/yd-gothic-130.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #000000;
   --fg: #e5e5e5;

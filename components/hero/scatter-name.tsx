@@ -35,8 +35,8 @@ const LAUNCH_DURATION = 0.24;
 const LAUNCH_DISTANCE = 1800;
 /** Peak motion blur (px) during pit launch / return */
 const BLUR_MAX = 25;
-/** Start SFX this many ms before the return snap so the clip’s peak lands near the letter settling */
-const WHEELGUN_LEAD_MS = 103;
+/** Wait after SFX starts before snap/spring so the clip’s impact lines up with the letter settling */
+const WHEELGUN_LEAD_MS = 175;
 
 type LineId = "tanish" | "misra";
 
@@ -49,11 +49,26 @@ type ScatterLetterProps = {
   blurMv: MotionValue<number>;
   lineId: LineId;
   className?: string;
+  /** 0-based index in the line’s token list (chars + spaces) for entrance stagger */
+  entranceIndex: number;
+  /** ms before this line’s first token starts fading in */
+  entranceBaseDelay: number;
 };
 
 const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
   function ScatterLetter(
-    { char, tx, ty, ox, oy, blurMv, lineId, className },
+    {
+      char,
+      tx,
+      ty,
+      ox,
+      oy,
+      blurMv,
+      lineId,
+      className,
+      entranceIndex,
+      entranceBaseDelay,
+    },
     ref,
   ) {
     const sx = useSpring(tx, magnetSpringConfig);
@@ -86,12 +101,47 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
             willChange: "transform, filter",
           }}
         >
-          {char}
+          <motion.span
+            className="inline-block"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              delay: (entranceBaseDelay + entranceIndex * 55) / 1000,
+              duration: 0.2,
+              ease: "easeOut",
+            }}
+          >
+            {char}
+          </motion.span>
         </motion.span>
       </motion.span>
     );
   },
 );
+
+function ScatterEntranceSpace({
+  sequenceIndex,
+  entranceBaseDelay,
+  className,
+}: {
+  sequenceIndex: number;
+  entranceBaseDelay: number;
+  className?: string;
+}) {
+  return (
+    <motion.span
+      aria-hidden
+      className={className}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{
+        delay: (entranceBaseDelay + sequenceIndex * 55) / 1000,
+        duration: 0.2,
+        ease: "easeOut",
+      }}
+    />
+  );
+}
 
 const MAGNET_RADIUS = 400;
 const PULL_FACTOR = 0.5;
@@ -143,6 +193,8 @@ type ScatterNameProps = {
   magnetResetRef?: MutableRefObject<(() => void) | null>;
   onScatterComplete?: () => void;
   className?: string;
+  /** ms before first letter (or space) on this line starts fading in */
+  entranceDelay?: number;
 };
 
 export function ScatterName({
@@ -154,8 +206,10 @@ export function ScatterName({
   magnetResetRef,
   onScatterComplete,
   className,
+  entranceDelay = 0,
 }: ScatterNameProps) {
   const tokens = useMemo(() => buildTokens(text), [text]);
+  const entranceBaseDelay = entranceDelay;
   const letterCount = tokens.filter((t) => t.kind === "char").length;
 
   const txs = useMemo(
@@ -358,13 +412,14 @@ export function ScatterName({
 
   return (
     <div role="presentation" className={className}>
-      {tokens.map((t) => {
+      {tokens.map((t, sequenceIndex) => {
         if (t.kind === "space") {
           return (
-            <span
+            <ScatterEntranceSpace
               key={t.key}
+              sequenceIndex={sequenceIndex}
+              entranceBaseDelay={entranceBaseDelay}
               className="inline-block w-[0.28em] sm:w-[0.32em]"
-              aria-hidden
             />
           );
         }
@@ -383,6 +438,8 @@ export function ScatterName({
             blurMv={blurMvs[li]}
             lineId={lineId}
             className="font-display"
+            entranceIndex={sequenceIndex}
+            entranceBaseDelay={entranceBaseDelay}
           />
         );
       })}
