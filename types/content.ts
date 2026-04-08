@@ -21,6 +21,7 @@ export type ProjectEntry = {
   title: string;
   description: string;
   techStack: string[];
+  githubUrl: string;
 };
 
 export type SkillCategory = {

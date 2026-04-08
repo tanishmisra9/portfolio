@@ -15,8 +15,6 @@ import {
   useRef,
 } from "react";
 
-const PURDUE_GOLD = "#CEB866";
-
 const springConfig = {
   type: "spring" as const,
   stiffness: 250,
@@ -24,10 +22,12 @@ const springConfig = {
   mass: 0.8,
 };
 
-const LAUNCH_DURATION = 0.34;
-const LAUNCH_DISTANCE = 2200;
+const LAUNCH_DURATION = 0.41;
+const LAUNCH_DISTANCE = 1800;
 /** Peak motion blur (px) during pit launch / return */
-const BLUR_MAX = 10;
+const BLUR_MAX = 100;
+
+type LineId = "tanish" | "misra";
 
 type ScatterLetterProps = {
   char: string;
@@ -35,15 +35,15 @@ type ScatterLetterProps = {
   ty: MotionValue<number>;
   ox: MotionValue<number>;
   oy: MotionValue<number>;
-  colorMv: MotionValue<string>;
   blurMv: MotionValue<number>;
+  lineId: LineId;
   onLetterActivate: () => void;
   className?: string;
 };
 
 const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
   function ScatterLetter(
-    { char, tx, ty, ox, oy, colorMv, blurMv, onLetterActivate, className },
+    { char, tx, ty, ox, oy, blurMv, lineId, onLetterActivate, className },
     ref,
   ) {
     const sx = useSpring(tx, springConfig);
@@ -58,7 +58,10 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
       }
     };
 
-    /* Outer = magnet spring; inner = pit-stop offset + color/blur. Nested
+    const lineColorClass =
+      lineId === "tanish" ? "text-white" : "text-neutral-600";
+
+    /* Outer = magnet spring; inner = pit-stop offset + blur. Nested
      * transforms avoid useTransform([spring, mv]) which can throw in FM 12 + RSC. */
     return (
       <motion.span
@@ -74,11 +77,10 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
           role="button"
           tabIndex={0}
           aria-label={`Letter ${char}, pit-stop animation`}
-          className="inline-block cursor-pointer select-none"
+          className={`inline-block cursor-pointer select-none ${lineColorClass}`}
           style={{
             x: ox,
             y: oy,
-            color: colorMv,
             filter: filterBlur,
             willChange: "transform, filter",
           }}
@@ -97,13 +99,7 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
 
 const MAGNET_RADIUS = 400;
 const PULL_FACTOR = 0.5;
-const MAX_PULL = 90;
-
-type LineId = "tanish" | "misra";
-
-function baselineHexForLine(lineId: LineId): string {
-  return lineId === "tanish" ? "#ffffff" : "#525252";
-}
+const MAX_PULL = 100;
 
 type Token =
   | { kind: "space"; key: string }
@@ -137,7 +133,6 @@ type ScatterNameProps = {
 export function ScatterName({ text, lineId, className }: ScatterNameProps) {
   const tokens = useMemo(() => buildTokens(text), [text]);
   const letterCount = tokens.filter((t) => t.kind === "char").length;
-  const baseline = baselineHexForLine(lineId);
 
   const txs = useMemo(
     () => Array.from({ length: letterCount }, () => motionValue(0)),
@@ -154,10 +149,6 @@ export function ScatterName({ text, lineId, className }: ScatterNameProps) {
   const oys = useMemo(
     () => Array.from({ length: letterCount }, () => motionValue(0)),
     [letterCount],
-  );
-  const colorMvs = useMemo(
-    () => Array.from({ length: letterCount }, () => motionValue(baseline)),
-    [letterCount, baseline],
   );
   const blurMvs = useMemo(
     () => Array.from({ length: letterCount }, () => motionValue(0)),
@@ -222,7 +213,6 @@ export function ScatterName({ text, lineId, className }: ScatterNameProps) {
 
       const ox = oxs[letterIndex];
       const oy = oys[letterIndex];
-      const colorMv = colorMvs[letterIndex];
       const blurMv = blurMvs[letterIndex];
 
       const angle = Math.random() * Math.PI * 2;
@@ -241,10 +231,6 @@ export function ScatterName({ text, lineId, className }: ScatterNameProps) {
         animate(blurMv, BLUR_MAX, {
           duration: LAUNCH_DURATION,
           ease: "easeIn",
-        }),
-        animate(colorMv, PURDUE_GOLD, {
-          duration: LAUNCH_DURATION * 0.35,
-          ease: "easeOut",
         }),
       ]);
 
@@ -273,14 +259,9 @@ export function ScatterName({ text, lineId, className }: ScatterNameProps) {
         }),
       ]);
 
-      await animate(colorMv, baseline, {
-        duration: 0.4,
-        ease: "easeOut",
-      });
-
       pitStopLettersRef.current.delete(key);
     },
-    [baseline, blurMvs, colorMvs, oxs, oys, pitKey, txs, tys],
+    [blurMvs, oxs, oys, pitKey, txs, tys],
   );
 
   return (
@@ -313,8 +294,8 @@ export function ScatterName({ text, lineId, className }: ScatterNameProps) {
             ty={tys[li]}
             ox={oxs[li]}
             oy={oys[li]}
-            colorMv={colorMvs[li]}
             blurMv={blurMvs[li]}
+            lineId={lineId}
             onLetterActivate={() => {
               void runPitStop(li);
             }}

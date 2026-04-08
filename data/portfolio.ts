@@ -153,6 +153,7 @@ export const portfolio: PortfolioContent = {
       description:
         'Async Python daemon scoring all F1 drivers to rotate onboard camera feeds.',
       techStack: ['Python', 'REST APIs', 'Pydantic'],
+      githubUrl: 'https://github.com/tanishmisra9/f1director',
     },
     {
       id: 'project-02',
@@ -160,6 +161,7 @@ export const portfolio: PortfolioContent = {
       description:
         '4-agent LangGraph pipeline for deduplicating vendor records using fuzzy matching and GPT-4.',
       techStack: ['Python', 'LangGraph', 'OpenAI', 'MySQL'],
+      githubUrl: 'https://github.com/tanishmisra9/VendorOrchestrator',
     },
     {
       id: 'project-03',
@@ -167,6 +169,7 @@ export const portfolio: PortfolioContent = {
       description:
         'AI agent generating tailored resume suggestions, featuring a BART zero-shot classification web scraper.',
       techStack: ['Python', 'LangChain', 'Transformers'],
+      githubUrl: 'https://github.com/tanishmisra9/resume-agent',
     },
     {
       id: 'project-04',
@@ -174,6 +177,7 @@ export const portfolio: PortfolioContent = {
       description:
         'Fine-tuned spaCy Transformer NER pipeline trained on 1M+ synthetic records.',
       techStack: ['Python', 'spaCy', 'PyTorch'],
+      githubUrl: 'https://github.com/tanishmisra9/pii-transformer',
     },
   ],
   aboutBio:
