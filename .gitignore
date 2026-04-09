@@ -56,6 +56,9 @@ Thumbs.db
 # Turbo
 .turbo
 
+# Photography assets (large binaries)
+public/photos/
+
 # Misc
 *.tgz
 .npm

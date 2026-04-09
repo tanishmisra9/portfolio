@@ -18,7 +18,7 @@ export function SkillsSection({ skills, certifications }: Props) {
             SKILLS
           </h2>
         </ScrollReveal>
-        <div className="mt-10 grid gap-8 md:grid-cols-2">
+        <div className="mt-8 grid gap-8 md:grid-cols-2">
           {skills.map((group) => (
             <ScrollReveal key={group.id}>
               <section className="rounded-md border border-[var(--border)] p-5">
@@ -40,7 +40,7 @@ export function SkillsSection({ skills, certifications }: Props) {
           ))}
         </div>
 
-        <section id="certifications" className="mt-12 scroll-mt-20">
+        <section id="certifications" className="mt-20 scroll-mt-20 md:mt-24">
           <div className="flex flex-col gap-10 md:gap-12">
             <ScrollReveal variant="fade">
               <h3 className="font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800">

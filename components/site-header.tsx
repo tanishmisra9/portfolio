@@ -3,17 +3,28 @@
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-const NAV = [
+type NavItem = { href: string; label: string };
+
+const NAV: NavItem[] = [
   { href: "#experience", label: "EXPERIENCE" },
   { href: "#education", label: "EDUCATION" },
   { href: "#skills", label: "SKILLS" },
   { href: "#certifications", label: "CERTIFICATIONS" },
   { href: "#projects", label: "PROJECTS" },
+  { href: "/photos", label: "PHOTOS" },
   { href: "#about", label: "ABOUT" },
-] as const;
+];
+
+function resolveNavHref(href: string, pathname: string): string {
+  if (href.startsWith("#") && pathname !== "/") {
+    return `/${href}`;
+  }
+  return href;
+}
 
 const mobileSpring = {
   type: "spring" as const,
@@ -44,8 +55,11 @@ const mobileItemVariants = {
 };
 
 export function SiteHeader() {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  const logoHref = pathname === "/" ? "#top" : "/#top";
 
   useEffect(() => {
     setMounted(true);
@@ -83,7 +97,7 @@ export function SiteHeader() {
         transition={{ delay: 1.3, duration: 0.5, ease: "easeOut" }}
       >
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 pl-6 pr-3 sm:pr-4">
-          <Link href="#top" className={`shrink-0 ${logoClassName}`}>
+          <Link href={logoHref} className={`shrink-0 ${logoClassName}`}>
             TM
           </Link>
 
@@ -94,8 +108,8 @@ export function SiteHeader() {
             >
               {NAV.map((item) => (
                 <Link
-                  key={item.href}
-                  href={item.href}
+                  key={item.label}
+                  href={resolveNavHref(item.href, pathname)}
                   className="inline-flex items-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                 >
                   {item.label}
@@ -135,7 +149,7 @@ export function SiteHeader() {
                 >
                   <div className="flex h-20 shrink-0 items-center justify-between border-b border-white/10 px-6">
                     <Link
-                      href="#top"
+                      href={logoHref}
                       className={logoClassName}
                       onClick={closeMenu}
                     >
@@ -160,9 +174,9 @@ export function SiteHeader() {
                     aria-label="Mobile sections"
                   >
                     {NAV.map((item) => (
-                      <motion.li key={item.href} variants={mobileItemVariants}>
+                      <motion.li key={item.label} variants={mobileItemVariants}>
                         <Link
-                          href={item.href}
+                          href={resolveNavHref(item.href, pathname)}
                           className="block text-center text-4xl font-semibold uppercase text-white"
                           onClick={closeMenu}
                         >

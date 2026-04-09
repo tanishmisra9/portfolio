@@ -1,5 +1,4 @@
 import { Hero } from '@/components/hero/hero';
-import { SiteHeader } from '@/components/site-header';
 import { AboutContactSection } from '@/components/sections/about-contact-section';
 import { EducationSection } from '@/components/sections/education-section';
 import { ExperienceSection } from '@/components/sections/experience-section';
@@ -10,7 +9,6 @@ import { portfolio } from '@/data/portfolio';
 export default function HomePage() {
   return (
     <>
-      <SiteHeader />
       <main className="relative z-0 isolate">
         <Hero subtitle={portfolio.heroSubtitle} />
         <ExperienceSection entries={portfolio.experience} />

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ScrollReveal } from '@/components/scroll-reveal';
 import { Github, Linkedin, Mail } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -34,6 +35,17 @@ const bioBodyClass =
 function renderHighlightedParagraph(paragraph: string): ReactNode {
   const pattern = new RegExp(`(${HIGHLIGHT_TERMS.map(escapeRegExp).join('|')})`, 'g');
   return paragraph.split(pattern).map((part, index) => {
+    if (part === '#ShotOniPhone17Pro') {
+      return (
+        <Link
+          key={`shot-${index}`}
+          href="/photos"
+          className="relative inline font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 after:pointer-events-none after:absolute after:bottom-[0.12em] after:left-0 after:block after:h-[0.065em] after:w-full after:origin-left after:scale-x-0 after:rounded-sm after:bg-current after:transition-transform after:duration-[600ms] after:ease-[cubic-bezier(0.19,1,0.22,1)] hover:after:scale-x-100 focus-visible:after:scale-x-100 motion-reduce:after:scale-x-100 motion-reduce:after:transition-none"
+        >
+          {part}
+        </Link>
+      );
+    }
     if (HIGHLIGHT_TERMS.includes(part as (typeof HIGHLIGHT_TERMS)[number])) {
       return (
         <strong key={`${part}-${index}`} className="font-bold text-white">

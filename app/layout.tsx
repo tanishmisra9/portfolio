@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
+import { SiteHeader } from "@/components/site-header";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import "./globals.css";
 import "lenis/dist/lenis.css";
@@ -35,7 +36,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-black text-neutral-200 text-base font-sans font-[120] antialiased md:text-lg">
-        <SmoothScroll>{children}</SmoothScroll>
+        <SmoothScroll>
+          <SiteHeader />
+          {children}
+        </SmoothScroll>
       </body>
     </html>
   );

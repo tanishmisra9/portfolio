@@ -50,3 +50,36 @@ body {
   background: rgba(243, 244, 246, 0.2);
   color: var(--fg);
 }
+
+/* ── iPhone-style camera flash: text color sequence ── */
+.camera-flash-text {
+  animation: iphone-flash 0.8s ease-out both;
+}
+
+@keyframes iphone-flash {
+  0% {
+    color: #ffffff;
+  }
+  36% {
+    color: #ffffff;
+  }
+  40% {
+    color: #404040;
+  }
+  72% {
+    color: #404040;
+  }
+  78% {
+    color: #d4d4d4;
+  }
+  100% {
+    color: #262626;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .camera-flash-text {
+    animation: none;
+    color: #262626;
+  }
+}
