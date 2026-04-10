@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import {
+  SITE_HEADER_ENTER_DELAY_S,
+  SITE_HEADER_FADE_DURATION_S,
+} from "@/lib/site-motion";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -94,7 +98,11 @@ export function SiteHeader() {
         className="relative sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.3, duration: 0.5, ease: "easeOut" }}
+        transition={{
+          delay: SITE_HEADER_ENTER_DELAY_S,
+          duration: SITE_HEADER_FADE_DURATION_S,
+          ease: "easeOut",
+        }}
       >
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 pl-6 pr-3 sm:pr-4">
           <Link href={logoHref} className={`shrink-0 ${logoClassName}`}>

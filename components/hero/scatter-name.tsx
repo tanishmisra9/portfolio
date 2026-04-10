@@ -31,6 +31,12 @@ const returnSpringConfig = {
   mass: 0.52,
 };
 
+/** Per-token stagger for the initial letter fade-in (ms). */
+export const SCATTER_NAME_ENTRANCE_STAGGER_MS = 45;
+
+/** Base delay (ms) before the first line’s first token fades in. */
+export const SCATTER_NAME_ENTRANCE_BASE_MS = 70;
+
 const LAUNCH_DURATION = 0.24;
 const LAUNCH_DISTANCE = 1800;
 /** Peak motion blur (px) during pit launch / return */
@@ -106,8 +112,11 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{
-              delay: (entranceBaseDelay + entranceIndex * 55) / 1000,
-              duration: 0.2,
+              delay:
+                (entranceBaseDelay +
+                  entranceIndex * SCATTER_NAME_ENTRANCE_STAGGER_MS) /
+                1000,
+              duration: 0.18,
               ease: "easeOut",
             }}
           >
@@ -135,8 +144,11 @@ function ScatterEntranceSpace({
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{
-        delay: (entranceBaseDelay + sequenceIndex * 55) / 1000,
-        duration: 0.2,
+        delay:
+          (entranceBaseDelay +
+            sequenceIndex * SCATTER_NAME_ENTRANCE_STAGGER_MS) /
+          1000,
+        duration: 0.18,
         ease: "easeOut",
       }}
     />
@@ -206,7 +218,7 @@ export function ScatterName({
   magnetResetRef,
   onScatterComplete,
   className,
-  entranceDelay = 0,
+  entranceDelay = SCATTER_NAME_ENTRANCE_BASE_MS,
 }: ScatterNameProps) {
   const tokens = useMemo(() => buildTokens(text), [text]);
   const entranceBaseDelay = entranceDelay;

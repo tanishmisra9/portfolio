@@ -8,7 +8,11 @@ import {
   type PointerEvent,
 } from "react";
 import { motion } from "framer-motion";
-import { ScatterName } from "./scatter-name";
+import {
+  ScatterName,
+  SCATTER_NAME_ENTRANCE_BASE_MS,
+  SCATTER_NAME_ENTRANCE_STAGGER_MS,
+} from "./scatter-name";
 import { HeroNameMotion } from "./hero-name-motion";
 
 type HeroProps = {
@@ -114,7 +118,7 @@ export function Hero({ subtitle }: HeroProps) {
                 <ScatterName
                   text="TANISH"
                   lineId="tanish"
-                  entranceDelay={100}
+                  entranceDelay={SCATTER_NAME_ENTRANCE_BASE_MS}
                   scatterTrigger={scatterTrigger}
                   queueGlobalReturnGap={queueGlobalReturnGap}
                   magnetPullRef={tanishMagnetRef}
@@ -126,7 +130,10 @@ export function Hero({ subtitle }: HeroProps) {
                 <ScatterName
                   text="MISRA"
                   lineId="misra"
-                  entranceDelay={100 + 6 * 55}
+                  entranceDelay={
+                    SCATTER_NAME_ENTRANCE_BASE_MS +
+                    6 * SCATTER_NAME_ENTRANCE_STAGGER_MS
+                  }
                   scatterTrigger={scatterTrigger}
                   queueGlobalReturnGap={queueGlobalReturnGap}
                   magnetPullRef={misraMagnetRef}
@@ -141,8 +148,8 @@ export function Hero({ subtitle }: HeroProps) {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              delay: 1.1,
-              duration: 0.5,
+              delay: 0.88,
+              duration: 0.42,
               ease: [0.16, 1, 0.3, 1],
             }}
           >
