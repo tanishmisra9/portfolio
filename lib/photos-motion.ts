@@ -40,8 +40,9 @@ export function photosEntranceVariants(reduceMotion: boolean | null): {
     };
   }
 
+  /** Opacity 0→1 on rows that contain `<img>` can leave Safari showing a black tile (compositor); slide on `x` only. */
   const item: Variants = {
-    hidden: { opacity: 0, x: -40 },
+    hidden: { opacity: 1, x: -40 },
     show: {
       opacity: 1,
       x: 0,
@@ -64,7 +65,7 @@ export function photosEntranceVariants(reduceMotion: boolean | null): {
     },
     item,
     gridSection: {
-      hidden: { opacity: 0, x: -40 },
+      hidden: { opacity: 1, x: -40 },
       show: {
         opacity: 1,
         x: 0,

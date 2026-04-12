@@ -67,6 +67,7 @@ export function PhotosIndexMotion({ collections }: Props) {
                 sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 600px"
                 className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                 priority={index < 2}
+                unoptimized={collection.slug === "super-max"}
               />
               <div
                 className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
