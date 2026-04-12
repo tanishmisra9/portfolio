@@ -2,14 +2,9 @@ export interface Photo {
   src: string;
   alt: string;
   caption?: string;
-  /** Intrinsic pixels for `next/image` width/height (layout / aspect ratio). */
-  imgWidth?: number;
-  imgHeight?: number;
   duetWith?: {
     src: string;
     alt: string;
-    imgWidth?: number;
-    imgHeight?: number;
   };
 }
 
@@ -416,91 +411,75 @@ export const collections: PhotoCollection[] = [
       {
         src: "/photos/super-max/Stock_1.jpg",
         alt: "Max Verstappen portrait, Red Bull Racing livery",
-        imgWidth: 960,
-        imgHeight: 1701,
         duetWith: {
           src: "/photos/super-max/Stock_2.jpg",
           alt: "Max Verstappen portrait, studio shot",
-          imgWidth: 960,
-          imgHeight: 1212,
         },
       },
       {
         src: "/photos/super-max/Canada_24.jpg",
         alt: "Max Verstappen, 2024 Canadian Grand Prix",
         caption: "An incredible changing-conditions drive by Max",
-        imgWidth: 3024,
-        imgHeight: 3024,
       },
       {
         src: "/photos/super-max/Austria_24.jpg",
         alt: "Max Verstappen, 2024 Austrian Grand Prix",
         caption: "Beginning of a new rivalry",
-        imgWidth: 3024,
-        imgHeight: 3024,
+      },
+      {
+        src: "/photos/super-max/Brazil_24.jpg",
+        alt: "Max Verstappen, 2024 Brazilian Grand Prix",
+        caption: "P17 to P1",
+      },
+      {
+        src: "/photos/super-max/Vegas_24.jpg",
+        alt: "Max Verstappen, 2024 Las Vegas Grand Prix",
+        caption: "That's four in a row",
       },
       {
         src: "/photos/super-max/Miami_25.jpg",
         alt: "Max Verstappen, 2025 Miami Grand Prix",
         caption: "Still got it, even with a wife and 2 children at home",
-        imgWidth: 1170,
-        imgHeight: 2052,
       },
       {
         src: "/photos/super-max/Imola_25.JPG",
         alt: "Max Verstappen, 2025 Emilia Romagna Grand Prix at Imola",
         caption: "One move at Tamburello",
-        imgWidth: 3024,
-        imgHeight: 3024,
       },
       {
         src: "/photos/super-max/Belgium_25_Sprint.JPG",
         alt: "Max Verstappen, 2025 Belgian Grand Prix Sprint Race",
-        caption: "Red Bull's new Mekies era starting with a win",
-        imgWidth: 3024,
-        imgHeight: 3024,
+        caption: "New era starting with a win",
       },
       {
         src: "/photos/super-max/Monza_25.JPG",
         alt: "Max Verstappen, 2025 Italian Grand Prix at Monza",
         caption: "The fastest in F1",
-        imgWidth: 3024,
-        imgHeight: 3024,
       },
       {
         src: "/photos/super-max/Baku_25.JPG",
         alt: "Max Verstappen, 2025 Azerbaijan Grand Prix",
         caption: "When it rains, Max reigns",
-        imgWidth: 3024,
-        imgHeight: 3024,
       },
       {
         src: "/photos/super-max/US_25.JPG",
         alt: "Max Verstappen, 2025 United States Grand Prix at COTA",
-        caption: "Lone star pace",
-        imgWidth: 4032,
-        imgHeight: 3024,
+        caption: "Lone-star pace",
       },
       {
         src: "/photos/super-max/Vegas_25.JPG",
         alt: "Max Verstappen, 2025 Las Vegas Grand Prix",
         caption: "What happens in Vegas...",
-        imgWidth: 3024,
-        imgHeight: 3024,
       },
       {
         src: "/photos/super-max/Abu_dhabi_25.jpeg",
         alt: "Max Verstappen, 2025 Abu Dhabi Grand Prix",
-        caption: "Chasing till the end",
-        imgWidth: 1170,
-        imgHeight: 1493,
+        caption: "Always chase till the end",
       },
       {
         src: "/photos/super-max/2026_intro.jpeg",
         alt: "Max Verstappen, 2026 season introduction",
         caption: "The start of #MV3",
-        imgWidth: 3024,
-        imgHeight: 4032,
       },
     ],
   },

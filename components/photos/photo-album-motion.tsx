@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useCallback, useRef, useState } from "react";
+import { ScrollReveal } from "@/components/scroll-reveal";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 import type { Photo } from "@/data/photos";
 
@@ -21,14 +23,19 @@ const DEFAULT_IMG_H = 3024;
 
 export function PhotoAlbumMotion({ title, description, photos }: Props) {
   const reduceMotion = useReducedMotion();
-  const { root, item, gridSection } = photosEntranceVariants(reduceMotion);
+  const { root, item, albumGridSlot } = photosEntranceVariants(reduceMotion);
+  const [headingsComplete, setHeadingsComplete] = useState(!!reduceMotion);
+  const headingsGateRef = useRef(false);
+  const onTitleBlockAnimationComplete = useCallback(() => {
+    if (headingsGateRef.current) return;
+    headingsGateRef.current = true;
+    setHeadingsComplete(true);
+  }, []);
   /** Bypass `/_next/image` cache — stale WebP for same public URL showed wrong duet/thumbs after replacing files. */
   const superMaxAlbum = title === "Super Max";
   /** Safari: `placeholder="blur"` can leave Next’s blur layer stuck until `img.decode()` settles; empty avoids a black box while pixels already loaded. */
   const superMaxPlaceholder = superMaxAlbum ? "empty" : "blur";
   const superMaxBlurData = superMaxAlbum ? {} : { blurDataURL: BLUR_DATA_URL };
-  /** Super Max: skip `initial="hidden"` on image rows so Safari does not composite a black tile during the entrance. */
-  const photoMotionInitial = superMaxAlbum ? false : "hidden";
 
   return (
     <motion.div
@@ -46,23 +53,29 @@ export function PhotoAlbumMotion({ title, description, photos }: Props) {
           Back to photos
         </Link>
       </motion.div>
-      <motion.div variants={item}>
+      <motion.div
+        variants={item}
+        onAnimationComplete={onTitleBlockAnimationComplete}
+      >
         <h1 className="font-display text-4xl font-extrabold uppercase tracking-tighter text-white md:text-5xl">
           {title}
         </h1>
         <p className="mt-4 text-lg text-neutral-400 md:text-xl">{description}</p>
       </motion.div>
       <motion.div
-        variants={gridSection}
-        initial={photoMotionInitial}
+        variants={albumGridSlot}
+        initial="hidden"
+        animate="show"
         className="mt-12 flex flex-col gap-10 md:mt-16 md:gap-10"
       >
         {photos.map((photo, index) =>
           photo.duetWith ? (
-            <motion.div
+            <ScrollReveal
               key={`${photo.src}-${index}`}
-              variants={item}
-              initial={photoMotionInitial}
+              variant="slide"
+              photoAlbumStaggerIndex={index}
+              photoAlbumIntroComplete={headingsComplete}
+              reducedMotion={!!reduceMotion}
               className="grid grid-cols-2 gap-4"
             >
               <figure className="m-0">
@@ -70,8 +83,8 @@ export function PhotoAlbumMotion({ title, description, photos }: Props) {
                   key={photo.src}
                   src={photo.src}
                   alt={photo.alt}
-                  width={photo.imgWidth ?? DEFAULT_IMG_W}
-                  height={photo.imgHeight ?? DEFAULT_IMG_H}
+                  width={DEFAULT_IMG_W}
+                  height={DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
                   sizes="(max-width: 768px) 50vw, 448px"
                   placeholder={superMaxPlaceholder}
@@ -86,8 +99,8 @@ export function PhotoAlbumMotion({ title, description, photos }: Props) {
                   key={photo.duetWith.src}
                   src={photo.duetWith.src}
                   alt={photo.duetWith.alt}
-                  width={photo.duetWith.imgWidth ?? DEFAULT_IMG_W}
-                  height={photo.duetWith.imgHeight ?? DEFAULT_IMG_H}
+                  width={DEFAULT_IMG_W}
+                  height={DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
                   sizes="(max-width: 768px) 50vw, 448px"
                   placeholder={superMaxPlaceholder}
@@ -97,33 +110,37 @@ export function PhotoAlbumMotion({ title, description, photos }: Props) {
                   unoptimized={superMaxAlbum}
                 />
               </figure>
-            </motion.div>
+            </ScrollReveal>
           ) : (
-            <motion.figure
+            <ScrollReveal
               key={`${photo.src}-${index}`}
-              variants={item}
-              initial={photoMotionInitial}
+              variant="slide"
+              photoAlbumStaggerIndex={index}
+              photoAlbumIntroComplete={headingsComplete}
+              reducedMotion={!!reduceMotion}
               className="m-0"
             >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                width={photo.imgWidth ?? DEFAULT_IMG_W}
-                height={photo.imgHeight ?? DEFAULT_IMG_H}
-                style={{ width: "100%", height: "auto" }}
-                sizes="(max-width: 768px) 100vw, 896px"
-                placeholder={superMaxPlaceholder}
-                {...superMaxBlurData}
-                className="rounded-md border border-white/10"
-                priority={index === 0}
-                unoptimized={superMaxAlbum}
-              />
-              {photo.caption ? (
-                <figcaption className="mt-3 text-lg text-neutral-400 md:text-xl">
-                  {photo.caption}
-                </figcaption>
-              ) : null}
-            </motion.figure>
+              <figure className="m-0">
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  width={DEFAULT_IMG_W}
+                  height={DEFAULT_IMG_H}
+                  style={{ width: "100%", height: "auto" }}
+                  sizes="(max-width: 768px) 100vw, 896px"
+                  placeholder={superMaxPlaceholder}
+                  {...superMaxBlurData}
+                  className="rounded-md border border-white/10"
+                  priority={index === 0}
+                  unoptimized={superMaxAlbum}
+                />
+                {photo.caption ? (
+                  <figcaption className="mt-3 text-lg text-neutral-400 md:text-xl">
+                    {photo.caption}
+                  </figcaption>
+                ) : null}
+              </figure>
+            </ScrollReveal>
           ),
         )}
       </motion.div>
