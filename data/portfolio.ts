@@ -125,19 +125,32 @@ export const portfolio: PortfolioContent = {
         'https://www.coursera.org/account/accomplishments/verify/8O423G7AHCWV',
     },
     {
-      id: 'cert-google-cyber',
+      id: 'cert-google-cyber-foundations',
       issuer: 'Google Cybersecurity Certificate',
-      title:
-        'Foundations of Cybersecurity, Manage Security Risks, Networks & Network Security',
+      title: 'Foundations of Cybersecurity',
       credentialUrl:
         'https://www.coursera.org/account/accomplishments/verify/HUNYVIPGYIO0',
+    },
+    {
+      id: 'cert-google-cyber-risks',
+      issuer: 'Google Cybersecurity Certificate',
+      title: 'Play It Safe: Manage Security Risks',
+      credentialUrl:
+        'https://www.coursera.org/account/accomplishments/verify/SR4FKRAQKNEQ',
+    },
+    {
+      id: 'cert-google-cyber-networks',
+      issuer: 'Google Cybersecurity Certificate',
+      title: 'Connect and Protect: Networks and Network Security',
+      credentialUrl:
+        'https://www.coursera.org/account/accomplishments/verify/WVO8VIFCW4UH',
     },
     {
       id: 'cert-aws-dlai',
       issuer: 'AWS & DeepLearning.AI',
       title: 'Generative AI & Large Language Models',
       credentialUrl:
-        'https://www.linkedin.com/in/tanish-misra/details/certifications/',
+        'https://www.coursera.org/account/accomplishments/verify/1R7ECY5UIWVV',
     },
     {
       id: 'cert-certiport-java',
@@ -164,20 +177,45 @@ export const portfolio: PortfolioContent = {
       githubUrl: 'https://github.com/tanishmisra9/VendorOrchestrator',
     },
     {
+      id: 'project-securify',
+      title: 'Securify',
+      description:
+        'Deployed a fine-tuned RoBERTa NER pipeline that redacts PII before any text reaches the LLM.',
+      techStack: [
+        'Python',
+        'spaCy',
+        'PyTorch',
+        'FastAPI',
+        'LangGraph',
+        'React',
+        'TypeScript',
+        'Tailwind CSS',
+      ],
+      githubUrl: 'https://github.com/tanishmisra9/security',
+    },
+    {
+      id: 'project-04',
+      title: 'Transformer-based PII Extraction',
+      description:
+        'spaCy Transformer NER pipeline trained on 1M+ synthetic records.',
+      techStack: ['Python', 'spaCy', 'PyTorch'],
+      githubUrl: 'https://github.com/tanishmisra9/pii-transformer',
+    },
+    {
+      id: 'project-portfolio',
+      title: 'Portfolio',
+      description:
+        'Deployed personal website, leaning into dark mode and minimalistic themes.',
+      techStack: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
+      githubUrl: 'https://github.com/tanishmisra9/portfolio',
+    },
+    {
       id: 'project-03',
       title: 'Resume Agent',
       description:
         'AI agent generating tailored resume suggestions, featuring a BART zero-shot classification web scraper.',
       techStack: ['Python', 'LangChain', 'Transformers'],
       githubUrl: 'https://github.com/tanishmisra9/resume-agent',
-    },
-    {
-      id: 'project-04',
-      title: 'Transformer-based PII Extraction',
-      description:
-        'Fine-tuned spaCy Transformer NER pipeline trained on 1M+ synthetic records.',
-      techStack: ['Python', 'spaCy', 'PyTorch'],
-      githubUrl: 'https://github.com/tanishmisra9/pii-transformer',
     },
   ],
   aboutBio:
