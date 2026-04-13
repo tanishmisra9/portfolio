@@ -148,7 +148,7 @@ body {
   }
 }
 
-/* Phase 3: Fly in from off-screen left, land on white */
+/* Phase 3: Fly in from off-screen left, land solid orange (settle fades to white) */
 .supermax-title[data-phase="flyin"] {
   color: #ff8c00;
   background: none;
@@ -169,37 +169,24 @@ body {
   100% {
     transform: translateX(0);
     opacity: 1;
-    color: #ffffff;
-    -webkit-text-fill-color: #ffffff;
+    color: #ff8c00;
+    -webkit-text-fill-color: #ff8c00;
   }
 }
 
-/* Phase 4: Orange drains off to the right (same technique as wipe, reversed) */
+/* Phase 4: Full orange → fade to white (no gradient clip — avoids white-then-orange flash) */
 .supermax-title[data-phase="settle"] {
-  color: transparent;
-  background-image: linear-gradient(
-    90deg,
-    #ff8c00 0%,
-    #ff8c00 50%,
-    #ffffff 50%,
-    #ffffff 100%
-  );
-  background-size: 200% 100%;
-  background-position: 0% 50%;
-  background-repeat: no-repeat;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: supermax-settle-pos 0.6s ease-out forwards;
+  color: #ff8c00;
+  background: none;
+  -webkit-text-fill-color: #ff8c00;
+  animation: supermax-settle-fade 0.6s ease-out forwards;
   transform: translateX(0);
 }
 
-@keyframes supermax-settle-pos {
-  from {
-    background-position: 0% 50%;
-  }
+@keyframes supermax-settle-fade {
   to {
-    background-position: 100% 50%;
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
   }
 }
 
