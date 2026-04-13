@@ -432,7 +432,7 @@ export const collections: PhotoCollection[] = [
         caption: "P17 to P1",
       },
       {
-        src: "/photos/super-max/Vegas_24.jpg",
+        src: "/photos/super-max/Vegas_24.JPG",
         alt: "Max Verstappen, 2024 Las Vegas Grand Prix",
         caption: "That's four in a row",
       },
