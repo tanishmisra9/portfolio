@@ -17,8 +17,8 @@ export function AlbumTitle({ title, slug }: Props) {
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  /** True after pointerdown already started SFX this press (click follows without double play). */
-  const sfxStartedForPressRef = useRef(false);
+  /** Bumps on flyby start so a late pointerdown prime cannot pause real playback. */
+  const audioGenerationRef = useRef(0);
 
   useEffect(() => {
     if (!interactiveSuperMax) return;
@@ -51,10 +51,9 @@ export function AlbumTitle({ title, slug }: Props) {
     timeoutsRef.current.forEach(clearTimeout);
     timeoutsRef.current = [];
 
-    if (!sfxStartedForPressRef.current) {
-      playPassby();
-    }
-    sfxStartedForPressRef.current = false;
+    audioGenerationRef.current += 1;
+    /* Same moment as wipe: avoids pointerdown→click gap where decode makes SFX feel late. */
+    playPassby();
 
     setPhase("wipe");
     schedule(() => setPhase("flyout"), 800);
@@ -66,10 +65,24 @@ export function AlbumTitle({ title, slug }: Props) {
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (e.button !== 0 || phase !== "idle") return;
-      sfxStartedForPressRef.current = true;
-      playPassby();
+      const a = audioRef.current;
+      if (!a) return;
+      const gen = audioGenerationRef.current;
+      const prev = a.volume;
+      a.volume = 0;
+      void a
+        .play()
+        .then(() => {
+          if (gen !== audioGenerationRef.current) return;
+          a.pause();
+          a.currentTime = 0;
+          a.volume = prev;
+        })
+        .catch(() => {
+          a.volume = prev;
+        });
     },
-    [phase, playPassby],
+    [phase],
   );
 
   const baseClasses =
