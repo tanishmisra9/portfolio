@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useCallback, useRef, useState } from "react";
+import { AlbumTitle } from "@/components/photos/album-title";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 import type { Photo } from "@/data/photos";
@@ -14,6 +15,7 @@ const BLUR_DATA_URL =
 
 type Props = {
   title: string;
+  slug: string;
   description: string;
   photos: Photo[];
 };
@@ -21,7 +23,7 @@ type Props = {
 const DEFAULT_IMG_W = 4032;
 const DEFAULT_IMG_H = 3024;
 
-export function PhotoAlbumMotion({ title, description, photos }: Props) {
+export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
   const reduceMotion = useReducedMotion();
   const { root, item, albumGridSlot } = photosEntranceVariants(reduceMotion);
   const [headingsComplete, setHeadingsComplete] = useState(!!reduceMotion);
@@ -57,9 +59,7 @@ export function PhotoAlbumMotion({ title, description, photos }: Props) {
         variants={item}
         onAnimationComplete={onTitleBlockAnimationComplete}
       >
-        <h1 className="font-display text-4xl font-extrabold uppercase tracking-tighter text-white md:text-5xl">
-          {title}
-        </h1>
+        <AlbumTitle title={title} slug={slug} />
         <p className="mt-4 text-lg text-neutral-400 md:text-xl">{description}</p>
       </motion.div>
       <motion.div

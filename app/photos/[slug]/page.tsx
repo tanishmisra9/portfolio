@@ -28,6 +28,7 @@ export default async function PhotoCollectionPage({ params }: Props) {
     <main className="relative z-0 isolate px-6 pb-24 pt-8 md:py-16">
       <PhotoAlbumMotion
         title={collection.title}
+        slug={slug}
         description={collection.description}
         photos={collection.photos}
       />

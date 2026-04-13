@@ -83,3 +83,146 @@ body {
     color: #262626;
   }
 }
+
+/* ── Super Max: register --wipe for smooth gradient interpolation ── */
+@property --wipe {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+/* ── Super Max flyby animation ── */
+.supermax-title {
+  --wipe: 0%;
+  color: #ffffff;
+  background: linear-gradient(90deg, #ff8c00 var(--wipe), #ffffff var(--wipe));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.supermax-title[data-phase="idle"] {
+  --wipe: 0%;
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Phase 1: Orange wipe sweeps left to right */
+.supermax-title[data-phase="wipe"] {
+  animation: supermax-wipe 0.8s ease-in-out forwards;
+}
+
+@keyframes supermax-wipe {
+  0% {
+    --wipe: 0%;
+  }
+  100% {
+    --wipe: 100%;
+  }
+}
+
+/* Phase 2: Fully orange, blast off to the right */
+.supermax-title[data-phase="flyout"] {
+  --wipe: 100%;
+  animation: supermax-flyout 0.6s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes supermax-flyout {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    /* vw so the title clears the viewport edge, not just ~1.2× its own width */
+    transform: translateX(calc(100vw + 100%));
+    opacity: 0;
+  }
+}
+
+/* Phase 3: Snap to left, fly in from off-screen left */
+.supermax-title[data-phase="flyin"] {
+  --wipe: 100%;
+  animation: supermax-flyin 0.8s cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+@keyframes supermax-flyin {
+  0% {
+    /* Well past the left viewport edge so the title visibly crosses the full screen */
+    transform: translateX(calc(-125vw - 100%));
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Phase 4: Settle, orange fades back to white */
+.supermax-title[data-phase="settle"] {
+  animation: supermax-settle 0.6s ease-out forwards;
+  transform: translateX(0);
+}
+
+@keyframes supermax-settle {
+  0% {
+    --wipe: 100%;
+  }
+  100% {
+    --wipe: 0%;
+  }
+}
+
+/* Smoke trail during flyout */
+.supermax-title[data-phase="flyout"]::after {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 200px;
+  height: 60%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 140, 0, 0.15) 30%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  filter: blur(12px);
+  pointer-events: none;
+  animation: smoke-fade 0.6s ease-out forwards;
+}
+
+@keyframes smoke-fade {
+  0% {
+    opacity: 1;
+    width: 200px;
+  }
+  100% {
+    opacity: 0;
+    width: 400px;
+  }
+}
+
+/* Reduced motion: disable all animation */
+@media (prefers-reduced-motion: reduce) {
+  .supermax-title,
+  .supermax-title[data-phase="wipe"],
+  .supermax-title[data-phase="flyout"],
+  .supermax-title[data-phase="flyin"],
+  .supermax-title[data-phase="settle"] {
+    animation: none !important;
+    --wipe: 0%;
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  .supermax-title::after {
+    display: none;
+  }
+}

@@ -19,7 +19,8 @@ export function PhotosHeader() {
     if (flashing) return;
     setFlashing(true);
 
-    const SHUTTER_DELAY_MS = 300;
+    /** Slightly after the flash holds white (~40% of 0.8s keyframe) so the shutter isn’t early. */
+    const SHUTTER_DELAY_MS = 380;
     if (audioRef.current) {
       const sfx = audioRef.current.cloneNode() as HTMLAudioElement;
       sfx.volume = 0.6;
