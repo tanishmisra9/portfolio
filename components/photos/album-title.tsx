@@ -20,8 +20,10 @@ export function AlbumTitle({ title, slug }: Props) {
 
   useEffect(() => {
     if (!interactiveSuperMax) return;
+    void fetch("/passby.mp3").catch(() => {});
     const el = new Audio("/passby.mp3");
     el.preload = "auto";
+    void el.load();
     audioRef.current = el;
     return () => {
       audioRef.current = null;
@@ -40,10 +42,11 @@ export function AlbumTitle({ title, slug }: Props) {
     timeoutsRef.current.forEach(clearTimeout);
     timeoutsRef.current = [];
 
-    if (audioRef.current) {
-      const sfx = audioRef.current.cloneNode() as HTMLAudioElement;
-      sfx.volume = 0.7;
-      sfx.play().catch(() => {});
+    const a = audioRef.current;
+    if (a) {
+      a.volume = 0.7;
+      a.currentTime = 0;
+      void a.play().catch(() => {});
     }
 
     setPhase("wipe");
@@ -71,6 +74,9 @@ export function AlbumTitle({ title, slug }: Props) {
     <div className={overflowForPhase}>
       <h1
         onClick={handleClick}
+        onPointerEnter={() => {
+          void audioRef.current?.load();
+        }}
         className={`${baseClasses} supermax-title relative cursor-pointer whitespace-nowrap`}
         data-phase={phase}
       >

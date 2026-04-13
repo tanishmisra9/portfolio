@@ -84,46 +84,52 @@ body {
   }
 }
 
-/* ── Super Max: register --wipe for smooth gradient interpolation ── */
-@property --wipe {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 0%;
-}
-
-/* ── Super Max flyby animation ── */
+/* ── Super Max flyby (wipe uses background-position — no @property; works on all deploy targets) ── */
 .supermax-title {
-  --wipe: 0%;
-  color: #ffffff;
-  background: linear-gradient(90deg, #ff8c00 var(--wipe), #ffffff var(--wipe));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  position: relative;
 }
 
 .supermax-title[data-phase="idle"] {
-  --wipe: 0%;
+  color: #ffffff;
+  background: none;
+  -webkit-text-fill-color: #ffffff;
   transform: translateX(0);
   opacity: 1;
 }
 
-/* Phase 1: Orange wipe sweeps left to right */
+/* Phase 1: Orange sweeps left → right (gradient window slides via background-position) */
 .supermax-title[data-phase="wipe"] {
-  animation: supermax-wipe 0.8s ease-in-out forwards;
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    #ff8c00 0%,
+    #ff8c00 50%,
+    #ffffff 50%,
+    #ffffff 100%
+  );
+  background-size: 200% 100%;
+  background-position: 100% 50%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: supermax-wipe-pos 0.8s ease-in-out forwards;
 }
 
-@keyframes supermax-wipe {
-  0% {
-    --wipe: 0%;
+@keyframes supermax-wipe-pos {
+  from {
+    background-position: 100% 50%;
   }
-  100% {
-    --wipe: 100%;
+  to {
+    background-position: 0% 50%;
   }
 }
 
-/* Phase 2: Fully orange, blast off to the right */
+/* Phase 2: Solid orange, blast off to the right */
 .supermax-title[data-phase="flyout"] {
-  --wipe: 100%;
+  color: #ff8c00;
+  background: none;
+  -webkit-text-fill-color: #ff8c00;
   animation: supermax-flyout 0.6s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
@@ -142,17 +148,20 @@ body {
   }
 }
 
-/* Phase 3: Snap to left, fly in from off-screen left */
+/* Phase 3: Fly in from off-screen left, land on white */
 .supermax-title[data-phase="flyin"] {
-  --wipe: 100%;
+  color: #ff8c00;
+  background: none;
+  -webkit-text-fill-color: #ff8c00;
   animation: supermax-flyin 0.8s cubic-bezier(0, 0, 0.2, 1) forwards;
 }
 
 @keyframes supermax-flyin {
   0% {
-    /* Well past the left viewport edge so the title visibly crosses the full screen */
     transform: translateX(calc(-125vw - 100%));
     opacity: 0;
+    color: #ff8c00;
+    -webkit-text-fill-color: #ff8c00;
   }
   12% {
     opacity: 1;
@@ -160,21 +169,37 @@ body {
   100% {
     transform: translateX(0);
     opacity: 1;
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
   }
 }
 
-/* Phase 4: Settle, orange fades back to white */
+/* Phase 4: Orange drains off to the right (same technique as wipe, reversed) */
 .supermax-title[data-phase="settle"] {
-  animation: supermax-settle 0.6s ease-out forwards;
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    #ff8c00 0%,
+    #ff8c00 50%,
+    #ffffff 50%,
+    #ffffff 100%
+  );
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: supermax-settle-pos 0.6s ease-out forwards;
   transform: translateX(0);
 }
 
-@keyframes supermax-settle {
-  0% {
-    --wipe: 100%;
+@keyframes supermax-settle-pos {
+  from {
+    background-position: 0% 50%;
   }
-  100% {
-    --wipe: 0%;
+  to {
+    background-position: 100% 50%;
   }
 }
 
@@ -217,9 +242,11 @@ body {
   .supermax-title[data-phase="flyin"],
   .supermax-title[data-phase="settle"] {
     animation: none !important;
-    --wipe: 0%;
     transform: translateX(0);
     opacity: 1;
+    color: #ffffff;
+    background: none;
+    -webkit-text-fill-color: #ffffff;
   }
 
   .supermax-title::after {

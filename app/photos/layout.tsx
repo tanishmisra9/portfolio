@@ -10,5 +10,10 @@ export default function PhotosLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <>
+      <link rel="preload" href="/passby.mp3" as="audio" type="audio/mpeg" />
+      {children}
+    </>
+  );
 }
