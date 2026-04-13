@@ -17,13 +17,14 @@ export function AlbumTitle({ title, slug }: Props) {
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  /** True after pointerdown already started SFX this press (click follows without double play). */
+  const sfxStartedForPressRef = useRef(false);
 
   useEffect(() => {
     if (!interactiveSuperMax) return;
     void fetch("/passby.mp3").catch(() => {});
     const el = new Audio("/passby.mp3");
     el.preload = "auto";
-    void el.load();
     audioRef.current = el;
     return () => {
       audioRef.current = null;
@@ -36,25 +37,40 @@ export function AlbumTitle({ title, slug }: Props) {
     timeoutsRef.current.push(setTimeout(fn, ms));
   }, []);
 
-  const handleClick = useCallback(() => {
+  const playPassby = useCallback(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.volume = 0.7;
+    a.currentTime = 0;
+    void a.play().catch(() => {});
+  }, []);
+
+  const startFlyby = useCallback(() => {
     if (!interactiveSuperMax || phase !== "idle") return;
 
     timeoutsRef.current.forEach(clearTimeout);
     timeoutsRef.current = [];
 
-    const a = audioRef.current;
-    if (a) {
-      a.volume = 0.7;
-      a.currentTime = 0;
-      void a.play().catch(() => {});
+    if (!sfxStartedForPressRef.current) {
+      playPassby();
     }
+    sfxStartedForPressRef.current = false;
 
     setPhase("wipe");
     schedule(() => setPhase("flyout"), 800);
     schedule(() => setPhase("flyin"), 1400);
     schedule(() => setPhase("settle"), 2200);
     schedule(() => setPhase("idle"), 2800);
-  }, [interactiveSuperMax, phase, schedule]);
+  }, [interactiveSuperMax, phase, playPassby, schedule]);
+
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.button !== 0 || phase !== "idle") return;
+      sfxStartedForPressRef.current = true;
+      playPassby();
+    },
+    [phase, playPassby],
+  );
 
   const baseClasses =
     "select-none font-display text-4xl font-extrabold uppercase tracking-tighter md:text-5xl";
@@ -73,10 +89,8 @@ export function AlbumTitle({ title, slug }: Props) {
   return (
     <div className={overflowForPhase}>
       <h1
-        onClick={handleClick}
-        onPointerEnter={() => {
-          void audioRef.current?.load();
-        }}
+        onPointerDown={onPointerDown}
+        onClick={startFlyby}
         className={`${baseClasses} supermax-title relative cursor-pointer whitespace-nowrap`}
         data-phase={phase}
       >
