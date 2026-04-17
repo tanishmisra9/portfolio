@@ -32,10 +32,10 @@ const returnSpringConfig = {
 };
 
 /** Per-token stagger for the initial letter fade-in (ms). */
-export const SCATTER_NAME_ENTRANCE_STAGGER_MS = 45;
+export const SCATTER_NAME_ENTRANCE_STAGGER_MS = 38;
 
 /** Base delay (ms) before the first line’s first token fades in. */
-export const SCATTER_NAME_ENTRANCE_BASE_MS = 70;
+export const SCATTER_NAME_ENTRANCE_BASE_MS = 55;
 
 const LAUNCH_DURATION = 0.24;
 const LAUNCH_DISTANCE = 1800;
@@ -116,7 +116,7 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
                 (entranceBaseDelay +
                   entranceIndex * SCATTER_NAME_ENTRANCE_STAGGER_MS) /
                 1000,
-              duration: 0.18,
+              duration: 0.15,
               ease: "easeOut",
             }}
           >
@@ -148,7 +148,7 @@ function ScatterEntranceSpace({
           (entranceBaseDelay +
             sequenceIndex * SCATTER_NAME_ENTRANCE_STAGGER_MS) /
           1000,
-        duration: 0.18,
+        duration: 0.15,
         ease: "easeOut",
       }}
     />

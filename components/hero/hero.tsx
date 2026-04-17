@@ -102,7 +102,7 @@ export function Hero({ subtitle }: HeroProps) {
               role="button"
               tabIndex={0}
               aria-label="Play name pit-stop animation"
-              className="cursor-pointer select-none font-display text-[clamp(3.45rem,13.8vw,13.34rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              className="cursor-pointer select-none font-display text-[clamp(3.105rem,12.42vw,12.006rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               onPointerMove={onNamePointerMove}
               onPointerLeave={onNamePointerLeaveOrCancel}
               onPointerCancel={onNamePointerLeaveOrCancel}
@@ -148,7 +148,7 @@ export function Hero({ subtitle }: HeroProps) {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              delay: 0.88,
+              delay: 0.8,
               duration: 0.42,
               ease: [0.16, 1, 0.3, 1],
             }}

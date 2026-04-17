@@ -12,8 +12,8 @@ export type EducationEntry = {
   institution: string;
   credential: string;
   date: string;
-  coursework?: string;
-  activities?: string;
+  /** Each inner array is one flex-wrap row of pills (same styling as skills). */
+  pillRows?: string[][];
 };
 
 export type ProjectEntry = {

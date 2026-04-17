@@ -54,10 +54,23 @@ export const portfolio: PortfolioContent = {
       date: 'Aug 2025 - May 2028',
       institution: 'Purdue University',
       credential: 'B.S. Computer Science (Machine Intelligence & Security)',
-      coursework:
-        'Relevant Coursework: Problem Solving & OOP, Programming in C, The Data Mine, Linear Algebra, Discrete Math',
-      activities:
-        'Activities: Purdue Electric Racing, Electric Vehicle Club, Google Developer Group, Claude Builder Club, F1 @ Purdue',
+      pillRows: [
+        [
+          'PER',
+          'EVC',
+          'Google Developer Group',
+          'Claude Builder Club',
+          'F1@P',
+        ],
+        [
+          'Problem Solving & OOP',
+          'Programming in C',
+          'TDM',
+          'Linear Algebra',
+          'Discrete Math',
+          'Multivariate Calculus',
+        ],
+      ],
     },
     {
       id: 'edu-02',
@@ -65,8 +78,14 @@ export const portfolio: PortfolioContent = {
       institution: 'Plano West Senior High School',
       credential:
         'Distinguished Level of Achievement, High School Diploma (Summa Cum Laude)',
-      activities:
-        'Activities: Clarinet player & Logistics Captain in the top-level Band program, Senior Officer at AI Club, NHS',
+      pillRows: [
+        [
+          'Clarinet player',
+          'Logistics Captain',
+          'AI Club Officer',
+          'NHS',
+        ],
+      ],
     },
   ],
   skills: [

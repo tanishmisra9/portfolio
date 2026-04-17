@@ -3,29 +3,8 @@ import type { EducationEntry } from '@/types/content';
 
 type Props = { entries: EducationEntry[] };
 
-/** "Label: body" → separate spans so the colon inherits `text-inherit` (avoids odd colon weight/color in Safari). */
-function LabeledDetailLine({
-  text,
-  className,
-}: {
-  text: string;
-  className: string;
-}) {
-  const trimmed = text.trim();
-  const colon = trimmed.indexOf(':');
-  if (colon < 0) {
-    return <p className={className}>{text}</p>;
-  }
-  const label = trimmed.slice(0, colon);
-  const body = trimmed.slice(colon + 1).replace(/^\s+/, '');
-  return (
-    <p className={className}>
-      <span className="text-inherit">{label}</span>
-      <span className="text-inherit">: </span>
-      <span className="text-inherit">{body}</span>
-    </p>
-  );
-}
+const pillClassName =
+  'rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-[11px] text-neutral-400 select-none cursor-default';
 
 export function EducationSection({ entries }: Props) {
   return (
@@ -46,17 +25,18 @@ export function EducationSection({ entries }: Props) {
                 <div>
                   <p className="font-display text-xl font-semibold text-white">{edu.institution}</p>
                   <p className="mt-1 text-neutral-400">{edu.credential}</p>
-                  {edu.coursework ? (
-                    <LabeledDetailLine
-                      text={edu.coursework}
-                      className="mt-4 text-left text-base font-normal leading-relaxed text-neutral-400 antialiased"
-                    />
-                  ) : null}
-                  {edu.activities ? (
-                    <LabeledDetailLine
-                      text={edu.activities}
-                      className="mt-3 text-left text-base font-normal leading-relaxed text-neutral-400 antialiased"
-                    />
+                  {edu.pillRows?.length ? (
+                    <div className="mt-4 flex flex-col gap-2">
+                      {edu.pillRows.map((row, rowIndex) => (
+                        <ul key={rowIndex} className="flex flex-wrap gap-2">
+                          {row.map((pill) => (
+                            <li key={`${edu.id}-${rowIndex}-${pill}`} className={pillClassName}>
+                              {pill}
+                            </li>
+                          ))}
+                        </ul>
+                      ))}
+                    </div>
                   ) : null}
                 </div>
               </div>
