@@ -417,6 +417,11 @@ export const collections: PhotoCollection[] = [
         },
       },
       {
+        src: "/photos/super-max/RB19.jpg",
+        alt: "Tanish holding Max Verstappen's helmet alongside the dominant RB19",
+        caption: "I met RB19",
+      },
+      {
         src: "/photos/super-max/Canada_24.jpg",
         alt: "Max Verstappen, 2024 Canadian Grand Prix",
         caption: "An incredible changing-conditions drive by Max",
@@ -434,12 +439,12 @@ export const collections: PhotoCollection[] = [
       {
         src: "/photos/super-max/Vegas_24.JPG",
         alt: "Max Verstappen, 2024 Las Vegas Grand Prix",
-        caption: "That's four in a row",
+        caption: "Four in a row",
       },
       {
         src: "/photos/super-max/Miami_25.jpg",
         alt: "Max Verstappen, 2025 Miami Grand Prix",
-        caption: "Still got it, even with a wife and 2 children at home",
+        caption: "Still got it, even with 2 kids at home",
       },
       {
         src: "/photos/super-max/Imola_25.JPG",
