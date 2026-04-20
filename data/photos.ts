@@ -44,6 +44,11 @@ export const collections: PhotoCollection[] = [
         caption: "Same campus, different light",
       },
       {
+        src: "/photos/campus/IMG_3118.jpeg",
+        alt: "The Purdue University bell tower as an airplane flies overhead.",
+        caption: "Flying through",
+      },
+      {
         src: "/photos/campus/img-1112.jpeg",
         alt: "Tall building banner on red brick: navy field with white words Persistently Pursuing Giant Leaps beside a photo of a gymnast mid-motion, seen from a low angle with glass windows above",
         caption: "Marketing department understood the assignment",
@@ -69,26 +74,6 @@ export const collections: PhotoCollection[] = [
         caption: "Everyone's a Ferrari fan",
       },
       {
-        src: "/photos/campus/img-2200.jpeg",
-        alt: "Iced coffee in a clear plastic cup with dome lid and straw on speckled marble; black sleeve reads All The Sips with whipped cream and cinnamon dust on top, window light and cup shadow",
-        caption: "First frappe at Panera",
-      },
-      {
-        src: "/photos/campus/img-2425.jpeg",
-        alt: "Purdue banner on a lamppost reading Find Your Next Giant Leap with gold motion P logo, gold pinstripes on black, bare twigs in foreground and blue sky with brick building corner",
-        caption: "Sidewalk slogan motivation",
-      },
-      {
-        src: "/photos/campus/img-2432.jpeg",
-        alt: "Busy airport arrivals corridor with motion-blurred travelers; large blue wall reading Welcome to Dallas and And Wide Open Minds, red Baggage Claim sign and exit lighting ahead",
-        caption: "Back home",
-      },
-      {
-        src: "/photos/campus/img-2724.jpeg",
-        alt: "Single flagpole against flat gray sky flying US flag, Indiana state flag with torch and stars, and black Purdue P flag underneath, all streaming right with bare branches lower right",
-        caption: "United States of Purdue",
-      },
-      {
         src: "/photos/campus/img-2726.jpeg",
         alt: "Wet red herringbone brick walkway in rain, glossy puddles and ripples, green hedge and vintage lamppost left, grass and distant bare trees and stop sign fading into gray haze",
         caption: "Slipping town",
@@ -107,24 +92,14 @@ export const collections: PhotoCollection[] = [
     coverImage: "/photos/snowfall/img-1125.jpeg",
     photos: [
       {
-        src: "/photos/snowfall/img-1466.jpeg",
-        alt: "Sunlit winter campus scene: cleared concrete walk between deep snowbanks, bare trees, long shadows, Adirondack chairs half-buried in snow, and brick buildings in the distance under pale blue sky",
-        caption: "Plow cleared the path, the lawn kept the receipts",
+        src: "/photos/snowfall/driftin-snow.jpeg",
+        alt: "Snow drifting",
+        caption: "Driftin' snow",
       },
       {
         src: "/photos/snowfall/img-1125.jpeg",
         alt: "Busy paved plaza during falling snow: students in winter coats crossing slushy stone, bike racks and bare trees, grey sky and reduced visibility",
         caption: "Snow did most of the work",
-      },
-      {
-        src: "/photos/snowfall/img-1130.jpeg",
-        alt: "Large dark stone Purdue block-P monument during heavy snow, hammer-and-chisel detail on rough base, brick plaza and vans blurred behind large falling flakes",
-        caption: "Snowy P",
-      },
-      {
-        src: "/photos/snowfall/img-1251.jpeg",
-        alt: "First-person view of feet in light sneakers on snow-dusted pavement at night; letters MV3 traced clear through the snow with nearby footprints under harsh overhead light",
-        caption: "I'm snow ready for #MV3",
       },
       {
         src: "/photos/snowfall/img-1260.jpeg",
@@ -135,11 +110,6 @@ export const collections: PhotoCollection[] = [
         src: "/photos/snowfall/img-9895.jpg",
         alt: "Purdue University brick gateway arch with white PURDUE UNIVERSITY lettering, holiday wreaths and string lights on the span, snow on walks and piled at the pillars, red brick halls beyond",
         caption: "Let the snow fall",
-      },
-      {
-        src: "/photos/snowfall/img-9911.jpg",
-        alt: "Curving cleared asphalt path through deep campus snow, snow-laden deciduous trees and a red brick building at right, tiny figures walking far ahead under flat overcast sky",
-        caption: "The path ahead"
       },
       {
         src: "/photos/snowfall/img-9926.jpg",
@@ -355,7 +325,7 @@ export const collections: PhotoCollection[] = [
   },
   {
     slug: "standalone",
-    title: "One-offs",
+    title: "Standalones",
     description: "One-offs and favorites.",
     coverImage: "/photos/standalone/squirrel.jpeg",
     photos: [
@@ -370,14 +340,9 @@ export const collections: PhotoCollection[] = [
         caption: "Blink and it's gone",
       },
       {
-        src: "/photos/standalone/wet-pavement.jpeg",
-        alt: "Wet pavement reflection",
-        caption: "Everyone's a Ferrari fan",
-      },
-      {
-        src: "/photos/standalone/driftin-snow.jpeg",
-        alt: "Snow drifting",
-        caption: "Driftin' snow",
+        src: "/photos/campus/img-2432.jpeg",
+        alt: "Busy airport arrivals corridor with motion-blurred travelers; large blue wall reading Welcome to Dallas and And Wide Open Minds, red Baggage Claim sign and exit lighting ahead",
+        caption: "Back home",
       },
       { src: "/photos/standalone/green-heart.jpeg", alt: "Green heart-shaped leaves" },
       {
@@ -405,7 +370,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "super-max",
     title: "Super Max",
-    description: "Max Max Max Super Max.",
+    description: "He makes me believe the odds don't matter.",
     coverImage: "/photos/super-max/US_25.JPG",
     photos: [
       {
@@ -422,14 +387,9 @@ export const collections: PhotoCollection[] = [
         caption: "I met RB19",
       },
       {
-        src: "/photos/super-max/Canada_24.jpg",
-        alt: "Max Verstappen, 2024 Canadian Grand Prix",
-        caption: "An incredible changing-conditions drive by Max",
-      },
-      {
         src: "/photos/super-max/Austria_24.jpg",
         alt: "Max Verstappen, 2024 Austrian Grand Prix",
-        caption: "Beginning of a new rivalry",
+        caption: "Lion-eyed",
       },
       {
         src: "/photos/super-max/Brazil_24.jpg",
@@ -467,6 +427,11 @@ export const collections: PhotoCollection[] = [
         caption: "When it rains, Max reigns",
       },
       {
+        src: "/photos/super-max/Race_suit.JPG",
+        alt: "I bought a Red Bull race suit and wore it to classes.",
+        caption: "Officially Red Bull bound",
+      },
+      {
         src: "/photos/super-max/US_25.JPG",
         alt: "Max Verstappen, 2025 United States Grand Prix at COTA",
         caption: "Lone-star pace",
@@ -484,7 +449,12 @@ export const collections: PhotoCollection[] = [
       {
         src: "/photos/super-max/2026_intro.jpeg",
         alt: "Max Verstappen, 2026 season introduction",
-        caption: "The start of #MV3",
+        caption: "Start of #MV3",
+      },
+      {
+        src: "/photos/super-max/24hQualifiers.jpeg",
+        alt: "Max Verstappen racing the ADAC 24h Nürburgring Qualifiers in April 2026",
+        caption: "Taking on the Green Hell",
       },
     ],
   },
