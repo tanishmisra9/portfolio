@@ -382,7 +382,7 @@ export const collections: PhotoCollection[] = [
         },
       },
       {
-        src: "/photos/super-max/RB19.jpg",
+        src: "/photos/super-max/RB19.JPG",
         alt: "Tanish holding Max Verstappen's helmet alongside the dominant RB19",
         caption: "I met RB19",
       },
