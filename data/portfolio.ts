@@ -124,7 +124,6 @@ export const portfolio: PortfolioContent = {
         'Pandas',
         'NumPy',
         'Matplotlib',
-        'FastF1',
       ],
     },
     {
