@@ -263,7 +263,7 @@ export function ScatterName({
     const src = audioBufferRef.current;
     if (!src) return;
     const sfx = src.cloneNode() as HTMLAudioElement;
-    sfx.volume = 0.5;
+    sfx.volume = 0.425;
     void sfx.play().catch(() => {});
   }, []);
 

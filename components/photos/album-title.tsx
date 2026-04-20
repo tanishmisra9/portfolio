@@ -40,7 +40,7 @@ export function AlbumTitle({ title, slug }: Props) {
   const playPassby = useCallback(() => {
     const a = audioRef.current;
     if (!a) return;
-    a.volume = 0.7;
+    a.volume = 0.595;
     a.currentTime = 0;
     void a.play().catch(() => {});
   }, []);
