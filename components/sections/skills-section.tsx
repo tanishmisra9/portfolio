@@ -21,15 +21,15 @@ export function SkillsSection({ skills, certifications }: Props) {
         <div className="mt-8 grid gap-8 md:grid-cols-2">
           {skills.map((group) => (
             <ScrollReveal key={group.id}>
-              <section className="rounded-md border border-[var(--border)] p-5">
-                <h3 className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--muted)]">
+              <section className="rounded-md border border-[var(--border)] p-6 md:p-7">
+                <h3 className="font-mono text-sm uppercase tracking-[0.12em] text-[var(--muted)] md:text-base">
                   {group.category}
                 </h3>
-                <ul className="mt-4 flex flex-wrap gap-2">
+                <ul className="mt-5 flex flex-wrap gap-2.5 md:gap-3">
                   {group.items.map((skill) => (
                     <li
                       key={skill}
-                      className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-[11px] text-neutral-400 select-none cursor-default"
+                      className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3.5 py-1.5 text-xs text-neutral-400 select-none cursor-default md:px-4 md:py-2 md:text-sm"
                     >
                       {skill}
                     </li>
