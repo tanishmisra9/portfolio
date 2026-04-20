@@ -22,6 +22,11 @@ type Props = {
    * gallery never runs ahead of those headings.
    */
   photoAlbumIntroComplete?: boolean;
+  /**
+   * `false` until the home hero tagline finishes; then `true` so sections below (e.g. experience)
+   * do not `whileInView` in ahead of the hero on short viewports.
+   */
+  homeIntroComplete?: boolean;
 };
 
 /** First rows only: small stagger when several share one in-view tick; deeper rows use 0. */
@@ -34,6 +39,7 @@ export function ScrollReveal({
   reducedMotion = false,
   photoAlbumStaggerIndex,
   photoAlbumIntroComplete,
+  homeIntroComplete,
 }: Props) {
   const slideEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
   /** Album rows: softer deceleration + a touch longer opacity for a silkier entrance. */
@@ -46,6 +52,9 @@ export function ScrollReveal({
   const albumFrozen = albumUsesIntroGate && !albumIntroDone;
   const albumAfterIntro = albumUsesIntroGate && albumIntroDone;
 
+  const homeUsesIntroGate = homeIntroComplete !== undefined;
+  const homeFrozen = homeUsesIntroGate && !homeIntroComplete;
+
   if (reducedMotion) {
     if (isAlbumRow) {
       return (
@@ -56,6 +65,16 @@ export function ScrollReveal({
               ? { opacity: 0, pointerEvents: "none" }
               : undefined
           }
+        >
+          {children}
+        </div>
+      );
+    }
+    if (homeIntroComplete === false) {
+      return (
+        <div
+          className={className}
+          style={{ opacity: 0, pointerEvents: "none" }}
         >
           {children}
         </div>
@@ -113,6 +132,19 @@ export function ScrollReveal({
       : 0;
 
   if (albumFrozen) {
+    return (
+      <motion.div
+        className={className}
+        initial={slideInitial}
+        animate={slideInitial}
+        transition={{ duration: 0 }}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+
+  if (homeFrozen) {
     return (
       <motion.div
         className={className}

@@ -8,7 +8,7 @@ const pillClassName =
 
 export function EducationSection({ entries }: Props) {
   return (
-    <section id="education" className="scroll-mt-20 px-6 py-20 md:py-24">
+    <section id="education" className="scroll-mt-20 px-6 pb-8 pt-6 md:py-24">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
           <h2 className="mb-8 font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">

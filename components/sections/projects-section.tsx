@@ -6,7 +6,7 @@ type Props = { projects: ProjectEntry[] };
 
 export function ProjectsSection({ projects }: Props) {
   return (
-    <section id="projects" className="scroll-mt-20 pb-12 pt-20 md:pb-16 md:pt-24">
+    <section id="projects" className="scroll-mt-20 pb-8 pt-6 md:pb-16 md:pt-24">
       <div className="mx-auto w-full max-w-7xl px-8 md:px-16 lg:px-32">
         <ScrollReveal variant="fade">
           <h2 className="mb-8 font-display text-[9.1vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 [text-shadow:0.55px_0_0_currentColor,-0.55px_0_0_currentColor] md:mb-12">

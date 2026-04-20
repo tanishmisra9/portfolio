@@ -164,7 +164,9 @@ export function SiteHeader() {
   return (
     <>
       <motion.header
-        className="relative sticky top-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-md"
+        className={`relative sticky top-0 border-b border-white/10 bg-black/40 backdrop-blur-md ${
+          menuOpen ? "z-[10001]" : "z-50"
+        }`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{
@@ -232,7 +234,28 @@ export function SiteHeader() {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               onClick={() => setMenuOpen((o) => !o)}
             >
-              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <span className="relative grid h-6 w-6 shrink-0 place-items-center">
+                <motion.span
+                  aria-hidden
+                  style={{ gridArea: "1 / 1" }}
+                  className="flex items-center justify-center"
+                  initial={false}
+                  animate={{ opacity: menuOpen ? 0 : 1 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  <Menu className="h-6 w-6" />
+                </motion.span>
+                <motion.span
+                  aria-hidden
+                  style={{ gridArea: "1 / 1" }}
+                  className="flex items-center justify-center"
+                  initial={false}
+                  animate={{ opacity: menuOpen ? 1 : 0 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  <X className="h-6 w-6" />
+                </motion.span>
+              </span>
             </button>
           </div>
         </div>
@@ -248,30 +271,12 @@ export function SiteHeader() {
                   role="dialog"
                   aria-modal="true"
                   aria-label="Navigation"
-                  className="fixed inset-0 z-[9999] flex flex-col bg-black md:hidden"
+                  className="fixed inset-x-0 bottom-0 top-20 z-[10000] flex flex-col bg-black md:hidden"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <div className="flex h-20 shrink-0 items-center justify-between border-b border-white/10 px-6">
-                    <Link
-                      href={logoHref}
-                      className={logoClassName}
-                      onClick={closeMenu}
-                    >
-                      TM
-                    </Link>
-                    <button
-                      type="button"
-                      className="flex items-center justify-center rounded-md p-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
-                      aria-label="Close menu"
-                      onClick={closeMenu}
-                    >
-                      <X className="h-6 w-6" />
-                    </button>
-                  </div>
-
                   <motion.ul
                     className="list-none grow flex flex-col items-center justify-center gap-8 px-6"
                     variants={mobileListVariants}
@@ -301,7 +306,7 @@ export function SiteHeader() {
                                 : undefined
                             }
                             className={[
-                              "block py-1 text-center text-4xl font-semibold uppercase transition-colors",
+                              "block py-1 text-center font-display text-4xl font-extrabold uppercase tracking-tighter transition-colors",
                               active
                                 ? "text-white underline decoration-white/30 decoration-1 underline-offset-[0.4em]"
                                 : "text-neutral-500 hover:text-neutral-300",

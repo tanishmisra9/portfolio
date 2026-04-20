@@ -10,7 +10,7 @@ export function SkillsSection({ skills, certifications }: Props) {
   return (
     <section
       id="skills"
-      className="scroll-mt-20 px-6 py-20 md:py-24"
+      className="scroll-mt-20 px-6 pb-8 pt-6 md:py-24"
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
@@ -40,7 +40,7 @@ export function SkillsSection({ skills, certifications }: Props) {
           ))}
         </div>
 
-        <section id="certifications" className="mt-20 scroll-mt-20 md:mt-24">
+        <section id="certifications" className="mt-10 scroll-mt-20 md:mt-24">
           <div className="flex flex-col gap-10 md:gap-12">
             <ScrollReveal variant="fade">
               <h3 className="font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800">

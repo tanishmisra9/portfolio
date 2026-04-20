@@ -7,7 +7,12 @@ import {
   useState,
   type PointerEvent,
 } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { useHomeIntroMarkDone } from "@/components/home-intro-gate";
+import {
+  HERO_TAGLINE_ENTER_DELAY_S,
+  HERO_TAGLINE_ENTER_DURATION_S,
+} from "@/lib/site-motion";
 import {
   ScatterName,
   SCATTER_NAME_ENTRANCE_BASE_MS,
@@ -24,6 +29,8 @@ function sleep(ms: number) {
 }
 
 export function Hero({ subtitle }: HeroProps) {
+  const markHomeIntroDone = useHomeIntroMarkDone();
+  const reduceHeroMotion = useReducedMotion();
   const [topLine = "", bottomLine = ""] = subtitle.split("\n");
   const [scatterTrigger, setScatterTrigger] = useState(0);
   const scatterBusyRef = useRef(false);
@@ -40,6 +47,12 @@ export function Hero({ subtitle }: HeroProps) {
     ((clientX: number, clientY: number) => void) | null
   >(null);
   const misraResetRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (reduceHeroMotion) {
+      markHomeIntroDone();
+    }
+  }, [reduceHeroMotion, markHomeIntroDone]);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -93,10 +106,10 @@ export function Hero({ subtitle }: HeroProps) {
   return (
     <section
       id="top"
-      className="relative z-0 isolate flex min-h-[82vh] items-center overflow-hidden px-6 pb-12 pt-24 md:py-24"
+      className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[82vh] md:items-center md:py-24"
     >
       <div className="mx-auto w-full max-w-6xl text-left">
-        <div className="mb-10 ml-[11vw] md:mb-32 md:ml-[9vw]">
+        <div className="mb-6 ml-[11vw] md:mb-32 md:ml-[9vw]">
           <HeroNameMotion>
             <div
               role="button"
@@ -144,14 +157,15 @@ export function Hero({ subtitle }: HeroProps) {
             </div>
           </HeroNameMotion>
           <motion.div
-            className="-translate-x-2 mt-12 flex max-w-4xl flex-col gap-3 text-left font-sans text-xl leading-relaxed md:-translate-x-3 md:mt-14 md:text-2xl"
+            className="-translate-x-2 mt-7 flex max-w-4xl flex-col gap-3 text-left font-sans text-xl leading-relaxed md:-translate-x-3 md:mt-14 md:text-2xl"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              delay: 0.8,
-              duration: 0.42,
+              delay: HERO_TAGLINE_ENTER_DELAY_S,
+              duration: HERO_TAGLINE_ENTER_DURATION_S,
               ease: [0.16, 1, 0.3, 1],
             }}
+            onAnimationComplete={markHomeIntroDone}
           >
             <span className="block text-white">{topLine}</span>
             <span className="block text-neutral-400">{bottomLine}</span>

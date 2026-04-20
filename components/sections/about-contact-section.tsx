@@ -65,7 +65,7 @@ export function AboutContactSection({ bio, social }: Props) {
   const [paragraphOne = '', paragraphTwo = ''] = bio.split('\n\n');
 
   return (
-    <section id="about" className="scroll-mt-20 px-6 pb-[4.6rem] pt-9 md:pb-[5.52rem] md:pt-11">
+    <section id="about" className="scroll-mt-20 px-6 pb-12 pt-6 md:pb-[5.52rem] md:pt-11">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
           <h2 className="mb-7 text-center font-display text-[8.74vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 [text-shadow:0.55px_0_0_currentColor,-0.55px_0_0_currentColor] md:mb-11">
