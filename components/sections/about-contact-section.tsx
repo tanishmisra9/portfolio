@@ -40,7 +40,18 @@ function renderHighlightedParagraph(paragraph: string): ReactNode {
         <Link
           key={`shot-${index}`}
           href="/photos"
-          className="relative inline-block align-text-bottom pb-[0.07em] leading-none font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:block after:h-[0.055em] after:w-full after:origin-left after:scale-x-0 after:rounded-sm after:bg-current after:transition-transform after:duration-[600ms] after:ease-[cubic-bezier(0.19,1,0.22,1)] hover:after:scale-x-100 focus-visible:after:scale-x-100 motion-reduce:after:scale-x-100 motion-reduce:after:transition-none"
+          className="font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+        >
+          {part}
+        </Link>
+      );
+    }
+    if (part === 'Formula 1') {
+      return (
+        <Link
+          key={`f1-${index}`}
+          href="/photos/super-max"
+          className="font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
         >
           {part}
         </Link>
@@ -68,7 +79,7 @@ export function AboutContactSection({ bio, social }: Props) {
     <section id="about" className="scroll-mt-20 px-6 pb-12 pt-6 md:pb-[5.52rem] md:pt-11">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className="mb-7 text-center font-display text-[8.74vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 [text-shadow:0.55px_0_0_currentColor,-0.55px_0_0_currentColor] md:mb-11">
+          <h2 className="mb-7 select-none text-center font-display text-[8.74vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 [text-shadow:0.55px_0_0_currentColor,-0.55px_0_0_currentColor] md:mb-11">
             ABOUT
           </h2>
         </ScrollReveal>

@@ -14,7 +14,7 @@ export function SkillsSection({ skills, certifications }: Props) {
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className="mb-8 font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
+          <h2 className="mb-8 select-none font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
             SKILLS
           </h2>
         </ScrollReveal>
@@ -22,7 +22,7 @@ export function SkillsSection({ skills, certifications }: Props) {
           {skills.map((group) => (
             <ScrollReveal key={group.id}>
               <section className="rounded-md border border-[var(--border)] p-6 md:p-7">
-                <h3 className="font-mono text-sm uppercase tracking-[0.12em] text-[var(--muted)] md:text-base">
+                <h3 className="select-none font-mono text-sm uppercase tracking-[0.12em] text-[var(--muted)] md:text-base">
                   {group.category}
                 </h3>
                 <ul className="mt-5 flex flex-wrap gap-2.5 md:gap-3">
@@ -43,7 +43,7 @@ export function SkillsSection({ skills, certifications }: Props) {
         <section id="certifications" className="mt-10 scroll-mt-20 md:mt-24">
           <div className="flex flex-col gap-10 md:gap-12">
             <ScrollReveal variant="fade">
-              <h3 className="font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800">
+              <h3 className="select-none font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800">
                 Certifications
               </h3>
             </ScrollReveal>

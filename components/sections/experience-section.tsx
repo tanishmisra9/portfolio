@@ -16,7 +16,7 @@ export function ExperienceSection({ entries }: Props) {
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade" homeIntroComplete={homeIntroDone}>
-          <h2 className="mb-8 font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
+          <h2 className="mb-8 select-none font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
             EXPERIENCE
           </h2>
         </ScrollReveal>

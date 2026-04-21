@@ -194,12 +194,22 @@ export const portfolio: PortfolioContent = {
   ],
   projects: [
     {
+      id: 'project-candle',
+      title: 'Candle',
+      description:
+        'Deployed an all-in-one Choroideremia research intelligence hub, aggregating trials and publications, with a natural language querying interface for patients to receive truthful responses.',
+      techStack: ['PostgreSQL', 'pgvector', 'RAG', 'React'],
+      githubUrl: 'https://github.com/tanishmisra9/candle',
+      pill: 'in progress',
+    },
+    {
       id: 'project-01',
       title: 'Autonomous F1 Broadcast Director',
       description:
         'Async Python daemon scoring all F1 drivers to rotate onboard camera feeds.',
       techStack: ['Python', 'REST APIs', 'Pydantic'],
       githubUrl: 'https://github.com/tanishmisra9/f1director',
+      pill: 'project',
     },
     {
       id: 'project-02',
@@ -208,6 +218,16 @@ export const portfolio: PortfolioContent = {
         '4-agent LangGraph pipeline for deduplicating vendor records using fuzzy matching and GPT-4.',
       techStack: ['Python', 'LangGraph', 'OpenAI', 'MySQL'],
       githubUrl: 'https://github.com/tanishmisra9/VendorOrchestrator',
+      pill: 'project',
+    },
+    {
+      id: 'project-portfolio',
+      title: 'Personal Portfolio',
+      description:
+        'Deployed personal website, leaning into dark mode and minimalistic themes.',
+      techStack: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
+      githubUrl: 'https://github.com/tanishmisra9/portfolio',
+      pill: 'project',
     },
     {
       id: 'project-securify',
@@ -225,6 +245,7 @@ export const portfolio: PortfolioContent = {
         'Tailwind CSS',
       ],
       githubUrl: 'https://github.com/tanishmisra9/security',
+      pill: 'project',
     },
     {
       id: 'project-04',
@@ -233,14 +254,25 @@ export const portfolio: PortfolioContent = {
         'spaCy Transformer NER pipeline trained on 1M+ synthetic records.',
       techStack: ['Python', 'spaCy', 'PyTorch'],
       githubUrl: 'https://github.com/tanishmisra9/pii-transformer',
+      pill: 'project',
     },
     {
-      id: 'project-portfolio',
-      title: 'Portfolio',
+      id: 'project-tokenwise',
+      title: 'Tokenwise',
       description:
-        'Deployed personal website, leaning into dark mode and minimalistic themes.',
-      techStack: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
-      githubUrl: 'https://github.com/tanishmisra9/portfolio',
+        'Agentic orchestration engine that decomposes tasks, routes each subtask to the cheapest capable model, validates quality, and escalates on failure.',
+      techStack: [
+        'Python',
+        'FastAPI',
+        'React',
+        'SQLite',
+        'OpenAI',
+        'Anthropic',
+        'Docker',
+        'Railway',
+      ],
+      githubUrl: 'https://github.com/tanishmisra9/tokenwise',
+      pill: 'project',
     },
     {
       id: 'project-03',
@@ -249,6 +281,7 @@ export const portfolio: PortfolioContent = {
         'AI agent generating tailored resume suggestions, featuring a BART zero-shot classification web scraper.',
       techStack: ['Python', 'LangChain', 'Transformers'],
       githubUrl: 'https://github.com/tanishmisra9/resume-agent',
+      pill: 'project',
     },
   ],
   aboutBio:

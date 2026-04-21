@@ -22,6 +22,8 @@ export type ProjectEntry = {
   description: string;
   techStack: string[];
   githubUrl: string;
+  /** Small label shown at the top-left of the card; hidden when empty/whitespace. */
+  pill?: string;
 };
 
 export type SkillCategory = {
