@@ -15,11 +15,8 @@ export function ProjectsSection({ projects }: Props) {
         </ScrollReveal>
         <div className="mt-10 grid gap-5 sm:grid-cols-2">
           {projects.map((project) => (
-            <ScrollReveal key={project.id}>
-              <article className="relative flex min-h-[300px] flex-col rounded-md border border-white/10 bg-black/40 backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-neutral-400">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
-                  PROJECT
-                </span>
+            <ScrollReveal key={project.id} className="h-full">
+              <article className="relative flex h-full min-h-[15.5rem] flex-col rounded-md border border-white/10 bg-black/40 backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-neutral-400 sm:min-h-[16.75rem]">
                 <a
                   href={project.githubUrl}
                   target="_blank"
@@ -29,11 +26,11 @@ export function ProjectsSection({ projects }: Props) {
                 >
                   <Github className="h-4 w-4" strokeWidth={1.8} />
                 </a>
-                <h3 className="mt-6 pr-8 font-display text-2xl font-semibold text-white">{project.title}</h3>
-                <p className="mt-4 leading-relaxed text-neutral-400">
+                <h3 className="pr-10 font-display text-2xl font-semibold text-white">{project.title}</h3>
+                <p className="mt-4 flex-1 leading-relaxed text-neutral-400">
                   {project.description}
                 </p>
-                <ul className="mt-auto flex flex-wrap gap-2 pt-10 font-mono text-[10px] uppercase tracking-widest">
+                <ul className="mt-10 flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-widest">
                   {project.techStack.map((tag) => (
                     <li
                       key={tag}
