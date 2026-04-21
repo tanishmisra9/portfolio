@@ -34,9 +34,14 @@ export type SkillCategory = {
 
 export type CertificationEntry = {
   id: string;
+  /** Kept for aria-labels; not displayed directly. */
   issuer: string;
   title: string;
   credentialUrl: string;
+  /** Top-left label(s); one or more pills. */
+  pills?: string[];
+  /** Bottom tag row, like techStack in projects. */
+  skills?: string[];
 };
 
 export type SocialLink = {

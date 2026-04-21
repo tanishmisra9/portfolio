@@ -156,27 +156,8 @@ export const portfolio: PortfolioContent = {
       title: 'Programming in C',
       credentialUrl:
         'https://www.coursera.org/account/accomplishments/verify/8O423G7AHCWV',
-    },
-    {
-      id: 'cert-google-cyber-foundations',
-      issuer: 'Google Cybersecurity Certificate',
-      title: 'Foundations of Cybersecurity',
-      credentialUrl:
-        'https://www.coursera.org/account/accomplishments/verify/HUNYVIPGYIO0',
-    },
-    {
-      id: 'cert-google-cyber-risks',
-      issuer: 'Google Cybersecurity Certificate',
-      title: 'Play It Safe: Manage Security Risks',
-      credentialUrl:
-        'https://www.coursera.org/account/accomplishments/verify/SR4FKRAQKNEQ',
-    },
-    {
-      id: 'cert-google-cyber-networks',
-      issuer: 'Google Cybersecurity Certificate',
-      title: 'Connect and Protect: Networks and Network Security',
-      credentialUrl:
-        'https://www.coursera.org/account/accomplishments/verify/WVO8VIFCW4UH',
+      pills: ['university of michigan'],
+      skills: ['C'],
     },
     {
       id: 'cert-aws-dlai',
@@ -184,12 +165,43 @@ export const portfolio: PortfolioContent = {
       title: 'Generative AI & Large Language Models',
       credentialUrl:
         'https://www.coursera.org/account/accomplishments/verify/1R7ECY5UIWVV',
+      pills: ['aws', 'deeplearning.ai'],
+      skills: ['Prompt Engineering', 'NLP', 'RLHF', 'Generative AI', 'LLM'],
+    },
+    {
+      id: 'cert-google-cyber-risks',
+      issuer: 'Google Cybersecurity Certificate',
+      title: 'Manage Security Risks',
+      credentialUrl:
+        'https://www.coursera.org/account/accomplishments/verify/SR4FKRAQKNEQ',
+      pills: ['google'],
+      skills: ['OWASP', 'SIEM', 'Vulnerability Management'],
+    },
+    {
+      id: 'cert-google-cyber-networks',
+      issuer: 'Google Cybersecurity Certificate',
+      title: 'Networks and Network Security',
+      credentialUrl:
+        'https://www.coursera.org/account/accomplishments/verify/WVO8VIFCW4UH',
+      pills: ['google'],
+      skills: ['Network Security', 'Protocols', 'TCP/IP', 'Hardening', 'Network Architecture'],
+    },
+    {
+      id: 'cert-google-cyber-foundations',
+      issuer: 'Google Cybersecurity Certificate',
+      title: 'Foundations of Cybersecurity',
+      credentialUrl:
+        'https://www.coursera.org/account/accomplishments/verify/HUNYVIPGYIO0',
+      pills: ['google'],
+      skills: ['Security Controls', 'SIEM', 'Incident Response'],
     },
     {
       id: 'cert-certiport-java',
       issuer: 'Certiport',
       title: 'IT Specialist in Java',
       credentialUrl: 'https://www.credly.com/users/tanish-misra/badges#credly',
+      pills: ['certiport'],
+      skills: ['Java'],
     },
   ],
   projects: [
@@ -200,7 +212,7 @@ export const portfolio: PortfolioContent = {
         'Deployed an all-in-one Choroideremia research intelligence hub, aggregating trials and publications, with a natural language querying interface for patients to receive truthful responses.',
       techStack: ['PostgreSQL', 'pgvector', 'RAG', 'React'],
       githubUrl: 'https://github.com/tanishmisra9/candle',
-      pill: 'in progress',
+      pill: 'in-progress',
     },
     {
       id: 'project-01',
@@ -227,7 +239,7 @@ export const portfolio: PortfolioContent = {
         'Deployed personal website, leaning into dark mode and minimalistic themes.',
       techStack: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
       githubUrl: 'https://github.com/tanishmisra9/portfolio',
-      pill: 'project',
+      pill: 'website',
     },
     {
       id: 'project-securify',
@@ -245,7 +257,7 @@ export const portfolio: PortfolioContent = {
         'Tailwind CSS',
       ],
       githubUrl: 'https://github.com/tanishmisra9/security',
-      pill: 'project',
+      pill: 'algofest 2026',
     },
     {
       id: 'project-04',
@@ -254,7 +266,7 @@ export const portfolio: PortfolioContent = {
         'spaCy Transformer NER pipeline trained on 1M+ synthetic records.',
       techStack: ['Python', 'spaCy', 'PyTorch'],
       githubUrl: 'https://github.com/tanishmisra9/pii-transformer',
-      pill: 'project',
+      pill: 'internship project',
     },
     {
       id: 'project-tokenwise',
@@ -272,7 +284,7 @@ export const portfolio: PortfolioContent = {
         'Railway',
       ],
       githubUrl: 'https://github.com/tanishmisra9/tokenwise',
-      pill: 'project',
+      pill: 'global fusion 2026',
     },
     {
       id: 'project-03',
