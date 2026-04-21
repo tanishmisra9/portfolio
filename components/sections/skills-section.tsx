@@ -71,7 +71,7 @@ export function SkillsSection({ skills, certifications }: Props) {
   return (
     <section
       id="skills"
-      className="scroll-mt-20 px-6 pb-8 pt-6 md:py-24"
+      className="scroll-mt-20 px-6 pb-8 pt-6 md:pb-16 md:pt-24"
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
