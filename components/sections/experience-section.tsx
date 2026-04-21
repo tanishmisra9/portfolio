@@ -12,11 +12,11 @@ export function ExperienceSection({ entries }: Props) {
   return (
     <section
       id="experience"
-      className="scroll-mt-20 px-6 pb-8 pt-6 md:py-24"
+      className="scroll-mt-20 px-6 pb-8 pt-5 md:pb-24 md:pt-20"
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade" homeIntroComplete={homeIntroDone}>
-          <h2 className="mb-8 select-none font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
+          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
             EXPERIENCE
           </h2>
         </ScrollReveal>
@@ -37,7 +37,7 @@ export function ExperienceSection({ entries }: Props) {
                     {entry.tags.map((tag) => (
                       <li
                         key={tag}
-                        className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-xs text-neutral-400 select-none cursor-default"
+                        className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-400 select-none cursor-default"
                       >
                         {tag}
                       </li>

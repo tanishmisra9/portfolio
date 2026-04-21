@@ -4,14 +4,14 @@ import type { EducationEntry } from '@/types/content';
 type Props = { entries: EducationEntry[] };
 
 const pillClassName =
-  'rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-[11px] text-neutral-400 select-none cursor-default';
+  'rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-400 select-none cursor-default';
 
 export function EducationSection({ entries }: Props) {
   return (
     <section id="education" className="scroll-mt-20 px-6 pb-8 pt-6 md:py-24">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className="mb-8 select-none font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
+          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
             EDUCATION
           </h2>
         </ScrollReveal>

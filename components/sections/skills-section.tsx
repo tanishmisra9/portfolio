@@ -49,7 +49,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
           {skills.map((skill) => (
             <li
               key={skill}
-              className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-neutral-400 select-none cursor-default"
+              className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-400 select-none cursor-default"
             >
               {skill}
             </li>
@@ -75,7 +75,7 @@ export function SkillsSection({ skills, certifications }: Props) {
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className="mb-8 select-none font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
+          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
             SKILLS
           </h2>
         </ScrollReveal>
@@ -90,7 +90,7 @@ export function SkillsSection({ skills, certifications }: Props) {
                   {group.items.map((skill) => (
                     <li
                       key={skill}
-                      className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3.5 py-1.5 text-xs text-neutral-400 select-none cursor-default md:px-4 md:py-2 md:text-sm"
+                      className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-400 select-none cursor-default"
                     >
                       {skill}
                     </li>
@@ -103,7 +103,7 @@ export function SkillsSection({ skills, certifications }: Props) {
 
         <section id="certifications" className="mt-10 scroll-mt-20 md:mt-24">
             <ScrollReveal variant="fade">
-              <h3 className="select-none font-display text-[8.8vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800">
+              <h3 className="select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800">
                 Certifications
               </h3>
             </ScrollReveal>
