@@ -86,7 +86,7 @@ export function AlbumTitle({ title, slug }: Props) {
   );
 
   const baseClasses =
-    "select-none font-display text-[2.93rem] font-extrabold uppercase tracking-tighter md:text-[3.9rem]";
+    "select-none font-display text-4xl font-extrabold uppercase tracking-tighter md:text-5xl";
 
   if (!isSuperMax || reduceMotion) {
     return (

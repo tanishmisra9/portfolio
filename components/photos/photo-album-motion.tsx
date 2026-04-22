@@ -60,7 +60,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
         onAnimationComplete={onTitleBlockAnimationComplete}
       >
         <AlbumTitle title={title} slug={slug} />
-        <p className="mt-4 text-[1.46rem] text-neutral-400 md:text-[1.625rem]">{description}</p>
+        <p className="mt-4 text-lg text-neutral-400 md:text-xl">{description}</p>
       </motion.div>
       <motion.div
         variants={albumGridSlot}
@@ -135,7 +135,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                   unoptimized={superMaxAlbum}
                 />
                 {photo.caption ? (
-                  <figcaption className="mt-3 text-[1.46rem] text-neutral-400 md:text-[1.625rem]">
+                  <figcaption className="mt-3 text-lg text-neutral-400 md:text-xl">
                     {photo.caption}
                   </figcaption>
                 ) : null}
