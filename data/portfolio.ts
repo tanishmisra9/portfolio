@@ -216,7 +216,7 @@ export const portfolio: PortfolioContent = {
     },
     {
       id: 'project-01',
-      title: 'Autonomous F1 Broadcast Director',
+      title: 'F1 MultiViewer Director',
       description:
         'Async Python daemon scoring all F1 drivers to rotate onboard camera feeds.',
       techStack: ['Python', 'REST APIs', 'Pydantic'],
@@ -225,9 +225,9 @@ export const portfolio: PortfolioContent = {
     },
     {
       id: 'project-02',
-      title: 'Agentic Vendor Master Assistant',
+      title: 'Vendor Master Assistant',
       description:
-        '4-agent LangGraph pipeline for deduplicating vendor records using fuzzy matching and GPT-4.',
+        'Deployed a 4-agent LangGraph pipeline for deduplicating vendor records using fuzzy matching and GPT-4.',
       techStack: ['Python', 'LangGraph', 'OpenAI', 'MySQL'],
       githubUrl: 'https://github.com/tanishmisra9/VendorOrchestrator',
       pill: 'project',
@@ -236,7 +236,7 @@ export const portfolio: PortfolioContent = {
       id: 'project-portfolio',
       title: 'Personal Portfolio',
       description:
-        'Deployed personal website, leaning into dark mode and minimalistic themes.',
+        'Deployed a personal website, leaning into dark mode and minimalism.',
       techStack: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
       githubUrl: 'https://github.com/tanishmisra9/portfolio',
       pill: 'website',
