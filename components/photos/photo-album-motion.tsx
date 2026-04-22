@@ -33,11 +33,6 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
     headingsGateRef.current = true;
     setHeadingsComplete(true);
   }, []);
-  /** Bypass `/_next/image` cache — stale WebP for same public URL showed wrong duet/thumbs after replacing files. */
-  const superMaxAlbum = title === "Super Max";
-  /** Safari: `placeholder="blur"` can leave Next’s blur layer stuck until `img.decode()` settles; empty avoids a black box while pixels already loaded. */
-  const superMaxPlaceholder = superMaxAlbum ? "empty" : "blur";
-  const superMaxBlurData = superMaxAlbum ? {} : { blurDataURL: BLUR_DATA_URL };
 
   return (
     <motion.div
@@ -90,11 +85,12 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                   height={DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
                   sizes="(max-width: 768px) 50vw, 448px"
-                  placeholder={superMaxPlaceholder}
-                  {...superMaxBlurData}
+                  placeholder="blur"
+                  blurDataURL={BLUR_DATA_URL}
+                  quality={72}
                   className="rounded-md border border-white/10"
                   priority={index === 0}
-                  unoptimized={superMaxAlbum}
+                  fetchPriority={index === 0 ? "high" : undefined}
                 />
               </figure>
               <figure className="m-0">
@@ -106,11 +102,10 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                   height={DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
                   sizes="(max-width: 768px) 50vw, 448px"
-                  placeholder={superMaxPlaceholder}
-                  {...superMaxBlurData}
+                  placeholder="blur"
+                  blurDataURL={BLUR_DATA_URL}
+                  quality={72}
                   className="rounded-md border border-white/10"
-                  priority={index === 0}
-                  unoptimized={superMaxAlbum}
                 />
               </figure>
             </ScrollReveal>
@@ -131,11 +126,12 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                   height={DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
                   sizes="(max-width: 768px) 100vw, 896px"
-                  placeholder={superMaxPlaceholder}
-                  {...superMaxBlurData}
+                  placeholder="blur"
+                  blurDataURL={BLUR_DATA_URL}
+                  quality={72}
                   className="rounded-md border border-white/10"
                   priority={index === 0}
-                  unoptimized={superMaxAlbum}
+                  fetchPriority={index === 0 ? "high" : undefined}
                 />
                 {photo.caption ? (
                   <figcaption className="mt-3 text-lg text-neutral-400 md:text-xl">
