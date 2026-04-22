@@ -74,7 +74,7 @@ export function PhotosIndexMotion({ collections }: Props) {
                 aria-hidden
               />
               <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-6 pt-16">
-                <span className="font-display text-2xl font-semibold text-white md:text-3xl">
+                <span className="font-display text-[1.95rem] font-semibold text-white md:text-[2.44rem]">
                   {collection.title}
                 </span>
                 <span className="text-sm text-neutral-400">
