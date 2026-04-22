@@ -64,12 +64,12 @@ export function PhotosIndexMotion({ collections }: Props) {
                 alt=""
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 600px"
-                className="object-cover blur-0 transition-[transform,filter] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:scale-[1.07] group-hover:blur-[2.5px]"
+                className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:scale-[1.04]"
                 priority={index < 2}
                 unoptimized={collection.slug === "super-max"}
               />
-              <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/25 p-6 text-center backdrop-blur-sm transition-[backdrop-filter] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:backdrop-blur-md">
-                <span className="inline-block origin-center select-none text-center font-display text-[clamp(1.6rem,6.4vw,3.35rem)] font-extrabold uppercase leading-none tracking-tighter text-[#ccccca] transition-[transform,text-shadow] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] [text-shadow:0_4px_28px_rgba(0,0,0,0),0_1px_8px_rgba(0,0,0,0)] scale-100 group-hover:scale-[0.985] group-hover:[text-shadow:0_12px_40px_rgba(0,0,0,0.42),0_4px_18px_rgba(0,0,0,0.30)]">
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 p-6 text-center backdrop-blur-sm transition-colors duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:bg-black/50">
+                <span className="select-none text-center font-display text-[clamp(1.4rem,5.8vw,3.1rem)] font-bold uppercase leading-none tracking-tighter text-[#e8e8e7]">
                   {collection.title}
                 </span>
               </div>
