@@ -20,7 +20,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "campus",
     title: "Purdue grounds",
-    description: "Quads, towers, banners—four seasons on West Lafayette brick.",
+    description: "Quads, towers, banners—four seasons on West Lafayette brick",
     coverImage: "/photos/campus/img-1809.jpeg",
     photos: [
       {
@@ -88,7 +88,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "snowfall",
     title: "Snowfall",
-    description: "West Lafayette winters.",
+    description: "West Lafayette winters",
     coverImage: "/photos/snowfall/img-1125.jpeg",
     photos: [
       {
@@ -121,7 +121,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "uk-2025",
     title: "UK",
-    description: "Pit lanes, shop windows, and one very loud afternoon at Silverstone.",
+    description: "Pit lanes, shop windows, and one very loud afternoon at Silverstone",
     coverImage: "/photos/uk-2025/img-7327.jpg",
     photos: [
       {
@@ -194,7 +194,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "new-york",
     title: "New York",
-    description: "The city that never sleeps... or changes.",
+    description: "The city that never sleeps... or changes",
     coverImage: "/photos/new-york/img-4825.jpeg",
     photos: [
       {
@@ -227,7 +227,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "smokies",
     title: "The Smokies",
-    description: "The Great Smoky Mountains for a reason.",
+    description: "The Great Smoky Mountains for a reason",
     coverImage: "/photos/smokies/img-7046.jpg",
     photos: [
       {
@@ -255,7 +255,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "holidays-2025",
     title: "Winter Holidays",
-    description: "December lights.",
+    description: "December lights",
     coverImage: "/photos/holidays-2025/img-0347.jpg",
     photos: [
       {
@@ -288,7 +288,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "new-years",
     title: "New Years",
-    description: "Ringing it in.",
+    description: "Ringing it in",
     coverImage: "/photos/new-years/img-0687.jpg",
     photos: [
       {
@@ -326,7 +326,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "standalone",
     title: "Standalones",
-    description: "One-offs and favorites.",
+    description: "One-offs and favorites",
     coverImage: "/photos/standalone/squirrel.jpeg",
     photos: [
       {
@@ -370,7 +370,7 @@ export const collections: PhotoCollection[] = [
   {
     slug: "super-max",
     title: "Super Max",
-    description: "He makes me believe the odds don't matter.",
+    description: "He makes me believe the odds don't matter",
     coverImage: "/photos/super-max/US_25.JPG",
     photos: [
       {
