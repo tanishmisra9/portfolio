@@ -49,18 +49,21 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
       <motion.div variants={item}>
         <Link
           href="/photos"
-          className="mb-10 inline-flex items-center gap-2 text-sm text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 md:mb-12"
+          className="mb-10 inline-flex items-center gap-2 text-[0.9625rem] text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 md:mb-12"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
+          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
           Back to photos
         </Link>
       </motion.div>
       <motion.div
         variants={item}
         onAnimationComplete={onTitleBlockAnimationComplete}
+        className="text-center"
       >
         <AlbumTitle title={title} slug={slug} />
-        <p className="mt-4 text-lg text-neutral-400 md:text-xl">{description}</p>
+        <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-400 md:text-xl">
+          {description}
+        </p>
       </motion.div>
       <motion.div
         variants={albumGridSlot}

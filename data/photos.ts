@@ -120,7 +120,7 @@ export const collections: PhotoCollection[] = [
   },
   {
     slug: "uk-2025",
-    title: "UK '25",
+    title: "UK",
     description: "Pit lanes, shop windows, and one very loud afternoon at Silverstone.",
     coverImage: "/photos/uk-2025/img-7327.jpg",
     photos: [
@@ -193,7 +193,7 @@ export const collections: PhotoCollection[] = [
   },
   {
     slug: "new-york",
-    title: "New York '22",
+    title: "New York",
     description: "The city that never sleeps... or changes.",
     coverImage: "/photos/new-york/img-4825.jpeg",
     photos: [
@@ -226,7 +226,7 @@ export const collections: PhotoCollection[] = [
   },
   {
     slug: "smokies",
-    title: "The Smokies '23",
+    title: "The Smokies",
     description: "The Great Smoky Mountains for a reason.",
     coverImage: "/photos/smokies/img-7046.jpg",
     photos: [
@@ -254,7 +254,7 @@ export const collections: PhotoCollection[] = [
   },
   {
     slug: "holidays-2025",
-    title: "Winter Holidays '25",
+    title: "Winter Holidays",
     description: "December lights.",
     coverImage: "/photos/holidays-2025/img-0347.jpg",
     photos: [
@@ -287,7 +287,7 @@ export const collections: PhotoCollection[] = [
   },
   {
     slug: "new-years",
-    title: "New Years '26",
+    title: "New Years",
     description: "Ringing it in.",
     coverImage: "/photos/new-years/img-0687.jpg",
     photos: [

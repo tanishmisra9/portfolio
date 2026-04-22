@@ -40,7 +40,7 @@ function renderHighlightedParagraph(paragraph: string): ReactNode {
         <Link
           key={`shot-${index}`}
           href="/photos"
-          className="font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+          className="select-none font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
         >
           {part}
         </Link>

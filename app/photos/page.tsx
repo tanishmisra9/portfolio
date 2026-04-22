@@ -14,7 +14,6 @@ export default function PhotosPage() {
       slug: c.slug,
       title: c.title,
       coverImage: c.coverImage,
-      photoCount: c.photos.length,
     }));
 
   return (

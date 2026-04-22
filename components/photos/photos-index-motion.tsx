@@ -11,7 +11,6 @@ export type PhotosIndexCollection = {
   slug: string;
   title: string;
   coverImage: string;
-  photoCount: number;
 };
 
 type Props = {
@@ -33,7 +32,7 @@ export function PhotosIndexMotion({ collections }: Props) {
         <PhotosHeader />
       </motion.div>
       <motion.div variants={item} className="mt-6 flex flex-wrap items-center gap-4 md:mt-8">
-        <p className="text-[1.375rem] leading-snug text-neutral-400">
+        <p className="select-none text-[1.375rem] leading-snug text-neutral-400">
           #ShotOniPhone17Pro
         </p>
         <a
@@ -58,28 +57,20 @@ export function PhotosIndexMotion({ collections }: Props) {
           <motion.div key={collection.slug} variants={item}>
             <Link
               href={`/photos/${collection.slug}`}
-              className="group relative block min-h-[280px] overflow-hidden rounded-md border border-white/10 bg-black/40 backdrop-blur-md transition-colors duration-200 hover:border-neutral-400"
+              className="group relative block min-h-[280px] overflow-hidden rounded-md border border-white/10 transition-colors duration-200 hover:border-neutral-400"
             >
               <Image
                 src={collection.coverImage}
                 alt=""
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 600px"
-                className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                className="object-cover blur-0 transition-[transform,filter] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:scale-[1.07] group-hover:blur-[2.5px]"
                 priority={index < 2}
                 unoptimized={collection.slug === "super-max"}
               />
-              <div
-                className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
-                aria-hidden
-              />
-              <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-6 pt-16">
-                <span className="font-display text-2xl font-semibold text-white md:text-3xl">
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/25 p-6 text-center backdrop-blur-sm transition-[backdrop-filter] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:backdrop-blur-md">
+                <span className="inline-block origin-center select-none text-center font-display text-[clamp(1.6rem,6.4vw,3.35rem)] font-extrabold uppercase leading-none tracking-tighter text-[#ccccca] transition-[transform,text-shadow] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] [text-shadow:0_4px_28px_rgba(0,0,0,0),0_1px_8px_rgba(0,0,0,0)] scale-100 group-hover:scale-[0.985] group-hover:[text-shadow:0_12px_40px_rgba(0,0,0,0.42),0_4px_18px_rgba(0,0,0,0.30)]">
                   {collection.title}
-                </span>
-                <span className="text-sm text-neutral-400">
-                  {collection.photoCount}{" "}
-                  {collection.photoCount === 1 ? "photo" : "photos"}
                 </span>
               </div>
             </Link>
