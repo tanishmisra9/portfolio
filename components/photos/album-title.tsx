@@ -86,11 +86,11 @@ export function AlbumTitle({ title, slug }: Props) {
   );
 
   const baseClasses =
-    "select-none font-display text-4xl font-extrabold uppercase tracking-tighter md:text-5xl";
+    "select-none font-display text-6xl font-extrabold uppercase tracking-tighter leading-[1.15] md:text-8xl";
 
   if (!isSuperMax || reduceMotion) {
     return (
-      <h1 className={`${baseClasses} cursor-default text-white`}>{title}</h1>
+      <h1 className={`${baseClasses} cursor-default py-2 text-white`}>{title}</h1>
     );
   }
 
@@ -100,7 +100,7 @@ export function AlbumTitle({ title, slug }: Props) {
       : "overflow-hidden";
 
   return (
-    <div className={overflowForPhase}>
+    <div className={`${overflowForPhase} py-2`}>
       <h1
         onPointerDown={onPointerDown}
         onClick={startFlyby}
