@@ -69,7 +69,7 @@ export function PhotosIndexMotion({ collections }: Props) {
                 unoptimized={collection.slug === "super-max"}
               />
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 p-6 text-center backdrop-blur-sm transition-colors duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:bg-black/50">
-                <span className="select-none text-center font-display text-[clamp(1.4rem,5.8vw,3.1rem)] font-bold uppercase leading-none tracking-tighter text-[#e8e8e7]">
+                <span className="select-none text-center font-display text-[clamp(1.75rem,5.8vw,3.1rem)] font-bold uppercase leading-none tracking-tighter text-[#e8e8e7]">
                   {collection.title}
                 </span>
               </div>
