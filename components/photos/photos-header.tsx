@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export function PhotosHeader() {
   const [flashing, setFlashing] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const timersRef = useRef<number[]>([]);
 
   useEffect(() => {
     const el = new Audio("/camera.mp3");
