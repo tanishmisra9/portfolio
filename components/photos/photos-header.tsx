@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export function PhotosHeader() {
   const [flashing, setFlashing] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     const el = new Audio("/camera.mp3");
@@ -12,6 +13,8 @@ export function PhotosHeader() {
     audioRef.current = el;
     return () => {
       audioRef.current = null;
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current = [];
     };
   }, []);
 
@@ -19,17 +22,20 @@ export function PhotosHeader() {
     if (flashing) return;
     setFlashing(true);
 
-    /** Slightly after the flash holds white (~40% of 0.8s keyframe) so the shutter isn’t early. */
     const SHUTTER_DELAY_MS = 380;
     if (audioRef.current) {
       const sfx = audioRef.current.cloneNode() as HTMLAudioElement;
       sfx.volume = 0.6;
-      window.setTimeout(() => {
-        sfx.play().catch(() => {});
-      }, SHUTTER_DELAY_MS);
+      timersRef.current.push(
+        window.setTimeout(() => {
+          sfx.play().catch(() => {});
+        }, SHUTTER_DELAY_MS),
+      );
     }
 
-    window.setTimeout(() => setFlashing(false), 800);
+    timersRef.current.push(
+      window.setTimeout(() => setFlashing(false), 800),
+    );
   }, [flashing]);
 
   return (

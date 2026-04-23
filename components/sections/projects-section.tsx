@@ -77,6 +77,7 @@ export function ProjectsSection({ projects }: Props) {
         <AnimatePresence initial={false}>
           {expanded && (
             <motion.div
+              id="projects-extra-content"
               key="extra"
               initial={{ height: 0 }}
               animate={{ height: 'auto' }}
@@ -104,11 +105,11 @@ export function ProjectsSection({ projects }: Props) {
 
         {/* Show more / Show less button */}
         {hasMore && (
-          <div className="mt-10 flex justify-center" id="projects-extra">
+          <div className="mt-10 flex justify-center">
             <button
               onClick={() => setExpanded((v) => !v)}
               aria-expanded={expanded}
-              aria-controls="projects-extra"
+              aria-controls="projects-extra-content"
               className="group relative inline-flex items-center justify-center rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 font-sans text-xs uppercase tracking-[0.2em] text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
             >
               {/* Specular sheen on hover */}

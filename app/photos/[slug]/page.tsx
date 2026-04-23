@@ -12,7 +12,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const collection = getCollectionBySlug(slug);
-  if (!collection) return { title: "Photos" };
+  if (!collection) return { title: "Not Found — Tanish Misra" };
   return {
     title: `${collection.title} — Tanish Misra`,
     description: collection.description,

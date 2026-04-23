@@ -114,7 +114,7 @@ export const collections: PhotoCollection[] = [
       {
         src: "/photos/snowfall/img-9926.jpg",
         alt: "Medium shot of the Purdue Unfinished P sculpture with smooth dark upper stroke and rough stone base, bronze hammer and chisel on the plinth, light snow on surfaces and soft-focus snowy campus behind",
-        caption: "Icey P",
+        caption: "Icy P",
       },
     ],
   },
@@ -286,38 +286,38 @@ export const collections: PhotoCollection[] = [
     ],
   },
   {
-    slug: "new-years",
-    title: "New Years",
+    slug: "new-year",
+    title: "New Year",
     description: "Ringing it in",
-    coverImage: "/photos/new-years/img-0687.jpg",
+    coverImage: "/photos/new-year/img-0687.jpg",
     photos: [
       {
-        src: "/photos/new-years/img-0646.jpg",
+        src: "/photos/new-year/img-0646.jpg",
         alt: "Nighttime crowd silhouettes facing a giant outdoor LED screen showing 2026 and Happy New Year with stylized fireworks",
         caption: "The countdown till 2026",
       },
       {
-        src: "/photos/new-years/img-0671.jpg",
+        src: "/photos/new-year/img-0671.jpg",
         alt: "Bright lime-green fireworks bursting over a black sky while a silhouetted crowd watches; one person holds up a glowing phone to record",
         caption: "Neon confetti",
       },
       {
-        src: "/photos/new-years/img-0673.jpg",
+        src: "/photos/new-year/img-0673.jpg",
         alt: "Gold and white fireworks with red spark tips above a dark crowd; a raised smartphone lights up in the foreground",
         caption: "One sky, a hundred tiny replays",
       },
       {
-        src: "/photos/new-years/img-0677.jpg",
+        src: "/photos/new-year/img-0677.jpg",
         alt: "Close-up of a large spherical red firework burst, hundreds of red sparks on black night sky",
         caption: "Ringing it in red",
       },
       {
-        src: "/photos/new-years/img-0682.jpg",
+        src: "/photos/new-year/img-0682.jpg",
         alt: "Purple, pink, and white layered fireworks over spectators' silhouettes; distant horizon lights and bare trees",
         caption: "Fireworks layer cake",
       },
       {
-        src: "/photos/new-years/img-0687.jpg",
+        src: "/photos/new-year/img-0687.jpg",
         alt: "Huge white and gold firework burst and lit smoke cloud as a crowd films the show on bright phone screens",
         caption: "Capturing the show overhead",
       },

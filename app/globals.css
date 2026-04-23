@@ -20,14 +20,9 @@
 }
 
 :root {
-  --bg: #000000;
   --fg: #e5e5e5;
   --muted: #b4b4b8;
   --border: rgba(255, 255, 255, 0.12);
-  --surface: #141414;
-  --accent: #f3f4f6;
-  --accent-dim: rgba(243, 244, 246, 0.08);
-  --accent-glow: rgba(243, 244, 246, 0.12);
 }
 
 html {
@@ -42,7 +37,6 @@ html {
 }
 
 body {
-  color: var(--fg);
   background-color: #000000;
 }
 

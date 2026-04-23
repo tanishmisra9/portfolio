@@ -256,7 +256,7 @@ export const portfolio: PortfolioContent = {
         'TypeScript',
         'Tailwind CSS',
       ],
-      githubUrl: 'https://github.com/tanishmisra9/security',
+      githubUrl: 'https://github.com/tanishmisra9/securify',
       pill: 'algofest 2026',
     },
     {

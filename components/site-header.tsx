@@ -9,7 +9,7 @@ import {
 import { Menu, X } from "lucide-react";
 import { useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type NavItem = { href: string; label: string };
@@ -147,13 +147,41 @@ export function SiteHeader() {
     };
   }, [menuOpen]);
 
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     if (!menuOpen) return;
+    const overlay = document.getElementById("mobile-nav-overlay");
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        menuTriggerRef.current?.focus();
+        return;
+      }
+      if (e.key !== "Tab" || !overlay) return;
+      const focusable = overlay.querySelectorAll<HTMLElement>(
+        'a[href], button, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
+    const raf = requestAnimationFrame(() => {
+      const firstLink = overlay?.querySelector<HTMLElement>("a[href]");
+      firstLink?.focus();
+    });
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("keydown", onKey);
+    };
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
@@ -227,6 +255,7 @@ export function SiteHeader() {
             </nav>
 
             <button
+              ref={menuTriggerRef}
               type="button"
               className="flex shrink-0 items-center justify-center rounded-md p-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white md:hidden"
               aria-expanded={menuOpen}

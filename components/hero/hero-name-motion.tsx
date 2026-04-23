@@ -1,11 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
 type Props = { children: ReactNode };
 
 export function HeroNameMotion({ children }: Props) {
+  const reduceMotion = useReducedMotion();
+
+  if (reduceMotion) return <div>{children}</div>;
+
   return (
     <motion.div
       animate={{
