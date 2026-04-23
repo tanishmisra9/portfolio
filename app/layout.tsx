@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
 import { SmoothScroll } from "@/components/smooth-scroll";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import "lenis/dist/lenis.css";
 
@@ -44,6 +45,7 @@ export default function RootLayout({
           <SiteHeader />
           {children}
         </SmoothScroll>
+        <Analytics />
       </body>
     </html>
   );
