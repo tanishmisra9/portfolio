@@ -2,6 +2,7 @@
 
 import { useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FireworkCanvas } from "@/components/photos/firework-canvas";
 import { FogCanvas } from "@/components/photos/fog-canvas";
 import {
   SnowfallCanvas,
@@ -21,11 +22,14 @@ export function AlbumTitle({ title, slug }: Props) {
   const isSnowfall = slug === "snowfall";
   const isUK = slug === "uk-2025";
   const isSmokies = slug === "smokies";
+  const isNewYears = slug === "new-year";
   const interactiveSuperMax = isSuperMax && !reduceMotion;
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const [ukFlying, setUkFlying] = useState(false);
   const [fogActive, setFogActive] = useState(false);
+  const [fireworkActive, setFireworkActive] = useState(false);
   const snowfallRef = useRef<SnowfallCanvasHandle>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   /** Bumps on flyby start so a late pointerdown prime cannot pause real playback. */
@@ -60,6 +64,17 @@ export function AlbumTitle({ title, slug }: Props) {
     if (fogActive) return;
     setFogActive(true);
   }, [fogActive]);
+
+  const startFirework = useCallback(() => {
+    if (fireworkActive) return;
+    setFireworkActive(true);
+  }, [fireworkActive]);
+
+  const getTitleY = useCallback(() => {
+    if (!titleRef.current) return window.innerHeight * 0.3;
+    const rect = titleRef.current.getBoundingClientRect();
+    return rect.top + rect.height / 2;
+  }, []);
 
   const startUKFlyby = useCallback(() => {
     if (ukFlying) return;
@@ -111,18 +126,21 @@ export function AlbumTitle({ title, slug }: Props) {
     "select-none font-display text-6xl font-extrabold uppercase tracking-tighter leading-[1.15] md:text-8xl";
 
   if (!isSuperMax || reduceMotion) {
-    const isInteractive = (isSnowfall || isUK || isSmokies) && !reduceMotion;
-    const handleClick = isSmokies && !reduceMotion
-      ? startFog
-      : isUK && !reduceMotion
-        ? startUKFlyby
-        : isSnowfall && !reduceMotion
-          ? () => snowfallRef.current?.triggerBurst()
-          : undefined;
+    const isInteractive = (isSnowfall || isUK || isSmokies || isNewYears) && !reduceMotion;
+    const handleClick = isNewYears && !reduceMotion
+      ? startFirework
+      : isSmokies && !reduceMotion
+        ? startFog
+        : isUK && !reduceMotion
+          ? startUKFlyby
+          : isSnowfall && !reduceMotion
+            ? () => snowfallRef.current?.triggerBurst()
+            : undefined;
 
     return (
       <>
         <h1
+          ref={isNewYears ? titleRef : undefined}
           className={`${baseClasses} py-2 ${
             isInteractive ? "cursor-pointer" : "cursor-default"
           } ${ukFlying ? "uk-flag-fly" : "text-white"}`}
@@ -135,6 +153,13 @@ export function AlbumTitle({ title, slug }: Props) {
           <FogCanvas
             active={fogActive}
             onComplete={() => setFogActive(false)}
+          />
+        )}
+        {fireworkActive && (
+          <FireworkCanvas
+            active={fireworkActive}
+            onComplete={() => setFireworkActive(false)}
+            titleY={getTitleY()}
           />
         )}
       </>
