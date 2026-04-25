@@ -3,7 +3,7 @@ import type { PortfolioContent } from '@/types/content';
 export const portfolio: PortfolioContent = {
   name: 'TANISH MISRA',
   heroSubtitle:
-    'Building practical AI for complex, real-world constraints.\nCS @ Purdue | Incoming @ Toyota Connected Technologies',
+    'Building practical solutions for real-world constraints.\nCS @ Purdue | Incoming @ Toyota Connected Technologies',
   experience: [
     {
       id: 'exp-01',
@@ -157,7 +157,7 @@ export const portfolio: PortfolioContent = {
       credentialUrl:
         'https://www.coursera.org/account/accomplishments/verify/8O423G7AHCWV',
       pills: ['university of michigan'],
-      skills: ['C'],
+      skills: ['C (Programming Language)', 'Memory Management'],
     },
     {
       id: 'cert-aws-dlai',
