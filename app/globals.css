@@ -276,6 +276,6 @@ body {
     animation: none !important;
     color: #ffffff;
     background: none;
-    -webkit-text-fill-color: unset;
+    -webkit-text-fill-color: #ffffff;
   }
 }

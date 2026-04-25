@@ -20,9 +20,7 @@ export function AlbumTitle({ title, slug }: Props) {
   const reduceMotion = useReducedMotion();
   const isSuperMax = slug === "super-max";
   const isSnowfall = slug === "snowfall";
-  const isUK = slug === "uk-2025";
-  const isSmokies = slug === "smokies";
-  const isNewYears = slug === "new-year";
+  const isNewYear = slug === "new-year";
   const interactiveSuperMax = isSuperMax && !reduceMotion;
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const [ukFlying, setUkFlying] = useState(false);
@@ -43,10 +41,17 @@ export function AlbumTitle({ title, slug }: Props) {
     audioRef.current = el;
     return () => {
       audioRef.current = null;
+    };
+  }, [interactiveSuperMax]);
+
+  // Unconditional unmount cleanup so timeouts from any effect (UK flyby,
+  // Super Max flyby) don't fire on an unmounted component.
+  useEffect(() => {
+    return () => {
       timeoutsRef.current.forEach(clearTimeout);
       timeoutsRef.current = [];
     };
-  }, [interactiveSuperMax]);
+  }, []);
 
   const schedule = useCallback((fn: () => void, ms: number) => {
     timeoutsRef.current.push(setTimeout(fn, ms));
@@ -79,7 +84,7 @@ export function AlbumTitle({ title, slug }: Props) {
   const startUKFlyby = useCallback(() => {
     if (ukFlying) return;
     setUkFlying(true);
-    setTimeout(() => setUkFlying(false), 2500);
+    timeoutsRef.current.push(setTimeout(() => setUkFlying(false), 2500));
   }, [ukFlying]);
 
   const startFlyby = useCallback(() => {
@@ -126,21 +131,19 @@ export function AlbumTitle({ title, slug }: Props) {
     "select-none font-display text-6xl font-extrabold uppercase tracking-tighter leading-[1.15] md:text-8xl";
 
   if (!isSuperMax || reduceMotion) {
-    const isInteractive = (isSnowfall || isUK || isSmokies || isNewYears) && !reduceMotion;
-    const handleClick = isNewYears && !reduceMotion
-      ? startFirework
-      : isSmokies && !reduceMotion
-        ? startFog
-        : isUK && !reduceMotion
-          ? startUKFlyby
-          : isSnowfall && !reduceMotion
-            ? () => snowfallRef.current?.triggerBurst()
-            : undefined;
+    const effectMap: Record<string, () => void> = {
+      "new-year": startFirework,
+      smokies: startFog,
+      "uk-2025": startUKFlyby,
+      snowfall: () => snowfallRef.current?.triggerBurst(),
+    };
+    const handleClick = !reduceMotion ? effectMap[slug] : undefined;
+    const isInteractive = handleClick !== undefined;
 
     return (
       <>
         <h1
-          ref={isNewYears ? titleRef : undefined}
+          ref={isNewYear ? titleRef : undefined}
           className={`${baseClasses} py-2 ${
             isInteractive ? "cursor-pointer" : "cursor-default"
           } ${ukFlying ? "uk-flag-fly" : "text-white"}`}
@@ -173,6 +176,8 @@ export function AlbumTitle({ title, slug }: Props) {
 
   return (
     <div className={`${overflowForPhase} py-2`}>
+      {/* React 19 hoists this <link> into <head>; only loaded on the Super Max route */}
+      <link rel="preload" href="/passby.mp3" as="audio" type="audio/mpeg" />
       <h1
         onPointerDown={onPointerDown}
         onClick={startFlyby}

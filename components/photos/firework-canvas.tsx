@@ -18,7 +18,9 @@ type Spark = {
   prevY: number;
   vx: number;
   vy: number;
-  color: string;
+  r: number;
+  g: number;
+  b: number;
   radius: number;
   opacity: number;
   decay: number;
@@ -26,12 +28,13 @@ type Spark = {
 
 const rng = (min: number, max: number) => Math.random() * (max - min) + min;
 
-function hexToRgba(hex: string, alpha: number): string {
+function parseHex(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
+  return [
+    parseInt(h.slice(0, 2), 16),
+    parseInt(h.slice(2, 4), 16),
+    parseInt(h.slice(4, 6), 16),
+  ];
 }
 
 const PALETTES = [
@@ -144,6 +147,9 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
           sparks = Array.from({ length: count }, () => {
             const angle = rng(0, Math.PI * 2);
             const mag = rng(220, 480);
+            const [r, g, b] = parseHex(
+              palette[Math.floor(Math.random() * palette.length)],
+            );
             return {
               x: rocketX,
               y: rocketY,
@@ -151,7 +157,9 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
               prevY: rocketY,
               vx: Math.cos(angle) * mag,
               vy: Math.sin(angle) * mag,
-              color: palette[Math.floor(Math.random() * palette.length)],
+              r,
+              g,
+              b,
               radius: rng(1.5, 3),
               opacity: 1,
               decay: rng(0.7, 1.2),
@@ -185,19 +193,20 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
           s.opacity -= s.decay * dt;
 
           const o = Math.max(s.opacity, 0);
+          const rgb = `${s.r},${s.g},${s.b}`;
 
           // Streak trail
           ctx.beginPath();
           ctx.moveTo(s.prevX, s.prevY);
           ctx.lineTo(s.x, s.y);
-          ctx.strokeStyle = hexToRgba(s.color, o * 0.5);
+          ctx.strokeStyle = `rgba(${rgb},${o * 0.5})`;
           ctx.lineWidth = s.radius * 0.8;
           ctx.stroke();
 
           // Spark head
           ctx.beginPath();
           ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-          ctx.fillStyle = s.color;
+          ctx.fillStyle = `rgb(${rgb})`;
           ctx.globalAlpha = o;
           ctx.fill();
           ctx.globalAlpha = 1;

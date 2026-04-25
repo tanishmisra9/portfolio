@@ -28,6 +28,10 @@ export function FogCanvas({ active, onComplete }: Props) {
   const [mounted, setMounted] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  // Capture mutable values in refs so the effect only runs once per activation
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
 
   useEffect(() => {
     setMounted(true);
@@ -40,7 +44,7 @@ export function FogCanvas({ active, onComplete }: Props) {
       "(prefers-reduced-motion: reduce)",
     ).matches;
     if (reducedMotion) {
-      onComplete();
+      onCompleteRef.current();
       return;
     }
 
@@ -125,7 +129,7 @@ export function FogCanvas({ active, onComplete }: Props) {
 
       if (allDone) {
         ctx.clearRect(0, 0, W, H);
-        onComplete();
+        onCompleteRef.current();
         return;
       }
 
@@ -140,7 +144,9 @@ export function FogCanvas({ active, onComplete }: Props) {
         rafRef.current = null;
       }
     };
-  }, [mounted, active, onComplete]);
+  // Only re-run when active toggles — onComplete is stable via ref
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, active]);
 
   if (!mounted || !active) return null;
 
