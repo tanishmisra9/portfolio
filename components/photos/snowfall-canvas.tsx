@@ -130,7 +130,7 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
               r: rng(2, 4),
               vy: rng(200, 400),
               vx: rng(-15, 15),
-              opacity: rng(0.5, 1.0),
+              opacity: rng(0.5, 0.85),
               dead: false,
             });
             burst.spawned++;
@@ -154,10 +154,17 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
 
         // --- Draw ---
         ctx.clearRect(0, 0, W, H);
+        const FADE_START = 0.82;
         for (const f of state.flakes) {
+          const progress = f.y / H;
+          const fade = progress > FADE_START
+            ? 1 - (progress - FADE_START) / (1 - FADE_START)
+            : 1;
+          const o = f.opacity * Math.max(fade, 0);
+          if (o <= 0) continue;
           ctx.beginPath();
           ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255,255,255,${f.opacity})`;
+          ctx.fillStyle = `rgba(255,255,255,${o})`;
           ctx.fill();
         }
 
