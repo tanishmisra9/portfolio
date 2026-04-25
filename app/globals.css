@@ -228,6 +228,31 @@ body {
   }
 }
 
+/* ── UK flag colour sweep on album title ── */
+.uk-flag-fly {
+  background-image: linear-gradient(
+    to right,
+    #ffffff 0% 21%,
+    #1d52c4 28% 47%,
+    #cf142b 53% 72%,
+    #ffffff 79% 100%
+  );
+  background-size: 400% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: uk-color-sweep 2.5s ease-in-out forwards;
+}
+
+@keyframes uk-color-sweep {
+  0%   { background-position: 100% center; }
+  33%  { background-position: 66.67% center; }
+  66%  { background-position: 33.33% center; }
+  100% { background-position: 0% center; }
+}
+
 /* Reduced motion: disable all animation */
 @media (prefers-reduced-motion: reduce) {
   .supermax-title,
@@ -245,5 +270,12 @@ body {
 
   .supermax-title::after {
     display: none;
+  }
+
+  .uk-flag-fly {
+    animation: none !important;
+    color: #ffffff;
+    background: none;
+    -webkit-text-fill-color: unset;
   }
 }

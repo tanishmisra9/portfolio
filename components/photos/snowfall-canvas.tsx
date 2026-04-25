@@ -59,7 +59,7 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
         const now = performance.now();
         if (now - state.lastBurstTime < 2000) return;
         state.lastBurstTime = now;
-        const total = state.isMobile ? 200 : 400;
+        const total = state.isMobile ? 160 : 320;
         const spawnTimes = Array.from({ length: total }, () =>
           rng(0, 2000),
         ).sort((a, b) => a - b);

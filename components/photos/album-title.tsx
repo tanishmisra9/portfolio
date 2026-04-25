@@ -18,8 +18,10 @@ export function AlbumTitle({ title, slug }: Props) {
   const reduceMotion = useReducedMotion();
   const isSuperMax = slug === "super-max";
   const isSnowfall = slug === "snowfall";
+  const isUK = slug === "uk-2025";
   const interactiveSuperMax = isSuperMax && !reduceMotion;
   const [phase, setPhase] = useState<AnimPhase>("idle");
+  const [ukFlying, setUkFlying] = useState(false);
   const snowfallRef = useRef<SnowfallCanvasHandle>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -50,6 +52,12 @@ export function AlbumTitle({ title, slug }: Props) {
     a.currentTime = 0;
     void a.play().catch(() => {});
   }, []);
+
+  const startUKFlyby = useCallback(() => {
+    if (ukFlying) return;
+    setUkFlying(true);
+    setTimeout(() => setUkFlying(false), 2500);
+  }, [ukFlying]);
 
   const startFlyby = useCallback(() => {
     if (!interactiveSuperMax || phase !== "idle") return;
@@ -95,11 +103,20 @@ export function AlbumTitle({ title, slug }: Props) {
     "select-none font-display text-6xl font-extrabold uppercase tracking-tighter leading-[1.15] md:text-8xl";
 
   if (!isSuperMax || reduceMotion) {
+    const isInteractive = (isSnowfall || isUK) && !reduceMotion;
+    const handleClick = isUK && !reduceMotion
+      ? startUKFlyby
+      : isSnowfall && !reduceMotion
+        ? () => snowfallRef.current?.triggerBurst()
+        : undefined;
+
     return (
       <>
         <h1
-          className={`${baseClasses} py-2 text-white ${isSnowfall && !reduceMotion ? "cursor-pointer" : "cursor-default"}`}
-          onClick={isSnowfall && !reduceMotion ? () => snowfallRef.current?.triggerBurst() : undefined}
+          className={`${baseClasses} py-2 ${
+            isInteractive ? "cursor-pointer" : "cursor-default"
+          } ${ukFlying ? "uk-flag-fly" : "text-white"}`}
+          onClick={handleClick}
         >
           {title}
         </h1>
