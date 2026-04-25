@@ -2,6 +2,10 @@
 
 import { useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  SnowfallCanvas,
+  type SnowfallCanvasHandle,
+} from "@/components/photos/snowfall-canvas";
 
 type Props = {
   title: string;
@@ -13,8 +17,10 @@ type AnimPhase = "idle" | "wipe" | "flyout" | "flyin" | "settle";
 export function AlbumTitle({ title, slug }: Props) {
   const reduceMotion = useReducedMotion();
   const isSuperMax = slug === "super-max";
+  const isSnowfall = slug === "snowfall";
   const interactiveSuperMax = isSuperMax && !reduceMotion;
   const [phase, setPhase] = useState<AnimPhase>("idle");
+  const snowfallRef = useRef<SnowfallCanvasHandle>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   /** Bumps on flyby start so a late pointerdown prime cannot pause real playback. */
@@ -90,7 +96,15 @@ export function AlbumTitle({ title, slug }: Props) {
 
   if (!isSuperMax || reduceMotion) {
     return (
-      <h1 className={`${baseClasses} cursor-default py-2 text-white`}>{title}</h1>
+      <>
+        <h1
+          className={`${baseClasses} py-2 text-white ${isSnowfall && !reduceMotion ? "cursor-pointer" : "cursor-default"}`}
+          onClick={isSnowfall && !reduceMotion ? () => snowfallRef.current?.triggerBurst() : undefined}
+        >
+          {title}
+        </h1>
+        {isSnowfall && !reduceMotion && <SnowfallCanvas ref={snowfallRef} />}
+      </>
     );
   }
 
