@@ -99,6 +99,9 @@ export function FogCanvas({ active, onComplete }: Props) {
       ctx.clearRect(0, 0, W, H);
       ctx.globalCompositeOperation = "lighter";
 
+      const FADE_IN = 0.7;
+      const fadeIn = Math.min(elapsed / FADE_IN, 1);
+
       let allDone = true;
 
       for (const p of puffs) {
@@ -108,9 +111,10 @@ export function FogCanvas({ active, onComplete }: Props) {
 
         if (p.x - r <= W) allDone = false;
 
+        const o = p.opacity * fadeIn;
         const grad = ctx.createRadialGradient(p.x, y, 0, p.x, y, r);
-        grad.addColorStop(0, `rgba(255,255,255,${p.opacity})`);
-        grad.addColorStop(0.4, `rgba(255,255,255,${p.opacity * 0.6})`);
+        grad.addColorStop(0, `rgba(255,255,255,${o})`);
+        grad.addColorStop(0.4, `rgba(255,255,255,${o * 0.6})`);
         grad.addColorStop(1, `rgba(255,255,255,0)`);
 
         ctx.beginPath();
