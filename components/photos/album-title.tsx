@@ -2,6 +2,7 @@
 
 import { useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FogCanvas } from "@/components/photos/fog-canvas";
 import {
   SnowfallCanvas,
   type SnowfallCanvasHandle,
@@ -19,9 +20,11 @@ export function AlbumTitle({ title, slug }: Props) {
   const isSuperMax = slug === "super-max";
   const isSnowfall = slug === "snowfall";
   const isUK = slug === "uk-2025";
+  const isSmokies = slug === "smokies";
   const interactiveSuperMax = isSuperMax && !reduceMotion;
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const [ukFlying, setUkFlying] = useState(false);
+  const [fogActive, setFogActive] = useState(false);
   const snowfallRef = useRef<SnowfallCanvasHandle>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -52,6 +55,11 @@ export function AlbumTitle({ title, slug }: Props) {
     a.currentTime = 0;
     void a.play().catch(() => {});
   }, []);
+
+  const startFog = useCallback(() => {
+    if (fogActive) return;
+    setFogActive(true);
+  }, [fogActive]);
 
   const startUKFlyby = useCallback(() => {
     if (ukFlying) return;
@@ -103,12 +111,14 @@ export function AlbumTitle({ title, slug }: Props) {
     "select-none font-display text-6xl font-extrabold uppercase tracking-tighter leading-[1.15] md:text-8xl";
 
   if (!isSuperMax || reduceMotion) {
-    const isInteractive = (isSnowfall || isUK) && !reduceMotion;
-    const handleClick = isUK && !reduceMotion
-      ? startUKFlyby
-      : isSnowfall && !reduceMotion
-        ? () => snowfallRef.current?.triggerBurst()
-        : undefined;
+    const isInteractive = (isSnowfall || isUK || isSmokies) && !reduceMotion;
+    const handleClick = isSmokies && !reduceMotion
+      ? startFog
+      : isUK && !reduceMotion
+        ? startUKFlyby
+        : isSnowfall && !reduceMotion
+          ? () => snowfallRef.current?.triggerBurst()
+          : undefined;
 
     return (
       <>
@@ -121,6 +131,12 @@ export function AlbumTitle({ title, slug }: Props) {
           {title}
         </h1>
         {isSnowfall && !reduceMotion && <SnowfallCanvas ref={snowfallRef} />}
+        {fogActive && (
+          <FogCanvas
+            active={fogActive}
+            onComplete={() => setFogActive(false)}
+          />
+        )}
       </>
     );
   }
