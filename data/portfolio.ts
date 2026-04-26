@@ -65,10 +65,10 @@ export const portfolio: PortfolioContent = {
         [
           'Problem Solving & OOP',
           'Programming in C',
-          'TDM',
-          'Linear Algebra',
           'Discrete Math',
-          'Multivariate Calculus',
+          'The Data Mine',
+          'Linear Algebra',
+          'Multivariable Calculus',
         ],
       ],
     },
@@ -77,7 +77,7 @@ export const portfolio: PortfolioContent = {
       date: 'May 2025',
       institution: 'Plano West Senior High School',
       credential:
-        'Distinguished Level of Achievement, High School Diploma (Summa Cum Laude)',
+        'Distinguished Level of Achievement, Summa Cum Laude',
       pillRows: [
         [
           'Clarinet player',
@@ -201,7 +201,7 @@ export const portfolio: PortfolioContent = {
       title: 'IT Specialist in Java',
       credentialUrl: 'https://www.credly.com/users/tanish-misra/badges#credly',
       pills: ['certiport'],
-      skills: ['Java'],
+      skills: ['Java', 'Object-Oriented Programming (OOP)'],
     },
   ],
   projects: [

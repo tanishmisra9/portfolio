@@ -80,8 +80,10 @@ export function SkillsSection({ skills, certifications }: Props) {
           </h2>
         </ScrollReveal>
         <div className="mt-8 grid gap-8 md:grid-cols-2">
-          {skills.map((group) => (
-            <ScrollReveal key={group.id}>
+          {skills.map((group, index) => {
+            const isLastOdd = index === skills.length - 1 && skills.length % 2 === 1;
+            return (
+            <ScrollReveal key={group.id} className={isLastOdd ? "md:col-span-2 md:w-1/2 md:mx-auto" : undefined}>
               <section className="rounded-md border border-[var(--border)] p-6 md:p-7">
                 <h3 className="select-none font-mono text-sm uppercase tracking-[0.12em] text-[var(--muted)] md:text-base">
                   {group.category}
@@ -98,7 +100,8 @@ export function SkillsSection({ skills, certifications }: Props) {
                 </ul>
               </section>
             </ScrollReveal>
-          ))}
+            );
+          })}
         </div>
 
         <section id="certifications" className="mt-10 scroll-mt-20 md:mt-24">
