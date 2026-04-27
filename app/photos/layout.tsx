@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { NYCAssetsWarmup } from "@/components/photos/nyc-assets-warmup";
 
 export const metadata: Metadata = {
   title: "Photography — Tanish Misra",
@@ -10,5 +11,18 @@ export default function PhotosLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <link
+        rel="preload"
+        href="/fonts/itc-american-typewriter-medium.woff2"
+        as="font"
+        type="font/woff2"
+        crossOrigin="anonymous"
+      />
+      <link rel="preload" href="/heart.png" as="image" />
+      <NYCAssetsWarmup />
+      {children}
+    </>
+  );
 }

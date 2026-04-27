@@ -19,6 +19,22 @@
   font-display: swap;
 }
 
+/*
+ * I ♥ NY (Milton Glaser, 1977): ITC American Typewriter Medium.
+ * Self-hosted: public/fonts/itc-american-typewriter-medium.woff2
+ * (woff2 first = same outlines everywhere; local() fallback if the file is missing).
+ */
+@font-face {
+  font-family: "ITC American Typewriter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url("/fonts/itc-american-typewriter-medium.woff2") format("woff2"),
+    local("American Typewriter Medium"),
+    local("American Typewriter");
+}
+
 :root {
   --fg: #e5e5e5;
   --muted: #b4b4b8;
@@ -253,189 +269,163 @@ body {
   100% { background-position: 0% center; }
 }
 
-/* ── New York skyline letter morph ── */
-/*
- * Wrapper-driven: data-morph on .nyc-skyline-stage drives every animated child.
- * The skyline silhouette is sculpted entirely by per-letter transforms — each
- * glyph stretches to a building height (scaleY 0.25–3.10) and a building width
- * (scaleX 0.72–1.38) with up to ±5° skewX, so the title's top edge reads as a
- * city profile of dramatic spires and squat low-rises. Profiles are randomized
- * per click, and one of four distinct skyline templates is picked each time.
- *
- * Colour philosophy mirrors the UK flag sweep: a single clean palette pulse
- * (white → taxi yellow → neon pink → twilight blue → warm gold) during morph-in,
- * then a hold-then-fade back to white timed exactly to each letter's retraction.
- *
- * --nyc-idx (set inline per letter) drives the morph-in transform stagger,
- * creating a Mexican-wave of buildings rising into place. --nyc-return-delay
- * (also inline, regenerated per click) drives the morph-out random-order
- * domino cascade and synchronises blur + colour + transform per letter.
- */
-.nyc-skyline-stage {
-  position: relative;
-  isolation: isolate;
-  /*
-   * padding-top reserves vertical headroom for the tallest spires (peak
-   * scaleY ≈ 3.1). With transform-origin at the baseline, a letter at
-   * scaleY 3.1 extends roughly 1.5× its cap-height upward beyond its
-   * idle box; 1.5em keeps even the tallest peaks clear of the back-link
-   * row above without pushing the idle title noticeably lower.
-   */
-  padding-top: 1.5em;
+
+/* ── I ♥ NY: title row — center by flex cross-axis; spacing only in em (h1 font-size) ── */
+.nyc-title-head {
+  line-height: 1;
+  contain: layout style;
 }
 
-.nyc-skyline-morph {
-  position: relative;
-  z-index: 1;
-  /*
-   * Base letter-spacing transition is the SMOOTH retraction curve. It lives on
-   * the base rule so it interpolates BOTH directions even after [data-morph]
-   * rules are dropped — without it, leaving skyline state would snap
-   * letter-spacing from 0.09em → 0 in a single frame (a sideways jolt right
-   * before the smooth scale-down). Morph-IN overrides this with a faster
-   * elastic curve via the [data-morph="skyline"] selector below. Duration
-   * matches the 1.2s morph-out transform so spacing and shape land together.
-   */
-  transition: letter-spacing 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+.nyc-title-head.nyc-title-head--typewriter {
+  font-family:
+    "ITC American Typewriter",
+    "American Typewriter",
+    ui-monospace,
+    "Courier New",
+    monospace;
+  font-weight: 500;
+  font-synthesis: none;
+  letter-spacing: 0;
+  line-height: 1;
 }
 
-/*
- * Per-letter transform is state-driven (transition, not keyframe). On morph-in
- * each letter rises to its profile's scaleY/scaleX/skewX with a staggered delay,
- * like buildings going up one after another. The base transition below is the
- * SMOOTH retraction curve, used for morph-out and any return to idle; morph-in
- * overrides it with a faster elastic-overshoot curve via the skyline selector.
- *
- * Colour during morph-in and morph-out is driven by CSS animations on the
- * skyline / returning state rules respectively (not by the base transition);
- * the base transition for colour exists only so any non-animated colour change
- * still interpolates rather than snapping.
- */
-.nyc-skyline-letter {
-  display: inline-block;
-  transform-origin: 50% 100%;
-  color: #ffffff;
-  transform: translateY(0) scaleY(1) scaleX(1) skewX(0deg);
-  will-change: transform, color, filter;
+/* ── I ♥ NY: clip + slide + opacity — rewind keeps the same motion shape but exits faster ── */
+.nyc-prefix {
+  display: inline-flex;
+  max-width: 0;
+  margin-inline-end: 0;
+  overflow: hidden;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 0;
+  vertical-align: middle;
+  transform: translateZ(0);
   transition:
-    color 1.2s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width 1.12s cubic-bezier(0.18, 0.95, 0.28, 1),
+    margin-inline-end 1.12s cubic-bezier(0.18, 0.95, 0.28, 1);
 }
 
-.nyc-skyline-stage[data-morph="skyline"] .nyc-skyline-letter {
-  transform:
-    translateY(-2px)
-    scaleY(var(--nyc-scale-y, 1))
-    scaleX(var(--nyc-scale-x, 1))
-    skewX(var(--nyc-skew, 0deg));
-  /*
-   * Energetic cascade morph-in: 0.6s per letter with a tight easeOutBack curve
-   * (y2 = 1.4 → ~7% overshoot). Each letter punches into place quickly and
-   * settles inside its own animation window rather than bobbing for the whole
-   * skyline phase, so the title doesn't read as "floating in the air" between
-   * the cascade ending and morph-out beginning. Inline transition-delay on
-   * each letter span staggers the rise at 110ms so consecutive letters pop on
-   * a clear time-delta. Colour is animation-driven below; the colour
-   * transition entry is unused while the keyframe is running.
-   */
+.nyc-prefix[data-phase="idle"] {
+  transition: none;
+}
+
+.nyc-prefix[data-phase="idle"] .nyc-prefix-inner {
+  transition: none;
+  opacity: 0;
+  /* Sits left of rest position so opening reads as push-in from the left with the clip */
+  transform: translateX(-14%);
+}
+
+.nyc-prefix-inner {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.2em;
+  opacity: 0;
+  transform: translateX(0);
   transition:
-    color 1.2s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.6s cubic-bezier(0.34, 1.4, 0.64, 1);
-  /*
-   * Two simultaneous morph-in animations:
-   *   1. nyc-letter-cycle — single 1.0s palette pulse, all letters in unison
-   *      (mirrors the UK sweep philosophy). Lands on warm gold #f5d280 and
-   *      holds there via `forwards` until the state flips to "returning".
-   *   2. nyc-letter-blur  — motion blur peaks ~18% in, clears by the end.
-   *      Staggered per letter at the same 110ms cadence as the transform so
-   *      blur, shape and pop timing stay locked together.
-   */
-  animation:
-    nyc-letter-cycle 1.0s ease-out 0s 1 forwards,
-    nyc-letter-blur 0.6s ease-out calc(var(--nyc-idx, 0) * 110ms) 1 forwards;
+    opacity 0.55s ease 0.04s,
+    transform 1.12s cubic-bezier(0.18, 0.95, 0.28, 1);
 }
 
-.nyc-skyline-stage[data-morph="skyline"] .nyc-skyline-morph {
-  /*
-   * Wider letter-spacing in skyline state so the fattest squat letters
-   * (scaleX up to 1.38) don't crowd into their neighbours, and so spires
-   * (scaleX as low as 0.72) read as visually distinct slivers rather than
-   * collapsing toward the next letter. Curve and duration match the per-letter
-   * transform morph-in (0.6s, y2 = 1.4) for a unified energetic feel; reverts
-   * to the smooth base transition automatically on morph-out.
-   */
-  letter-spacing: 0.09em;
-  transition: letter-spacing 0.6s cubic-bezier(0.34, 1.4, 0.64, 1);
+.nyc-prefix[data-phase="collapse"],
+.nyc-prefix[data-phase="hold"],
+.nyc-prefix[data-phase="burst"] {
+  max-width: 6em;
+  margin-inline-end: 0.2em;
 }
 
-/*
- * Morph-out ("returning") state: transform interpolates back to identity via
- * the smooth base transition (1.2s ease-out). Colour and blur are driven by
- * keyframe animations so they hold their vibrant value through the per-letter
- * domino delay rather than snapping.
- *
- * --nyc-return-delay is set inline per letter and regenerates on every click
- * as a shuffled, jittered cascade. The SAME delay drives:
- *   • The transform `transitionDelay` (set inline on each letter span)
- *   • The colour fade-to-white animation (below)
- *   • The motion-blur animation (below)
- * so for each letter, transform + blur + colour all start in lockstep and
- * resolve together exactly when its 1.2s retraction lands.
- *
- * Why `animation-fill-mode: both` on the colour fade: `both` = backwards +
- * forwards. Backwards fill makes the property hold the FIRST keyframe value
- * (#f5d280, the same warm gold the skyline cycle ended at) during the
- * animation-delay phase — so each letter's vibrancy is genuinely held while
- * it waits for its slot in the domino, with NO white flash between skyline
- * end and the fade actually beginning. Forwards fill keeps it at white once
- * the animation completes.
- */
-.nyc-skyline-stage[data-morph="returning"] .nyc-skyline-letter {
-  animation:
-    nyc-letter-fade-white 1.2s ease-out var(--nyc-return-delay, 0ms) 1 both,
-    nyc-letter-blur 1.2s ease-out var(--nyc-return-delay, 0ms) 1 forwards;
+.nyc-prefix[data-phase="collapse"] .nyc-prefix-inner,
+.nyc-prefix[data-phase="hold"] .nyc-prefix-inner,
+.nyc-prefix[data-phase="burst"] .nyc-prefix-inner {
+  opacity: 1;
+  transform: translateX(0);
 }
 
-/*
- * Morph-in colour pulse. Mirrors the UK sweep's clean 4-stop philosophy with
- * an NYC palette (taxi yellow → Times Square neon → twilight blue → warm
- * gold). All letters cycle in unison; ends on warm gold and holds there via
- * `forwards` fill until morph-out picks it up.
- */
-@keyframes nyc-letter-cycle {
-  0%   { color: #ffffff; }
-  25%  { color: #ffc845; }
-  50%  { color: #ff3d8b; }
-  75%  { color: #4a9eff; }
-  100% { color: #f5d280; }
+/* Rewind: reverse of arrival — clip closes while the inner slides and fades left */
+.nyc-prefix[data-phase="rewind"] {
+  max-width: 0;
+  margin-inline-end: 0;
+  overflow: hidden;
+  transition:
+    max-width 0.8s cubic-bezier(0.18, 0.95, 0.28, 1),
+    margin-inline-end 0.8s cubic-bezier(0.18, 0.95, 0.28, 1);
+}
+
+.nyc-prefix[data-phase="rewind"] .nyc-prefix-inner {
+  opacity: 0;
+  transform: translateX(-14%);
+  transition:
+    opacity 0.35s ease,
+    transform 0.8s cubic-bezier(0.18, 0.95, 0.28, 1);
+}
+
+/* Cap I: same face as “NY” when typewriter is active; inherits Inter before first click */
+.nyc-prefix-i {
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.nyc-prefix[data-phase="collapse"] .nyc-prefix-i,
+.nyc-prefix[data-phase="hold"] .nyc-prefix-i,
+.nyc-prefix[data-phase="burst"] .nyc-prefix-i {
+  font-family:
+    "ITC American Typewriter",
+    "American Typewriter",
+    ui-monospace,
+    "Courier New",
+    monospace;
+  font-weight: 500;
+  font-synthesis: none;
+  letter-spacing: 0;
 }
 
 /*
- * Morph-out colour. First 60% holds the vibrant warm gold so the colour stays
- * fully saturated through most of each letter's retraction (the user-visible
- * "punch"); last 40% smoothly fades to white so each letter resolves to its
- * identity colour exactly as its transform lands. With `animation-fill-mode:
- * both`, the 0% keyframe also fills the per-letter delay before the cascade
- * reaches that letter — so vibrancy never drops until the letter actually
- * starts retracting.
+ * Heart: ~15% under cap line (0.85em of heading) for better balance vs typewriter I.
  */
-@keyframes nyc-letter-fade-white {
-  0%   { color: #f5d280; }
-  60%  { color: #f5d280; }
-  100% { color: #ffffff; }
+.nyc-prefix-heart {
+  height: 0.85em;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 /*
- * Motion-blur curve for morph-in. Blur ramps in fast (so the very first frames
- * of scale change are already softened), peaks while the shape is mid-flight,
- * then eases back to crisp by the time the letter lands at its skyline target.
+ * Letter collapse: grid column 1fr → 0fr (interpolates smoothly; avoids
+ * max-width layout thrash that reads rough on first paint / interaction).
  */
-@keyframes nyc-letter-blur {
-  0%   { filter: blur(0); }
-  18%  { filter: blur(2.6px); }
-  55%  { filter: blur(1.4px); }
-  85%  { filter: blur(0.4px); }
-  100% { filter: blur(0); }
+.nyc-letter {
+  display: inline-grid;
+  vertical-align: middle;
+  contain: layout style;
+  grid-template-columns: minmax(0, 1fr);
+  will-change: grid-template-columns, opacity;
+  transition:
+    grid-template-columns 1.12s cubic-bezier(0.18, 0.95, 0.28, 1),
+    opacity 0.72s ease 0.08s;
+}
+
+.nyc-letter[data-collapse="true"] {
+  grid-template-columns: minmax(0, 0fr);
+  opacity: 0;
+}
+
+.nyc-letter-inner {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.nyc-letter[data-typewriter="true"] .nyc-letter-inner {
+  font-family:
+    "ITC American Typewriter",
+    "American Typewriter",
+    ui-monospace,
+    "Courier New",
+    monospace;
+  font-weight: 500;
+  font-synthesis: none;
+  letter-spacing: 0;
 }
 
 /* Reduced motion: disable all animation */
@@ -464,9 +454,14 @@ body {
     -webkit-text-fill-color: #ffffff;
   }
 
-  .nyc-skyline-morph,
-  .nyc-skyline-letter {
+  .nyc-prefix,
+  .nyc-prefix-inner,
+  .nyc-letter {
     transition: none !important;
-    animation: none !important;
+  }
+
+  .nyc-prefix[data-phase="rewind"] .nyc-prefix-inner {
+    transform: translateX(0);
+    opacity: 0;
   }
 }

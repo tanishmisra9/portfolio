@@ -251,7 +251,7 @@ export function ScatterName({
   const sequenceGenerationRef = useRef(0);
 
   useEffect(() => {
-    const el = new Audio("/pitstop.mp3");
+    const el = new Audio("/sfx/pitstop.mp3");
     el.preload = "auto";
     audioBufferRef.current = el;
     return () => {

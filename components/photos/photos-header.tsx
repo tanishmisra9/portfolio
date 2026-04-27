@@ -8,7 +8,7 @@ export function PhotosHeader() {
   const timersRef = useRef<number[]>([]);
 
   useEffect(() => {
-    const el = new Audio("/camera.mp3");
+    const el = new Audio("/sfx/camera.mp3");
     el.preload = "auto";
     audioRef.current = el;
     return () => {

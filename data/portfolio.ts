@@ -10,7 +10,7 @@ export const portfolio: PortfolioContent = {
       date: 'Incoming, Summer 2026',
       org: 'Toyota Connected Technologies',
       role: 'Incoming STEM Co-op Intern',
-      tags: ['AI/ML', 'Software Engineering'],
+      tags: ['Software Engineering', 'AI/ML', 'QA'],
     },
     {
       id: 'exp-02',
@@ -45,7 +45,7 @@ export const portfolio: PortfolioContent = {
       date: 'Mar 2024 - Jul 2025',
       org: 'Q Spark Group',
       role: 'Data, Analytics, and AI Intern',
-      tags: ['NER Models', 'Python', 'SQL', 'Pandas'],
+      tags: ['NER Models', 'spaCy', 'Python', 'SQL', 'Pandas'],
     },
   ],
   education: [

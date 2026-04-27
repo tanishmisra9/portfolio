@@ -20,8 +20,8 @@ const NAV: NavItem[] = [
   { href: "#skills", label: "SKILLS" },
   { href: "#certifications", label: "CERTIFICATIONS" },
   { href: "#projects", label: "PROJECTS" },
-  { href: "/photos", label: "PHOTOS" },
   { href: "#about", label: "ABOUT" },
+  { href: "/photos", label: "PHOTOS" },
 ];
 
 /** DOM order — must match home page sections for scroll-spy. */
