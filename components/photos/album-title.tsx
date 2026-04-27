@@ -130,9 +130,12 @@ export function AlbumTitle({ title, slug }: Props) {
   );
 
   const isLongSingleWordTitle = !title.includes(" ") && title.length >= 10;
+  const isSuperMaxTitle = slug === "super-max";
   const titleSizeClasses = isLongSingleWordTitle
     ? "text-[clamp(3.35rem,12.4vw,5.4rem)] sm:text-[clamp(3.8rem,12vw,6rem)]"
-    : "text-[clamp(4.5rem,15vw,6rem)]";
+    : isSuperMaxTitle
+      ? "text-[clamp(3.15rem,11.8vw,5.4rem)] sm:text-[clamp(3.8rem,12vw,6rem)]"
+      : "text-[clamp(4.5rem,15vw,6rem)]";
   const baseClasses =
     `select-none font-display ${titleSizeClasses} font-extrabold uppercase tracking-tighter leading-[1.08] md:text-8xl`;
 
