@@ -40,7 +40,7 @@ export const SCATTER_NAME_ENTRANCE_BASE_MS = 39;
 const LAUNCH_DURATION = 0.24;
 const LAUNCH_DISTANCE = 1800;
 /** Peak motion blur (px) during pit launch / return */
-const BLUR_MAX = 25;
+const BLUR_MAX = 55;
 /** Wait after SFX starts before snap/spring so the clip’s impact lines up with the letter settling */
 const WHEELGUN_LEAD_MS = 175;
 

@@ -53,6 +53,9 @@ Thumbs.db
 # Cursor (local workspace; optional rules can be committed explicitly)
 .cursor/
 
+# Claude
+.claude/
+
 # Turbo
 .turbo
 
