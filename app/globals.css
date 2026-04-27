@@ -273,23 +273,23 @@ body {
 /* ── I ♥ NY: title row — center by flex cross-axis; spacing only in em (h1 font-size) ── */
 .nyc-title-head {
   line-height: 1;
-  contain: layout style;
+  contain: layout paint style;
+  isolation: isolate;
 }
 
-/* ── I ♥ NY: clip + slide + opacity — arrival transitions into a permanent held state ── */
 .nyc-prefix {
   display: inline-flex;
+  align-items: center;
   max-width: 0;
   margin-inline-end: 0;
   overflow: hidden;
-  align-items: center;
   flex-shrink: 0;
   min-width: 0;
   vertical-align: middle;
   transform: translateZ(0);
   transition:
-    max-width 1.12s cubic-bezier(0.18, 0.95, 0.28, 1),
-    margin-inline-end 1.12s cubic-bezier(0.18, 0.95, 0.28, 1);
+    max-width 1s cubic-bezier(0.18, 0.95, 0.28, 1),
+    margin-inline-end 1s cubic-bezier(0.18, 0.95, 0.28, 1);
 }
 
 .nyc-prefix[data-phase="idle"] {
@@ -299,7 +299,6 @@ body {
 .nyc-prefix[data-phase="idle"] .nyc-prefix-inner {
   transition: none;
   opacity: 0;
-  /* Sits left of rest position so opening reads as push-in from the left with the clip */
   transform: translateX(-14%);
 }
 
@@ -312,7 +311,7 @@ body {
   transform: translateX(0);
   transition:
     opacity 0.55s ease 0.04s,
-    transform 1.12s cubic-bezier(0.18, 0.95, 0.28, 1);
+    transform 1s cubic-bezier(0.18, 0.95, 0.28, 1);
 }
 
 .nyc-prefix[data-phase="collapse"],
@@ -327,7 +326,6 @@ body {
   transform: translateX(0);
 }
 
-/* Cap I: same face as “NY” when typewriter is active; inherits Inter before first click */
 .nyc-prefix-i {
   line-height: 1;
   flex-shrink: 0;
@@ -360,19 +358,14 @@ body {
   -webkit-user-drag: none;
 }
 
-/*
- * Letter collapse: grid column 1fr → 0fr (interpolates smoothly; avoids
- * max-width layout thrash that reads rough on first paint / interaction).
- */
 .nyc-letter {
   display: inline-grid;
   vertical-align: middle;
-  contain: layout style;
+  contain: layout paint style;
   grid-template-columns: minmax(0, 1fr);
-  will-change: grid-template-columns, opacity;
   transition:
-    grid-template-columns 1.12s cubic-bezier(0.18, 0.95, 0.28, 1),
-    opacity 0.72s ease 0.08s;
+    grid-template-columns 1s cubic-bezier(0.18, 0.95, 0.28, 1),
+    opacity 0.56s ease 0.06s;
 }
 
 .nyc-letter[data-collapse="true"] {

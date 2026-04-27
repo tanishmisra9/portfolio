@@ -130,7 +130,7 @@ export function AlbumTitle({ title, slug }: Props) {
   );
 
   const baseClasses =
-    "select-none font-display text-6xl font-extrabold uppercase tracking-tighter leading-[1.15] md:text-8xl";
+    "select-none font-display text-[clamp(4.5rem,15vw,6rem)] font-extrabold uppercase tracking-tighter leading-[1.08] md:text-8xl";
 
   if (!isSuperMax || reduceMotion) {
     if (isNYC && !reduceMotion) {
