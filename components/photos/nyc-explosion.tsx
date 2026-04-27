@@ -58,7 +58,7 @@ export function NYCExplosion({ active, onComplete, heartX, heartY }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = 1;
     const W = window.innerWidth;
     const H = window.innerHeight;
 
@@ -74,7 +74,8 @@ export function NYCExplosion({ active, onComplete, heartX, heartY }: Props) {
     const ctx = canvas.getContext("2d")!;
     ctx.scale(dpr, dpr);
 
-    const count = Math.floor(rng(140, 201));
+    const isMobile = W < 768;
+    const count = isMobile ? Math.floor(rng(30, 51)) : Math.floor(rng(70, 101));
     const sparks: Spark[] = Array.from({ length: count }, () => {
       const angle = rng(0, Math.PI * 2);
       const mag = rng(300, 800);
@@ -100,6 +101,26 @@ export function NYCExplosion({ active, onComplete, heartX, heartY }: Props) {
       if (startTime === 0) {
         startTime = timestamp;
         lastTimestamp = timestamp;
+
+        ctx.clearRect(0, 0, W, H);
+        const grad = ctx.createRadialGradient(
+          heartX,
+          heartY,
+          0,
+          heartX,
+          heartY,
+          FLASH_RADIUS,
+        );
+        grad.addColorStop(0, "rgba(255,255,255,0.5)");
+        grad.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.beginPath();
+        ctx.arc(heartX, heartY, FLASH_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        flashFrames = 1;
+
+        rafRef.current = requestAnimationFrame(tick);
+        return;
       }
       const elapsed = (timestamp - startTime) / 1000;
       const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.033);
@@ -160,23 +181,9 @@ export function NYCExplosion({ active, onComplete, heartX, heartY }: Props) {
         }
       }
 
-      ctx.globalCompositeOperation = "lighter";
-
       for (const [color, group] of sparksByColor) {
         const avgOpacity =
           group.reduce((total, spark) => total + spark.opacity, 0) / group.length;
-        const avgRadius =
-          group.reduce((total, spark) => total + spark.radius, 0) / group.length;
-
-        ctx.beginPath();
-        for (const spark of group) {
-          ctx.moveTo(spark.prevX, spark.prevY);
-          ctx.lineTo(spark.x, spark.y);
-        }
-        ctx.strokeStyle = color;
-        ctx.globalAlpha = avgOpacity * 0.4;
-        ctx.lineWidth = avgRadius * 0.8;
-        ctx.stroke();
 
         ctx.beginPath();
         for (const spark of group) {
@@ -188,7 +195,6 @@ export function NYCExplosion({ active, onComplete, heartX, heartY }: Props) {
         ctx.fill();
       }
 
-      ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = 1;
 
       const washDone = elapsed >= 1.8;

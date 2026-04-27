@@ -270,115 +270,23 @@ body {
 }
 
 
-/* ── I ♥ NY: title row — center by flex cross-axis; spacing only in em (h1 font-size) ── */
-.nyc-title-head {
+/* ── I ♥ NY crossfade ── */
+.nyc-title-container {
   line-height: 1;
-  contain: layout paint style;
-  isolation: isolate;
 }
 
-.nyc-prefix {
-  display: inline-flex;
-  align-items: center;
-  max-width: 0;
-  margin-inline-end: 0;
-  overflow: hidden;
-  flex-shrink: 0;
-  min-width: 0;
-  vertical-align: middle;
-  transform: translateZ(0);
+.nyc-title-layer {
   transition:
-    max-width 1s cubic-bezier(0.18, 0.95, 0.28, 1),
-    margin-inline-end 1s cubic-bezier(0.18, 0.95, 0.28, 1);
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+  transform-origin: center;
 }
 
-.nyc-prefix[data-phase="idle"] {
-  transition: none;
+.nyc-ilove-text {
+  white-space: nowrap;
 }
 
-.nyc-prefix[data-phase="idle"] .nyc-prefix-inner {
-  transition: none;
-  opacity: 0;
-  transform: translateX(-14%);
-}
-
-.nyc-prefix-inner {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  gap: 0.2em;
-  opacity: 0;
-  transform: translateX(0);
-  transition:
-    opacity 0.55s ease 0.04s,
-    transform 1s cubic-bezier(0.18, 0.95, 0.28, 1);
-}
-
-.nyc-prefix[data-phase="collapse"],
-.nyc-prefix[data-phase="hold"] {
-  max-width: 6em;
-  margin-inline-end: 0.2em;
-}
-
-.nyc-prefix[data-phase="collapse"] .nyc-prefix-inner,
-.nyc-prefix[data-phase="hold"] .nyc-prefix-inner {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.nyc-prefix-i {
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.nyc-prefix[data-phase="collapse"] .nyc-prefix-i,
-.nyc-prefix[data-phase="hold"] .nyc-prefix-i {
-  font-family:
-    "ITC American Typewriter",
-    "American Typewriter",
-    ui-monospace,
-    "Courier New",
-    monospace;
-  font-weight: 500;
-  font-synthesis: none;
-  letter-spacing: 0;
-}
-
-/*
- * Heart: ~15% under cap line (0.85em of heading) for better balance vs typewriter I.
- */
-.nyc-prefix-heart {
-  height: 0.85em;
-  width: auto;
-  display: block;
-  flex-shrink: 0;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-.nyc-letter {
-  display: inline-grid;
-  vertical-align: middle;
-  contain: layout paint style;
-  grid-template-columns: minmax(0, 1fr);
-  transition:
-    grid-template-columns 1s cubic-bezier(0.18, 0.95, 0.28, 1),
-    opacity 0.56s ease 0.06s;
-}
-
-.nyc-letter[data-collapse="true"] {
-  grid-template-columns: minmax(0, 0fr);
-  opacity: 0;
-}
-
-.nyc-letter-inner {
-  overflow: hidden;
-  min-width: 0;
-}
-
-.nyc-letter[data-typewriter="true"] .nyc-letter-inner {
+.nyc-typewriter-text {
   font-family:
     "ITC American Typewriter",
     "American Typewriter",
@@ -416,9 +324,8 @@ body {
     -webkit-text-fill-color: #ffffff;
   }
 
-  .nyc-prefix,
-  .nyc-prefix-inner,
-  .nyc-letter {
+  .nyc-title-layer {
     transition: none !important;
+    transform: none !important;
   }
 }
