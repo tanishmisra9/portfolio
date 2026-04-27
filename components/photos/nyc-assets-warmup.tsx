@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 let warmNycAssetsPromise: Promise<void> | null = null;
 
@@ -48,7 +48,7 @@ export function warmNycAssets(): Promise<void> {
 }
 
 export function NYCAssetsWarmup() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     void warmNycAssets();
   }, []);
 

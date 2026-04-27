@@ -12,7 +12,7 @@ import {
 import { warmNycAssets } from "@/components/photos/nyc-assets-warmup";
 import { NYCExplosion } from "@/components/photos/nyc-explosion";
 
-type Phase = "idle" | "collapse" | "hold" | "burst" | "rewind";
+type Phase = "idle" | "collapse" | "hold";
 
 type Props = {
   baseClasses: string;
@@ -22,20 +22,24 @@ const LETTERS = ["N", "E", "W", "\u00A0", "Y", "O", "R", "K"];
 const COLLAPSE_INDICES = new Set([1, 2, 3, 5, 6, 7]);
 const NYC_HOLD_MS = 700;
 const NYC_BURST_MS = 1100;
+const NYC_EXPLOSION_COOLDOWN_MS = 1000;
 const TYPEWRITER_STAGGER_MS = 60;
-
-/** Prefix clip + letter grid — must match CSS transition duration for rewind → idle. */
-const NYC_REWIND_MS = 850;
 
 export function NYCTitle({ baseClasses }: Props) {
   const [phase, setPhase] = useState<Phase>("idle");
-  const [typewriterLocked, setTypewriterLocked] = useState(false);
+  const [explosionActive, setExplosionActive] = useState(false);
+  const [explosionRunId, setExplosionRunId] = useState(0);
   const heartRef = useRef<HTMLImageElement>(null);
   const prefixRef = useRef<HTMLSpanElement>(null);
   const heartPosRef = useRef({ x: 0, y: 0 });
+  const assetsWarmedRef = useRef(false);
+  const titlePrimedRef = useRef(false);
+  const warmAndPrimePromiseRef = useRef<Promise<void> | null>(null);
+  const unmountedRef = useRef(false);
   const clickFrameRef = useRef<number | null>(null);
   const primeFrameRef = useRef<number | null>(null);
-  const pendingTypewriterLockRef = useRef(false);
+  const hasTriggeredExplosionRef = useRef(false);
+  const nextExplosionAtRef = useRef(0);
   const phaseRef = useRef<Phase>("idle");
   const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const phaseTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -59,75 +63,110 @@ export function NYCTitle({ baseClasses }: Props) {
     phaseRef.current = phase;
   }, [phase]);
 
-  useLayoutEffect(() => {
-    let cancelled = false;
+  const primeTitleLayout = useCallback(() => {
+    if (
+      unmountedRef.current ||
+      titlePrimedRef.current ||
+      phaseRef.current !== "idle" ||
+      clickFrameRef.current !== null ||
+      phaseTimeoutsRef.current.length > 0
+    ) {
+      return false;
+    }
 
-    const primeTitleLayout = () => {
-      if (
-        cancelled ||
-        phaseRef.current !== "idle" ||
-        clickFrameRef.current !== null ||
-        phaseTimeoutsRef.current.length > 0
-      ) {
-        return;
-      }
+    const prefixEl = prefixRef.current;
+    const innerEl = prefixEl?.querySelector<HTMLElement>(".nyc-prefix-inner");
+    const letters = letterRefs.current;
 
-      const prefixEl = prefixRef.current;
-      const innerEl = prefixEl?.querySelector<HTMLElement>(".nyc-prefix-inner");
-      const letters = letterRefs.current;
+    if (
+      !prefixEl ||
+      letters.length !== LETTERS.length ||
+      letters.some((el) => el === null)
+    ) {
+      return false;
+    }
 
-      if (!prefixEl || letters.length === 0) return;
-
-      prefixEl.style.transition = "none";
-      if (innerEl) {
-        innerEl.style.transition = "none";
-      }
-      letters.forEach((el) => {
-        if (el) {
-          el.style.transition = "none";
-        }
-      });
-
-      prefixEl.dataset.phase = "collapse";
-      letters.forEach((el, i) => {
-        if (!el) return;
-        el.dataset.collapse = COLLAPSE_INDICES.has(i) ? "true" : "false";
-        el.dataset.typewriter = "true";
-      });
-      void prefixEl.offsetHeight;
-
-      prefixEl.dataset.phase = "idle";
-      letters.forEach((el) => {
-        if (!el) return;
-        el.dataset.collapse = "false";
-        el.dataset.typewriter = "false";
-      });
-      void prefixEl.offsetHeight;
-
-      primeFrameRef.current = requestAnimationFrame(() => {
-        primeFrameRef.current = null;
-        if (cancelled) return;
-
-        prefixEl.style.transition = "";
-        if (innerEl) {
-          innerEl.style.transition = "";
-        }
-        letters.forEach((el) => {
-          if (el) {
-            el.style.transition = "";
-          }
-        });
-      });
-    };
-
-    void warmNycAssets().then(() => {
-      if (!cancelled) {
-        primeTitleLayout();
+    prefixEl.style.transition = "none";
+    if (innerEl) {
+      innerEl.style.transition = "none";
+    }
+    letters.forEach((el) => {
+      if (el) {
+        el.style.transition = "none";
       }
     });
 
+    prefixEl.dataset.phase = "collapse";
+    letters.forEach((el, i) => {
+      if (!el) return;
+      el.dataset.collapse = COLLAPSE_INDICES.has(i) ? "true" : "false";
+      el.dataset.typewriter = "true";
+    });
+    void prefixEl.offsetHeight;
+
+    prefixEl.dataset.phase = "idle";
+    letters.forEach((el) => {
+      if (!el) return;
+      el.dataset.collapse = "false";
+      el.dataset.typewriter = "false";
+    });
+    void prefixEl.offsetHeight;
+
+    titlePrimedRef.current = true;
+    if (primeFrameRef.current !== null) {
+      cancelAnimationFrame(primeFrameRef.current);
+    }
+    primeFrameRef.current = requestAnimationFrame(() => {
+      primeFrameRef.current = null;
+      if (unmountedRef.current) return;
+
+      prefixEl.style.transition = "";
+      if (innerEl) {
+        innerEl.style.transition = "";
+      }
+      letters.forEach((el) => {
+        if (el) {
+          el.style.transition = "";
+        }
+      });
+    });
+
+    return true;
+  }, []);
+
+  const ensureWarmAndPrime = useCallback(() => {
+    if (titlePrimedRef.current || unmountedRef.current) {
+      return Promise.resolve();
+    }
+
+    if (assetsWarmedRef.current) {
+      primeTitleLayout();
+      return Promise.resolve();
+    }
+
+    if (warmAndPrimePromiseRef.current) {
+      return warmAndPrimePromiseRef.current;
+    }
+
+    const warmAndPrimePromise = warmNycAssets()
+      .then(() => {
+        assetsWarmedRef.current = true;
+        primeTitleLayout();
+      })
+      .finally(() => {
+        warmAndPrimePromiseRef.current = null;
+      });
+
+    warmAndPrimePromiseRef.current = warmAndPrimePromise;
+    return warmAndPrimePromise;
+  }, [primeTitleLayout]);
+
+  useLayoutEffect(() => {
+    unmountedRef.current = false;
+    void ensureWarmAndPrime();
+
     return () => {
-      cancelled = true;
+      unmountedRef.current = true;
       if (clickFrameRef.current !== null) {
         cancelAnimationFrame(clickFrameRef.current);
         clickFrameRef.current = null;
@@ -138,12 +177,10 @@ export function NYCTitle({ baseClasses }: Props) {
       }
       clearPhaseTimeouts();
       clearTypewriterTimeouts();
-      pendingTypewriterLockRef.current = false;
     };
-  }, [clearPhaseTimeouts, clearTypewriterTimeouts]);
+  }, [clearPhaseTimeouts, clearTypewriterTimeouts, ensureWarmAndPrime]);
 
-  const isCollapsing =
-    phase === "collapse" || phase === "hold" || phase === "burst";
+  const isCollapsing = phase === "collapse" || phase === "hold";
 
   useEffect(() => {
     letterRefs.current.forEach((el, i) => {
@@ -171,8 +208,7 @@ export function NYCTitle({ baseClasses }: Props) {
     clearTypewriterTimeouts();
     letterRefs.current.forEach((el) => {
       if (!el) return;
-      el.dataset.typewriter =
-        phase === "hold" || phase === "burst" ? "true" : "false";
+      el.dataset.typewriter = phase === "hold" ? "true" : "false";
     });
   }, [clearTypewriterTimeouts, isCollapsing, phase]);
 
@@ -195,48 +231,74 @@ export function NYCTitle({ baseClasses }: Props) {
     [],
   );
 
-  /** After explosion: reverse arrival — prefix closes + letters expand together (CSS). */
-  const beginRewind = useCallback(() => {
-    clearPhaseTimeouts();
-    if (pendingTypewriterLockRef.current) {
-      setTypewriterLocked(true);
-      pendingTypewriterLockRef.current = false;
+  const triggerExplosion = useCallback(() => {
+    // Capture heart position right before launching the explosion.
+    if (heartRef.current) {
+      const rect = heartRef.current.getBoundingClientRect();
+      heartPosRef.current = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
     }
-    setPhase("rewind");
-    schedPhase(() => setPhase("idle"), NYC_REWIND_MS);
-  }, [clearPhaseTimeouts, schedPhase]);
+    hasTriggeredExplosionRef.current = true;
+    nextExplosionAtRef.current = Date.now() + NYC_EXPLOSION_COOLDOWN_MS;
+    setExplosionRunId((runId) => runId + 1);
+    setExplosionActive(true);
+  }, []);
+
+  const handlePointerDown = useCallback(() => {
+    void ensureWarmAndPrime();
+  }, [ensureWarmAndPrime]);
 
   const handleClick = useCallback(() => {
-    if (phase !== "idle" || clickFrameRef.current !== null) return;
+    if (clickFrameRef.current !== null) {
+      return;
+    }
+
+    if (phase === "hold" && hasTriggeredExplosionRef.current) {
+      if (Date.now() < nextExplosionAtRef.current) {
+        return;
+      }
+      triggerExplosion();
+      return;
+    }
+
+    if (explosionActive) {
+      return;
+    }
+
+    if (phase !== "idle") {
+      return;
+    }
+
+    if (assetsWarmedRef.current && !titlePrimedRef.current) {
+      primeTitleLayout();
+    }
 
     clearPhaseTimeouts();
     clearTypewriterTimeouts();
-    if (!typewriterLocked) {
-      pendingTypewriterLockRef.current = true;
-    }
     clickFrameRef.current = requestAnimationFrame(() => {
       clickFrameRef.current = null;
       setPhase("collapse");
       schedPhase(() => setPhase("hold"), NYC_HOLD_MS);
-      schedPhase(() => {
-        // Capture heart position before it unmounts when burst phase removes it
-        if (heartRef.current) {
-          const rect = heartRef.current.getBoundingClientRect();
-          heartPosRef.current = {
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2,
-          };
-        }
-        setPhase("burst");
-      }, NYC_BURST_MS);
+      schedPhase(triggerExplosion, NYC_BURST_MS);
     });
-  }, [clearPhaseTimeouts, clearTypewriterTimeouts, phase, schedPhase, typewriterLocked]);
+  }, [
+    explosionActive,
+    clearPhaseTimeouts,
+    clearTypewriterTimeouts,
+    phase,
+    primeTitleLayout,
+    schedPhase,
+    triggerExplosion,
+  ]);
 
   return (
     <>
       <h1
+        onPointerDown={handlePointerDown}
         onClick={handleClick}
-        className={`${baseClasses} nyc-title-head inline-flex flex-nowrap items-center justify-center py-2 cursor-pointer text-white whitespace-nowrap ${typewriterLocked ? "nyc-title-head--typewriter" : ""}`}
+        className={`${baseClasses} nyc-title-head inline-flex flex-nowrap items-center justify-center py-2 cursor-pointer text-white whitespace-nowrap`}
       >
         {/* "I ♥" prefix — expands from zero width and fades in via CSS transitions */}
         <span ref={prefixRef} className="nyc-prefix" data-phase={phase}>
@@ -251,6 +313,7 @@ export function NYCTitle({ baseClasses }: Props) {
               aria-hidden
               className="nyc-prefix-heart"
               decoding="async"
+              draggable={false}
               fetchPriority="high"
             />
           </span>
@@ -260,10 +323,13 @@ export function NYCTitle({ baseClasses }: Props) {
         {letterElements}
       </h1>
 
-      {phase === "burst" && (
+      {explosionActive && (
         <NYCExplosion
-          active={true}
-          onComplete={beginRewind}
+          key={explosionRunId}
+          active={explosionActive}
+          onComplete={() => {
+            setExplosionActive(false);
+          }}
           heartX={heartPosRef.current.x}
           heartY={heartPosRef.current.y}
         />

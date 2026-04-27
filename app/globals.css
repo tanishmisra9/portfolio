@@ -276,20 +276,7 @@ body {
   contain: layout style;
 }
 
-.nyc-title-head.nyc-title-head--typewriter {
-  font-family:
-    "ITC American Typewriter",
-    "American Typewriter",
-    ui-monospace,
-    "Courier New",
-    monospace;
-  font-weight: 500;
-  font-synthesis: none;
-  letter-spacing: 0;
-  line-height: 1;
-}
-
-/* ── I ♥ NY: clip + slide + opacity — rewind keeps the same motion shape but exits faster ── */
+/* ── I ♥ NY: clip + slide + opacity — arrival transitions into a permanent held state ── */
 .nyc-prefix {
   display: inline-flex;
   max-width: 0;
@@ -329,35 +316,15 @@ body {
 }
 
 .nyc-prefix[data-phase="collapse"],
-.nyc-prefix[data-phase="hold"],
-.nyc-prefix[data-phase="burst"] {
+.nyc-prefix[data-phase="hold"] {
   max-width: 6em;
   margin-inline-end: 0.2em;
 }
 
 .nyc-prefix[data-phase="collapse"] .nyc-prefix-inner,
-.nyc-prefix[data-phase="hold"] .nyc-prefix-inner,
-.nyc-prefix[data-phase="burst"] .nyc-prefix-inner {
+.nyc-prefix[data-phase="hold"] .nyc-prefix-inner {
   opacity: 1;
   transform: translateX(0);
-}
-
-/* Rewind: reverse of arrival — clip closes while the inner slides and fades left */
-.nyc-prefix[data-phase="rewind"] {
-  max-width: 0;
-  margin-inline-end: 0;
-  overflow: hidden;
-  transition:
-    max-width 0.8s cubic-bezier(0.18, 0.95, 0.28, 1),
-    margin-inline-end 0.8s cubic-bezier(0.18, 0.95, 0.28, 1);
-}
-
-.nyc-prefix[data-phase="rewind"] .nyc-prefix-inner {
-  opacity: 0;
-  transform: translateX(-14%);
-  transition:
-    opacity 0.35s ease,
-    transform 0.8s cubic-bezier(0.18, 0.95, 0.28, 1);
 }
 
 /* Cap I: same face as “NY” when typewriter is active; inherits Inter before first click */
@@ -367,8 +334,7 @@ body {
 }
 
 .nyc-prefix[data-phase="collapse"] .nyc-prefix-i,
-.nyc-prefix[data-phase="hold"] .nyc-prefix-i,
-.nyc-prefix[data-phase="burst"] .nyc-prefix-i {
+.nyc-prefix[data-phase="hold"] .nyc-prefix-i {
   font-family:
     "ITC American Typewriter",
     "American Typewriter",
@@ -389,6 +355,9 @@ body {
   display: block;
   flex-shrink: 0;
   object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 /*
@@ -458,10 +427,5 @@ body {
   .nyc-prefix-inner,
   .nyc-letter {
     transition: none !important;
-  }
-
-  .nyc-prefix[data-phase="rewind"] .nyc-prefix-inner {
-    transform: translateX(0);
-    opacity: 0;
   }
 }
