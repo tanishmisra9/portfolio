@@ -129,8 +129,12 @@ export function AlbumTitle({ title, slug }: Props) {
     [phase],
   );
 
+  const isLongSingleWordTitle = !title.includes(" ") && title.length >= 10;
+  const titleSizeClasses = isLongSingleWordTitle
+    ? "text-[clamp(3.35rem,12.4vw,5.4rem)] sm:text-[clamp(3.8rem,12vw,6rem)]"
+    : "text-[clamp(4.5rem,15vw,6rem)]";
   const baseClasses =
-    "select-none font-display text-[clamp(4.5rem,15vw,6rem)] font-extrabold uppercase tracking-tighter leading-[1.08] md:text-8xl";
+    `select-none font-display ${titleSizeClasses} font-extrabold uppercase tracking-tighter leading-[1.08] md:text-8xl`;
 
   if (!isSuperMax || reduceMotion) {
     if (isNYC && !reduceMotion) {
@@ -149,9 +153,11 @@ export function AlbumTitle({ title, slug }: Props) {
     const heading = (
       <h1
         ref={isNewYear ? titleRef : undefined}
-        className={`${baseClasses} py-2 ${
+        className={`${baseClasses} mx-auto max-w-full py-2 ${
           isInteractive ? "cursor-pointer" : "cursor-default"
-        } ${ukFlying ? "uk-flag-fly" : "text-white"}`}
+        } ${isLongSingleWordTitle ? "[overflow-wrap:anywhere]" : ""} ${
+          ukFlying ? "uk-flag-fly" : "text-white"
+        }`}
         onClick={handleClick}
       >
         {title}
