@@ -15,12 +15,12 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       options={{
         autoRaf: true,
         smoothWheel: true,
-        lerp: 0.23,
-        duration: 0.35,
+        lerp: 0.3,
+        duration: 0.28,
         easing: easeOutCubic,
-        wheelMultiplier: 1.3,
+        wheelMultiplier: 1.35,
         anchors: {
-          duration: 0.4,
+          duration: 0.32,
           easing: easeOutCubic,
         },
       }}
