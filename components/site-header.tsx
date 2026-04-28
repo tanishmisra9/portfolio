@@ -110,7 +110,7 @@ export function SiteHeader() {
 
   const updateActiveSection = useCallback(() => {
     if (pathname !== "/") {
-      setActiveSectionId((prev) => (prev !== null ? null : prev));
+      setActiveSectionId(null);
       return;
     }
     const next = computeActiveSectionId();
