@@ -13,6 +13,11 @@ function iconFor(label: string) {
   const key = label.toLowerCase();
   if (key.includes('github')) return Github;
   if (key.includes('linkedin')) return Linkedin;
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(
+      `[iconFor] Unrecognized social label: "${label}". Falling back to Mail icon.`,
+    );
+  }
   return Mail;
 }
 
