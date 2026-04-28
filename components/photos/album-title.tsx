@@ -32,12 +32,9 @@ export function AlbumTitle({ title, slug }: Props) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  /** Bumps on flyby start so a late pointerdown prime cannot pause real playback. */
-  const audioGenerationRef = useRef(0);
 
   useEffect(() => {
     if (!interactiveSuperMax) return;
-    void fetch("/sfx/passby.mp3").catch(() => {});
     const el = new Audio("/sfx/passby.mp3");
     el.preload = "auto";
     audioRef.current = el;
@@ -60,11 +57,11 @@ export function AlbumTitle({ title, slug }: Props) {
   }, []);
 
   const playPassby = useCallback(() => {
-    const a = audioRef.current;
-    if (!a) return;
-    a.volume = 0.595;
-    a.currentTime = 0;
-    void a.play().catch(() => {});
+    const src = audioRef.current;
+    if (!src) return;
+    const sfx = src.cloneNode() as HTMLAudioElement;
+    sfx.volume = 0.595;
+    void sfx.play().catch(() => {});
   }, []);
 
   const startFog = useCallback(() => {
@@ -95,8 +92,6 @@ export function AlbumTitle({ title, slug }: Props) {
     timeoutsRef.current.forEach(clearTimeout);
     timeoutsRef.current = [];
 
-    audioGenerationRef.current += 1;
-    /* Same moment as wipe: avoids pointerdown→click gap where decode makes SFX feel late. */
     playPassby();
 
     setPhase("wipe");
@@ -105,29 +100,6 @@ export function AlbumTitle({ title, slug }: Props) {
     schedule(() => setPhase("settle"), 2200);
     schedule(() => setPhase("idle"), 2800);
   }, [interactiveSuperMax, phase, playPassby, schedule]);
-
-  const onPointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      if (e.button !== 0 || phase !== "idle") return;
-      const a = audioRef.current;
-      if (!a) return;
-      const gen = audioGenerationRef.current;
-      const prev = a.volume;
-      a.volume = 0;
-      void a
-        .play()
-        .then(() => {
-          if (gen !== audioGenerationRef.current) return;
-          a.pause();
-          a.currentTime = 0;
-          a.volume = prev;
-        })
-        .catch(() => {
-          a.volume = prev;
-        });
-    },
-    [phase],
-  );
 
   const isLongSingleWordTitle = !title.includes(" ") && title.length >= 10;
   const isSuperMaxTitle = slug === "super-max";
@@ -198,7 +170,6 @@ export function AlbumTitle({ title, slug }: Props) {
       {/* React 19 hoists this <link> into <head>; only loaded on the Super Max route */}
       <link rel="preload" href="/sfx/passby.mp3" as="audio" type="audio/mpeg" />
       <h1
-        onPointerDown={onPointerDown}
         onClick={startFlyby}
         className={`${baseClasses} supermax-title relative cursor-pointer whitespace-nowrap`}
         data-phase={phase}
