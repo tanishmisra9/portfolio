@@ -13,6 +13,7 @@ function iconFor(label: string) {
   const key = label.toLowerCase();
   if (key.includes('github')) return Github;
   if (key.includes('linkedin')) return Linkedin;
+  if (key.includes('email')) return Mail;
   if (process.env.NODE_ENV === 'development') {
     console.warn(
       `[iconFor] Unrecognized social label: "${label}". Falling back to Mail icon.`,
@@ -35,7 +36,7 @@ function escapeRegExp(value: string) {
 
 /** Shared typography for both bio blocks; color applied per paragraph. (~8% smaller than 2xl/3xl scale.) */
 const bioBodyClass =
-  "text-[1.38rem] leading-[1.486] md:text-[1.725rem] md:leading-[1.53]";
+  "text-[1.38rem] font-[200] subpixel-antialiased leading-[1.486] md:text-[1.725rem] md:leading-[1.53]";
 
 function renderHighlightedParagraph(paragraph: string): ReactNode {
   const pattern = new RegExp(`(${HIGHLIGHT_TERMS.map(escapeRegExp).join('|')})`, 'g');
