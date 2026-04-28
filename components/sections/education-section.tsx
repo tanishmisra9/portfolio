@@ -1,10 +1,11 @@
 import { ScrollReveal } from '@/components/scroll-reveal';
+import { PILL_CLASSES } from '@/components/ui/class-constants';
 import type { EducationEntry } from '@/types/content';
 
 type Props = { entries: EducationEntry[] };
 
 const orgPillClassName =
-  'rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-400 select-none cursor-default';
+  `${PILL_CLASSES} font-mono text-[10px] uppercase tracking-widest`;
 
 function CoursePill({ label }: { label: string }) {
   return (

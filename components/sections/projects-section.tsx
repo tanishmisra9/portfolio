@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ScrollReveal } from '@/components/scroll-reveal';
+import { PILL_CLASSES } from '@/components/ui/class-constants';
 import type { ProjectEntry } from '@/types/content';
 import { Github } from 'lucide-react';
 
@@ -16,7 +17,9 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
   return (
     <article className="relative flex h-full min-h-[15.5rem] flex-col rounded-md border border-white/10 bg-black/40 backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-neutral-400 sm:min-h-[16.75rem]">
       {pillLabel ? (
-        <span className="inline-flex self-start rounded-full border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-neutral-400">
+        <span
+          className={`${PILL_CLASSES} inline-flex self-start font-mono text-[10px] font-semibold uppercase tracking-widest`}
+        >
           {pillLabel}
         </span>
       ) : null}
@@ -39,7 +42,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
         {project.techStack.map((tag) => (
           <li
             key={tag}
-            className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 text-neutral-400 select-none cursor-default"
+            className={PILL_CLASSES}
           >
             {tag}
           </li>

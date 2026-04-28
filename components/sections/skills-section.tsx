@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ScrollReveal } from '@/components/scroll-reveal';
+import { PILL_CLASSES } from '@/components/ui/class-constants';
 import type { CertificationEntry, SkillCategory } from '@/types/content';
 import { ExternalLink } from 'lucide-react';
 
@@ -25,7 +26,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
           {pills.map((pill) => (
             <span
               key={pill}
-              className="inline-flex rounded-full border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-widest text-neutral-400 select-none"
+              className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
             >
               {pill}
             </span>
@@ -49,7 +50,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
           {skills.map((skill) => (
             <li
               key={skill}
-              className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-400 select-none cursor-default"
+              className={`${PILL_CLASSES} font-mono text-[10px] uppercase tracking-widest`}
             >
               {skill}
             </li>
@@ -92,7 +93,7 @@ export function SkillsSection({ skills, certifications }: Props) {
                   {group.items.map((skill) => (
                     <li
                       key={skill}
-                      className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-400 select-none cursor-default"
+                      className={`${PILL_CLASSES} font-mono text-[10px] uppercase tracking-widest`}
                     >
                       {skill}
                     </li>

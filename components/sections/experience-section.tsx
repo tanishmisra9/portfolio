@@ -2,6 +2,7 @@
 
 import { useHomeIntroDone } from "@/components/home-intro-gate";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { PILL_CLASSES } from "@/components/ui/class-constants";
 import type { ExperienceEntry } from "@/types/content";
 
 type Props = { entries: ExperienceEntry[] };
@@ -37,7 +38,7 @@ export function ExperienceSection({ entries }: Props) {
                     {entry.tags.map((tag) => (
                       <li
                         key={tag}
-                        className="rounded-full border border-white/10 bg-black/40 backdrop-blur-md px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-400 select-none cursor-default"
+                        className={`${PILL_CLASSES} font-mono text-[10px] uppercase tracking-widest`}
                       >
                         {tag}
                       </li>
