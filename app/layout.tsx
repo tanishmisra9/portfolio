@@ -3,6 +3,7 @@ import { Inter, Space_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import "lenis/dist/lenis.css";
 
@@ -46,6 +47,7 @@ export default function RootLayout({
           {children}
         </SmoothScroll>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
