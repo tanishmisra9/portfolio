@@ -207,7 +207,7 @@ export const portfolio: PortfolioContent = {
   projects: [
     {
       id: 'project-candle',
-      title: 'Candle',
+      title: 'Candle for CHM',
       description:
         'Deployed an all-in-one Choroideremia research intelligence hub, aggregating trials and publications, with a natural language querying interface for patients to receive truthful responses.',
       techStack: ['PostgreSQL', 'pgvector', 'RAG', 'React'],
