@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { HomeIntroGateProvider } from "@/components/home-intro-gate";
 import { Hero } from "@/components/hero/hero";
 import { AboutContactSection } from "@/components/sections/about-contact-section";
@@ -6,6 +7,19 @@ import { ExperienceSection } from "@/components/sections/experience-section";
 import { ProjectsSection } from "@/components/sections/projects-section";
 import { SkillsSection } from "@/components/sections/skills-section";
 import { portfolio } from "@/data/portfolio";
+
+const homeDescription = portfolio.heroSubtitle.replace(/\n+/g, " ");
+
+export const metadata: Metadata = {
+  title: "Tanish Misra",
+  description: homeDescription,
+  openGraph: {
+    title: "Tanish Misra",
+    description: homeDescription,
+    url: "https://tanishmisra.com",
+    type: "website",
+  },
+};
 
 export default function HomePage() {
   return (
