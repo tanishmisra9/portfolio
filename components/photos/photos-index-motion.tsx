@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Instagram, ArrowRight, X } from "lucide-react";
+import { Instagram, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PhotosHeader } from "@/components/photos/photos-header";
 import {
@@ -14,9 +14,6 @@ import {
 } from "@/components/ui/class-constants";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 import type { RandomPhotoCandidate } from "@/data/photos";
-
-const BLUR_DATA_URL =
-  "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AJQAB/9k=";
 
 const OVERLAY_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const SURPRISE_BOKEH_ORBS = [
@@ -248,29 +245,34 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                     </button>
 
                     <div
-                      className="grid gap-0 md:grid-cols-[minmax(0,1fr)_18rem]"
+                      className="grid gap-0 md:grid-cols-[minmax(0,1fr)_22rem]"
                     >
-                      <div className="relative min-h-[18rem] bg-black/30 md:min-h-[34rem]">
-                        <Image
-                          src={selectedPhoto.src}
-                          alt={selectedPhoto.alt}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 75vw"
-                          className="object-contain"
-                          placeholder="blur"
-                          blurDataURL={BLUR_DATA_URL}
-                          quality={72}
-                        />
+                      <div className="relative aspect-[3/2] max-h-[min(80vh,44rem)] overflow-hidden bg-neutral-950 md:max-h-[min(80vh,44rem)]">
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 select-none font-mono text-[0.6rem] uppercase tracking-[0.32em] text-neutral-700"
+                        >
+                          Developing…
+                        </span>
+                        <div className="relative z-10 h-full w-full">
+                          <Image
+                            src={selectedPhoto.src}
+                            alt={selectedPhoto.alt}
+                            fill
+                            className="object-contain"
+                            quality={72}
+                          />
+                        </div>
                       </div>
 
-                      <div className="flex flex-col justify-between gap-6 border-t border-white/10 p-6 md:border-l md:border-t-0 md:p-7">
-                        <div>
+                      <div className="flex min-w-0 flex-col justify-center gap-8 border-t border-white/10 p-6 md:border-l md:border-t-0 md:p-7">
+                        <div className="min-w-0">
                           <p className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-neutral-500">
                             Surprise Pick
                           </p>
                           <h2
                             id="surprise-photo-title"
-                            className="mt-3 font-display text-[clamp(2rem,5vw,3rem)] font-bold uppercase leading-none tracking-tighter text-white"
+                            className="mt-3 font-display text-[clamp(1.6rem,4.4vw,2.6rem)] font-bold uppercase leading-[0.95] tracking-tighter text-white break-words [overflow-wrap:anywhere] [hyphens:auto]"
                           >
                             {selectedPhoto.collectionTitle}
                           </h2>
@@ -288,14 +290,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                             className={GLASS_BUTTON_SHEEN_CLASSES}
                             style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }}
                           />
-                          <span className="relative inline-flex items-center gap-2">
-                            Go to {selectedPhoto.collectionTitle}
-                            <ArrowRight
-                              className="h-4 w-4 shrink-0"
-                              strokeWidth={1.8}
-                              aria-hidden
-                            />
-                          </span>
+                          <span className="relative">{selectedPhoto.collectionTitle}</span>
                         </Link>
                       </div>
                     </div>
