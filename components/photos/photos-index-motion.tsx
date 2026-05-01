@@ -20,6 +20,38 @@ const BLUR_DATA_URL =
 
 const OVERLAY_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const SHUTTER_SFX_SRC = "/sfx/camera.mp3";
+const SURPRISE_BOKEH_ORBS = [
+  {
+    className:
+      "-left-10 top-[9%] h-40 w-40 md:-left-16 md:top-[10%] md:h-56 md:w-56",
+    background:
+      "radial-gradient(circle, rgba(255, 216, 168, 0.22) 0%, rgba(255, 216, 168, 0.14) 30%, transparent 70%)",
+  },
+  {
+    className:
+      "right-[-2.25rem] top-[16%] h-44 w-44 md:right-[6%] md:top-[13%] md:h-64 md:w-64",
+    background:
+      "radial-gradient(circle, rgba(176, 220, 255, 0.18) 0%, rgba(176, 220, 255, 0.12) 34%, transparent 72%)",
+  },
+  {
+    className:
+      "left-[14%] top-[58%] h-32 w-32 md:left-[16%] md:top-[68%] md:h-48 md:w-48",
+    background:
+      "radial-gradient(circle, rgba(255, 178, 200, 0.13) 0%, rgba(255, 178, 200, 0.08) 35%, transparent 74%)",
+  },
+  {
+    className:
+      "right-[8%] top-[70%] h-36 w-36 md:right-[12%] md:top-[74%] md:h-52 md:w-52",
+    background:
+      "radial-gradient(circle, rgba(255, 246, 197, 0.14) 0%, rgba(255, 246, 197, 0.08) 32%, transparent 74%)",
+  },
+  {
+    className:
+      "left-1/2 top-[33%] hidden h-24 w-24 -translate-x-1/2 md:block md:h-32 md:w-32",
+    background:
+      "radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.06) 36%, transparent 72%)",
+  },
+];
 
 export type PhotosIndexCollection = {
   slug: string;
@@ -149,7 +181,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
               className={GLASS_BUTTON_SHEEN_CLASSES}
               style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }}
             />
-            <span className="relative">Surprise Me</span>
+            <span className="relative">Surprise me!</span>
           </button>
         </motion.div>
         <motion.div
@@ -206,13 +238,16 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                   />
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 opacity-90"
-                    style={{
-                      background:
-                        "radial-gradient(circle at 18% 22%, rgba(255, 216, 168, 0.18) 0 5%, transparent 14%), radial-gradient(circle at 76% 20%, rgba(176, 220, 255, 0.18) 0 6%, transparent 16%), radial-gradient(circle at 28% 78%, rgba(255, 178, 200, 0.14) 0 4%, transparent 12%), radial-gradient(circle at 82% 72%, rgba(255, 246, 197, 0.14) 0 5%, transparent 13%), radial-gradient(circle at 54% 52%, rgba(255, 255, 255, 0.08) 0 3%, transparent 10%)",
-                      filter: "blur(18px)",
-                    }}
-                  />
+                    className="pointer-events-none absolute inset-0 overflow-hidden"
+                  >
+                    {SURPRISE_BOKEH_ORBS.map((orb, index) => (
+                      <div
+                        key={index}
+                        className={`absolute rounded-full blur-3xl ${orb.className}`}
+                        style={{ background: orb.background }}
+                      />
+                    ))}
+                  </div>
                   <motion.div
                     role="dialog"
                     aria-modal="true"
