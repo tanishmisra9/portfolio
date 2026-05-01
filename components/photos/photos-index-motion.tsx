@@ -252,7 +252,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                           aria-hidden
                           className="pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 select-none font-mono text-[0.6rem] uppercase tracking-[0.32em] text-neutral-700"
                         >
-                          Developing…
+                          Loading…
                         </span>
                         <div className="relative z-10 h-full w-full">
                           <Image
