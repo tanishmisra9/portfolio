@@ -290,7 +290,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                             className={GLASS_BUTTON_SHEEN_CLASSES}
                             style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }}
                           />
-                          <span className="relative">{selectedPhoto.collectionTitle}</span>
+                          <span className="relative">Go to collection</span>
                         </Link>
                       </div>
                     </div>
