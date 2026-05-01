@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ScrollReveal } from '@/components/scroll-reveal';
-import { PILL_CLASSES } from '@/components/ui/class-constants';
+import {
+  GLASS_BUTTON_CLASSES,
+  GLASS_BUTTON_SHEEN_BACKGROUND,
+  GLASS_BUTTON_SHEEN_CLASSES,
+  PILL_CLASSES,
+} from '@/components/ui/class-constants';
 import type { ProjectEntry } from '@/types/content';
 import { Github } from 'lucide-react';
 
@@ -113,16 +118,12 @@ export function ProjectsSection({ projects }: Props) {
               onClick={() => setExpanded((v) => !v)}
               aria-expanded={expanded}
               aria-controls="projects-extra-content"
-              className="group relative inline-flex items-center justify-center rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 font-sans text-xs uppercase tracking-[0.2em] text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              className={GLASS_BUTTON_CLASSES}
             >
-              {/* Specular sheen on hover */}
               <span
                 aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                style={{
-                  background:
-                    'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.13) 0%, transparent 70%)',
-                }}
+                className={GLASS_BUTTON_SHEEN_CLASSES}
+                style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }}
               />
               <span className="relative">{expanded ? 'Show less' : 'Show more'}</span>
             </button>

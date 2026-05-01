@@ -16,6 +16,14 @@ export interface PhotoCollection {
   photos: Photo[];
 }
 
+export interface RandomPhotoCandidate {
+  src: string;
+  alt: string;
+  caption?: string;
+  collectionTitle: string;
+  collectionSlug: string;
+}
+
 export const collections: PhotoCollection[] = [
   {
     slug: "campus",
@@ -466,4 +474,30 @@ export function getCollectionBySlug(slug: string): PhotoCollection | undefined {
 
 export function getAllCollectionSlugs(): string[] {
   return collections.map((c) => c.slug);
+}
+
+export function getRandomPhotoCandidates(): RandomPhotoCandidate[] {
+  return collections.flatMap((collection) =>
+    collection.photos.flatMap((photo) => {
+      const primary: RandomPhotoCandidate = {
+        src: photo.src,
+        alt: photo.alt,
+        caption: photo.caption,
+        collectionTitle: collection.title,
+        collectionSlug: collection.slug,
+      };
+
+      return photo.duetWith
+        ? [
+            primary,
+            {
+              src: photo.duetWith.src,
+              alt: photo.duetWith.alt,
+              collectionTitle: collection.title,
+              collectionSlug: collection.slug,
+            },
+          ]
+        : [primary];
+    }),
+  );
 }
