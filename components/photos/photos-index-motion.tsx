@@ -25,31 +25,31 @@ const SURPRISE_BOKEH_ORBS = [
     className:
       "-left-10 top-[9%] h-40 w-40 md:-left-16 md:top-[10%] md:h-56 md:w-56",
     background:
-      "radial-gradient(circle, rgba(255, 216, 168, 0.22) 0%, rgba(255, 216, 168, 0.14) 30%, transparent 70%)",
+      "radial-gradient(circle, rgba(255, 216, 168, 0.18) 0%, rgba(255, 216, 168, 0.1) 26%, rgba(255, 216, 168, 0.05) 42%, transparent 72%)",
   },
   {
     className:
       "right-[-2.25rem] top-[16%] h-44 w-44 md:right-[6%] md:top-[13%] md:h-64 md:w-64",
     background:
-      "radial-gradient(circle, rgba(176, 220, 255, 0.18) 0%, rgba(176, 220, 255, 0.12) 34%, transparent 72%)",
+      "radial-gradient(circle, rgba(176, 220, 255, 0.16) 0%, rgba(176, 220, 255, 0.09) 28%, rgba(176, 220, 255, 0.04) 44%, transparent 74%)",
   },
   {
     className:
       "left-[14%] top-[58%] h-32 w-32 md:left-[16%] md:top-[68%] md:h-48 md:w-48",
     background:
-      "radial-gradient(circle, rgba(255, 178, 200, 0.13) 0%, rgba(255, 178, 200, 0.08) 35%, transparent 74%)",
+      "radial-gradient(circle, rgba(255, 178, 200, 0.11) 0%, rgba(255, 178, 200, 0.06) 28%, rgba(255, 178, 200, 0.03) 42%, transparent 74%)",
   },
   {
     className:
       "right-[8%] top-[70%] h-36 w-36 md:right-[12%] md:top-[74%] md:h-52 md:w-52",
     background:
-      "radial-gradient(circle, rgba(255, 246, 197, 0.14) 0%, rgba(255, 246, 197, 0.08) 32%, transparent 74%)",
+      "radial-gradient(circle, rgba(255, 246, 197, 0.12) 0%, rgba(255, 246, 197, 0.07) 28%, rgba(255, 246, 197, 0.03) 42%, transparent 74%)",
   },
   {
     className:
       "left-1/2 top-[33%] hidden h-24 w-24 -translate-x-1/2 md:block md:h-32 md:w-32",
     background:
-      "radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.06) 36%, transparent 72%)",
+      "radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.05) 30%, rgba(255, 255, 255, 0.02) 42%, transparent 70%)",
   },
 ];
 
@@ -229,7 +229,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                   <motion.button
                     type="button"
                     onClick={closeOverlay}
-                    className="absolute inset-0 bg-black/58 backdrop-blur-xl"
+                    className="absolute inset-0 bg-black/62 backdrop-blur-md md:backdrop-blur-xl"
                     aria-label="Close surprise photo"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -243,7 +243,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                     {SURPRISE_BOKEH_ORBS.map((orb, index) => (
                       <div
                         key={index}
-                        className={`absolute rounded-full blur-3xl ${orb.className}`}
+                        className={`absolute rounded-full opacity-90 md:opacity-100 ${orb.className}`}
                         style={{ background: orb.background }}
                       />
                     ))}
@@ -252,7 +252,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="surprise-photo-title"
-                    className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/15 bg-black/45 shadow-[0_24px_90px_-28px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.16)] backdrop-blur-2xl"
+                    className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/15 bg-black/45 shadow-[0_24px_90px_-28px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.16)] backdrop-blur-lg md:backdrop-blur-2xl"
                     initial={
                       reduceMotion
                         ? { opacity: 1 }
@@ -270,7 +270,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                       ref={closeButtonRef}
                       type="button"
                       onClick={closeOverlay}
-                      className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] backdrop-blur-xl transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] backdrop-blur-md md:backdrop-blur-xl transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                       aria-label="Close surprise photo"
                     >
                       <X className="h-4 w-4" strokeWidth={1.9} aria-hidden />
