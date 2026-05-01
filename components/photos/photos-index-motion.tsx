@@ -19,37 +19,36 @@ const BLUR_DATA_URL =
   "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AJQAB/9k=";
 
 const OVERLAY_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-const SHUTTER_SFX_SRC = "/sfx/camera.mp3";
 const SURPRISE_BOKEH_ORBS = [
   {
     className:
       "-left-10 top-[9%] h-40 w-40 md:-left-16 md:top-[10%] md:h-56 md:w-56",
     background:
-      "radial-gradient(circle, rgba(255, 216, 168, 0.18) 0%, rgba(255, 216, 168, 0.1) 26%, rgba(255, 216, 168, 0.05) 42%, transparent 72%)",
+      "radial-gradient(circle, rgba(255, 216, 168, 0.12) 0%, rgba(255, 216, 168, 0.06) 30%, transparent 72%)",
   },
   {
     className:
       "right-[-2.25rem] top-[16%] h-44 w-44 md:right-[6%] md:top-[13%] md:h-64 md:w-64",
     background:
-      "radial-gradient(circle, rgba(176, 220, 255, 0.16) 0%, rgba(176, 220, 255, 0.09) 28%, rgba(176, 220, 255, 0.04) 44%, transparent 74%)",
+      "radial-gradient(circle, rgba(176, 220, 255, 0.11) 0%, rgba(176, 220, 255, 0.05) 30%, transparent 74%)",
   },
   {
     className:
       "left-[14%] top-[58%] h-32 w-32 md:left-[16%] md:top-[68%] md:h-48 md:w-48",
     background:
-      "radial-gradient(circle, rgba(255, 178, 200, 0.11) 0%, rgba(255, 178, 200, 0.06) 28%, rgba(255, 178, 200, 0.03) 42%, transparent 74%)",
+      "radial-gradient(circle, rgba(255, 178, 200, 0.08) 0%, rgba(255, 178, 200, 0.04) 28%, transparent 74%)",
   },
   {
     className:
       "right-[8%] top-[70%] h-36 w-36 md:right-[12%] md:top-[74%] md:h-52 md:w-52",
     background:
-      "radial-gradient(circle, rgba(255, 246, 197, 0.12) 0%, rgba(255, 246, 197, 0.07) 28%, rgba(255, 246, 197, 0.03) 42%, transparent 74%)",
+      "radial-gradient(circle, rgba(255, 246, 197, 0.08) 0%, rgba(255, 246, 197, 0.04) 28%, transparent 74%)",
   },
   {
     className:
       "left-1/2 top-[33%] hidden h-24 w-24 -translate-x-1/2 md:block md:h-32 md:w-32",
     background:
-      "radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.05) 30%, rgba(255, 255, 255, 0.02) 42%, transparent 70%)",
+      "radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.025) 30%, transparent 70%)",
   },
 ];
 
@@ -71,21 +70,10 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
     null,
   );
   const [mounted, setMounted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const el = new Audio(SHUTTER_SFX_SRC);
-    el.preload = "auto";
-    audioRef.current = el;
-
-    return () => {
-      audioRef.current = null;
-    };
   }, []);
 
   useEffect(() => {
@@ -113,22 +101,13 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedPhoto]);
 
-  const playShutterSound = useCallback(() => {
-    if (!audioRef.current) return;
-
-    const sfx = audioRef.current.cloneNode() as HTMLAudioElement;
-    sfx.volume = 0.6;
-    void sfx.play().catch(() => {});
-  }, []);
-
   const handleSurpriseMe = useCallback(() => {
     if (randomPhotos.length === 0) return;
 
     const nextPhoto =
       randomPhotos[Math.floor(Math.random() * randomPhotos.length)];
     setSelectedPhoto(nextPhoto);
-    playShutterSound();
-  }, [playShutterSound, randomPhotos]);
+  }, [randomPhotos]);
 
   const closeOverlay = useCallback(() => {
     setSelectedPhoto(null);
@@ -220,49 +199,41 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
               {selectedPhoto ? (
                 <motion.div
                   key={selectedPhoto.src}
-                  className="fixed inset-0 z-[10002] flex items-center justify-center p-5 md:p-8"
+                  className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/55 p-5 backdrop-blur-sm md:p-8"
+                  onClick={closeOverlay}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={overlayTransition}
                 >
-                  <motion.button
-                    type="button"
-                    onClick={closeOverlay}
-                    className="absolute inset-0 bg-black/62 backdrop-blur-md md:backdrop-blur-xl"
-                    aria-label="Close surprise photo"
+                  <motion.div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 overflow-hidden"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={overlayTransition}
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 overflow-hidden"
                   >
                     {SURPRISE_BOKEH_ORBS.map((orb, index) => (
                       <div
                         key={index}
-                        className={`absolute rounded-full opacity-90 md:opacity-100 ${orb.className}`}
+                        className={`absolute rounded-full opacity-70 md:opacity-80 ${orb.className}`}
                         style={{ background: orb.background }}
                       />
                     ))}
-                  </div>
+                  </motion.div>
                   <motion.div
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="surprise-photo-title"
-                    className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/15 bg-black/45 shadow-[0_24px_90px_-28px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.16)] backdrop-blur-lg md:backdrop-blur-2xl"
+                    onClick={(event) => event.stopPropagation()}
+                    className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/15 bg-neutral-950/95 shadow-[0_24px_90px_-28px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.16)]"
                     initial={
-                      reduceMotion
-                        ? { opacity: 1 }
-                        : { opacity: 0, y: 24, scale: 0.985 }
+                      reduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }
                     }
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    animate={{ opacity: 1, y: 0 }}
                     exit={
-                      reduceMotion
-                        ? { opacity: 0 }
-                        : { opacity: 0, y: 18, scale: 0.985 }
+                      reduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }
                     }
                     transition={overlayTransition}
                   >
@@ -270,13 +241,15 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                       ref={closeButtonRef}
                       type="button"
                       onClick={closeOverlay}
-                      className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] backdrop-blur-md md:backdrop-blur-xl transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                       aria-label="Close surprise photo"
                     >
                       <X className="h-4 w-4" strokeWidth={1.9} aria-hidden />
                     </button>
 
-                    <div className="grid gap-0 md:grid-cols-[minmax(0,1fr)_18rem]">
+                    <div
+                      className="grid gap-0 md:grid-cols-[minmax(0,1fr)_18rem]"
+                    >
                       <div className="relative min-h-[18rem] bg-black/30 md:min-h-[34rem]">
                         <Image
                           src={selectedPhoto.src}
