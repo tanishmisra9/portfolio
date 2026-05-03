@@ -73,6 +73,10 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
     setMounted(true);
   }, []);
 
+  const closeOverlay = useCallback(() => {
+    setSelectedPhoto(null);
+  }, []);
+
   useEffect(() => {
     if (!selectedPhoto) return;
 
@@ -90,13 +94,30 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setSelectedPhoto(null);
+        closeOverlay();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const dialog = document.getElementById("surprise-photo-dialog");
+      if (!dialog) return;
+      const focusable = dialog.querySelectorAll<HTMLElement>(
+        'a[href], button, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedPhoto]);
+  }, [selectedPhoto, closeOverlay]);
 
   const handleSurpriseMe = useCallback(() => {
     if (randomPhotos.length === 0) return;
@@ -105,10 +126,6 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
       randomPhotos[Math.floor(Math.random() * randomPhotos.length)];
     setSelectedPhoto(nextPhoto);
   }, [randomPhotos]);
-
-  const closeOverlay = useCallback(() => {
-    setSelectedPhoto(null);
-  }, []);
 
   const overlayTransition = reduceMotion
     ? { duration: 0 }
@@ -220,6 +237,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                     ))}
                   </motion.div>
                   <motion.div
+                    id="surprise-photo-dialog"
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="surprise-photo-title"
