@@ -58,7 +58,7 @@ export function NYCExplosion({ active, onComplete, heartX, heartY }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = 1;
+    const dpr = window.devicePixelRatio || 1;
     const W = window.innerWidth;
     const H = window.innerHeight;
 
