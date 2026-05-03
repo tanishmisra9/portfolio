@@ -161,8 +161,6 @@ export function FogCanvas({ active, onComplete }: Props) {
       }
       window.removeEventListener("resize", handleResize);
     };
-  // Only re-run when active toggles — onComplete is stable via ref
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, active]);
 
   if (!mounted || !active) return null;

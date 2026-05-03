@@ -126,6 +126,7 @@ export function NYCTitle({ baseClasses }: Props) {
           aria-hidden={!showILoveNY}
         >
           <span className="nyc-typewriter-text">I</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             ref={heartRef}
             src="/heart.png"

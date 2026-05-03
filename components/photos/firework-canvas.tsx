@@ -247,8 +247,6 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
       }
       window.removeEventListener("resize", handleResize);
     };
-  // Only re-run when active toggles — onComplete/titleY are stable via refs
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, active]);
 
   if (!mounted || !active) return null;
