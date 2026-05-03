@@ -123,6 +123,7 @@ export function NYCExplosion({ active, onComplete, heartX, heartY }: Props) {
         return;
       }
       const elapsed = (timestamp - startTime) / 1000;
+      // Tighter cap (30fps floor) — short burst animation, larger dt skips look worse than a slowdown.
       const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.033);
       lastTimestamp = timestamp;
 
