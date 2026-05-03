@@ -105,7 +105,27 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
       };
       stateRef.current = state;
 
-      if (reducedMotion) return;
+      const handleResize = () => {
+        const newW = window.innerWidth;
+        const newH = window.innerHeight;
+        canvas.width = newW * dpr;
+        canvas.height = newH * dpr;
+        canvas.style.width = "100vw";
+        canvas.style.height = "100vh";
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        state.W = newW;
+        state.H = newH;
+        state.isMobile = newW < 768;
+      };
+      window.addEventListener("resize", handleResize);
+
+      if (reducedMotion) {
+        return () => {
+          window.removeEventListener("resize", handleResize);
+          stateRef.current = null;
+        };
+      }
 
       const tick = (timestamp: number) => {
         if (state.startTime === 0) {
@@ -125,7 +145,7 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
             burst.spawnTimes[burst.spawned] <= burstElapsed
           ) {
             state.flakes.push({
-              x: rng(0, W),
+              x: rng(0, state.W),
               y: -10,
               r: rng(2, 4),
               vy: rng(200, 400),
@@ -143,7 +163,7 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
           f.y += f.vy * dt;
           f.x += f.vx * dt;
           f.x += Math.sin(elapsed * 0.002 + f.x * 0.01) * 0.3;
-          if (f.y > H + 10) f.dead = true;
+          if (f.y > state.H + 10) f.dead = true;
         }
 
         // --- Prune ---
@@ -153,10 +173,10 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
         state.flakes = state.flakes.filter((f) => !f.dead);
 
         // --- Draw ---
-        ctx.clearRect(0, 0, W, H);
+        ctx.clearRect(0, 0, state.W, state.H);
         const FADE_START = 0.82;
         for (const f of state.flakes) {
-          const progress = f.y / H;
+          const progress = f.y / state.H;
           const fade = progress > FADE_START
             ? 1 - (progress - FADE_START) / (1 - FADE_START)
             : 1;
@@ -178,6 +198,7 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
           cancelAnimationFrame(rafRef.current);
           rafRef.current = null;
         }
+        window.removeEventListener("resize", handleResize);
         stateRef.current = null;
       };
     }, [mounted]);

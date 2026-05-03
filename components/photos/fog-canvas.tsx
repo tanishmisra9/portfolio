@@ -66,6 +66,21 @@ export function FogCanvas({ active, onComplete }: Props) {
 
     const ctx = canvas.getContext("2d")!;
     ctx.scale(dpr, dpr);
+    const state = { W, H };
+
+    const handleResize = () => {
+      const newW = window.innerWidth;
+      const newH = window.innerHeight;
+      canvas.width = newW * dpr;
+      canvas.height = newH * dpr;
+      canvas.style.width = "100vw";
+      canvas.style.height = "100vh";
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      state.W = newW;
+      state.H = newH;
+    };
+    window.addEventListener("resize", handleResize);
 
     // Fill the full screen with puffs distributed across the entire height.
     // Use many large puffs so the fog feels volumetric, not like a thin strip.
@@ -100,7 +115,7 @@ export function FogCanvas({ active, onComplete }: Props) {
       const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.05);
       lastTimestamp = timestamp;
 
-      ctx.clearRect(0, 0, W, H);
+      ctx.clearRect(0, 0, state.W, state.H);
       ctx.globalCompositeOperation = "lighter";
 
       const FADE_IN = 0.7;
@@ -113,7 +128,7 @@ export function FogCanvas({ active, onComplete }: Props) {
         const y = p.baseY + Math.sin(elapsed * p.yFreq + p.phase) * p.yDrift;
         const r = p.baseRadius + Math.sin(elapsed * p.radiusFreq + p.radiusPhase) * p.radiusDrift;
 
-        if (p.x - r <= W) allDone = false;
+        if (p.x - r <= state.W) allDone = false;
 
         const o = p.opacity * fadeIn;
         const grad = ctx.createRadialGradient(p.x, y, 0, p.x, y, r);
@@ -128,7 +143,7 @@ export function FogCanvas({ active, onComplete }: Props) {
       }
 
       if (allDone) {
-        ctx.clearRect(0, 0, W, H);
+        ctx.clearRect(0, 0, state.W, state.H);
         onCompleteRef.current();
         return;
       }
@@ -143,6 +158,7 @@ export function FogCanvas({ active, onComplete }: Props) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
+      window.removeEventListener("resize", handleResize);
     };
   // Only re-run when active toggles — onComplete is stable via ref
   // eslint-disable-next-line react-hooks/exhaustive-deps

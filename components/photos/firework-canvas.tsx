@@ -89,6 +89,21 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
 
     const ctx = canvas.getContext("2d")!;
     ctx.scale(dpr, dpr);
+    const state = { W, H };
+
+    const handleResize = () => {
+      const newW = window.innerWidth;
+      const newH = window.innerHeight;
+      canvas.width = newW * dpr;
+      canvas.height = newH * dpr;
+      canvas.style.width = "100vw";
+      canvas.style.height = "100vh";
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      state.W = newW;
+      state.H = newH;
+    };
+    window.addEventListener("resize", handleResize);
 
     // Snapshot titleY once so it doesn't shift mid-animation
     const explosionTargetY = titleYRef.current + rng(-30, 30);
@@ -97,7 +112,7 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
     const palette = PALETTES[Math.floor(Math.random() * PALETTES.length)];
 
     let rocketX = launchX;
-    let rocketY = H + 10;
+      let rocketY = state.H + 10;
     const trail: TrailPos[] = [];
     const TRAIL_LEN = 5;
 
@@ -116,7 +131,7 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
       const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.05);
       lastTimestamp = timestamp;
 
-      ctx.clearRect(0, 0, W, H);
+      ctx.clearRect(0, 0, state.W, state.H);
 
       if (phase === "launch") {
         rocketX += Math.sin(elapsed * 8) * 0.5;
@@ -213,7 +228,7 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
         }
 
         if (allDone) {
-          ctx.clearRect(0, 0, W, H);
+          ctx.clearRect(0, 0, state.W, state.H);
           onCompleteRef.current();
           return;
         }
@@ -229,6 +244,7 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
+      window.removeEventListener("resize", handleResize);
     };
   // Only re-run when active toggles — onComplete/titleY are stable via refs
   // eslint-disable-next-line react-hooks/exhaustive-deps
