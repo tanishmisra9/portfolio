@@ -68,6 +68,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
   );
   const [mounted, setMounted] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const surpriseTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -75,6 +76,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
 
   const closeOverlay = useCallback(() => {
     setSelectedPhoto(null);
+    surpriseTriggerRef.current?.focus();
   }, []);
 
   useEffect(() => {
@@ -165,6 +167,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
         </motion.div>
         <motion.div variants={item} className="mt-5 flex justify-center md:mt-6">
           <button
+            ref={surpriseTriggerRef}
             type="button"
             onClick={handleSurpriseMe}
             className={GLASS_BUTTON_CLASSES}
