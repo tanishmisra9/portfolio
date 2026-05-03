@@ -264,6 +264,9 @@ export function ScatterName({
     if (!src) return;
     const sfx = src.cloneNode() as HTMLAudioElement;
     sfx.volume = 0.425;
+    sfx.onended = () => {
+      sfx.src = "";
+    };
     void sfx.play().catch(() => {});
   }, []);
 

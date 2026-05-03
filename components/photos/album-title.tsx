@@ -61,6 +61,9 @@ export function AlbumTitle({ title, slug }: Props) {
     if (!src) return;
     const sfx = src.cloneNode() as HTMLAudioElement;
     sfx.volume = 0.595;
+    sfx.onended = () => {
+      sfx.src = "";
+    };
     void sfx.play().catch(() => {});
   }, []);
 

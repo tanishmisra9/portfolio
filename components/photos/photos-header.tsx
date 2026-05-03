@@ -26,6 +26,9 @@ export function PhotosHeader() {
     if (audioRef.current) {
       const sfx = audioRef.current.cloneNode() as HTMLAudioElement;
       sfx.volume = 0.6;
+      sfx.onended = () => {
+        sfx.src = "";
+      };
       timersRef.current.push(
         window.setTimeout(() => {
           sfx.play().catch(() => {});
