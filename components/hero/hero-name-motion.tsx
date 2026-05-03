@@ -16,13 +16,6 @@ export function HeroNameMotion({ children }: Props) {
         x: [0, 2.2, -1.4, 0],
         y: [0, -1.8, 1, 0],
         skewX: [0, 0.35, 0, -0.28, 0],
-        filter: [
-          "blur(0px)",
-          "blur(0.28px)",
-          "blur(0px)",
-          "blur(0.2px)",
-          "blur(0px)",
-        ],
       }}
       transition={{
         duration: 18,
