@@ -288,12 +288,9 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
 
                       <div className="flex min-w-0 flex-col justify-center gap-8 border-t border-white/10 p-6 md:border-l md:border-t-0 md:p-7">
                         <div className="min-w-0">
-                          <p className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-neutral-500">
-                            Surprise Pick
-                          </p>
                           <h2
                             id="surprise-photo-title"
-                            className="mt-3 font-display text-[clamp(1.6rem,4.4vw,2.6rem)] font-bold uppercase leading-[0.95] tracking-tighter text-white break-words [overflow-wrap:anywhere] [hyphens:auto]"
+                            className="font-display text-[clamp(1.6rem,4.4vw,2.6rem)] font-bold uppercase leading-[0.95] tracking-tighter text-white break-words [overflow-wrap:anywhere] [hyphens:auto]"
                           >
                             {selectedPhoto.collectionTitle}
                           </h2>
