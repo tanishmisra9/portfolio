@@ -29,6 +29,7 @@ const REDS = [
 ];
 const rng = (min: number, max: number) => Math.random() * (max - min) + min;
 const FLASH_RADIUS = 180;
+const CANVAS_Z_INDEX = "9999";
 
 export function NYCExplosion({ active, onComplete, heartX, heartY }: Props) {
   const [mounted, setMounted] = useState(false);
@@ -68,7 +69,7 @@ export function NYCExplosion({ active, onComplete, heartX, heartY }: Props) {
     canvas.style.height = "100vh";
     canvas.style.position = "fixed";
     canvas.style.inset = "0";
-    canvas.style.zIndex = "9998";
+    canvas.style.zIndex = CANVAS_Z_INDEX;
     canvas.style.pointerEvents = "none";
 
     const ctx = canvas.getContext("2d")!;

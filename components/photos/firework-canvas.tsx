@@ -26,6 +26,7 @@ type Spark = {
   decay: number;
 };
 
+const CANVAS_Z_INDEX = "9999";
 const rng = (min: number, max: number) => Math.random() * (max - min) + min;
 
 function parseHex(hex: string): [number, number, number] {
@@ -84,7 +85,7 @@ export function FireworkCanvas({ active, onComplete, titleY }: Props) {
     canvas.style.height = "100vh";
     canvas.style.position = "fixed";
     canvas.style.inset = "0";
-    canvas.style.zIndex = "9998";
+    canvas.style.zIndex = CANVAS_Z_INDEX;
     canvas.style.pointerEvents = "none";
 
     const ctx = canvas.getContext("2d")!;
