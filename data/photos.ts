@@ -123,9 +123,10 @@ export const collections: PhotoCollection[] = [
     description: "West Lafayette winters",
     coverImage: "/photos/snowfall/img-1125.jpeg",
     photos: [
+      // TODO: alt — describe scene
       {
         src: "/photos/snowfall/driftin-snow.jpeg",
-        alt: "Snow drifting",
+        alt: "",
         caption: "Driftin' snow",
         width: 2838,
         height: 3785,
@@ -397,16 +398,18 @@ export const collections: PhotoCollection[] = [
     description: "One-offs and favorites",
     coverImage: "/photos/standalone/squirrel.jpeg",
     photos: [
+      // TODO: alt — describe scene
       {
         src: "/photos/standalone/squirrel.jpeg",
-        alt: "Squirrel on campus",
+        alt: "",
         caption: "A squirrel fur real",
         width: 3264,
         height: 3264,
       },
+      // TODO: alt — describe scene
       {
         src: "/photos/standalone/blink-and-youll-miss-it.jpeg",
-        alt: "Fleeting street moment",
+        alt: "",
         caption: "Blink and it's gone",
         width: 3271,
         height: 3271,
