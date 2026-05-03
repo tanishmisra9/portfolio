@@ -47,6 +47,7 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const rafRef = useRef<number | null>(null);
     const stateRef = useRef<SceneState | null>(null);
+    const tickRef = useRef<((timestamp: number) => void) | null>(null);
 
     useEffect(() => {
       setMounted(true);
@@ -64,6 +65,9 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
           rng(0, 2000),
         ).sort((a, b) => a - b);
         state.bursts.push({ spawnTimes, spawned: 0, startTime: 0 });
+        if (rafRef.current === null && tickRef.current) {
+          rafRef.current = requestAnimationFrame(tickRef.current);
+        }
       },
     }));
 
@@ -172,6 +176,11 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
         );
         state.flakes = state.flakes.filter((f) => !f.dead);
 
+        if (state.flakes.length === 0 && state.bursts.length === 0) {
+          rafRef.current = null;
+          return;
+        }
+
         // --- Draw ---
         ctx.clearRect(0, 0, state.W, state.H);
         const FADE_START = 0.82;
@@ -190,6 +199,7 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
 
         rafRef.current = requestAnimationFrame(tick);
       };
+      tickRef.current = tick;
 
       rafRef.current = requestAnimationFrame(tick);
 
@@ -198,6 +208,7 @@ export const SnowfallCanvas = forwardRef<SnowfallCanvasHandle>(
           cancelAnimationFrame(rafRef.current);
           rafRef.current = null;
         }
+        tickRef.current = null;
         window.removeEventListener("resize", handleResize);
         stateRef.current = null;
       };
