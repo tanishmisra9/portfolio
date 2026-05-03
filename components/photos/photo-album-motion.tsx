@@ -81,8 +81,8 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                   key={photo.src}
                   src={photo.src}
                   alt={photo.alt}
-                  width={DEFAULT_IMG_W}
-                  height={DEFAULT_IMG_H}
+                  width={photo.width ?? DEFAULT_IMG_W}
+                  height={photo.height ?? DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
                   sizes="(max-width: 768px) 50vw, 448px"
                   placeholder="blur"
@@ -98,8 +98,8 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                   key={photo.duetWith.src}
                   src={photo.duetWith.src}
                   alt={photo.duetWith.alt}
-                  width={DEFAULT_IMG_W}
-                  height={DEFAULT_IMG_H}
+                  width={photo.duetWith.width ?? DEFAULT_IMG_W}
+                  height={photo.duetWith.height ?? DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
                   sizes="(max-width: 768px) 50vw, 448px"
                   placeholder="blur"
@@ -122,8 +122,8 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                 <Image
                   src={photo.src}
                   alt={photo.alt}
-                  width={DEFAULT_IMG_W}
-                  height={DEFAULT_IMG_H}
+                  width={photo.width ?? DEFAULT_IMG_W}
+                  height={photo.height ?? DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
                   sizes="(max-width: 768px) 100vw, 896px"
                   placeholder="blur"
