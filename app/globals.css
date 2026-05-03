@@ -83,14 +83,14 @@ body {
     color: #d4d4d4;
   }
   100% {
-    color: #262626;
+    color: #525252;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .camera-flash-text {
     animation: none;
-    color: #262626;
+    color: #525252;
   }
 }
 
