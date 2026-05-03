@@ -455,6 +455,7 @@ export function ScatterName({
           />
         );
       })}
+      <span className="sr-only">{text}</span>
     </div>
   );
 }

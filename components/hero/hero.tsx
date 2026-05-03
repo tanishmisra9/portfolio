@@ -111,50 +111,53 @@ export function Hero({ subtitle }: HeroProps) {
       <div className="mx-auto w-full max-w-6xl text-left">
         <div className="mb-6 ml-[11vw] md:mb-32 md:ml-[9vw]">
           <HeroNameMotion>
-            <div
-              role="button"
-              tabIndex={0}
-              aria-label="Play name pit-stop animation"
-              className="cursor-pointer select-none font-display text-[clamp(3.105rem,12.42vw,12.006rem)] md:text-[clamp(2.256rem,9.026vw,8.726rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-              onPointerMove={onNamePointerMove}
-              onPointerLeave={onNamePointerLeaveOrCancel}
-              onPointerCancel={onNamePointerLeaveOrCancel}
-              onClick={onNameClick}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onNameClick();
-                }
-              }}
-            >
-              <div className="text-white translate-x-8 md:translate-x-10">
-                <ScatterName
-                  text="TANISH"
-                  lineId="tanish"
-                  entranceDelay={SCATTER_NAME_ENTRANCE_BASE_MS}
-                  scatterTrigger={scatterTrigger}
-                  queueGlobalReturnGap={queueGlobalReturnGap}
-                  magnetPullRef={tanishMagnetRef}
-                  magnetResetRef={tanishResetRef}
-                  onScatterComplete={onLineScatterComplete}
-                />
-              </div>
-              <div className="-mt-3 -translate-x-2 text-neutral-600 md:-mt-5 md:-translate-x-3">
-                <ScatterName
-                  text="MISRA"
-                  lineId="misra"
-                  entranceDelay={
-                    SCATTER_NAME_ENTRANCE_BASE_MS +
-                    6 * SCATTER_NAME_ENTRANCE_STAGGER_MS
+            <>
+              <h1 className="sr-only">TANISH MISRA</h1>
+              <div
+                role="button"
+                tabIndex={0}
+                aria-label="Play name pit-stop animation"
+                className="cursor-pointer select-none font-display text-[clamp(3.105rem,12.42vw,12.006rem)] md:text-[clamp(2.256rem,9.026vw,8.726rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                onPointerMove={onNamePointerMove}
+                onPointerLeave={onNamePointerLeaveOrCancel}
+                onPointerCancel={onNamePointerLeaveOrCancel}
+                onClick={onNameClick}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onNameClick();
                   }
-                  scatterTrigger={scatterTrigger}
-                  queueGlobalReturnGap={queueGlobalReturnGap}
-                  magnetPullRef={misraMagnetRef}
-                  magnetResetRef={misraResetRef}
-                  onScatterComplete={onLineScatterComplete}
-                />
+                }}
+              >
+                <div className="text-white translate-x-8 md:translate-x-10">
+                  <ScatterName
+                    text="TANISH"
+                    lineId="tanish"
+                    entranceDelay={SCATTER_NAME_ENTRANCE_BASE_MS}
+                    scatterTrigger={scatterTrigger}
+                    queueGlobalReturnGap={queueGlobalReturnGap}
+                    magnetPullRef={tanishMagnetRef}
+                    magnetResetRef={tanishResetRef}
+                    onScatterComplete={onLineScatterComplete}
+                  />
+                </div>
+                <div className="-mt-3 -translate-x-2 text-neutral-600 md:-mt-5 md:-translate-x-3">
+                  <ScatterName
+                    text="MISRA"
+                    lineId="misra"
+                    entranceDelay={
+                      SCATTER_NAME_ENTRANCE_BASE_MS +
+                      6 * SCATTER_NAME_ENTRANCE_STAGGER_MS
+                    }
+                    scatterTrigger={scatterTrigger}
+                    queueGlobalReturnGap={queueGlobalReturnGap}
+                    magnetPullRef={misraMagnetRef}
+                    magnetResetRef={misraResetRef}
+                    onScatterComplete={onLineScatterComplete}
+                  />
+                </div>
               </div>
-            </div>
+            </>
           </HeroNameMotion>
           <motion.div
             className="-translate-x-2 mt-7 flex max-w-4xl flex-col gap-3 text-left font-sans text-xl leading-relaxed md:-translate-x-3 md:mt-14 md:text-2xl"
