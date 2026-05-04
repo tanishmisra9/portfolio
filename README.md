@@ -1,84 +1,55 @@
-# Personal Portfolio
+# Tanish Misra Portfolio
 
-A portfolio built with Next.js, TypeScript, and Tailwind CSS. Dark-only layout with smooth scrolling, Framer Motion animations, and a photography section with interactive per-album title effects.
+Personal portfolio and photography site built with Next.js, TypeScript, and Tailwind CSS. The project combines a dark, motion-heavy portfolio experience with a separate photography section featuring custom album interactions, route-specific effects, and sound design.
 
-## Features
+## Overview
 
-- Dark theme
-- Responsive layout
-- Smooth scroll via Lenis
-- Hero typography with scatter/reassemble name animation (Framer Motion)
-- Scroll-reveal entrance animations gated behind hero intro completion
-- Sections for experience, education, skills + certifications, projects, and about/contact
-- Photography section (`/photos`) with nine curated collections
-- Per-album interactive title effects: F1 car flyby (Super Max), snowfall burst, fog roll, fireworks canvas, UK flag sweep, and NYC skyline letter morph
-- Audio SFX on interactive album titles (preloaded per-route)
-- Vercel Analytics
-- Content driven from typed data files
+- App Router portfolio site built with Next.js 15, React 19, and TypeScript
+- Dark-first visual system with smooth scrolling and animated section reveals
+- Content-driven home page for experience, education, skills, certifications, projects, and contact details
+- Dedicated `/photos` experience with curated collections and custom per-album interactions
+- Route-specific visual and audio effects for selected photo collections
+- Vercel Analytics integration for production usage tracking
+
+## Current Content
+
+The site currently reflects:
+
+- Purdue CS coursework and campus involvement
+- Experience spanning Toyota Connected Technologies, Purdue Electric Racing, The Data Mine, Purdue Electric Vehicle Club, and prior analytics/internship work
+- Projects across AI, ML, data systems, and software engineering
+- 9 live photography collections:
+  `campus`, `snowfall`, `uk-2025`, `new-york`, `smokies`, `holidays-2025`, `new-year`, `standalone`, plus the dedicated `super-max` collection
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **UI**: React 19, Tailwind CSS 3
-- **Motion**: Framer Motion
-- **Scroll**: Lenis
-- **Icons**: Lucide React
-- **Analytics**: Vercel Analytics
-- **Deployment**: Vercel
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS 3
+- Framer Motion
+- Lenis
+- Lucide React
+- Vercel Analytics
 
 ## Project Structure
 
-```
+```text
 Portfolio/
-├── app/
-│   ├── globals.css
-│   ├── icon.svg
-│   ├── layout.tsx
-│   ├── page.tsx
-│   ├── error.tsx
-│   ├── not-found.tsx
-│   └── photos/
-│       ├── layout.tsx
-│       ├── page.tsx
-│       └── [slug]/
-│           └── page.tsx
+├── app/                    # App Router entrypoints, layouts, error states
 ├── components/
-│   ├── hero/
-│   │   ├── hero.tsx
-│   │   ├── hero-name-motion.tsx
-│   │   └── scatter-name.tsx
-│   ├── photos/
-│   │   ├── album-title.tsx
-│   │   ├── firework-canvas.tsx
-│   │   ├── fog-canvas.tsx
-│   │   ├── photo-album-motion.tsx
-│   │   ├── photos-header.tsx
-│   │   ├── photos-index-motion.tsx
-│   │   └── snowfall-canvas.tsx
-│   ├── sections/
-│   │   ├── about-contact-section.tsx
-│   │   ├── education-section.tsx
-│   │   ├── experience-section.tsx
-│   │   ├── projects-section.tsx
-│   │   └── skills-section.tsx
-│   ├── home-intro-gate.tsx
-│   ├── scroll-reveal.tsx
-│   ├── site-header.tsx
-│   └── smooth-scroll.tsx
+│   ├── hero/               # Landing page hero animations
+│   ├── photos/             # Photo album UI and interactive effects
+│   └── sections/           # Home page content sections
 ├── data/
-│   ├── photos.ts
-│   └── portfolio.ts
-├── lib/
-│   ├── photos-motion.ts
-│   └── site-motion.ts
+│   ├── portfolio.ts        # Resume-style content for the home page
+│   └── photos.ts           # Photo collection metadata and image lists
+├── lib/                    # Motion configs and shared helpers
 ├── public/
-│   ├── fonts/
-│   │   └── yd-gothic-130.woff2
-│   ├── photos/
-│   └── *.mp3
-├── types/
-│   └── content.ts
+│   ├── fonts/              # Local display fonts
+│   ├── photos/             # Photography assets
+│   └── sfx/                # Audio used by interactive photo titles
+├── types/                  # Shared TypeScript content types
 ├── next.config.ts
 ├── tailwind.config.ts
 └── package.json
@@ -91,7 +62,7 @@ Portfolio/
 - Node.js 18+
 - npm
 
-### Installation
+### Install
 
 ```bash
 git clone https://github.com/tanishmisra9/portfolio.git
@@ -99,7 +70,7 @@ cd portfolio
 npm install
 ```
 
-### Development
+### Run locally
 
 ```bash
 npm run dev
@@ -107,13 +78,13 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-To expose the dev server on your local network (e.g. for mobile testing):
+To test on other devices on the same network:
 
 ```bash
 npm run dev:lan
 ```
 
-### Production
+### Production build
 
 ```bash
 npm run build
@@ -123,68 +94,61 @@ npm run start
 ### Other scripts
 
 ```bash
-npm run lint      # ESLint
-npm run clean     # remove .next (useful after odd dev/build cache issues)
+npm run lint
+npm run clean
 ```
 
-## Customization
+## Editing Content
 
 ### Portfolio content
 
-Edit `data/portfolio.ts`. Shape is defined by `PortfolioContent` in `types/content.ts` (`experience`, `education`, `skills`, `certifications`, `projects`, `aboutBio`, `social`, hero copy).
+Update [data/portfolio.ts](/Users/tanishmisra/Code/Portfolio/data/portfolio.ts) to edit:
+
+- hero copy
+- experience
+- education
+- skills and certifications
+- projects
+- about/contact details
+
+The shared content shape lives in [types/content.ts](/Users/tanishmisra/Code/Portfolio/types/content.ts).
 
 ### Photography content
 
-Edit `data/photos.ts`. Each entry in `collections` is a `PhotoCollection` with a `slug`, `title`, `description`, `coverImage`, and `photos` array. The slug also determines which interactive title effect fires — see `components/photos/album-title.tsx` for the effect map.
+Update [data/photos.ts](/Users/tanishmisra/Code/Portfolio/data/photos.ts) to edit:
 
-### Site metadata
+- collection titles and descriptions
+- cover images
+- photo ordering
+- captions and alt text
+- per-photo duet layouts
 
-Edit `app/layout.tsx` (`metadata.title`, `metadata.description`).
+Album-specific title effects are wired through the photo components in [components/photos](/Users/tanishmisra/Code/Portfolio/components/photos).
 
-### Theme and typography
+### Metadata and styling
 
-Global styles: `app/globals.css`. Tailwind theme extensions: `tailwind.config.ts`. Fonts are loaded in `layout.tsx` (Inter, Space Mono) and via `@font-face` in `globals.css` (YD Gothic 130 — display font used on photo album titles).
+- Site metadata: [app/layout.tsx](/Users/tanishmisra/Code/Portfolio/app/layout.tsx)
+- Global styles: [app/globals.css](/Users/tanishmisra/Code/Portfolio/app/globals.css)
+- Tailwind theme: [tailwind.config.ts](/Users/tanishmisra/Code/Portfolio/tailwind.config.ts)
 
-## Sections
+## Key UX Details
 
-### Portfolio (`/`)
-
-1. **Hero** — Name with scatter/reassemble animation, subtitle
-2. **Experience** — Roles and tags
-3. **Education** — Institutions and coursework
-4. **Skills** — Grouped skill lists and certifications
-5. **Projects** — Descriptions and tech stacks
-6. **About** — Bio and social links
-
-### Photography (`/photos`)
-
-Index grid of all collections; each card links to `/photos/[slug]`.
-
-Current collections: Purdue grounds · Snowfall · UK · New York · The Smokies · Winter Holidays · New Year · Standalones · Super Max
+- Scatter/reassemble hero name animation on the landing page
+- Intro-gated reveal behavior for the main homepage sections
+- Smooth scrolling across the site with Lenis
+- Interactive photo album titles with custom motion and canvas effects
+- Audio cues for selected photography interactions
 
 ## Deployment
 
-Connect the GitHub repo to Vercel and deploy with default Next.js settings. Set the production branch (e.g. `main`) in the project settings. For a custom domain, add it under Project → Domains and apply the DNS records Vercel shows.
+The site is set up for deployment on Vercel. A standard Next.js deployment works out of the box:
+
+```bash
+npm run build
+```
+
+Then connect the repository to Vercel and deploy with the default framework settings.
 
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-## Author
-
-**Tanish Misra**
-
-- GitHub: [@tanishmisra9](https://github.com/tanishmisra9)
-- LinkedIn: [tanish-misra](https://linkedin.com/in/tanish-misra)
-- Site: [tanishmisra.com](https://tanishmisra.com)
-
-## Inspiration
-
-Layout influenced by [Lakshya Chaudhry](https://www.laksh.us)'s portfolio work.
-
-## Acknowledgments
-
-- [Lucide](https://lucide.dev)
-- [Framer Motion](https://www.framer.com/motion)
-- [Lenis](https://lenis.darkroom.engineering)
-- [Vercel Analytics](https://vercel.com/analytics)
