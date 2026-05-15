@@ -269,6 +269,56 @@ export const collections: PhotoCollection[] = [
         alt: "Street-level worm's-eye view of Lower Manhattan glass towers, including One World Trade Center, their upper floors erased by dense white fog; white ribbed Oculus structure lower right, bare winter trees along the bottom",
         caption: "Foggy skyline",
       },
+      {
+        src: "/photos/new-york/IMG_3674.jpeg",
+        alt: "Sunlight streaming through a tall glass-walled interior with diagonal structural beams, casting long shadows across a seated crowd and the floor below",
+        caption: "Terminal velocity",
+      },
+      {
+        src: "/photos/new-york/IMG_3683.jpeg",
+        alt: "Empire State Building centered between modern towers at dusk, viewed above a rooftop deck with a glowing neon sign reading 'The City That Never Sleeps' and empty swings in the foreground",
+        caption: "The skyline backed it up",
+      },
+      {
+        src: "/photos/new-york/IMG_3751.jpeg",
+        alt: "Blurred black prancing horse emblem mounted on a glossy red storefront facade, with reflections of nearby buildings and parked cars at the edges of the frame",
+        caption: "Closest I'm getting to one",
+      },
+      {
+        src: "/photos/new-york/IMG_3830.jpeg",
+        alt: "Street-level view looking up at a pencil-thin Midtown tower against a blue sky streaked with thin clouds, framed by darker glass and tan residential buildings",
+        caption: "They ran out of width",
+      },
+      {
+        src: "/photos/new-york/IMG_3899.jpeg",
+        alt: "Bow Bridge arcing over the lake in Central Park beneath bright spring trees and a wide blue sky filled with soft white clouds",
+        caption: "Eight hundred acres of not thinking about anything",
+      },
+      {
+        src: "/photos/new-york/IMG_3901.jpeg",
+        alt: "Slender supertall tower rising beyond Central Park trees and a dark rock outcrop, with leafy branches framing the blue sky above",
+        caption: "Two New Yorks, one frame",
+      },
+      {
+        src: "/photos/new-york/IMG_3924.jpeg",
+        alt: "Pigeons gathered on a path scattered with birdseed, one sharply detailed in the foreground while another stands softly out of focus behind it",
+        caption: "The real locals",
+      },
+      {
+        src: "/photos/new-york/IMG_4008.jpeg",
+        alt: "Crowded Times Square at night beneath towering digital billboards, neon storefront signs, and green traffic lights glowing over the packed intersection",
+        caption: "City at full volume",
+      },
+      {
+        src: "/photos/new-york/IMG_4081.jpeg",
+        alt: "Long-exposure Midtown sidewalk scene with pedestrians blurred into motion, the Chrysler Building in the distance, and glass office facades reflecting the blue sky",
+        caption: "Nobody stopped for the photo",
+      },
+      {
+        src: "/photos/new-york/IMG_4100.jpeg",
+        alt: "Across-the-river skyline view of Midtown Manhattan under dramatic layered clouds, with glassy high-rises stacked along the waterfront",
+        caption: "Glass and ambition",
+      },
     ],
   },
   {
