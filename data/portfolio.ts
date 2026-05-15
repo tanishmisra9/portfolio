@@ -80,8 +80,7 @@ export const portfolio: PortfolioContent = {
         'Distinguished Level of Achievement, Summa Cum Laude',
       pillRows: [
         [
-          'Clarinet player',
-          'Logistics Captain',
+          'Clarinet player & Logistics Captain',
           'AI Club Officer',
           'NHS',
         ],
@@ -207,7 +206,7 @@ export const portfolio: PortfolioContent = {
   projects: [
     {
       id: 'project-candle',
-      title: 'Candle for CHM',
+      title: 'Candle (CHM Research Hub)',
       description:
         'Deployed an all-in-one Choroideremia research intelligence hub, aggregating trials and publications, with a natural language querying interface for patients to receive truthful responses.',
       techStack: ['PostgreSQL', 'pgvector', 'RAG', 'React'],
@@ -236,7 +235,7 @@ export const portfolio: PortfolioContent = {
       id: 'project-portfolio',
       title: 'Personal Portfolio',
       description:
-        'Deployed a personal website, leaning into dark mode and minimalism.',
+        'Built a personal website, leaning into minimalism.',
       techStack: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
       githubUrl: 'https://github.com/tanishmisra9/portfolio',
       pill: 'website',
