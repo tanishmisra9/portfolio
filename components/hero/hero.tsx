@@ -108,8 +108,8 @@ export function Hero({ subtitle }: HeroProps) {
       id="top"
       className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[82vh] md:items-center md:py-24"
     >
-      <div className="mx-auto w-full max-w-6xl text-left">
-        <div className="mb-6 ml-[11vw] md:mb-32 md:ml-[9vw]">
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="mb-6 flex flex-col items-center md:mb-32">
           <HeroNameMotion>
             <>
               <h1 className="sr-only">TANISH MISRA</h1>
@@ -117,7 +117,7 @@ export function Hero({ subtitle }: HeroProps) {
                 role="button"
                 tabIndex={0}
                 aria-label="Play name pit-stop animation"
-                className="cursor-pointer select-none font-display text-[clamp(3.105rem,12.42vw,12.006rem)] md:text-[clamp(2.256rem,9.026vw,8.726rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                className="flex flex-col items-center cursor-pointer select-none font-display text-[clamp(3.105rem,12.42vw,12.006rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30 md:text-[clamp(2.256rem,9.026vw,8.726rem)]"
                 onPointerMove={onNamePointerMove}
                 onPointerLeave={onNamePointerLeaveOrCancel}
                 onPointerCancel={onNamePointerLeaveOrCancel}
@@ -129,7 +129,7 @@ export function Hero({ subtitle }: HeroProps) {
                   }
                 }}
               >
-                <div className="text-white translate-x-8 md:translate-x-10">
+                <div className="text-white">
                   <ScatterName
                     text="TANISH"
                     lineId="tanish"
@@ -141,7 +141,7 @@ export function Hero({ subtitle }: HeroProps) {
                     onScatterComplete={onLineScatterComplete}
                   />
                 </div>
-                <div className="-mt-3 -translate-x-2 text-neutral-600 md:-mt-5 md:-translate-x-3">
+                <div className="-mt-3 translate-x-[0.14em] text-neutral-600 md:-mt-5">
                   <ScatterName
                     text="MISRA"
                     lineId="misra"
@@ -160,7 +160,7 @@ export function Hero({ subtitle }: HeroProps) {
             </>
           </HeroNameMotion>
           <motion.div
-            className="-translate-x-2 mt-7 flex max-w-4xl flex-col gap-3 text-left font-sans text-xl leading-relaxed md:-translate-x-3 md:mt-14 md:text-2xl"
+            className="mt-7 flex max-w-4xl flex-col items-center gap-3 text-center font-sans text-xl leading-relaxed md:mt-14 md:text-2xl"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
