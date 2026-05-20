@@ -3,13 +3,13 @@ import type { PortfolioContent } from '@/types/content';
 export const portfolio: PortfolioContent = {
   name: 'TANISH MISRA',
   heroSubtitle:
-    'Building practical solutions for real-world constraints.\nCS @ Purdue | Incoming @ Toyota Connected Technologies',
+    'Building practical solutions for real-world constraints.\nCS @ Purdue | Automation Co-op @ Toyota CXD',
   experience: [
     {
       id: 'exp-01',
-      date: 'Incoming, Summer 2026',
-      org: 'Toyota Connected Technologies',
-      role: 'Incoming STEM Co-op Intern',
+      date: 'May 2026 - Present',
+      org: 'Toyota Connected Experiences Division (CXD)',
+      role: 'Automation Co-op',
       tags: ['Software Engineering', 'AI/ML', 'QA'],
     },
     {
