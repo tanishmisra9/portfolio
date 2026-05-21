@@ -244,7 +244,7 @@ export const portfolio: PortfolioContent = {
       id: 'project-securify',
       title: 'Securify',
       description:
-        'Semi-finalist at AlgoFest Hackathon 2026 (200+ submissions); deployed a fine-tuned RoBERTa NER pipeline that redacts PII before any text reaches the LLM',
+        'Semi-finalist at AlgoFest 2026 (200+ submissions); deployed a fine-tuned RoBERTa NER pipeline that redacts PII before any text reaches an LLM.',
       techStack: [
         'Python',
         'spaCy',
