@@ -208,7 +208,7 @@ export const portfolio: PortfolioContent = {
       id: 'project-candle',
       title: 'Candle (CHM Research Hub)',
       description:
-        'Deployed an all-in-one Choroideremia research intelligence hub, aggregating trials and publications, with a natural language querying interface for patients to receive truthful responses.',
+        'Open-source CHM research dashboard aggregating 29 clinical trials and 475 publications into one accessible interface, adopted by CureCHM as an official patient resource at candleforchm.org.',
       techStack: ['PostgreSQL', 'pgvector', 'RAG', 'React'],
       githubUrl: 'https://github.com/tanishmisra9/candle',
       pill: 'in-progress',
