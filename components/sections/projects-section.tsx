@@ -10,7 +10,7 @@ import {
   PILL_CLASSES,
 } from '@/components/ui/class-constants';
 import type { ProjectEntry } from '@/types/content';
-import { Github } from 'lucide-react';
+import { ExternalLink, Github } from 'lucide-react';
 
 type Props = { projects: ProjectEntry[] };
 
@@ -28,16 +28,30 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
           {pillLabel}
         </span>
       ) : null}
-      <a
-        href={project.githubUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute right-6 top-6 text-neutral-500 transition-colors hover:text-white"
-        aria-label={`${project.title} on GitHub`}
-      >
-        <Github className="h-4 w-4" strokeWidth={1.8} />
-      </a>
-      <h3 className={`${pillLabel ? 'mt-5 ' : ''}pr-10 font-display text-2xl font-semibold text-white`}>
+      <div className="absolute right-6 top-6 flex items-center gap-4">
+        {project.links?.map(({ label, url }) => (
+          <a
+            key={url}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-neutral-500 transition-colors hover:text-white"
+            aria-label={label}
+          >
+            <ExternalLink className="h-4 w-4" strokeWidth={1.8} />
+          </a>
+        ))}
+        <a
+          href={project.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-neutral-500 transition-colors hover:text-white"
+          aria-label={`${project.title} on GitHub`}
+        >
+          <Github className="h-4 w-4" strokeWidth={1.8} />
+        </a>
+      </div>
+      <h3 className={`${pillLabel ? 'mt-5 ' : ''}${project.links?.length ? 'pr-16' : 'pr-10'} font-display text-2xl font-semibold text-white`}>
         {project.title}
       </h3>
       <p className="mt-4 flex-1 leading-relaxed text-neutral-400">

@@ -22,6 +22,7 @@ export type ProjectEntry = {
   description: string;
   techStack: string[];
   githubUrl: string;
+  links?: { label: string; url: string }[];
   /** Small label shown at the top-left of the card; hidden when empty/whitespace. */
   pill?: string;
 };

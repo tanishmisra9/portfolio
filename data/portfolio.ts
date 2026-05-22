@@ -211,6 +211,7 @@ export const portfolio: PortfolioContent = {
         'Open-source CHM research dashboard aggregating 29 clinical trials and 475 publications into one accessible interface, adopted by CureCHM as an official patient resource at candleforchm.org.',
       techStack: ['PostgreSQL', 'pgvector', 'RAG', 'React'],
       githubUrl: 'https://github.com/tanishmisra9/candle',
+      links: [{ label: 'Live site', url: 'https://candleforchm.org' }],
       pill: 'in-progress',
     },
     {
