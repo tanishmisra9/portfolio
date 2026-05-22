@@ -230,6 +230,7 @@ export const portfolio: PortfolioContent = {
         'Deployed a 4-agent LangGraph pipeline for deduplicating vendor records using fuzzy matching and GPT-4.',
       techStack: ['Python', 'LangGraph', 'OpenAI', 'MySQL'],
       githubUrl: 'https://github.com/tanishmisra9/VendorOrchestrator',
+      links: [{ label: 'Live site', url: 'https://vendororchestrator-production.up.railway.app' }],
       pill: 'project',
     },
     {
@@ -239,6 +240,7 @@ export const portfolio: PortfolioContent = {
         'Built a personal website, leaning into minimalism.',
       techStack: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
       githubUrl: 'https://github.com/tanishmisra9/portfolio',
+      links: [{ label: 'Live site', url: 'https://www.tanishmisra.com' }],
       pill: 'website',
     },
     {
@@ -257,6 +259,7 @@ export const portfolio: PortfolioContent = {
         'Tailwind CSS',
       ],
       githubUrl: 'https://github.com/tanishmisra9/securify',
+      links: [{ label: 'Live site', url: 'https://securify-production-136f.up.railway.app' }],
       pill: 'algofest 2026',
     },
     {
@@ -284,6 +287,7 @@ export const portfolio: PortfolioContent = {
         'Railway',
       ],
       githubUrl: 'https://github.com/tanishmisra9/tokenwise',
+      links: [{ label: 'Live site', url: 'https://tokenwise-production.up.railway.app' }],
       pill: 'global fusion 2026',
     },
     {
