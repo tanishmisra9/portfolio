@@ -38,7 +38,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
             className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
             aria-label={label}
           >
-            <ExternalLink className="h-4 w-4" strokeWidth={1.8} />
+            <ExternalLink className="h-4 w-4" strokeWidth={1.8} aria-hidden />
           </a>
         ))}
         <a
@@ -48,7 +48,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
           className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
           aria-label={`${project.title} on GitHub`}
         >
-          <Github className="h-4 w-4" strokeWidth={1.8} />
+          <Github className="h-4 w-4" strokeWidth={1.8} aria-hidden />
         </a>
       </div>
       <h3 className={`${pillLabel ? 'mt-5 ' : ''}${project.links?.length ? 'pr-16' : 'pr-10'} font-display text-2xl font-semibold text-white`}>
