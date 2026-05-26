@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <HomeIntroGateProvider>
-      <main className="relative z-0 isolate">
+      <main id="main-content" tabIndex={-1} className="relative z-0 isolate">
         <Hero subtitle={portfolio.heroSubtitle} />
         <ExperienceSection entries={portfolio.experience} />
         <EducationSection entries={portfolio.education} />

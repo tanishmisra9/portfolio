@@ -39,6 +39,7 @@
   --fg: #e5e5e5;
   --muted: #b4b4b8;
   --border: rgba(255, 255, 255, 0.12);
+  --heading-ghost: #6a6a6a; /* ~3.9:1 on #000 — clears the 3:1 large-text bar with margin */
 }
 
 html {
@@ -83,14 +84,14 @@ body {
     color: #d4d4d4;
   }
   100% {
-    color: #525252;
+    color: #737373;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .camera-flash-text {
     animation: none;
-    color: #525252;
+    color: #737373;
   }
 }
 

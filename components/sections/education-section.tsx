@@ -28,7 +28,7 @@ export function EducationSection({ entries }: Props) {
     <section id="education" className="scroll-mt-20 px-6 pb-8 pt-6 md:py-24">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
+          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] md:mb-12">
             EDUCATION
           </h2>
         </ScrollReveal>

@@ -25,7 +25,7 @@ export default async function PhotoCollectionPage({ params }: Props) {
   if (!collection) notFound();
 
   return (
-    <main className="relative z-0 isolate px-6 pb-24 pt-8 md:py-16">
+    <main id="main-content" tabIndex={-1} className="relative z-0 isolate px-6 pb-24 pt-8 md:py-16">
       <PhotoAlbumMotion
         title={collection.title}
         slug={slug}

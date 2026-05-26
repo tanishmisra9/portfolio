@@ -81,7 +81,7 @@ export function SkillsSection({ skills, certifications }: Props) {
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800 md:mb-12">
+          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] md:mb-12">
             SKILLS
           </h2>
         </ScrollReveal>
@@ -112,7 +112,7 @@ export function SkillsSection({ skills, certifications }: Props) {
 
         <section id="certifications" className="mt-10 scroll-mt-20 md:mt-24">
             <ScrollReveal variant="fade">
-              <h3 className="select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-neutral-800">
+              <h3 className="select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)]">
                 Certifications
               </h3>
             </ScrollReveal>

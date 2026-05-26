@@ -83,7 +83,7 @@ const ScatterLetter = forwardRef<HTMLSpanElement, ScatterLetterProps>(
     const filterBlur = useTransform(blurMv, (b) => `blur(${Number(b)}px)`);
 
     const lineColorClass =
-      lineId === "tanish" ? "text-white" : "text-neutral-600";
+      lineId === "tanish" ? "text-white" : "text-neutral-500";
 
     /* Outer = magnet spring; inner = pit-stop offset + blur. Nested
      * transforms avoid useTransform([spring, mv]) which can throw in FM 12 + RSC. */
