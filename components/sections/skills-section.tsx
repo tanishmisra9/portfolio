@@ -77,11 +77,16 @@ export function SkillsSection({ skills, certifications }: Props) {
   return (
     <section
       id="skills"
+      aria-labelledby="skills-heading"
       className="scroll-mt-20 px-6 pb-8 pt-6 md:pb-16 md:pt-24"
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] md:mb-12">
+          <h2
+            id="skills-heading"
+            tabIndex={0}
+            className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:mb-12"
+          >
             SKILLS
           </h2>
         </ScrollReveal>
@@ -110,9 +115,13 @@ export function SkillsSection({ skills, certifications }: Props) {
           })}
         </div>
 
-        <section id="certifications" className="mt-10 scroll-mt-20 md:mt-24">
+        <section id="certifications" aria-labelledby="certifications-heading" className="mt-10 scroll-mt-20 md:mt-24">
             <ScrollReveal variant="fade">
-              <h3 className="select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)]">
+              <h3
+                id="certifications-heading"
+                tabIndex={0}
+                className="select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              >
                 Certifications
               </h3>
             </ScrollReveal>

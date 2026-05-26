@@ -25,10 +25,14 @@ function CoursePill({ label }: { label: string }) {
 
 export function EducationSection({ entries }: Props) {
   return (
-    <section id="education" className="scroll-mt-20 px-6 pb-8 pt-6 md:py-24">
+    <section id="education" aria-labelledby="education-heading" className="scroll-mt-20 px-6 pb-8 pt-6 md:py-24">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] md:mb-12">
+          <h2
+            id="education-heading"
+            tabIndex={0}
+            className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:mb-12"
+          >
             EDUCATION
           </h2>
         </ScrollReveal>
