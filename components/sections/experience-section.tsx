@@ -21,7 +21,7 @@ export function ExperienceSection({ entries }: Props) {
           <h2
             id="experience-heading"
             tabIndex={0}
-            className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:mb-12"
+            className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:mb-12"
           >
             EXPERIENCE
           </h2>

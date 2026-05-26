@@ -85,7 +85,7 @@ export function SkillsSection({ skills, certifications }: Props) {
           <h2
             id="skills-heading"
             tabIndex={0}
-            className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:mb-12"
+            className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:mb-12"
           >
             SKILLS
           </h2>
@@ -120,7 +120,7 @@ export function SkillsSection({ skills, certifications }: Props) {
               <h3
                 id="certifications-heading"
                 tabIndex={0}
-                className="select-none font-display text-[10vw] font-extrabold uppercase leading-none tracking-tighter text-[var(--heading-ghost)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="select-none font-display text-[10vw] font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
                 Certifications
               </h3>

@@ -39,7 +39,19 @@
   --fg: #e5e5e5;
   --muted: #b4b4b8;
   --border: rgba(255, 255, 255, 0.12);
-  --heading-ghost: #6a6a6a; /* ~3.9:1 on #000 — clears the 3:1 large-text bar with margin */
+  --heading-ghost: #6a6a6a;
+}
+
+.heading-ghost {
+  -webkit-text-stroke: 1.5px var(--heading-ghost);
+  color: rgba(106, 106, 106, 0.22);
+  letter-spacing: 0.01em;
+}
+
+@media (min-width: 768px) {
+  .heading-ghost {
+    -webkit-text-stroke-width: 2px;
+  }
 }
 
 html {
