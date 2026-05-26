@@ -117,7 +117,7 @@ export function Hero({ subtitle }: HeroProps) {
                 role="button"
                 tabIndex={0}
                 aria-label="Play name pit-stop animation"
-                className="flex flex-col items-center cursor-pointer select-none font-display text-[clamp(3.105rem,12.42vw,12.006rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/30 md:text-[clamp(2.256rem,9.026vw,8.726rem)]"
+                className="flex flex-col items-center cursor-pointer select-none font-display text-[clamp(3.105rem,12.42vw,12.006rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:text-[clamp(2.256rem,9.026vw,8.726rem)]"
                 onPointerMove={onNamePointerMove}
                 onPointerLeave={onNamePointerLeaveOrCancel}
                 onPointerCancel={onNamePointerLeaveOrCancel}

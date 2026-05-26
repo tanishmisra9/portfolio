@@ -85,9 +85,13 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     closeButtonRef.current?.focus();
+    document.querySelector("main")?.setAttribute("inert", "");
+    document.querySelector("header")?.setAttribute("inert", "");
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.querySelector("main")?.removeAttribute("inert");
+      document.querySelector("header")?.removeAttribute("inert");
     };
   }, [selectedPhoto]);
 
@@ -155,7 +159,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
             href="https://www.instagram.com/tanishtakespics/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-full border border-white/10 p-[0.6875rem] text-neutral-400 transition-colors hover:border-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+            className="inline-flex items-center justify-center rounded-full border border-white/10 p-[0.6875rem] text-neutral-400 transition-colors hover:border-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             aria-label="Instagram"
           >
             <Instagram
@@ -259,7 +263,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                       ref={closeButtonRef}
                       type="button"
                       onClick={closeOverlay}
-                      className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                       aria-label="Close surprise photo"
                     >
                       <X className="h-4 w-4" strokeWidth={1.9} aria-hidden />

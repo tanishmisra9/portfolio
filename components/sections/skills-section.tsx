@@ -42,7 +42,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
         href={cert.credentialUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute right-6 top-6 text-neutral-500 transition-colors hover:text-white"
+        className="absolute right-6 top-6 text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
         aria-label={`View credential for ${cert.title}`}
       >
         <ExternalLink className="h-4 w-4" strokeWidth={1.8} />

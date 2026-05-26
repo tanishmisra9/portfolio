@@ -36,7 +36,7 @@ export function EducationSection({ entries }: Props) {
           {entries.map((edu) => (
             <ScrollReveal key={edu.id}>
               <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
-                <span className="font-mono text-sm uppercase tracking-wider text-neutral-500">
+                <span className="font-mono text-sm uppercase tracking-wider text-neutral-400">
                   {edu.date}
                 </span>
                 <div>

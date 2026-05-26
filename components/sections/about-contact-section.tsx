@@ -46,7 +46,7 @@ function renderHighlightedParagraph(paragraph: string): ReactNode {
         <Link
           key={`shot-${index}`}
           href="/photos"
-          className="select-none font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+          className="select-none font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
           {part}
         </Link>
@@ -57,7 +57,7 @@ function renderHighlightedParagraph(paragraph: string): ReactNode {
         <Link
           key={`f1-${index}`}
           href="/photos/super-max"
-          className="font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+          className="font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
           {part}
         </Link>
@@ -109,7 +109,7 @@ export function AboutContactSection({ bio, social }: Props) {
                   href={link.href}
                   aria-label={link.label}
                   title={link.label}
-                  className="rounded-md p-2 text-neutral-400 transition-colors hover:text-white"
+                  className="rounded-md p-2 text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                   {...(link.href.startsWith('http')
                     ? { target: '_blank', rel: 'noopener noreferrer' }
                     : {})}
@@ -125,7 +125,7 @@ export function AboutContactSection({ bio, social }: Props) {
           </div>
         </ScrollReveal>
         <ScrollReveal variant="fade">
-          <p className="mt-14 text-center text-[0.805rem] text-neutral-500 md:mt-[4.6rem]">
+          <p className="mt-14 text-center text-[0.805rem] text-neutral-400 md:mt-[4.6rem]">
             © {new Date().getFullYear()} Tanish Misra
           </p>
         </ScrollReveal>

@@ -14,7 +14,7 @@ export default function Error({
       <p className="mt-4 text-lg text-neutral-400">Something went wrong.</p>
       <button
         onClick={reset}
-        className="mt-8 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-xs uppercase tracking-[0.2em] text-neutral-200 backdrop-blur-xl transition-colors hover:border-white/30 hover:bg-white/[0.1]"
+        className="mt-8 rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-xs uppercase tracking-[0.2em] text-neutral-200 backdrop-blur-xl transition-colors hover:border-white/30 hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
       >
         Try again
       </button>

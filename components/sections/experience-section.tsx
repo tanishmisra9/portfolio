@@ -25,7 +25,7 @@ export function ExperienceSection({ entries }: Props) {
           {entries.map((entry) => (
             <ScrollReveal key={entry.id} homeIntroComplete={homeIntroDone}>
               <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
-                <div className="font-mono text-sm uppercase tracking-wider text-neutral-500">
+                <div className="font-mono text-sm uppercase tracking-wider text-neutral-400">
                   {entry.date}
                 </div>
                 <div>

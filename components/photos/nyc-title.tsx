@@ -130,8 +130,7 @@ export function NYCTitle({ baseClasses }: Props) {
           <img
             ref={heartRef}
             src="/heart.png"
-            alt=""
-            aria-hidden
+            alt="love"
             className="pointer-events-none mx-[0.15em] h-[0.7em] w-auto select-none"
             decoding="async"
             draggable={false}

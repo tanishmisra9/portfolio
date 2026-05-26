@@ -142,8 +142,10 @@ export function SiteHeader() {
     if (!menuOpen) return;
     const prev = document.documentElement.style.overflow;
     document.documentElement.style.overflow = "hidden";
+    document.querySelector("main")?.setAttribute("inert", "");
     return () => {
       document.documentElement.style.overflow = prev;
+      document.querySelector("main")?.removeAttribute("inert");
     };
   }, [menuOpen]);
 
@@ -231,7 +233,7 @@ export function SiteHeader() {
                         : undefined
                     }
                     className={[
-                      "relative inline-flex items-center justify-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
+                      "relative inline-flex items-center justify-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
                       active
                         ? "text-white"
                         : "text-neutral-400 hover:text-white",
@@ -257,7 +259,7 @@ export function SiteHeader() {
             <button
               ref={menuTriggerRef}
               type="button"
-              className="flex shrink-0 items-center justify-center rounded-md p-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white md:hidden"
+              className="flex shrink-0 items-center justify-center rounded-md p-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:hidden"
               aria-expanded={menuOpen}
               aria-controls="mobile-nav-overlay"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
