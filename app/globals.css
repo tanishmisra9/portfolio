@@ -43,14 +43,23 @@
 }
 
 .heading-ghost {
-  -webkit-text-stroke: 1.5px var(--heading-ghost);
   color: rgba(106, 106, 106, 0.22);
-  letter-spacing: 0.01em;
+  letter-spacing: 0.03em;
+  --ghost-outline: 1px;
+  text-shadow:
+    calc(-1 * var(--ghost-outline)) 0 var(--heading-ghost),
+    var(--ghost-outline) 0 var(--heading-ghost),
+    0 calc(-1 * var(--ghost-outline)) var(--heading-ghost),
+    0 var(--ghost-outline) var(--heading-ghost),
+    calc(-1 * var(--ghost-outline)) calc(-1 * var(--ghost-outline)) var(--heading-ghost),
+    var(--ghost-outline) var(--ghost-outline) var(--heading-ghost),
+    calc(-1 * var(--ghost-outline)) var(--ghost-outline) var(--heading-ghost),
+    var(--ghost-outline) calc(-1 * var(--ghost-outline)) var(--heading-ghost);
 }
 
 @media (min-width: 768px) {
   .heading-ghost {
-    -webkit-text-stroke-width: 2px;
+    --ghost-outline: 1.5px;
   }
 }
 
