@@ -39,34 +39,20 @@
   --fg: #e5e5e5;
   --muted: #b4b4b8;
   --border: rgba(255, 255, 255, 0.12);
-  --heading-ghost: #757575;
+  --heading-ghost: #848484de;
 }
 
 .heading-ghost {
-  -webkit-text-stroke: 1px var(--heading-ghost);
+  -webkit-text-stroke: 2.8px var(--heading-ghost);
   paint-order: stroke fill;
   /* black fill masks inner stroke; only the outer ring reads as outline */
   color: #000;
-  letter-spacing: 0.06em;
-}
-
-@media (min-width: 768px) {
-  .heading-ghost {
-    -webkit-text-stroke-width: 1.5px;
-    letter-spacing: 0.05em;
-  }
+  letter-spacing: 0.004em;
 }
 
 /* Long photos title — tighter tracking than section headings so it fits with stroke */
 .heading-ghost.heading-ghost-photos {
-  letter-spacing: -0.05em;
-  -webkit-text-stroke-width: 0.75px;
-}
-
-@media (min-width: 768px) {
-  .heading-ghost.heading-ghost-photos {
-    -webkit-text-stroke-width: 1px;
-  }
+  letter-spacing: -0.04em;
 }
 
 html {
@@ -92,8 +78,6 @@ body {
 /* ── iPhone-style camera flash: text color sequence ── */
 .camera-flash-text {
   animation: iphone-flash 0.8s ease-out both;
-  -webkit-text-stroke: 0 transparent;
-  paint-order: normal;
 }
 
 @keyframes iphone-flash {
@@ -104,23 +88,29 @@ body {
     color: #ffffff;
   }
   40% {
-    color: #404040;
+    color: #000000;
   }
-  72% {
-    color: #404040;
+  66% {
+    color: #000000;
+  }
+  70% {
+    color: #ffffff;
   }
   78% {
-    color: #d4d4d4;
+    color: #ffffff;
+  }
+  86% {
+    color: #000000;
   }
   100% {
-    color: #737373;
+    color: #000000;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .camera-flash-text {
     animation: none;
-    color: #737373;
+    color: #000000;
   }
 }
 

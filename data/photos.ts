@@ -635,7 +635,9 @@ export function getAllCollectionSlugs(): string[] {
 }
 
 export function getRandomPhotoCandidates(): RandomPhotoCandidate[] {
-  return collections.flatMap((collection) =>
+  return collections
+    .filter((collection) => collection.slug !== "super-max")
+    .flatMap((collection) =>
     collection.photos.flatMap((photo) => {
       const primary: RandomPhotoCandidate = {
         src: photo.src,

@@ -44,8 +44,8 @@ export function PhotosHeader() {
   return (
     <h1
       onClick={handleClick}
-      className={`select-none cursor-default text-center font-display text-[clamp(2.2rem,7.5vw,5.75rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(2.4rem,8.2vw,6.25rem)] md:text-[min(7.5vw,6.25rem)] md:max-w-full motion-reduce:animate-none ${
-        flashing ? "camera-flash-text" : "heading-ghost heading-ghost-photos"
+      className={`select-none cursor-default text-center font-display text-[clamp(2.4rem,8.2vw,6.2rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(2.65rem,9vw,6.75rem)] md:text-[min(8.2vw,6.75rem)] md:max-w-full motion-reduce:animate-none heading-ghost heading-ghost-photos ${
+        flashing ? "camera-flash-text" : ""
       }`}
     >
       TANISHTAKESPICS
