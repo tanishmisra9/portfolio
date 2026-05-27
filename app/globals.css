@@ -39,7 +39,7 @@
   --fg: #e5e5e5;
   --muted: #b4b4b8;
   --border: rgba(255, 255, 255, 0.12);
-  --heading-ghost: #6a6a6a;
+  --heading-ghost: #757575;
 }
 
 .heading-ghost {
@@ -80,6 +80,8 @@ body {
 /* ── iPhone-style camera flash: text color sequence ── */
 .camera-flash-text {
   animation: iphone-flash 0.8s ease-out both;
+  -webkit-text-stroke: 0 transparent;
+  paint-order: normal;
 }
 
 @keyframes iphone-flash {

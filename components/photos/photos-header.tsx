@@ -45,7 +45,7 @@ export function PhotosHeader() {
     <h1
       onClick={handleClick}
       className={`select-none cursor-default text-center font-display text-[clamp(2.4rem,8.6vw,6.25rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(2.7rem,9.6vw,7rem)] md:text-[8.8vw] motion-reduce:animate-none ${
-        flashing ? "camera-flash-text" : "text-neutral-500"
+        flashing ? "camera-flash-text" : "heading-ghost"
       }`}
     >
       TANISHTAKESPICS
