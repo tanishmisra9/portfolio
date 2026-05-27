@@ -44,7 +44,7 @@ export function PhotosHeader() {
   return (
     <h1
       onClick={handleClick}
-      className={`select-none cursor-default text-center font-display text-[clamp(2.4rem,8.2vw,6.2rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(2.65rem,9vw,6.75rem)] md:text-[min(8.2vw,6.75rem)] md:max-w-full motion-reduce:animate-none heading-ghost heading-ghost-photos ${
+      className={`heading-bleed-mobile select-none cursor-default text-center font-display text-[clamp(2.75rem,10.5vw,6.5rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(3rem,11.5vw,7rem)] md:text-[min(8.2vw,6.75rem)] md:max-w-full motion-reduce:animate-none heading-ghost heading-ghost-photos ${
         flashing ? "camera-flash-text" : ""
       }`}
     >

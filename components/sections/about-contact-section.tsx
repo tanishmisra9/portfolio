@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/scroll-reveal';
+import { SECTION_GHOST_HEADING_BASE } from '@/components/ui/class-constants';
 import { Github, Linkedin, Mail } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { SocialLink } from '@/types/content';
@@ -85,7 +86,9 @@ export function AboutContactSection({ bio, social }: Props) {
     <section id="about" className="scroll-mt-20 px-6 pb-12 pt-6 md:pb-[5.52rem] md:pt-11">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className="mb-7 select-none text-center font-display text-[10vw] font-extrabold uppercase leading-none heading-ghost md:mb-11">
+          <h2
+            className={`${SECTION_GHOST_HEADING_BASE} mb-7 text-center md:mb-11`}
+          >
             ABOUT
           </h2>
         </ScrollReveal>

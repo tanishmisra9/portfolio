@@ -107,12 +107,12 @@ export function AlbumTitle({ title, slug }: Props) {
   const isLongSingleWordTitle = !title.includes(" ") && title.length >= 10;
   const isSuperMaxTitle = slug === "super-max";
   const titleSizeClasses = isLongSingleWordTitle
-    ? "text-[clamp(3.35rem,12.4vw,5.4rem)] sm:text-[clamp(3.8rem,12vw,6rem)]"
+    ? "text-[clamp(3.75rem,13.5vw,5.75rem)] sm:text-[clamp(4.2rem,13vw,6.25rem)]"
     : isSuperMaxTitle
-      ? "text-[clamp(3.15rem,11.8vw,5.4rem)] sm:text-[clamp(3.8rem,12vw,6rem)]"
-      : "text-[clamp(4.5rem,15vw,6rem)]";
+      ? "text-[clamp(3.55rem,13vw,5.75rem)] sm:text-[clamp(4.2rem,13vw,6.25rem)]"
+      : "text-[clamp(4.85rem,16.5vw,6.35rem)]";
   const baseClasses =
-    `select-none font-display ${titleSizeClasses} font-extrabold uppercase tracking-tighter leading-[1.08] md:text-8xl`;
+    `heading-bleed-mobile select-none font-display ${titleSizeClasses} font-extrabold uppercase tracking-tighter leading-[1.08] md:text-8xl`;
 
   if (!isSuperMax || reduceMotion) {
     if (isNYC && !reduceMotion) {

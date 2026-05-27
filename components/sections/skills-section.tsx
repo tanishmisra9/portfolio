@@ -8,6 +8,8 @@ import {
   GLASS_BUTTON_SHEEN_BACKGROUND,
   GLASS_BUTTON_SHEEN_CLASSES,
   PILL_CLASSES,
+  SECTION_GHOST_HEADING_BASE,
+  SECTION_GHOST_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
 import type { CertificationEntry, SkillCategory } from '@/types/content';
 import { ExternalLink } from 'lucide-react';
@@ -85,7 +87,7 @@ export function SkillsSection({ skills, certifications }: Props) {
           <h2
             id="skills-heading"
             tabIndex={0}
-            className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:mb-12"
+            className={SECTION_GHOST_HEADING_CLASSES}
           >
             SKILLS
           </h2>
@@ -120,7 +122,7 @@ export function SkillsSection({ skills, certifications }: Props) {
               <h3
                 id="certifications-heading"
                 tabIndex={0}
-                className="select-none font-display text-[10vw] font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className={SECTION_GHOST_HEADING_BASE}
               >
                 Certifications
               </h3>

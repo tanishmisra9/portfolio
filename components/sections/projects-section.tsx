@@ -8,6 +8,7 @@ import {
   GLASS_BUTTON_SHEEN_BACKGROUND,
   GLASS_BUTTON_SHEEN_CLASSES,
   PILL_CLASSES,
+  SECTION_GHOST_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
 import type { ProjectEntry } from '@/types/content';
 import { ExternalLink, Github } from 'lucide-react';
@@ -83,7 +84,7 @@ export function ProjectsSection({ projects }: Props) {
     <section id="projects" className="scroll-mt-20 pb-8 pt-6 md:pb-16 md:pt-11">
       <div className="mx-auto w-full max-w-7xl px-8 md:px-16 lg:px-32">
         <ScrollReveal variant="fade">
-          <h2 className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none heading-ghost md:mb-12">
+          <h2 className={SECTION_GHOST_HEADING_CLASSES}>
             PROJECTS
           </h2>
         </ScrollReveal>

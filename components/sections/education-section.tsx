@@ -1,5 +1,8 @@
 import { ScrollReveal } from '@/components/scroll-reveal';
-import { PILL_CLASSES } from '@/components/ui/class-constants';
+import {
+  PILL_CLASSES,
+  SECTION_GHOST_HEADING_CLASSES,
+} from '@/components/ui/class-constants';
 import type { EducationEntry } from '@/types/content';
 
 type Props = { entries: EducationEntry[] };
@@ -31,7 +34,7 @@ export function EducationSection({ entries }: Props) {
           <h2
             id="education-heading"
             tabIndex={0}
-            className="mb-8 select-none font-display text-[10vw] font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:mb-12"
+            className={SECTION_GHOST_HEADING_CLASSES}
           >
             EDUCATION
           </h2>
