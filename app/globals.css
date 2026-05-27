@@ -63,6 +63,12 @@
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
   }
+
+  .section-ghost-heading,
+  .section-ghost-heading-long {
+    text-align: center;
+    max-width: 100%;
+  }
 }
 
 /* Home section ghost headings — larger than legacy 10vw on mobile */
@@ -71,16 +77,29 @@
   letter-spacing: -0.02em;
 }
 
+/* Long labels (e.g. Certifications) — no bleed, tighter fit on narrow screens */
+.section-ghost-heading-long {
+  font-size: clamp(2rem, 10.5vw, 5.5rem);
+  letter-spacing: -0.04em;
+}
+
 @media (min-width: 768px) {
   .section-ghost-heading {
     font-size: clamp(3.25rem, 5.25vw, 4.75rem);
     letter-spacing: 0.004em;
+  }
+
+  .section-ghost-heading-long {
+    font-size: clamp(3.25rem, 5.25vw, 4.75rem);
+    letter-spacing: 0.004em;
+    text-align: left;
   }
 }
 
 html {
   scroll-behavior: auto;
   font-size: 16px;
+  overflow-x: clip;
 }
 
 @media (min-width: 1024px) {
@@ -91,6 +110,14 @@ html {
 
 body {
   background-color: #000000;
+  overflow-x: clip;
+}
+
+@supports not (overflow-x: clip) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
 }
 
 ::selection {

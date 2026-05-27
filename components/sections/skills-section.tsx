@@ -8,7 +8,7 @@ import {
   GLASS_BUTTON_SHEEN_BACKGROUND,
   GLASS_BUTTON_SHEEN_CLASSES,
   PILL_CLASSES,
-  SECTION_GHOST_HEADING_BASE,
+  CERTIFICATIONS_GHOST_HEADING_CLASSES,
   SECTION_GHOST_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
 import type { CertificationEntry, SkillCategory } from '@/types/content';
@@ -122,7 +122,7 @@ export function SkillsSection({ skills, certifications }: Props) {
               <h3
                 id="certifications-heading"
                 tabIndex={0}
-                className={SECTION_GHOST_HEADING_BASE}
+                className={CERTIFICATIONS_GHOST_HEADING_CLASSES}
               >
                 Certifications
               </h3>
