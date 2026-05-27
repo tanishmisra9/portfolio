@@ -51,7 +51,7 @@ export const portfolio: PortfolioContent = {
   education: [
     {
       id: 'edu-01',
-      date: 'Aug 2025 - May 2028',
+      date: 'Aug 2025 - Dec 2028',
       institution: 'Purdue University',
       credential: 'B.S. Computer Science (Machine Intelligence & Security)',
       pillRows: [
@@ -71,6 +71,12 @@ export const portfolio: PortfolioContent = {
           'Multivariable Calculus',
         ],
       ],
+    },
+    {
+      id: 'edu-01-stats',
+      date: 'Aug 2025 - Dec 2028',
+      institution: 'Purdue University',
+      credential: 'Minor, Statistics',
     },
     {
       id: 'edu-02',
