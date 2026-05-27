@@ -104,10 +104,7 @@ export function Hero({ subtitle }: HeroProps) {
   };
 
   return (
-    <section
-      id="top"
-      className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[82vh] md:items-center md:py-24"
-    >
+    <section className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[82vh] md:items-center md:py-24">
       <div className="mx-auto w-full max-w-6xl">
         <div className="mb-6 flex flex-col items-center md:mb-32">
           <HeroNameMotion>

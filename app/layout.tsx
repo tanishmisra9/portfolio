@@ -41,6 +41,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-black text-neutral-200 text-base font-sans font-[120] antialiased md:text-lg">
+        <div id="top" tabIndex={-1} aria-hidden="true" />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[10002] focus:rounded-full focus:border focus:border-white/15 focus:bg-black focus:px-5 focus:py-3 focus:font-sans focus:text-xs focus:uppercase focus:tracking-[0.2em] focus:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-white/70"
