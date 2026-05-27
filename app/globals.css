@@ -57,6 +57,18 @@
   }
 }
 
+/* Long photos title — tighter tracking than section headings so it fits with stroke */
+.heading-ghost.heading-ghost-photos {
+  letter-spacing: -0.05em;
+  -webkit-text-stroke-width: 0.75px;
+}
+
+@media (min-width: 768px) {
+  .heading-ghost.heading-ghost-photos {
+    -webkit-text-stroke-width: 1px;
+  }
+}
+
 html {
   scroll-behavior: auto;
   font-size: 16px;
