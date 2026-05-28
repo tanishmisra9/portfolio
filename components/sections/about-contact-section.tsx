@@ -87,7 +87,7 @@ export function AboutContactSection({ bio, social }: Props) {
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
           <h2
-            className={`${SECTION_GHOST_HEADING_BASE} mb-7 text-center md:mb-11`}
+            className={`${SECTION_GHOST_HEADING_BASE} mb-7 md:text-center md:mb-11`}
           >
             ABOUT
           </h2>

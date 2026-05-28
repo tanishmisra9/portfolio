@@ -11,10 +11,10 @@ export const GLASS_BUTTON_SHEEN_BACKGROUND =
   "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.13) 0%, transparent 70%)";
 
 export const SECTION_GHOST_HEADING_BASE =
-  "section-ghost-heading heading-bleed-mobile select-none font-display font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70";
+  "section-ghost-heading heading-bleed-mobile select-none text-center font-display font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:text-left";
 
 export const SECTION_GHOST_HEADING_CLASSES = `${SECTION_GHOST_HEADING_BASE} mb-8 md:mb-12`;
 
 /** Certifications — no mobile bleed; uses section-ghost-heading-long in globals.css */
 export const CERTIFICATIONS_GHOST_HEADING_CLASSES =
-  "section-ghost-heading-long select-none font-display font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70";
+  "section-ghost-heading-long select-none text-center font-display font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:text-left";
