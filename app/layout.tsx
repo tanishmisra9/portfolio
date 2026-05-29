@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
+import { RadioKeystrokeListener } from "@/components/easter-eggs/radio-keystroke-listener";
 import { SiteHeader } from "@/components/site-header";
 import { SmoothScroll } from "@/components/smooth-scroll";
+import { getRadioSampleUrls } from "@/lib/radio-samples";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import "lenis/dist/lenis.css";
@@ -29,11 +31,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const radioSamples = await getRadioSampleUrls();
+
   return (
     <html
       lang="en"
@@ -48,6 +52,7 @@ export default function RootLayout({
         >
           Skip to content
         </a>
+        <RadioKeystrokeListener samples={radioSamples} />
         <SmoothScroll>
           <SiteHeader />
           {children}
