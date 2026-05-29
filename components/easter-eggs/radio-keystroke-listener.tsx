@@ -32,11 +32,22 @@ function resolvePool(samples: string[]): string[] {
   return samples.length > 0 ? samples : [...RADIO_SAMPLE_FALLBACK];
 }
 
+function pickNextSample(pool: string[], lastPlayed: string | null): string {
+  if (pool.length === 0) return RADIO_SAMPLE_FALLBACK[0];
+  if (pool.length === 1) return pool[0];
+
+  const candidates =
+    lastPlayed !== null ? pool.filter((url) => url !== lastPlayed) : pool;
+  const choices = candidates.length > 0 ? candidates : pool;
+  return choices[Math.floor(Math.random() * choices.length)];
+}
+
 export function RadioKeystrokeListener({ samples }: Props) {
   const bufferRef = useRef("");
   const playingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const poolRef = useRef(resolvePool(samples));
+  const lastPlayedRef = useRef<string | null>(null);
 
   useEffect(() => {
     poolRef.current = resolvePool(samples);
@@ -57,7 +68,8 @@ export function RadioKeystrokeListener({ samples }: Props) {
       if (playingRef.current) return;
 
       const pool = poolRef.current;
-      const src = pool[Math.floor(Math.random() * pool.length)];
+      const src = pickNextSample(pool, lastPlayedRef.current);
+      lastPlayedRef.current = src;
       const sfx = new Audio(src);
       audioRef.current = sfx;
       playingRef.current = true;
