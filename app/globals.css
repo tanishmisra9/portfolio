@@ -39,11 +39,11 @@
   --fg: #e5e5e5;
   --muted: #b4b4b8;
   --border: rgba(255, 255, 255, 0.12);
-  --heading-ghost: #848484de;
+  --heading-ghost: #a6a6a6ee;
 }
 
 .heading-ghost {
-  -webkit-text-stroke: 2.8px var(--heading-ghost);
+  -webkit-text-stroke: 5px var(--heading-ghost);
   paint-order: stroke fill;
   /* black fill masks inner stroke; only the outer ring reads as outline */
   color: #000;
@@ -72,24 +72,24 @@
 
 /* Home section ghost headings — larger than legacy 10vw on mobile */
 .section-ghost-heading {
-  font-size: clamp(2.75rem, 13.5vw, 5.5rem);
+  font-size: clamp(4.8125rem, 23.625vw, 9.625rem);
   letter-spacing: -0.02em;
 }
 
 /* Long labels (e.g. Certifications) — no bleed, tighter fit on narrow screens */
 .section-ghost-heading-long {
-  font-size: clamp(2rem, 10.5vw, 5.5rem);
+  font-size: clamp(3.5rem, 18.375vw, 9.625rem);
   letter-spacing: -0.04em;
 }
 
 @media (min-width: 768px) {
   .section-ghost-heading {
-    font-size: clamp(3.25rem, 5.25vw, 4.75rem);
+    font-size: clamp(5.6875rem, 9.1875vw, 8.3125rem);
     letter-spacing: 0.004em;
   }
 
   .section-ghost-heading-long {
-    font-size: clamp(3.25rem, 5.25vw, 4.75rem);
+    font-size: clamp(5.6875rem, 9.1875vw, 8.3125rem);
     letter-spacing: 0.004em;
     text-align: left;
   }
@@ -160,6 +160,39 @@ body {
   .camera-flash-text {
     animation: none;
     color: #000000;
+  }
+}
+
+/* ── Photos index collection tile cursor illumination ── */
+.collection-tile {
+  --hover-x: 50%;
+  --hover-y: 50%;
+}
+
+.collection-tile-spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    circle 9rem at var(--hover-x) var(--hover-y),
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.14) 32%,
+    rgba(255, 255, 255, 0.04) 52%,
+    transparent 72%
+  );
+  mix-blend-mode: soft-light;
+}
+
+.collection-tile[data-spotlight="on"] .collection-tile-spotlight {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collection-tile-spotlight {
+    display: none;
   }
 }
 

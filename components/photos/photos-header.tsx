@@ -22,7 +22,7 @@ export function PhotosHeader() {
     if (flashing) return;
     setFlashing(true);
 
-    const SHUTTER_DELAY_MS = 380;
+    const SHUTTER_DELAY_MS = 330;
     if (audioRef.current) {
       const sfx = audioRef.current.cloneNode() as HTMLAudioElement;
       sfx.volume = 0.6;
