@@ -8,6 +8,8 @@ import {
 
 const TRIGGERS = ["bbb", "boxbox"] as const;
 const BUFFER_MAX = 6;
+const TRIPLE_TAP_COUNT = 3;
+const TRIPLE_TAP_WINDOW_MS = 800;
 const BASE_VOLUME = 0.72;
 const RMS_FLOOR = 0.0008;
 const GAIN_MIN = 0.45;
@@ -149,6 +151,9 @@ export function RadioKeystrokeListener({ samples }: Props) {
   const poolRef = useRef(resolvePool(samples));
   const lastPlayedRef = useRef<string | null>(null);
   const gainBySampleRef = useRef<Map<string, number>>(unityGainMap(resolvePool(samples)));
+  const tapCountRef = useRef(0);
+  const lastTapAtRef = useRef(0);
+  const tapInactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const pool = resolvePool(samples);
@@ -166,18 +171,8 @@ export function RadioKeystrokeListener({ samples }: Props) {
   }, [samples]);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
-      if (isEditableTarget(event.target)) return;
-
-      const letter = normalizeKey(event.key);
-      if (!letter) return;
-
-      const next = (bufferRef.current + letter).slice(-BUFFER_MAX);
-      bufferRef.current = next;
-
-      if (!matchesTrigger(next)) return;
-      if (playingRef.current) return;
+    const playRandomRadio = (): boolean => {
+      if (playingRef.current) return false;
 
       const pool = poolRef.current;
       const src = pickNextSample(pool, lastPlayedRef.current);
@@ -196,13 +191,70 @@ export function RadioKeystrokeListener({ samples }: Props) {
       sfx.addEventListener("error", onDone, { once: true });
 
       void sfx.play().catch(onDone);
+      return true;
+    };
 
-      bufferRef.current = "";
+    const resetTapTracking = () => {
+      tapCountRef.current = 0;
+      lastTapAtRef.current = 0;
+      if (tapInactivityTimerRef.current !== null) {
+        clearTimeout(tapInactivityTimerRef.current);
+        tapInactivityTimerRef.current = null;
+      }
+    };
+
+    const scheduleTapInactivityReset = () => {
+      if (tapInactivityTimerRef.current !== null) {
+        clearTimeout(tapInactivityTimerRef.current);
+      }
+      tapInactivityTimerRef.current = setTimeout(() => {
+        tapCountRef.current = 0;
+        lastTapAtRef.current = 0;
+        tapInactivityTimerRef.current = null;
+      }, TRIPLE_TAP_WINDOW_MS);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (isEditableTarget(event.target)) return;
+
+      const letter = normalizeKey(event.key);
+      if (!letter) return;
+
+      const next = (bufferRef.current + letter).slice(-BUFFER_MAX);
+      bufferRef.current = next;
+
+      if (!matchesTrigger(next)) return;
+
+      if (playRandomRadio()) bufferRef.current = "";
+    };
+
+    const handleTouchEnd = () => {
+      if (playingRef.current) return;
+
+      const now = Date.now();
+      const elapsed = now - lastTapAtRef.current;
+
+      if (tapCountRef.current > 0 && elapsed > TRIPLE_TAP_WINDOW_MS) {
+        tapCountRef.current = 0;
+      }
+
+      tapCountRef.current += 1;
+      lastTapAtRef.current = now;
+      scheduleTapInactivityReset();
+
+      if (tapCountRef.current >= TRIPLE_TAP_COUNT) {
+        resetTapTracking();
+        playRandomRadio();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("touchend", handleTouchEnd);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("touchend", handleTouchEnd);
+      resetTapTracking();
       const current = audioRef.current;
       if (current) {
         current.pause();
