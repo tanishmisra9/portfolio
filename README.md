@@ -7,6 +7,7 @@ Personal portfolio and photography site at [tanishmisra.com](https://tanishmisra
 - **Home (`/`)** — Hero, experience, education, skills, certifications, projects, and about/contact
 - **Photos (`/photos`)** — Collection grid, interactive header, and “Surprise me!” random photo overlay
 - **Album pages (`/photos/[slug]`)** — Static routes generated from `data/photos.ts`
+- **Box Box easter egg** — Global F1 team-radio SFX on any page (desktop: type `bbb` or `boxbox`; mobile: triple-tap within 800ms)
 - **Stack** — Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 3, Framer Motion, Lenis
 - **Analytics** — Vercel Analytics in production
 
@@ -47,7 +48,7 @@ Asset folders under `public/photos/` match collection slugs (`campus`, `snowfall
 ```text
 Portfolio/
 ├── app/
-│   ├── layout.tsx          # Root layout, skip link, #top anchor, SmoothScroll, header
+│   ├── layout.tsx          # Root layout, skip link, radio easter egg, SmoothScroll, header
 │   ├── page.tsx            # Home page sections
 │   ├── globals.css         # Theme, ghost headings, album title animations
 │   ├── photos/
@@ -57,6 +58,7 @@ Portfolio/
 │   ├── error.tsx
 │   └── not-found.tsx
 ├── components/
+│   ├── easter-eggs/        # Box Box radio keystroke + triple-tap listener
 │   ├── hero/               # Scatter name, hero motion
 │   ├── photos/             # Album UI, canvases, photos header flash
 │   ├── sections/           # Home content sections
@@ -67,11 +69,13 @@ Portfolio/
 ├── data/
 │   ├── portfolio.ts        # Resume-style home content
 │   └── photos.ts           # Collections, images, Surprise me pool
-├── lib/                    # Motion timing helpers
+├── lib/
+│   ├── radio-samples.ts    # Scans public/sfx/radio at build time
+│   └── …                   # Motion timing helpers
 ├── public/
 │   ├── fonts/              # YD Gothic, ITC American Typewriter
 │   ├── photos/             # Image assets by collection
-│   └── sfx/                # camera.mp3, passby.mp3, pitstop.mp3
+│   └── sfx/                # camera.mp3, passby.mp3, pitstop.mp3, radio/*.mp3
 ├── types/content.ts
 ├── next.config.ts          # Image optimization config
 ├── tailwind.config.ts
@@ -139,6 +143,17 @@ After adding images, place files under the matching folder in `public/photos/`. 
 
 **Surprise me** on `/photos` draws from all collections except `super-max` via `getRandomPhotoCandidates()`.
 
+### Box Box radio easter egg
+
+Team-radio clips live in [`public/sfx/radio/`](public/sfx/radio/). [`lib/radio-samples.ts`](lib/radio-samples.ts) discovers `.mp3` (and other audio) files at build/request time — add a file, rebuild or redeploy, and it joins the pool automatically.
+
+[`components/easter-eggs/radio-keystroke-listener.tsx`](components/easter-eggs/radio-keystroke-listener.tsx) is mounted in the root layout and plays a random clip with:
+
+- **Desktop** — Type `bbb` or `boxbox` anywhere except inputs/textareas (ignored while a clip is already playing; no back-to-back repeats of the same file)
+- **Mobile / touch** — Triple-tap anywhere within 800ms
+
+Playback volume is normalized against a reference clip (`stupid.mp3` in [`lib/radio-samples.constants.ts`](lib/radio-samples.constants.ts)). If the radio folder is missing or empty, a small hard-coded fallback list is used instead.
+
 ### Metadata and styling
 
 - Site metadata: [`app/layout.tsx`](app/layout.tsx)
@@ -150,7 +165,7 @@ After adding images, place files under the matching folder in `public/photos/`. 
 - **Hero** — Click or activate the name for a scatter/reassemble animation; desktop pointer “magnet” on letters
 - **Home intro** — Sections reveal after the hero tagline animation (`HomeIntroGateProvider`)
 - **Smooth scroll** — Lenis site-wide
-- **Ghost headings** — Large section titles use stroke outlines (`.heading-ghost`) for contrast on black
+- **Ghost headings** — Large section titles use stroke outlines (`.heading-ghost`) for contrast on black; mobile sizes are clamped so long titles (e.g. EXPERIENCE) do not overflow the viewport
 - **Skip link** — “Skip to content” in the root layout targets `#main-content`
 - **Focus** — Visible focus rings on interactive controls; section headings on the home page are keyboard-focusable where needed
 - **Reduced motion** — `prefers-reduced-motion` disables or simplifies animations (hero, album titles, photos header flash)
