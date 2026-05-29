@@ -82,6 +82,24 @@
   letter-spacing: -0.04em;
 }
 
+@media (max-width: 767px) {
+  .heading-ghost {
+    -webkit-text-stroke: 3.5px var(--heading-ghost);
+  }
+
+  .section-ghost-heading {
+    font-size: clamp(2.65rem, 10.5vw, 3.6rem);
+    letter-spacing: -0.06em;
+    max-width: 100%;
+  }
+
+  .section-ghost-heading-long {
+    font-size: clamp(2.2rem, 8.8vw, 3.1rem);
+    letter-spacing: -0.06em;
+    max-width: 100%;
+  }
+}
+
 @media (min-width: 768px) {
   .section-ghost-heading {
     font-size: clamp(5.6875rem, 9.1875vw, 8.3125rem);
