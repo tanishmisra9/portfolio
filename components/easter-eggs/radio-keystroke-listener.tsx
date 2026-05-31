@@ -41,14 +41,48 @@ function resolvePool(samples: string[]): string[] {
   return samples.length > 0 ? samples : [...RADIO_SAMPLE_FALLBACK];
 }
 
-function pickNextSample(pool: string[], lastPlayed: string | null): string {
-  if (pool.length === 0) return RADIO_SAMPLE_FALLBACK[0];
-  if (pool.length === 1) return pool[0];
+function shuffleCopy(pool: string[]): string[] {
+  const arr = [...pool];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
-  const candidates =
-    lastPlayed !== null ? pool.filter((url) => url !== lastPlayed) : pool;
-  const choices = candidates.length > 0 ? candidates : pool;
-  return choices[Math.floor(Math.random() * choices.length)];
+function resetCycle(pool: string[]): string[] {
+  if (pool.length === 0) return [];
+  return shuffleCopy(pool);
+}
+
+function pickNextSampleFromCycle(
+  pool: string[],
+  remaining: string[],
+  lastPlayed: string | null,
+): { src: string; remaining: string[] } {
+  if (pool.length === 0) {
+    return { src: RADIO_SAMPLE_FALLBACK[0], remaining: [] };
+  }
+  if (pool.length === 1) {
+    return { src: pool[0], remaining: [] };
+  }
+
+  let cycleRemaining = remaining;
+  if (cycleRemaining.length === 0) {
+    cycleRemaining = shuffleCopy(pool);
+  }
+
+  let candidates = cycleRemaining;
+  if (lastPlayed !== null && cycleRemaining.length > 1) {
+    const withoutLast = cycleRemaining.filter((url) => url !== lastPlayed);
+    if (withoutLast.length > 0) candidates = withoutLast;
+  }
+
+  const index = Math.floor(Math.random() * candidates.length);
+  const src = candidates[index];
+  const nextRemaining = cycleRemaining.filter((url) => url !== src);
+
+  return { src, remaining: nextRemaining };
 }
 
 function clampGain(gain: number): number {
@@ -149,6 +183,7 @@ export function RadioKeystrokeListener({ samples }: Props) {
   const playingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const poolRef = useRef(resolvePool(samples));
+  const remainingPoolRef = useRef<string[]>(resetCycle(resolvePool(samples)));
   const lastPlayedRef = useRef<string | null>(null);
   const gainBySampleRef = useRef<Map<string, number>>(unityGainMap(resolvePool(samples)));
   const tapCountRef = useRef(0);
@@ -158,6 +193,7 @@ export function RadioKeystrokeListener({ samples }: Props) {
   useEffect(() => {
     const pool = resolvePool(samples);
     poolRef.current = pool;
+    remainingPoolRef.current = resetCycle(pool);
     gainBySampleRef.current = unityGainMap(pool);
 
     let cancelled = false;
@@ -175,7 +211,12 @@ export function RadioKeystrokeListener({ samples }: Props) {
       if (playingRef.current) return false;
 
       const pool = poolRef.current;
-      const src = pickNextSample(pool, lastPlayedRef.current);
+      const { src, remaining } = pickNextSampleFromCycle(
+        pool,
+        remainingPoolRef.current,
+        lastPlayedRef.current,
+      );
+      remainingPoolRef.current = remaining;
       lastPlayedRef.current = src;
       const sfx = new Audio(src);
       audioRef.current = sfx;
