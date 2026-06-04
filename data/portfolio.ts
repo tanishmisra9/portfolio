@@ -35,17 +35,17 @@ export const portfolio: PortfolioContent = {
     },
     {
       id: 'exp-05',
-      date: 'June 2023 - August 2025',
-      org: "Karen Dillard's College Prep",
-      role: 'Student Worker',
-      tags: ['CRM', 'Operations', 'Customer Service', 'Office Administration'],
-    },
-    {
-      id: 'exp-06',
       date: 'Mar 2024 - Jul 2025',
       org: 'Q Spark Group',
       role: 'Data, Analytics, and AI Intern',
       tags: ['NER Models', 'spaCy', 'Python', 'SQL', 'Pandas'],
+    },
+    {
+      id: 'exp-06',
+      date: 'June 2023 - August 2025',
+      org: "Karen Dillard's College Prep",
+      role: 'Student Worker',
+      tags: ['CRM', 'Operations', 'Customer Service', 'Office Administration'],
     },
   ],
   education: [

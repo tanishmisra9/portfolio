@@ -240,7 +240,7 @@ export const collections: PhotoCollection[] = [
     slug: "new-york",
     title: "New York",
     description: "The city that never sleeps... or changes",
-    coverImage: "/photos/new-york/img-4825.jpeg",
+    coverImage: "/photos/new-york/IMG_4100.jpeg",
     photos: [
       {
         src: "/photos/new-york/img-4815.jpeg",
@@ -438,9 +438,16 @@ export const collections: PhotoCollection[] = [
     slug: "standalone",
     title: "Standalones",
     description: "One-offs and favorites",
-    coverImage: "/photos/standalone/squirrel.jpeg",
+    coverImage: "/photos/standalone/IMG_4613.jpeg",
     photos: [
       // TODO: alt — describe scene
+      {
+        src: "/photos/standalone/IMG_4613.jpeg",
+        alt: "",
+        caption: "Supra-natural",
+        width: 2803,
+        height: 2803,
+      },
       {
         src: "/photos/standalone/squirrel.jpeg",
         alt: "",
@@ -501,7 +508,7 @@ export const collections: PhotoCollection[] = [
     slug: "super-max",
     title: "Super Max",
     description: "He makes me believe the odds don't matter",
-    coverImage: "/photos/super-max/US_25.JPG",
+    coverImage: "/photos/super-max/Brazil_24.jpg",
     photos: [
       {
         src: "/photos/super-max/Stock_1.jpg",
