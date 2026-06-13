@@ -1,13 +1,15 @@
-# Tanish Misra Portfolio
+# Tanish Misra's Portfolio
 
-Personal portfolio and photography site at [tanishmisra.com](https://tanishmisra.com), built with Next.js, TypeScript, and Tailwind CSS. The home page is a dark, motion-heavy resume-style experience; `/photos` is a separate gallery with curated collections, per-album interactions, and light sound design.
+Personal portfolio and photography site at [tanishmisra.com](https://tanishmisra.com), built with Next.js, TypeScript, and Tailwind CSS. The home page is a dark, motion-heavy resume-style experience; `/photos` is a separate gallery with curated collections, per-album interactions, and light sound design; `/quotes` is a generative typographic quote cloud that arranges itself differently on every visit.
 
 ## Overview
 
 - **Home (`/`)** — Hero, experience, education, skills, certifications, projects, and about/contact
 - **Photos (`/photos`)** — Collection grid, interactive header, and “Surprise me!” random photo overlay
 - **Album pages (`/photos/[slug]`)** — Static routes generated from `data/photos.ts`
+- **Quotes (`/quotes`)** — Generative typographic quote cloud: a skyline-packed mosaic on desktop (different fonts, sizes, and arrangement every visit) and a clean vertical Playfair stack on mobile, both ordered by a per-load shuffle
 - **Box Box easter egg** — Global F1 team-radio SFX on any page (desktop: type `bbb` or `boxbox`; mobile: triple-tap within 800ms)
+- **Super Max easter egg** — Clicking any Max Verstappen quote on `/quotes` jumps to the Super Max photo album
 - **Stack** — Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 3, Framer Motion, Lenis
 - **Analytics** — Vercel Analytics in production
 
@@ -18,6 +20,7 @@ Personal portfolio and photography site at [tanishmisra.com](https://tanishmisra
 | `/` | Portfolio home |
 | `/photos` | Photography index (Super Max pinned first) |
 | `/photos/[slug]` | Album pages — `campus`, `snowfall`, `uk-2025`, `new-york`, `smokies`, `new-year`, `standalone`, `super-max` |
+| `/quotes` | Generative typographic quote cloud |
 
 ## Photography collections
 
@@ -55,12 +58,17 @@ Portfolio/
 │   │   ├── layout.tsx      # Photos metadata + font preloads
 │   │   ├── page.tsx        # Photos index
 │   │   └── [slug]/page.tsx # Album pages (SSG)
+│   ├── quotes/
+│   │   ├── fonts.ts        # Route-scoped Playfair Display (next/font)
+│   │   ├── layout.tsx      # Quotes metadata + serif font variable
+│   │   └── page.tsx        # Renders the quote cloud
 │   ├── error.tsx
 │   └── not-found.tsx
 ├── components/
 │   ├── easter-eggs/        # Box Box radio keystroke + triple-tap listener
 │   ├── hero/               # Scatter name, hero motion
 │   ├── photos/             # Album UI, canvases, photos header flash
+│   ├── quotes/             # quote-cloud.tsx — generative cloud, packing, tooltip
 │   ├── sections/           # Home content sections
 │   ├── site-header.tsx     # Nav, scroll spy, mobile menu
 │   ├── smooth-scroll.tsx   # Lenis wrapper
@@ -68,9 +76,11 @@ Portfolio/
 │   └── home-intro-gate.tsx
 ├── data/
 │   ├── portfolio.ts        # Resume-style home content
-│   └── photos.ts           # Collections, images, Surprise me pool
+│   ├── photos.ts           # Collections, images, Surprise me pool
+│   └── quotes.ts           # Quote text, attributions, emphasis tiers
 ├── lib/
 │   ├── radio-samples.ts    # Scans public/sfx/radio at build time
+│   ├── quotes-motion.ts    # Quote cloud reveal/stagger constants
 │   └── …                   # Motion timing helpers
 ├── public/
 │   ├── fonts/              # YD Gothic, ITC American Typewriter
@@ -143,6 +153,15 @@ After adding images, place files under the matching folder in `public/photos/`. 
 
 **Surprise me** on `/photos` draws from all collections except `super-max` via `getRandomPhotoCandidates()`.
 
+### Quotes
+
+Edit [`data/quotes.ts`](data/quotes.ts) — each entry is `{ id, text, attribution?, emphasis? }`. `emphasis` (1–3) biases the size tier: `3` quotes can land in the largest hero tier (capped at one hero per render), `1` skews smaller; it defaults to `1`. Everything else is generated client-side in [`components/quotes/quote-cloud.tsx`](components/quotes/quote-cloud.tsx) on each load, so the same data renders a fresh layout every visit:
+
+- **Desktop** — A greedy skyline bin-packer lays quotes into an interlocking, overlap-free mosaic with sizes intermixed top-to-bottom. Typography is a two-face system (Playfair Display serif, leading; Inter sans, lighter accent) and a two-value colour scheme (bright white / dark grey) that is spread so neighbours alternate. Quotes by the same author are pushed apart. Hovering a quote shows its author in a cursor-following, liquid-glass tooltip.
+- **Mobile** — A single vertical Playfair stack with the author formatted beneath each quote, revealed on scroll.
+
+Typeface-to-size pairing, size tiers, colours, gutter, and reveal timing are tunable constants at the top of `quote-cloud.tsx` and in [`lib/quotes-motion.ts`](lib/quotes-motion.ts). The route-scoped serif loads via [`app/quotes/fonts.ts`](app/quotes/fonts.ts).
+
 ### Box Box radio easter egg
 
 Team-radio clips live in [`public/sfx/radio/`](public/sfx/radio/). [`lib/radio-samples.ts`](lib/radio-samples.ts) discovers `.mp3` (and other audio) files at build/request time — add a file, rebuild or redeploy, and it joins the pool automatically.
@@ -170,6 +189,7 @@ Playback volume is normalized against a reference clip (`stupid.mp3` in [`lib/ra
 - **Focus** — Visible focus rings on interactive controls; section headings on the home page are keyboard-focusable where needed
 - **Reduced motion** — `prefers-reduced-motion` disables or simplifies animations (hero, album titles, photos header flash)
 - **Photos header** — `TANISHTAKESPICS` camera-flash effect on click; outline stays visible during the animation
+- **Quotes** — Each quote carries an `aria-label` of its text and author (visual text is `aria-hidden`); the cloud fades/scales in with a tiered stagger, replaced by an instant render under reduced motion; quote text is non-selectable like the page headings
 - **Modals** — Surprise overlay and mobile nav use `inert` on main/header while open
 - **Logo** — Scrolls to document top via `#top` anchor at the start of `<body>`
 

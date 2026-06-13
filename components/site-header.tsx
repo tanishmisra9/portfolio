@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { href: "#projects", label: "PROJECTS" },
   { href: "#about", label: "ABOUT" },
   { href: "/photos", label: "PHOTOS" },
+  { href: "/quotes", label: "QUOTES" },
 ];
 
 /** DOM order — must match home page sections for scroll-spy. */
@@ -49,14 +50,11 @@ function navItemIsActive(
   activeSectionId: string | null,
   pathname: string,
 ): boolean {
-  if (item.href === "/photos") {
-    return pathname === "/photos" || pathname.startsWith("/photos/");
+  if (!item.href.startsWith("#")) {
+    return pathname === item.href || pathname.startsWith(`${item.href}/`);
   }
-  if (item.href.startsWith("#")) {
-    const id = item.href.slice(1);
-    return pathname === "/" && activeSectionId === id;
-  }
-  return false;
+  const id = item.href.slice(1);
+  return pathname === "/" && activeSectionId === id;
 }
 
 /** Viewport-only math so this stays correct with Lenis and native scroll. */
@@ -227,9 +225,9 @@ export function SiteHeader() {
                     href={resolveNavHref(item.href, pathname)}
                     aria-current={
                       active
-                        ? item.href === "/photos"
-                          ? "page"
-                          : "true"
+                        ? item.href.startsWith("#")
+                          ? "true"
+                          : "page"
                         : undefined
                     }
                     className={[
@@ -331,9 +329,9 @@ export function SiteHeader() {
                             href={resolveNavHref(item.href, pathname)}
                             aria-current={
                               active
-                                ? item.href === "/photos"
-                                  ? "page"
-                                  : "true"
+                                ? item.href.startsWith("#")
+                                  ? "true"
+                                  : "page"
                                 : undefined
                             }
                             className={[
