@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { playfair } from "./fonts";
+import { bricolage, familjen, instrumentSerif, playfair } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Quotes — Tanish Misra",
@@ -11,7 +11,13 @@ export default function QuotesLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // `contents` keeps this wrapper out of layout while scoping the serif font
-  // variable to this route — the custom property still inherits to the cloud.
-  return <div className={`contents ${playfair.variable}`}>{children}</div>;
+  // `contents` keeps this wrapper out of layout while scoping the route-only font
+  // variables here — the custom properties still inherit to the cloud.
+  return (
+    <div
+      className={`contents ${playfair.variable} ${instrumentSerif.variable} ${bricolage.variable} ${familjen.variable}`}
+    >
+      {children}
+    </div>
+  );
 }

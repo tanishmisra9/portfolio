@@ -21,13 +21,13 @@ export const quotes: QuoteEntry[] = [
   },
   {
     id: "max-1",
-    text: "I am the best driver because I believe that I am the best, because every driver needs to think like that, otherwise it's better to stay at home.",
+    text: "I am the best driver because I believe that I am the best.",
     attribution: "Max Verstappen",
-    emphasis: 1,
+    emphasis: 2,
   },
   {
     id: "max-2",
-    text: "Simply lovely.",
+    text: "You know what that is? Simply lovely.",
     attribution: "Max Verstappen",
     emphasis: 3,
   },
@@ -59,7 +59,7 @@ export const quotes: QuoteEntry[] = [
     id: "lauda-2",
     text: "Winning is one thing, but out of losing I always learned more for the future.",
     attribution: "Niki Lauda",
-    emphasis: 1,
+    emphasis: 2,
   },
   {
     id: "jobs-3",
@@ -72,12 +72,6 @@ export const quotes: QuoteEntry[] = [
     text: "Stay hungry. Stay foolish.",
     attribution: "Steve Jobs",
     emphasis: 3,
-  },
-  {
-    id: "larson-1",
-    text: "Give so much time to the improvement of yourself that you have no time to criticize others.",
-    attribution: "Christian D. Larson",
-    emphasis: 2,
   },
   {
     id: "federer-1",

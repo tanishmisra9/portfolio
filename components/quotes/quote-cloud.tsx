@@ -16,6 +16,9 @@ const SHOW_ATTRIBUTION = false;
 
 const PLAYFAIR = "var(--font-playfair), Georgia, serif";
 const INTER = "var(--font-inter), system-ui, sans-serif";
+const INSTRUMENT_SERIF = "var(--font-instrument-serif), Georgia, serif";
+const BRICOLAGE = "var(--font-bricolage), system-ui, sans-serif";
+const FAMILJEN = "var(--font-familjen), system-ui, sans-serif";
 
 interface Treatment {
   /** Stable key for adjacency de-duplication. */
@@ -32,8 +35,14 @@ interface Treatment {
 // fine — applyTreatment only reads from them.
 const T_PLAYFAIR: Treatment = { id: "playfair", fontFamily: PLAYFAIR, fontStyle: "normal", weights: [400, 500], uppercase: false };
 const T_PLAYFAIR_HERO: Treatment = { ...T_PLAYFAIR, letterSpacing: "-0.01em" };
-const T_INTER_LIGHT: Treatment = { id: "inter", fontFamily: INTER, fontStyle: "normal", weights: [300, 400], uppercase: false };
-const T_INTER: Treatment = { id: "inter", fontFamily: INTER, fontStyle: "normal", weights: [300, 400], uppercase: false };
+const T_INTER_LIGHT: Treatment = { id: "inter", fontFamily: INTER, fontStyle: "normal", weights: [200], uppercase: false, letterSpacing: "-0.01em" };
+const T_INTER: Treatment = { id: "inter", fontFamily: INTER, fontStyle: "normal", weights: [250], uppercase: false, letterSpacing: "-0.01em" };
+// Occasional accent typefaces — Playfair stays dominant in the tiers below.
+// Instrument Serif is an upright display serif; Bricolage is a bold display
+// sans; Familjen is a clean upright sans. All sentence-case to match the cloud.
+const T_INSTRUMENT: Treatment = { id: "instrument", fontFamily: INSTRUMENT_SERIF, fontStyle: "normal", weights: [400], uppercase: false, letterSpacing: "-0.005em" };
+const T_BRICOLAGE: Treatment = { id: "bricolage", fontFamily: BRICOLAGE, fontStyle: "normal", weights: [600, 800], uppercase: false, letterSpacing: "-0.02em" };
+const T_FAMILJEN: Treatment = { id: "familjen", fontFamily: FAMILJEN, fontStyle: "normal", weights: [400, 700], uppercase: false, letterSpacing: "-0.01em" };
 
 /**
  * Typeface treatments allowed at each size tier. Coupling font/weight to size
@@ -43,12 +52,12 @@ const T_INTER: Treatment = { id: "inter", fontFamily: INTER, fontStyle: "normal"
 const TIER_TREATMENTS: Treatment[][] = [
   // Tier 0 — hero (huge). Upright Playfair only: the crisp, confident look.
   [T_PLAYFAIR_HERO],
-  // Tier 1 — large. Serif-led, thin sans accent.
-  [T_PLAYFAIR, T_PLAYFAIR, T_INTER_LIGHT],
-  // Tier 2 — medium. Serif-led, sans accent.
-  [T_PLAYFAIR, T_PLAYFAIR, T_INTER],
-  // Tier 3 — small. Serif joins the sans here too (tiers are big enough now).
-  [T_PLAYFAIR, T_INTER],
+  // Tier 1 — large. Serif-led; thin sans, display serif, and bold display accents.
+  [T_PLAYFAIR, T_PLAYFAIR, T_PLAYFAIR, T_INTER_LIGHT, T_INSTRUMENT, T_BRICOLAGE],
+  // Tier 2 — medium. Serif-led; sans, display serif, and upright sans accents.
+  [T_PLAYFAIR, T_PLAYFAIR, T_PLAYFAIR, T_INTER, T_INSTRUMENT, T_FAMILJEN],
+  // Tier 3 — small. Serif joins the sans accents here too (tiers are big enough now).
+  [T_PLAYFAIR, T_PLAYFAIR, T_INTER, T_FAMILJEN],
 ];
 
 // Tier 3 is the size floor — no quote renders smaller than the "Under pressure…"
@@ -77,8 +86,8 @@ const TIER_DELAY_STEP_MS = 420;
 /** Two-value contrast only: bright white or dark grey, nothing in between.
  * Colour is assigned after packing (see assignSpreadColors) so neighbours
  * alternate and same-colour quotes never cluster into chunks. */
-const QUOTE_WHITE = "#fff";
-const QUOTE_DARK = "#7c7c82";
+const QUOTE_WHITE = "#ffffffd5";
+const QUOTE_DARK = "#8c8c93bf";
 
 /** How many nearest already-coloured blocks a new block checks to pick the
  * locally-minority colour. */
@@ -640,7 +649,7 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
             Quotes
           </h1>
           <p className="mt-6 select-none text-[1.375rem] leading-snug text-neutral-400 md:mt-8">
-            Lines worth keeping.
+            " Lines worth keeping. "
           </p>
         </motion.header>
         {assignments && isDesktop !== null ? (
@@ -756,7 +765,7 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
             })}
           </div>
           ) : (
-            // Mobile: a simple vertical Playfair stack with the author below,
+            // Mobile: a vertical stack carrying each quote's own font treatment,
             // ordered by the same per-load shuffle. Just scroll.
             <ul className="flex flex-col gap-12">
               {assignments.map((a) => (
@@ -789,8 +798,11 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
                       aria-hidden="true"
                       className="text-neutral-100"
                       style={{
-                        fontFamily: PLAYFAIR,
-                        fontWeight: 400,
+                        fontFamily: a.fontFamily,
+                        fontStyle: a.fontStyle,
+                        fontWeight: a.fontWeight,
+                        textTransform: a.uppercase ? "uppercase" : undefined,
+                        letterSpacing: a.letterSpacing,
                         fontSize: "clamp(1.5rem, 5.5vw, 2.1rem)",
                         lineHeight: 1.3,
                       }}
