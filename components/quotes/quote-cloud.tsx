@@ -649,7 +649,7 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
             Quotes
           </h1>
           <p className="mt-6 select-none text-[1.375rem] leading-snug text-neutral-400 md:mt-8">
-            " Lines worth keeping. "
+            &ldquo; Lines worth keeping. &rdquo;
           </p>
         </motion.header>
         {assignments && isDesktop !== null ? (
