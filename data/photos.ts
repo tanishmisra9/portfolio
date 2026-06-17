@@ -449,6 +449,13 @@ export const collections: PhotoCollection[] = [
         height: 2803,
       },
       {
+        src: "/photos/standalone/IMG_4712.jpeg",
+        alt: "",
+        caption: "Split second",
+        width: 3446,
+        height: 3446,
+      },
+      {
         src: "/photos/standalone/squirrel.jpeg",
         alt: "",
         caption: "A squirrel fur real",
@@ -620,6 +627,13 @@ export const collections: PhotoCollection[] = [
         caption: "Taking on the Green Hell",
         width: 1273,
         height: 1601,
+      },
+      {
+        src: "/photos/super-max/Canada_26.JPG",
+        alt: "Max Verstappen and Lewis Hamilton finish on the podium in Canda 2026.",
+        caption: "MV 🤝 LH",
+        width: 874,
+        height: 729,
       },
     ],
   },
