@@ -324,5 +324,10 @@ export const portfolio: PortfolioContent = {
       href: 'mailto:tmisra@purdue.edu',
       display: 'tmisra@purdue.edu',
     },
+    {
+      label: 'Resume',
+      href: '/resume.pdf',
+      display: 'Resume',
+    },
   ],
 };

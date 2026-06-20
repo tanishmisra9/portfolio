@@ -259,4 +259,10 @@ export const quotes: QuoteEntry[] = [
     attribution: "Max Verstappen",
     emphasis: 3,
   },
+  {
+    id: "hawke-1",
+    text: "The one who's in love always wins.",
+    attribution: "Ethan Hawke",
+    emphasis: 3,
+  },
 ];

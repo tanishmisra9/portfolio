@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/scroll-reveal';
 import { SECTION_GHOST_HEADING_BASE } from '@/components/ui/class-constants';
-import { Github, Linkedin, Mail } from 'lucide-react';
+import { FileDown, Github, Linkedin, Mail } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { SocialLink } from '@/types/content';
 
@@ -15,6 +15,7 @@ function iconFor(label: string) {
   if (key.includes('github')) return Github;
   if (key.includes('linkedin')) return Linkedin;
   if (key.includes('email')) return Mail;
+  if (key.includes('resume')) return FileDown;
   if (process.env.NODE_ENV === 'development') {
     console.warn(
       `[iconFor] Unrecognized social label: "${label}". Falling back to Mail icon.`,
@@ -113,6 +114,7 @@ export function AboutContactSection({ bio, social }: Props) {
                   aria-label={link.label}
                   title={link.label}
                   className="rounded-md p-2 text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  {...(link.label === 'Resume' ? { download: 'Tanish_Misra_Resume.pdf' } : {})}
                   {...(link.href.startsWith('http')
                     ? { target: '_blank', rel: 'noopener noreferrer' }
                     : {})}
