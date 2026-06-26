@@ -1,17 +1,11 @@
 import type { Variants } from "framer-motion";
-import { SITE_HEADER_ENTER_DELAY_S } from "@/lib/site-motion";
 
-export const photosSlideEase: [number, number, number, number] = [
-  0.16, 1, 0.3, 1,
-];
+const photosSlideEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-/** Slide + fade duration for each `item` under `root` (seconds). */
-export const PHOTOS_ITEM_DURATION_S = 0.38;
-const itemDuration = PHOTOS_ITEM_DURATION_S;
-const stagger = 0.065;
+const PHOTOS_ITEM_DURATION_S = 0.38;
 
 /** Stagger between sibling photo rows / index cards (seconds). */
-export const PHOTOS_ENTRANCE_STAGGER_S = stagger;
+export const PHOTOS_ENTRANCE_STAGGER_S = 0.065;
 
 export function photosEntranceVariants(reduceMotion: boolean | null): {
   root: Variants;
@@ -62,7 +56,7 @@ export function photosEntranceVariants(reduceMotion: boolean | null): {
       opacity: 1,
       x: 0,
       transition: {
-        duration: itemDuration,
+        duration: PHOTOS_ITEM_DURATION_S,
         ease: photosSlideEase,
       },
     },
@@ -73,8 +67,8 @@ export function photosEntranceVariants(reduceMotion: boolean | null): {
       hidden: {},
       show: {
         transition: {
-          delayChildren: SITE_HEADER_ENTER_DELAY_S,
-          staggerChildren: stagger,
+          delayChildren: 0,
+          staggerChildren: PHOTOS_ENTRANCE_STAGGER_S,
         },
       },
     },
@@ -89,9 +83,9 @@ export function photosEntranceVariants(reduceMotion: boolean | null): {
         opacity: 1,
         x: 0,
         transition: {
-          duration: itemDuration,
+          duration: PHOTOS_ITEM_DURATION_S,
           ease: photosSlideEase,
-          staggerChildren: stagger,
+          staggerChildren: PHOTOS_ENTRANCE_STAGGER_S,
           delayChildren: 0,
         },
       },

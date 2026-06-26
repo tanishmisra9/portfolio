@@ -47,13 +47,9 @@ export function ScrollReveal({
   const albumSlideDistancePx = 56;
 
   const isAlbumRow = photoAlbumStaggerIndex !== undefined;
-  const albumUsesIntroGate = isAlbumRow && photoAlbumIntroComplete !== undefined;
-  const albumIntroDone = photoAlbumIntroComplete === true;
-  const albumFrozen = albumUsesIntroGate && !albumIntroDone;
-  const albumAfterIntro = albumUsesIntroGate && albumIntroDone;
-
-  const homeUsesIntroGate = homeIntroComplete !== undefined;
-  const homeFrozen = homeUsesIntroGate && !homeIntroComplete;
+  const albumFrozen = isAlbumRow && photoAlbumIntroComplete === false;
+  const albumAfterIntro = isAlbumRow && photoAlbumIntroComplete === true;
+  const homeFrozen = homeIntroComplete === false;
 
   if (reducedMotion) {
     if (isAlbumRow) {
@@ -114,15 +110,6 @@ export function ScrollReveal({
     },
   };
 
-  /** Legacy: stagger index set without intro gate (should not happen from album page). */
-  const legacyAlbumDelayS =
-    isAlbumRow &&
-    !albumUsesIntroGate &&
-    photoAlbumStaggerIndex !== undefined &&
-    photoAlbumStaggerIndex < ALBUM_INTRO_STAGGER_CAP
-      ? photoAlbumStaggerIndex * PHOTOS_ENTRANCE_STAGGER_S
-      : undefined;
-
   /** When several top rows share one in-view tick after intro, stagger only those; deeper rows use 0. */
   const albumInViewStaggerS =
     albumAfterIntro &&
@@ -175,14 +162,8 @@ export function ScrollReveal({
   }
 
   const transition = isAlbumRow
-    ? {
-        ...albumTransitionBase,
-        ...(legacyAlbumDelayS !== undefined ? { delay: legacyAlbumDelayS } : {}),
-      }
-    : {
-        duration: 0.5,
-        ease: slideEase,
-      };
+    ? albumTransitionBase
+    : { duration: 0.5, ease: slideEase };
 
   return (
     <motion.div

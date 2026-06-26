@@ -2,9 +2,7 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
-  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -18,15 +16,8 @@ const HomeIntroContext = createContext<HomeIntroContextValue | null>(null);
 
 export function HomeIntroGateProvider({ children }: { children: ReactNode }) {
   const [introDone, setIntroDone] = useState(false);
-  const markIntroDone = useCallback(() => {
-    setIntroDone(true);
-  }, []);
-  const value = useMemo(
-    () => ({ introDone, markIntroDone }),
-    [introDone, markIntroDone],
-  );
   return (
-    <HomeIntroContext.Provider value={value}>
+    <HomeIntroContext.Provider value={{ introDone, markIntroDone: () => setIntroDone(true) }}>
       {children}
     </HomeIntroContext.Provider>
   );

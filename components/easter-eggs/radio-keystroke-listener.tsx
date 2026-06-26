@@ -37,10 +37,6 @@ function matchesTrigger(buffer: string): boolean {
   return TRIGGERS.some((trigger) => buffer.endsWith(trigger));
 }
 
-function resolvePool(samples: string[]): string[] {
-  return samples.length > 0 ? samples : [...RADIO_SAMPLE_FALLBACK];
-}
-
 function shuffleCopy(pool: string[]): string[] {
   const arr = [...pool];
   for (let i = arr.length - 1; i > 0; i -= 1) {
@@ -48,11 +44,6 @@ function shuffleCopy(pool: string[]): string[] {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
-}
-
-function resetCycle(pool: string[]): string[] {
-  if (pool.length === 0) return [];
-  return shuffleCopy(pool);
 }
 
 function pickNextSampleFromCycle(
@@ -119,12 +110,8 @@ async function fetchAndDecode(
   }
 }
 
-function unityGainMap(pool: string[]): Map<string, number> {
-  return new Map(pool.map((url) => [url, 1]));
-}
-
 async function buildGainMap(pool: string[]): Promise<Map<string, number>> {
-  const fallback = unityGainMap(pool);
+  const fallback = new Map<string, number>(pool.map((url) => [url, 1]));
   if (pool.length === 0) return fallback;
 
   let context: AudioContext | null = null;
@@ -182,22 +169,21 @@ export function RadioKeystrokeListener({ samples }: Props) {
   const bufferRef = useRef("");
   const playingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const poolRef = useRef(resolvePool(samples));
-  const remainingPoolRef = useRef<string[]>(resetCycle(resolvePool(samples)));
+  const poolRef = useRef(samples);
+  const remainingPoolRef = useRef<string[]>(shuffleCopy(samples));
   const lastPlayedRef = useRef<string | null>(null);
-  const gainBySampleRef = useRef<Map<string, number>>(unityGainMap(resolvePool(samples)));
+  const gainBySampleRef = useRef<Map<string, number>>(new Map<string, number>(samples.map((url) => [url, 1])));
   const tapCountRef = useRef(0);
   const lastTapAtRef = useRef(0);
   const tapInactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const pool = resolvePool(samples);
-    poolRef.current = pool;
-    remainingPoolRef.current = resetCycle(pool);
-    gainBySampleRef.current = unityGainMap(pool);
+    poolRef.current = samples;
+    remainingPoolRef.current = samples.length > 0 ? shuffleCopy(samples) : [];
+    gainBySampleRef.current = new Map<string, number>(samples.map((url) => [url, 1]));
 
     let cancelled = false;
-    void buildGainMap(pool).then((map) => {
+    void buildGainMap(samples).then((map) => {
       if (!cancelled) gainBySampleRef.current = map;
     });
 

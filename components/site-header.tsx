@@ -2,10 +2,7 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  SITE_HEADER_ENTER_DELAY_S,
-  SITE_HEADER_FADE_DURATION_S,
-} from "@/lib/site-motion";
+import { SITE_HEADER_FADE_DURATION_S } from "@/lib/site-motion";
 import { Menu, X } from "lucide-react";
 import { useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
@@ -198,7 +195,7 @@ export function SiteHeader() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{
-          delay: SITE_HEADER_ENTER_DELAY_S,
+          delay: 0,
           duration: SITE_HEADER_FADE_DURATION_S,
           ease: "easeOut",
         }}

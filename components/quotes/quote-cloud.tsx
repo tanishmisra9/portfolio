@@ -11,8 +11,6 @@ import {
   REDUCED_MOTION_FADE_DURATION_S,
 } from "@/lib/quotes-motion";
 
-/** Temporary toggle: set true to show the author tag above each quote again. */
-const SHOW_ATTRIBUTION = false;
 
 const PLAYFAIR = "var(--font-playfair), Georgia, serif";
 const INTER = "var(--font-inter), system-ui, sans-serif";
@@ -734,14 +732,6 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
                       : { position: "relative" }
                   }
                 >
-                  {SHOW_ATTRIBUTION && a.quote.attribution ? (
-                    <figcaption
-                      aria-hidden="true"
-                      className="mb-2.5 ms-1.5 font-mono text-[0.7rem] uppercase leading-none tracking-[0.22em] text-neutral-400"
-                    >
-                      {a.quote.attribution}
-                    </figcaption>
-                  ) : null}
                   <blockquote
                     aria-hidden="true"
                     style={{

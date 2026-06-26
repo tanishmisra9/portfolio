@@ -7,11 +7,6 @@ const PUBLIC_PREFIX = "/sfx/radio";
 
 const ALLOWED_EXTENSIONS = new Set([".mp3", ".m4a", ".wav", ".ogg", ".webm"]);
 
-function isAudioFile(name: string): boolean {
-  const ext = path.extname(name).toLowerCase();
-  return ALLOWED_EXTENSIONS.has(ext);
-}
-
 /**
  * Discover radio easter-egg samples from `public/sfx/radio` at build/request time.
  * New files are included automatically after rebuild or deploy.
@@ -20,7 +15,7 @@ export async function getRadioSampleUrls(): Promise<string[]> {
   try {
     const entries = await readdir(RADIO_DIR, { withFileTypes: true });
     const urls = entries
-      .filter((entry) => entry.isFile() && isAudioFile(entry.name))
+      .filter((entry) => entry.isFile() && ALLOWED_EXTENSIONS.has(path.extname(entry.name).toLowerCase()))
       .map((entry) => `${PUBLIC_PREFIX}/${entry.name}`)
       .sort((a, b) => a.localeCompare(b));
 
