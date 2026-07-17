@@ -364,11 +364,13 @@ export const quotes: QuoteEntry[] = [
   {
     id: "imam-1",
     text: "What was meant for me will never miss me, and that which misses me was never meant for me.",
-    attribution: "Imam Al-Shafi'i"
+    attribution: "Imam Al-Shafi'i",
+    emphasis: 2,
   },
   {
     id: "aman-1",
     text: "Always burn your bridges.",
-    attribution: "Aman Patel"
+    attribution: "Aman Patel",
+    emphasis: 3
   }
 ];
