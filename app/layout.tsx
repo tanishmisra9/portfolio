@@ -2,12 +2,10 @@ import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import { RadioKeystrokeListener } from "@/components/easter-eggs/radio-keystroke-listener";
 import { SiteHeader } from "@/components/site-header";
-import { SmoothScroll } from "@/components/smooth-scroll";
 import { getRadioSampleUrls } from "@/lib/radio-samples";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
-import "lenis/dist/lenis.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -54,10 +52,8 @@ export default async function RootLayout({
           Skip to content
         </a>
         <RadioKeystrokeListener samples={radioSamples} />
-        <SmoothScroll>
-          <SiteHeader />
-          {children}
-        </SmoothScroll>
+        <SiteHeader />
+        {children}
         <Analytics />
         <SpeedInsights />
       </body>

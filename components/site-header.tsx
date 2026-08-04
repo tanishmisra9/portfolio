@@ -4,7 +4,6 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { SITE_HEADER_FADE_DURATION_S } from "@/lib/site-motion";
 import { Menu, X } from "lucide-react";
-import { useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -54,7 +53,7 @@ function navItemIsActive(
   return pathname === "/" && activeSectionId === id;
 }
 
-/** Viewport-only math so this stays correct with Lenis and native scroll. */
+/** Viewport-only math. */
 function computeActiveSectionId(): string | null {
   if (typeof document === "undefined") return null;
   const line = SCROLL_SPY_HEADER_OFFSET;
@@ -112,18 +111,16 @@ export function SiteHeader() {
     setActiveSectionId((prev) => (prev === next ? prev : next));
   }, [pathname]);
 
-  useLenis(() => {
-    updateActiveSection();
-  }, [updateActiveSection]);
-
   useEffect(() => {
     updateActiveSection();
   }, [updateActiveSection]);
 
   useEffect(() => {
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
     window.addEventListener("resize", updateActiveSection);
     window.addEventListener("hashchange", updateActiveSection);
     return () => {
+      window.removeEventListener("scroll", updateActiveSection);
       window.removeEventListener("resize", updateActiveSection);
       window.removeEventListener("hashchange", updateActiveSection);
     };
