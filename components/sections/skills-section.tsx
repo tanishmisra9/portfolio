@@ -11,6 +11,7 @@ import {
   CERTIFICATIONS_GHOST_HEADING_CLASSES,
   SECTION_GHOST_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
+import { Tooltip } from '@/components/ui/tooltip';
 import type { CertificationEntry, SkillCategory } from '@/types/content';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 
@@ -24,6 +25,7 @@ const CERT_VISIBLE_COUNT = 4;
 
 function CertCard({ cert }: { cert: CertificationEntry }) {
   const [coursesOpen, setCoursesOpen] = useState(false);
+  const [coursesSettled, setCoursesSettled] = useState(false);
   const reducedMotion = useReducedMotion();
   const pills = cert.pills ?? [];
   const skills = cert.skills ?? [];
@@ -37,10 +39,14 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
         <div
           role="button"
           tabIndex={0}
-          onClick={() => setCoursesOpen((v) => !v)}
+          onClick={() => {
+            setCoursesSettled(false);
+            setCoursesOpen((v) => !v);
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
+              setCoursesSettled(false);
               setCoursesOpen((v) => !v);
             }
           }}
@@ -48,56 +54,68 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
           aria-label={`${coursesOpen ? 'Hide' : 'Show'} courses for ${cert.title}`}
           className="group -m-2 cursor-pointer rounded p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
-          {hasPills && (
-            <div className="flex flex-wrap gap-1.5">
-              {pills.map((pill) => (
-                <span
-                  key={pill}
-                  className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
-                >
-                  {pill}
+          <div className="flex items-center justify-between gap-4">
+            {hasPills ? (
+              <div className="flex flex-wrap gap-1.5">
+                {pills.map((pill) => (
+                  <span
+                    key={pill}
+                    className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
+                  >
+                    {pill}
+                  </span>
+                ))}
+                <span className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}>
+                  {courses.length} courses
                 </span>
-              ))}
-              <span className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}>
-                {courses.length} courses
+              </div>
+            ) : (
+              <span />
+            )}
+            <Tooltip label={`${coursesOpen ? 'Hide' : 'Show'} courses`} align="end">
+              <span className="text-neutral-500 transition-colors group-hover:text-white">
+                <ChevronDown
+                  className={`h-5 w-5 transition-transform duration-300 ${coursesOpen ? 'rotate-180' : ''}`}
+                  strokeWidth={1.8}
+                  aria-hidden
+                />
               </span>
-            </div>
-          )}
-          <span className="absolute right-6 top-6 text-neutral-500 transition-colors group-hover:text-white">
-            <ChevronDown
-              className={`h-5 w-5 transition-transform duration-300 ${coursesOpen ? 'rotate-180' : ''}`}
-              strokeWidth={1.8}
-              aria-hidden
-            />
-          </span>
-          <h4 className={`${hasPills ? 'mt-5 ' : ''}pr-10 font-display text-xl font-semibold text-white`}>
+            </Tooltip>
+          </div>
+          <h4 className="mt-5 font-display text-xl font-semibold text-white">
             {cert.title}
           </h4>
         </div>
       ) : (
         <>
-          {hasPills && (
-            <div className="flex flex-wrap gap-1.5">
-              {pills.map((pill) => (
-                <span
-                  key={pill}
-                  className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
-                >
-                  {pill}
-                </span>
-              ))}
-            </div>
-          )}
-          <a
-            href={cert.credentialUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute right-6 top-6 text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
-            aria-label={`View credential for ${cert.title}`}
-          >
-            <ExternalLink className="h-4 w-4" strokeWidth={1.8} aria-hidden />
-          </a>
-          <h4 className={`${hasPills ? 'mt-5 ' : ''}pr-10 font-display text-xl font-semibold text-white`}>
+          <div className="flex items-center justify-between gap-4">
+            {hasPills ? (
+              <div className="flex flex-wrap gap-1.5">
+                {pills.map((pill) => (
+                  <span
+                    key={pill}
+                    className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
+                  >
+                    {pill}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span />
+            )}
+            <Tooltip label="View credential" align="end">
+              <a
+                href={cert.credentialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
+                aria-label={`View credential for ${cert.title}`}
+              >
+                <ExternalLink className="h-4 w-4" strokeWidth={1.8} aria-hidden />
+              </a>
+            </Tooltip>
+          </div>
+          <h4 className="mt-5 font-display text-xl font-semibold text-white">
             {cert.title}
           </h4>
         </>
@@ -122,8 +140,9 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
               initial={{ height: 0 }}
               animate={{ height: 'auto' }}
               exit={{ height: 0 }}
-              style={{ overflow: 'hidden' }}
+              style={{ overflow: coursesSettled ? 'visible' : 'hidden' }}
               transition={reducedMotion ? { duration: 0 } : { duration: 0.4, ease: EASE }}
+              onAnimationComplete={() => setCoursesSettled(true)}
             >
               <ul className="mt-6 space-y-2 border-t border-white/10 pt-5">
                 {courses.map((course) => (
@@ -135,11 +154,13 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
                       className="group flex items-center justify-between gap-3 rounded px-2 py-1.5 -mx-2 text-base text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                     >
                       <span>{course.title}</span>
-                      <ExternalLink
-                        className="h-4 w-4 shrink-0 text-neutral-600 transition-colors group-hover:text-white"
-                        strokeWidth={1.8}
-                        aria-hidden
-                      />
+                      <Tooltip label="View credential" side="left">
+                        <ExternalLink
+                          className="h-4 w-4 shrink-0 text-neutral-600 transition-colors group-hover:text-white"
+                          strokeWidth={1.8}
+                          aria-hidden
+                        />
+                      </Tooltip>
                     </a>
                   </li>
                 ))}

@@ -18,6 +18,7 @@ import {
   GLASS_BUTTON_SHEEN_BACKGROUND,
   GLASS_BUTTON_SHEEN_CLASSES,
 } from "@/components/ui/class-constants";
+import { Tooltip } from "@/components/ui/tooltip";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 import type { RandomPhotoCandidate } from "@/data/photos";
 
@@ -227,19 +228,21 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
           <p className="select-none text-[1.375rem] leading-snug text-neutral-400">
             #ShotOniPhone17Pro
           </p>
-          <a
-            href="https://www.instagram.com/tanishtakespics/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-full border border-white/10 p-[0.6875rem] text-neutral-400 transition-colors hover:border-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-            aria-label="Instagram"
-          >
-            <Instagram
-              className="h-[1.375rem] w-[1.375rem]"
-              strokeWidth={1.75}
-              aria-hidden
-            />
-          </a>
+          <Tooltip label="Instagram">
+            <a
+              href="https://www.instagram.com/tanishtakespics/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-full border border-white/10 p-[0.6875rem] text-neutral-400 transition-colors hover:border-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              aria-label="Instagram"
+            >
+              <Instagram
+                className="h-[1.375rem] w-[1.375rem]"
+                strokeWidth={1.75}
+                aria-hidden
+              />
+            </a>
+          </Tooltip>
         </motion.div>
         <motion.div variants={item} className="mt-5 flex justify-center md:mt-6">
           <button

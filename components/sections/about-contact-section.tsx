@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ScrollReveal } from '@/components/scroll-reveal';
 import { SECTION_GHOST_HEADING_BASE } from '@/components/ui/class-constants';
+import { Tooltip } from '@/components/ui/tooltip';
 import { FileDown, Github, Linkedin, Mail } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { SocialLink } from '@/types/content';
@@ -108,23 +109,23 @@ export function AboutContactSection({ bio, social }: Props) {
             {social.map((link) => {
               const Icon = iconFor(link.label);
               return (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  aria-label={link.label}
-                  title={link.label}
-                  className="rounded-md p-2 text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                  {...(link.label === 'Resume' ? { download: 'Tanish_Misra_Resume.pdf' } : {})}
-                  {...(link.href.startsWith('http')
-                    ? { target: '_blank', rel: 'noopener noreferrer' }
-                    : {})}
-                >
-                  <Icon
-                    className="size-[1.3225rem]"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
-                </a>
+                <Tooltip key={link.href} label={link.label}>
+                  <a
+                    href={link.href}
+                    aria-label={link.label}
+                    className="rounded-md p-2 text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    {...(link.label === 'Resume' ? { download: 'Tanish_Misra_Resume.pdf' } : {})}
+                    {...(link.href.startsWith('http')
+                      ? { target: '_blank', rel: 'noopener noreferrer' }
+                      : {})}
+                  >
+                    <Icon
+                      className="size-[1.3225rem]"
+                      strokeWidth={1.75}
+                      aria-hidden
+                    />
+                  </a>
+                </Tooltip>
               );
             })}
           </div>

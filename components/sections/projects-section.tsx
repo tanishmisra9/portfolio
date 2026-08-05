@@ -10,6 +10,7 @@ import {
   PILL_CLASSES,
   SECTION_GHOST_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
+import { Tooltip } from '@/components/ui/tooltip';
 import type { ProjectEntry } from '@/types/content';
 import { ExternalLink, Github, Newspaper } from 'lucide-react';
 
@@ -24,7 +25,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
   const pills = project.pills ?? [];
   return (
     <article className="relative flex h-full min-h-[15.5rem] flex-col rounded-md border border-white/10 bg-black/40 backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-neutral-400 sm:min-h-[16.75rem]">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         {pills.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
             {pills.map((pill) => (
@@ -43,27 +44,30 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
           {project.links?.map(({ label, url, icon }) => {
             const Icon = LINK_ICONS[icon ?? 'external'];
             return (
-              <a
-                key={url}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
-                aria-label={label}
-              >
-                <Icon className="h-4 w-4" strokeWidth={1.8} aria-hidden />
-              </a>
+              <Tooltip key={url} label={label} align="end">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
+                  aria-label={label}
+                >
+                  <Icon className="h-4 w-4" strokeWidth={1.8} aria-hidden />
+                </a>
+              </Tooltip>
             );
           })}
-          <a
-            href={project.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
-            aria-label={`${project.title} on GitHub`}
-          >
-            <Github className="h-4 w-4" strokeWidth={1.8} aria-hidden />
-          </a>
+          <Tooltip label="GitHub repository" align="end">
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
+              aria-label={`${project.title} on GitHub`}
+            >
+              <Github className="h-4 w-4" strokeWidth={1.8} aria-hidden />
+            </a>
+          </Tooltip>
         </div>
       </div>
       <h3 className="mt-5 font-display text-2xl font-semibold text-white">
