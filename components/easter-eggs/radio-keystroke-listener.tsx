@@ -26,6 +26,11 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
 }
 
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.closest('a, button, [role="button"], input, textarea, select, article') !== null;
+}
+
 function normalizeKey(key: string): string | null {
   if (key.length !== 1) return null;
   const lower = key.toLowerCase();
@@ -256,8 +261,9 @@ export function RadioKeystrokeListener({ samples }: Props) {
       if (playRandomRadio()) bufferRef.current = "";
     };
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (event: TouchEvent) => {
       if (playingRef.current) return;
+      if (isInteractiveTarget(event.target)) return;
 
       const now = Date.now();
       const elapsed = now - lastTapAtRef.current;

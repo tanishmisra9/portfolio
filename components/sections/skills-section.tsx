@@ -12,7 +12,7 @@ import {
   SECTION_GHOST_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
 import type { CertificationEntry, SkillCategory } from '@/types/content';
-import { ExternalLink } from 'lucide-react';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 
 type Props = {
   skills: SkillCategory[];
@@ -23,35 +23,85 @@ const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const CERT_VISIBLE_COUNT = 4;
 
 function CertCard({ cert }: { cert: CertificationEntry }) {
+  const [coursesOpen, setCoursesOpen] = useState(false);
+  const reducedMotion = useReducedMotion();
   const pills = cert.pills ?? [];
   const skills = cert.skills ?? [];
+  const courses = cert.courses ?? [];
+  const isProgram = courses.length > 0;
   const hasPills = pills.length > 0;
+
   return (
     <article className="relative flex h-full min-h-[12rem] flex-col rounded-md border border-white/10 bg-black/40 backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-neutral-400 sm:min-h-[13.5rem]">
-      {hasPills && (
-        <div className="flex flex-wrap gap-1.5">
-          {pills.map((pill) => (
-            <span
-              key={pill}
-              className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
-            >
-              {pill}
-            </span>
-          ))}
+      {isProgram ? (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setCoursesOpen((v) => !v)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setCoursesOpen((v) => !v);
+            }
+          }}
+          aria-expanded={coursesOpen}
+          aria-label={`${coursesOpen ? 'Hide' : 'Show'} courses for ${cert.title}`}
+          className="group -m-2 cursor-pointer rounded p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        >
+          {hasPills && (
+            <div className="flex flex-wrap gap-1.5">
+              {pills.map((pill) => (
+                <span
+                  key={pill}
+                  className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
+                >
+                  {pill}
+                </span>
+              ))}
+              <span className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}>
+                {courses.length} courses
+              </span>
+            </div>
+          )}
+          <span className="absolute right-6 top-6 text-neutral-500 transition-colors group-hover:text-white">
+            <ChevronDown
+              className={`h-5 w-5 transition-transform duration-300 ${coursesOpen ? 'rotate-180' : ''}`}
+              strokeWidth={1.8}
+              aria-hidden
+            />
+          </span>
+          <h4 className={`${hasPills ? 'mt-5 ' : ''}pr-10 font-display text-xl font-semibold text-white`}>
+            {cert.title}
+          </h4>
         </div>
+      ) : (
+        <>
+          {hasPills && (
+            <div className="flex flex-wrap gap-1.5">
+              {pills.map((pill) => (
+                <span
+                  key={pill}
+                  className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
+                >
+                  {pill}
+                </span>
+              ))}
+            </div>
+          )}
+          <a
+            href={cert.credentialUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute right-6 top-6 text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
+            aria-label={`View credential for ${cert.title}`}
+          >
+            <ExternalLink className="h-4 w-4" strokeWidth={1.8} aria-hidden />
+          </a>
+          <h4 className={`${hasPills ? 'mt-5 ' : ''}pr-10 font-display text-xl font-semibold text-white`}>
+            {cert.title}
+          </h4>
+        </>
       )}
-      <a
-        href={cert.credentialUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute right-6 top-6 text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
-        aria-label={`View credential for ${cert.title}`}
-      >
-        <ExternalLink className="h-4 w-4" strokeWidth={1.8} aria-hidden />
-      </a>
-      <h4 className={`${hasPills ? 'mt-5 ' : ''}pr-10 font-display text-xl font-semibold text-white`}>
-        {cert.title}
-      </h4>
       {skills.length > 0 && (
         <ul className="mt-auto flex flex-wrap gap-2 pt-8 font-mono text-[10px] uppercase tracking-widest">
           {skills.map((skill) => (
@@ -63,6 +113,40 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
             </li>
           ))}
         </ul>
+      )}
+      {isProgram && (
+        <AnimatePresence initial={false}>
+          {coursesOpen && (
+            <motion.div
+              key="courses"
+              initial={{ height: 0 }}
+              animate={{ height: 'auto' }}
+              exit={{ height: 0 }}
+              style={{ overflow: 'hidden' }}
+              transition={reducedMotion ? { duration: 0 } : { duration: 0.4, ease: EASE }}
+            >
+              <ul className="mt-6 space-y-2 border-t border-white/10 pt-5">
+                {courses.map((course) => (
+                  <li key={course.title}>
+                    <a
+                      href={course.credentialUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center justify-between gap-3 rounded px-2 py-1.5 -mx-2 text-base text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    >
+                      <span>{course.title}</span>
+                      <ExternalLink
+                        className="h-4 w-4 shrink-0 text-neutral-600 transition-colors group-hover:text-white"
+                        strokeWidth={1.8}
+                        aria-hidden
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
     </article>
   );
@@ -129,9 +213,9 @@ export function SkillsSection({ skills, certifications }: Props) {
             </ScrollReveal>
 
             {/* First 4 certs */}
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-12">
+            <div className="mt-10 grid items-start gap-5 sm:grid-cols-2 md:mt-12">
               {visibleCerts.map((cert) => (
-                <ScrollReveal key={cert.id} className="h-full">
+                <ScrollReveal key={cert.id}>
                   <CertCard cert={cert} />
                 </ScrollReveal>
               ))}
@@ -148,11 +232,10 @@ export function SkillsSection({ skills, certifications }: Props) {
                   style={{ overflow: 'hidden' }}
                   transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: EASE }}
                 >
-                  <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                  <div className="mt-5 grid items-start gap-5 sm:grid-cols-2">
                     {hiddenCerts.map((cert, i) => (
                       <motion.div
                         key={cert.id}
-                        className="h-full"
                         initial={reducedMotion ? false : { opacity: 0, filter: 'blur(10px)' }}
                         animate={reducedMotion ? {} : { opacity: 1, filter: 'blur(0px)' }}
                         exit={reducedMotion ? {} : { opacity: 0, filter: 'blur(10px)' }}

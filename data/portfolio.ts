@@ -174,31 +174,65 @@ export const portfolio: PortfolioContent = {
       skills: ['Prompt Engineering', 'NLP', 'RLHF', 'Generative AI', 'LLM'],
     },
     {
-      id: 'cert-google-cyber-risks',
-      issuer: 'Google Cybersecurity Certificate',
-      title: 'Manage Security Risks',
-      credentialUrl:
-        'https://www.coursera.org/account/accomplishments/verify/SR4FKRAQKNEQ',
+      id: 'cert-google-cyber',
+      issuer: 'Google',
+      title: 'Google Cybersecurity Certificate',
       pills: ['google'],
-      skills: ['OWASP', 'SIEM', 'Vulnerability Management'],
+      skills: ['OWASP', 'SIEM', 'Network Security', 'Incident Response'],
+      courses: [
+        {
+          title: 'Foundations of Cybersecurity',
+          credentialUrl:
+            'https://www.coursera.org/account/accomplishments/verify/HUNYVIPGYIO0',
+        },
+        {
+          title: 'Manage Security Risks',
+          credentialUrl:
+            'https://www.coursera.org/account/accomplishments/verify/SR4FKRAQKNEQ',
+        },
+        {
+          title: 'Networks and Network Security',
+          credentialUrl:
+            'https://www.coursera.org/account/accomplishments/verify/WVO8VIFCW4UH',
+        },
+      ],
     },
     {
-      id: 'cert-google-cyber-networks',
-      issuer: 'Google Cybersecurity Certificate',
-      title: 'Networks and Network Security',
-      credentialUrl:
-        'https://www.coursera.org/account/accomplishments/verify/WVO8VIFCW4UH',
-      pills: ['google'],
-      skills: ['Network Security', 'Protocols', 'TCP/IP', 'Hardening', 'Network Architecture'],
-    },
-    {
-      id: 'cert-google-cyber-foundations',
-      issuer: 'Google Cybersecurity Certificate',
-      title: 'Foundations of Cybersecurity',
-      credentialUrl:
-        'https://www.coursera.org/account/accomplishments/verify/HUNYVIPGYIO0',
-      pills: ['google'],
-      skills: ['Security Controls', 'SIEM', 'Incident Response'],
+      id: 'cert-anthropic-academy',
+      issuer: 'Anthropic',
+      title: 'Anthropic Academy',
+      pills: ['anthropic'],
+      skills: ['Claude', 'Agent Skills', 'MCP', 'Subagents'],
+      courses: [
+        {
+          title: 'AI Fluency: Framework & Foundations',
+          credentialUrl: 'https://verify.skilljar.com/c/y9yk8txvrpzz',
+        },
+        {
+          title: 'Claude 101',
+          credentialUrl: 'https://verify.skilljar.com/c/gtthy7hboonf',
+        },
+        {
+          title: 'Claude Code 101',
+          credentialUrl: 'https://verify.skilljar.com/c/uuec2qzoim8w',
+        },
+        {
+          title: 'Claude Code in Action',
+          credentialUrl: 'https://verify.skilljar.com/c/rrt9vezg6wtk',
+        },
+        {
+          title: 'Introduction to Agent Skills',
+          credentialUrl: 'https://verify.skilljar.com/c/qvgzqqh5g8nm',
+        },
+        {
+          title: 'Introduction to Subagents',
+          credentialUrl: 'https://verify.skilljar.com/c/m566yornfpov',
+        },
+        {
+          title: 'Introduction to Model Context Protocol',
+          credentialUrl: 'https://verify.skilljar.com/c/yo6bb4g8shnb',
+        },
+      ],
     },
     {
       id: 'cert-certiport-java',
