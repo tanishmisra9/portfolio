@@ -81,8 +81,8 @@ export function ProjectsSection({ projects }: Props) {
   const hasMore = hiddenProjects.length > 0;
 
   return (
-    <section id="projects" className="scroll-mt-20 pb-8 pt-6 md:pb-16 md:pt-11">
-      <div className="mx-auto w-full max-w-7xl px-8 md:px-16 lg:px-32">
+    <section id="projects" className="scroll-mt-20 px-6 pb-8 pt-6 md:pb-16 md:pt-11">
+      <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
           <h2 className={SECTION_GHOST_HEADING_CLASSES}>
             PROJECTS

@@ -156,24 +156,6 @@ export const portfolio: PortfolioContent = {
   ],
   certifications: [
     {
-      id: 'cert-umich-c',
-      issuer: 'University of Michigan',
-      title: 'Programming in C',
-      credentialUrl:
-        'https://www.coursera.org/account/accomplishments/verify/8O423G7AHCWV',
-      pills: ['university of michigan'],
-      skills: ['C (Programming Language)', 'Memory Management'],
-    },
-    {
-      id: 'cert-aws-dlai',
-      issuer: 'AWS & DeepLearning.AI',
-      title: 'Generative AI & Large Language Models',
-      credentialUrl:
-        'https://www.coursera.org/account/accomplishments/verify/1R7ECY5UIWVV',
-      pills: ['aws', 'deeplearning.ai'],
-      skills: ['Prompt Engineering', 'NLP', 'RLHF', 'Generative AI', 'LLM'],
-    },
-    {
       id: 'cert-google-cyber',
       issuer: 'Google',
       title: 'Google Cybersecurity Certificate',
@@ -233,6 +215,24 @@ export const portfolio: PortfolioContent = {
           credentialUrl: 'https://verify.skilljar.com/c/yo6bb4g8shnb',
         },
       ],
+    },
+    {
+      id: 'cert-umich-c',
+      issuer: 'University of Michigan',
+      title: 'Programming in C',
+      credentialUrl:
+        'https://www.coursera.org/account/accomplishments/verify/8O423G7AHCWV',
+      pills: ['university of michigan'],
+      skills: ['C (Programming Language)', 'Memory Management'],
+    },
+    {
+      id: 'cert-aws-dlai',
+      issuer: 'AWS & DeepLearning.AI',
+      title: 'Generative AI & Large Language Models',
+      credentialUrl:
+        'https://www.coursera.org/account/accomplishments/verify/1R7ECY5UIWVV',
+      pills: ['aws', 'deeplearning.ai'],
+      skills: ['Prompt Engineering', 'NLP', 'RLHF', 'Generative AI', 'LLM'],
     },
     {
       id: 'cert-certiport-java',
