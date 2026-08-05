@@ -253,15 +253,16 @@ export const portfolio: PortfolioContent = {
       githubUrl: 'https://github.com/tanishmisra9/candle',
       links: [
         { 
-          label: 'Live site', 
+          label: 'Website', 
           url: 'https://candleforchm.org' 
         },
-        { 
-          label: 'Press release', 
-          url: 'https://www.einpresswire.com/article/918493577/choroideremia-research-foundation-highlights-candle-a-patient-developed-resource-hub-advancing-access-to-chm-research' 
+        {
+          label: 'Press release',
+          url: 'https://www.einpresswire.com/article/918493577/choroideremia-research-foundation-highlights-candle-a-patient-developed-resource-hub-advancing-access-to-chm-research',
+          icon: 'newspaper',
         },
         ],
-      pill: 'in-progress',
+      pill: 'research dashboard',
     },
     {
       id: 'project-01',
