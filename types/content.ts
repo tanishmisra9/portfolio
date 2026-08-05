@@ -23,8 +23,8 @@ export type ProjectEntry = {
   techStack: string[];
   githubUrl: string;
   links?: { label: string; url: string; icon?: 'external' | 'newspaper' }[];
-  /** Small label shown at the top-left of the card; hidden when empty/whitespace. */
-  pill?: string;
+  /** Label(s) shown at the top-left of the card; hidden when empty. */
+  pills?: string[];
 };
 
 export type SkillCategory = {

@@ -262,7 +262,17 @@ export const portfolio: PortfolioContent = {
           icon: 'newspaper',
         },
         ],
-      pill: 'research dashboard',
+      pills: ['research dashboard'],
+    },
+    {
+      id: 'project-telogify',
+      title: 'Telogify',
+      description:
+        'F1 telemetry pipeline turning a race weekend into deterministic pace, degradation, and deployment insights, delivered as an editorial-brutalist dashboard.',
+      techStack: ['PostgreSQL', 'FastAPI', 'LangGraph', 'React', 'TypeScript', 'Tailwind CSS', 'FastF1'],
+      githubUrl: 'https://github.com/tanishmisra9/telogify',
+      links: [{ label: 'Live site', url: 'https://www.telogify.com' }],
+      pills: ['f1'],
     },
     {
       id: 'project-01',
@@ -271,7 +281,7 @@ export const portfolio: PortfolioContent = {
         'Async Python daemon scoring all F1 drivers to rotate onboard camera feeds.',
       techStack: ['Python', 'REST APIs', 'Pydantic'],
       githubUrl: 'https://github.com/tanishmisra9/f1director',
-      pill: 'project',
+      pills: ['project'],
     },
     {
       id: 'project-02',
@@ -281,7 +291,7 @@ export const portfolio: PortfolioContent = {
       techStack: ['Python', 'LangGraph', 'OpenAI', 'MySQL'],
       githubUrl: 'https://github.com/tanishmisra9/VendorOrchestrator',
       links: [{ label: 'Live site', url: 'https://vendororchestrator-production.up.railway.app' }],
-      pill: 'project',
+      pills: ['project'],
     },
     {
       id: 'project-portfolio',
@@ -291,7 +301,7 @@ export const portfolio: PortfolioContent = {
       techStack: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
       githubUrl: 'https://github.com/tanishmisra9/portfolio',
       links: [{ label: 'Live site', url: 'https://www.tanishmisra.com' }],
-      pill: 'website',
+      pills: ['website'],
     },
     {
       id: 'project-securify',
@@ -310,7 +320,7 @@ export const portfolio: PortfolioContent = {
       ],
       githubUrl: 'https://github.com/tanishmisra9/securify',
       links: [{ label: 'Live site', url: 'https://securify-production-136f.up.railway.app' }],
-      pill: 'algofest 2026',
+      pills: ['algofest 2026 semi-finalist'],
     },
     {
       id: 'project-04',
@@ -319,7 +329,7 @@ export const portfolio: PortfolioContent = {
         'spaCy Transformer NER pipeline trained on 1M+ synthetic records.',
       techStack: ['Python', 'spaCy', 'PyTorch'],
       githubUrl: 'https://github.com/tanishmisra9/pii-transformer',
-      pill: 'internship project',
+      pills: ['internship project'],
     },
     {
       id: 'project-tokenwise',
@@ -338,7 +348,7 @@ export const portfolio: PortfolioContent = {
       ],
       githubUrl: 'https://github.com/tanishmisra9/tokenwise',
       links: [{ label: 'Live site', url: 'https://tokenwise-production.up.railway.app' }],
-      pill: 'global fusion 2026',
+      pills: ['global fusion 2026'],
     },
     {
       id: 'project-03',
@@ -347,7 +357,7 @@ export const portfolio: PortfolioContent = {
         'AI agent generating tailored resume suggestions, featuring a BART zero-shot classification web scraper.',
       techStack: ['Python', 'LangChain', 'Transformers'],
       githubUrl: 'https://github.com/tanishmisra9/resume-agent',
-      pill: 'project',
+      pills: ['project'],
     },
   ],
   aboutBio:

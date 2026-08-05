@@ -18,19 +18,24 @@ const LINK_ICONS = { external: ExternalLink, newspaper: Newspaper };
 type Props = { projects: ProjectEntry[] };
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-const VISIBLE_COUNT = 4;
+const VISIBLE_COUNT = 2;
 
 function ProjectCard({ project }: { project: ProjectEntry }) {
-  const pillLabel = project.pill?.trim() ?? '';
+  const pills = project.pills ?? [];
   return (
     <article className="relative flex h-full min-h-[15.5rem] flex-col rounded-md border border-white/10 bg-black/40 backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-neutral-400 sm:min-h-[16.75rem]">
-      <div className="flex items-center justify-between gap-4">
-        {pillLabel ? (
-          <span
-            className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
-          >
-            {pillLabel}
-          </span>
+      <div className="flex items-start justify-between gap-4">
+        {pills.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {pills.map((pill) => (
+              <span
+                key={pill}
+                className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
+              >
+                {pill}
+              </span>
+            ))}
+          </div>
         ) : (
           <span />
         )}
