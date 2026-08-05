@@ -26,9 +26,12 @@ function iconFor(label: string) {
 }
 
 const HIGHLIGHT_TERMS = [
-  'applied AI',
-  'machine learning systems',
-  'automotive',
+  'Machine Intelligence and Security',
+  'Securify',
+  'CureCHM',
+  'Toyota',
+  'Telogify',
+  'Purdue Electric Racing',
   'Formula 1',
   '#ShotOniPhone17Pro',
 ] as const;

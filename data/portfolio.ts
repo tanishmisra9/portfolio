@@ -361,7 +361,7 @@ export const portfolio: PortfolioContent = {
     },
   ],
   aboutBio:
-    "I am a student at Purdue learning about applied AI, data pipelines, and building practical machine learning systems that can tackle messy data and real-world constraints from the ground up.\n\nBeyond my technical work, I am deeply fascinated by automotive innovation. I'm also an avid Formula 1 fan (recently building an autonomous broadcast director that automatically rotates onboard cameras to capture the best action), currently developing firmware for Purdue Electric Racing, and enjoy exploring my everyday surroundings through #ShotOniPhone17Pro photography.",
+    "I study computer science at Purdue, concentrating in Machine Intelligence and Security. I like building AI systems that hold up against messy data and real-world constraints, from a PII redaction pipeline for Securify to a Choroideremia research platform CureCHM now uses as its official patient resource. Most recently, that's meant writing LLM-driven test generation pipelines for in-vehicle infotainment as a co-op at Toyota's Connected Experiences Division.\n\nThat automotive interest carries into my free time too. I'm an avid Formula 1 fan, I built Telogify to turn race weekend telemetry into pace and strategy insights, I built an autonomous broadcast director that rotates onboard camera feeds to catch the best action, and I write embedded firmware for Purdue Electric Racing. When I'm not building something, I'm out with a camera, shooting #ShotOniPhone17Pro.",
   social: [
     {
       label: 'GitHub',
