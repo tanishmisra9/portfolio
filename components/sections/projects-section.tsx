@@ -90,11 +90,14 @@ export function ProjectsSection({ projects }: Props) {
         </ScrollReveal>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2">
-          {visibleProjects.map((project) => (
-            <ScrollReveal key={project.id} className="h-full">
-              <ProjectCard project={project} />
-            </ScrollReveal>
-          ))}
+          {visibleProjects.map((project, index) => {
+            const isLastOdd = index === visibleProjects.length - 1 && visibleProjects.length % 2 === 1;
+            return (
+              <ScrollReveal key={project.id} className={isLastOdd ? "h-full sm:col-span-2 sm:w-1/2 sm:mx-auto" : "h-full"}>
+                <ProjectCard project={project} />
+              </ScrollReveal>
+            );
+          })}
         </div>
 
         <AnimatePresence initial={false}>
@@ -109,18 +112,21 @@ export function ProjectsSection({ projects }: Props) {
               transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: EASE }}
             >
               <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                {hiddenProjects.map((project, i) => (
-                  <motion.div
-                    key={project.id}
-                    className="h-full"
-                    initial={reducedMotion ? false : { opacity: 0, filter: 'blur(10px)' }}
-                    animate={reducedMotion ? {} : { opacity: 1, filter: 'blur(0px)' }}
-                    exit={reducedMotion ? {} : { opacity: 0, filter: 'blur(10px)' }}
-                    transition={{ duration: 0.45, ease: EASE, delay: i * 0.06 }}
-                  >
-                    <ProjectCard project={project} />
-                  </motion.div>
-                ))}
+                {hiddenProjects.map((project, i) => {
+                  const isLastOdd = i === hiddenProjects.length - 1 && hiddenProjects.length % 2 === 1;
+                  return (
+                    <motion.div
+                      key={project.id}
+                      className={isLastOdd ? "h-full sm:col-span-2 sm:w-1/2 sm:mx-auto" : "h-full"}
+                      initial={reducedMotion ? false : { opacity: 0, filter: 'blur(10px)' }}
+                      animate={reducedMotion ? {} : { opacity: 1, filter: 'blur(0px)' }}
+                      exit={reducedMotion ? {} : { opacity: 0, filter: 'blur(10px)' }}
+                      transition={{ duration: 0.45, ease: EASE, delay: i * 0.06 }}
+                    >
+                      <ProjectCard project={project} />
+                    </motion.div>
+                  );
+                })}
               </div>
             </motion.div>
           )}

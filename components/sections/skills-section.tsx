@@ -214,11 +214,14 @@ export function SkillsSection({ skills, certifications }: Props) {
 
             {/* First 4 certs */}
             <div className="mt-10 grid items-start gap-5 sm:grid-cols-2 md:mt-12">
-              {visibleCerts.map((cert) => (
-                <ScrollReveal key={cert.id}>
-                  <CertCard cert={cert} />
-                </ScrollReveal>
-              ))}
+              {visibleCerts.map((cert, index) => {
+                const isLastOdd = index === visibleCerts.length - 1 && visibleCerts.length % 2 === 1;
+                return (
+                  <ScrollReveal key={cert.id} className={isLastOdd ? "sm:col-span-2 sm:w-1/2 sm:mx-auto" : undefined}>
+                    <CertCard cert={cert} />
+                  </ScrollReveal>
+                );
+              })}
             </div>
 
             {/* Height-animated shell — not a flex child, so no gap snap on removal */}
@@ -233,17 +236,21 @@ export function SkillsSection({ skills, certifications }: Props) {
                   transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: EASE }}
                 >
                   <div className="mt-5 grid items-start gap-5 sm:grid-cols-2">
-                    {hiddenCerts.map((cert, i) => (
-                      <motion.div
-                        key={cert.id}
-                        initial={reducedMotion ? false : { opacity: 0, filter: 'blur(10px)' }}
-                        animate={reducedMotion ? {} : { opacity: 1, filter: 'blur(0px)' }}
-                        exit={reducedMotion ? {} : { opacity: 0, filter: 'blur(10px)' }}
-                        transition={{ duration: 0.45, ease: EASE, delay: i * 0.06 }}
-                      >
-                        <CertCard cert={cert} />
-                      </motion.div>
-                    ))}
+                    {hiddenCerts.map((cert, i) => {
+                      const isLastOdd = i === hiddenCerts.length - 1 && hiddenCerts.length % 2 === 1;
+                      return (
+                        <motion.div
+                          key={cert.id}
+                          className={isLastOdd ? "sm:col-span-2 sm:w-1/2 sm:mx-auto" : undefined}
+                          initial={reducedMotion ? false : { opacity: 0, filter: 'blur(10px)' }}
+                          animate={reducedMotion ? {} : { opacity: 1, filter: 'blur(0px)' }}
+                          exit={reducedMotion ? {} : { opacity: 0, filter: 'blur(10px)' }}
+                          transition={{ duration: 0.45, ease: EASE, delay: i * 0.06 }}
+                        >
+                          <CertCard cert={cert} />
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </motion.div>
               )}
