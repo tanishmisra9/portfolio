@@ -262,7 +262,7 @@ export const portfolio: PortfolioContent = {
           icon: 'newspaper',
         },
         ],
-      pills: ['research dashboard'],
+      pills: ['research hub'],
     },
     {
       id: 'project-telogify',
@@ -272,7 +272,7 @@ export const portfolio: PortfolioContent = {
       techStack: ['PostgreSQL', 'FastAPI', 'LangGraph', 'React', 'TypeScript', 'Tailwind CSS', 'FastF1'],
       githubUrl: 'https://github.com/tanishmisra9/telogify',
       links: [{ label: 'Live site', url: 'https://www.telogify.com' }],
-      pills: ['f1'],
+      pills: ['f1', 'website', 'dashboard'],
     },
     {
       id: 'project-01',
@@ -320,7 +320,7 @@ export const portfolio: PortfolioContent = {
       ],
       githubUrl: 'https://github.com/tanishmisra9/securify',
       links: [{ label: 'Live site', url: 'https://securify-production-136f.up.railway.app' }],
-      pills: ['algofest 2026 semi-finalist'],
+      pills: ['algofest', 'semi-finalist', '2026'],
     },
     {
       id: 'project-04',
@@ -329,7 +329,7 @@ export const portfolio: PortfolioContent = {
         'spaCy Transformer NER pipeline trained on 1M+ synthetic records.',
       techStack: ['Python', 'spaCy', 'PyTorch'],
       githubUrl: 'https://github.com/tanishmisra9/pii-transformer',
-      pills: ['internship project'],
+      pills: ['internship'],
     },
     {
       id: 'project-tokenwise',
@@ -348,7 +348,7 @@ export const portfolio: PortfolioContent = {
       ],
       githubUrl: 'https://github.com/tanishmisra9/tokenwise',
       links: [{ label: 'Live site', url: 'https://tokenwise-production.up.railway.app' }],
-      pills: ['global fusion 2026'],
+      pills: ['global fusion', '2026'],
     },
     {
       id: 'project-03',
