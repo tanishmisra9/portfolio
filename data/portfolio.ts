@@ -3,7 +3,7 @@ import type { PortfolioContent } from '@/types/content';
 export const portfolio: PortfolioContent = {
   name: 'TANISH MISRA',
   heroSubtitle:
-    'I like building systems that reach real people.\nCS @ Purdue | Prev. Automation Co-op @ Toyota CXD',
+    'I like building systems that reach real people.\nPrev. Automation Co-op @ Toyota CXD',
   experience: [
     {
       id: 'exp-01',
