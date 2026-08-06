@@ -60,12 +60,12 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
                 {pills.map((pill) => (
                   <span
                     key={pill}
-                    className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
+                    className={`${PILL_CLASSES} inline-flex font-sans text-[10px] font-semibold uppercase tracking-widest`}
                   >
                     {pill}
                   </span>
                 ))}
-                <span className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}>
+                <span className={`${PILL_CLASSES} inline-flex font-sans text-[10px] font-semibold uppercase tracking-widest`}>
                   {courses.length} courses
                 </span>
               </div>
@@ -94,7 +94,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
                 {pills.map((pill) => (
                   <span
                     key={pill}
-                    className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
+                    className={`${PILL_CLASSES} inline-flex font-sans text-[10px] font-semibold uppercase tracking-widest`}
                   >
                     {pill}
                   </span>
@@ -121,11 +121,11 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
         </>
       )}
       {skills.length > 0 && (
-        <ul className="mt-auto flex flex-wrap gap-2 pt-8 font-mono text-[10px] uppercase tracking-widest">
+        <ul className="mt-auto flex flex-wrap gap-2 pt-8 font-sans text-[10px] uppercase tracking-widest">
           {skills.map((skill) => (
             <li
               key={skill}
-              className={`${PILL_CLASSES} font-mono text-[10px] uppercase tracking-widest`}
+              className={`${PILL_CLASSES} font-sans text-[10px] uppercase tracking-widest`}
             >
               {skill}
             </li>
@@ -210,7 +210,7 @@ export function SkillsSection({ skills, certifications }: Props) {
                   {group.items.map((skill) => (
                     <li
                       key={skill}
-                      className={`${PILL_CLASSES} font-mono text-[10px] uppercase tracking-widest`}
+                      className={`${PILL_CLASSES} font-sans text-[10px] uppercase tracking-widest`}
                     >
                       {skill}
                     </li>

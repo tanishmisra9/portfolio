@@ -8,11 +8,11 @@ import type { EducationEntry } from '@/types/content';
 type Props = { entries: EducationEntry[] };
 
 const orgPillClassName =
-  `${PILL_CLASSES} font-mono text-[10px] uppercase tracking-widest`;
+  `${PILL_CLASSES} font-sans text-[10px] uppercase tracking-widest`;
 
 function CoursePill({ label }: { label: string }) {
   return (
-    <li className="group relative inline-flex rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-xl px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_4px_12px_-4px_rgba(0,0,0,0.5)] select-none cursor-default transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.1]">
+    <li className="group relative inline-flex rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-xl px-3 py-1 font-sans text-[10px] uppercase tracking-widest text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_4px_12px_-4px_rgba(0,0,0,0.5)] select-none cursor-default transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.1]">
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100"

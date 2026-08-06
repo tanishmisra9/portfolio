@@ -46,7 +46,7 @@ export function ExperienceSection({ entries }: Props) {
                     {entry.tags.map((tag) => (
                       <li
                         key={tag}
-                        className={`${PILL_CLASSES} font-mono text-[10px] uppercase tracking-widest`}
+                        className={`${PILL_CLASSES} font-sans text-[10px] uppercase tracking-widest`}
                       >
                         {tag}
                       </li>

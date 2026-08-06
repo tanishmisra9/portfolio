@@ -31,7 +31,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
             {pills.map((pill) => (
               <span
                 key={pill}
-                className={`${PILL_CLASSES} inline-flex font-mono text-[10px] font-semibold uppercase tracking-widest`}
+                className={`${PILL_CLASSES} inline-flex font-sans text-[10px] font-semibold uppercase tracking-widest`}
               >
                 {pill}
               </span>
@@ -76,7 +76,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
       <p className="mt-4 flex-1 leading-relaxed text-neutral-400">
         {project.description}
       </p>
-      <ul className="mt-10 flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-widest">
+      <ul className="mt-10 flex flex-wrap gap-2 font-sans text-[10px] uppercase tracking-widest">
         {project.techStack.map((tag) => (
           <li
             key={tag}
