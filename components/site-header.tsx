@@ -12,12 +12,11 @@ type NavItem = { href: string; label: string };
 
 const NAV: NavItem[] = [
   { href: "#experience", label: "EXPERIENCE" },
-  { href: "#education", label: "EDUCATION" },
   { href: "#skills", label: "SKILLS" },
-  { href: "#certifications", label: "CERTIFICATIONS" },
   { href: "#projects", label: "PROJECTS" },
   { href: "#about", label: "ABOUT" },
   { href: "/photos", label: "PHOTOS" },
+  { href: "/blog", label: "BLOG" },
   { href: "/quotes", label: "QUOTES" },
 ];
 
