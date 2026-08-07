@@ -126,6 +126,12 @@ export async function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
 }
 
+// All valid slugs are known at build time — no runtime fallback needed. Without this,
+// Vercel bundles the whole public/blog/<slug>/ image folder into a fallback serverless
+// function (lib/image-dimensions.ts reads a dynamically-built path), which blew past the
+// 250MB function size limit.
+export const dynamicParams = false;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = getPostBySlug(slug);

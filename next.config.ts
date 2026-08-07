@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 365,
     qualities: [68, 72, 75],
   },
+  /* lib/image-dimensions.ts reads a dynamically-built path under public/blog/ at build
+   * time, which makes Next's file tracer conservatively bundle the whole directory into
+   * the [slug] fallback function — blowing past Vercel's 250MB function size limit. These
+   * images are static assets served directly, never needed inside the function itself. */
+  outputFileTracingExcludes: {
+    "/blog/\\[slug\\]": ["./public/blog/**/*"],
+  },
 };
 
 export default nextConfig;
