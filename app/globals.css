@@ -66,21 +66,19 @@
   --quote-muted: #8c8c93bf;
 }
 
-/* Smooth cross-fade between themes; --theme-transition-duration is the one knob to retune it. */
-*,
-*::before,
-*::after {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: var(--theme-transition-duration);
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+/* Theme change is a circular reveal (see components/theme-toggle.tsx), not a
+   cross-fade — a cross-fade passes through a mid-grey where all text hits zero
+   contrast. Old snapshot sits still underneath; new one is clipped open on top. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0ms;
-  }
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2147483646;
 }
 
 .heading-ghost {

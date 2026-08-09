@@ -4,6 +4,7 @@ import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { Tooltip } from "@/components/ui/tooltip";
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
@@ -14,13 +15,60 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   const isDark = mounted ? resolvedTheme === "dark" : true;
   const label = isDark ? "Switch to light mode" : "Switch to dark mode";
 
+  const toggleTheme = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const next = isDark ? "light" : "dark";
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (reducedMotion || !document.startViewTransition) {
+      setTheme(next);
+      return;
+    }
+
+    // Circular reveal instead of a cross-fade: a cross-fade between inverted
+    // light/dark palettes always passes through a mid-grey where every bit of
+    // text hits ~zero contrast — the longer the transition, the more visible
+    // that washout reads as a flicker. A hard clip-path boundary means every
+    // pixel is always fully one theme or the other, so the washout can't happen.
+    const { clientX: x, clientY: y } = e;
+    const radius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y),
+    );
+    const durationMs =
+      parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue(
+          "--theme-transition-duration",
+        ),
+      ) || 650;
+
+    document
+      .startViewTransition(() => flushSync(() => setTheme(next)))
+      .ready.then(() => {
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${radius}px at ${x}px ${y}px)`,
+            ],
+          },
+          {
+            duration: durationMs,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+            pseudoElement: "::view-transition-new(root)",
+          },
+        );
+      });
+  };
+
   return (
     <Tooltip label={label} align="end" className={className}>
       <button
         type="button"
         className="flex shrink-0 items-center justify-center rounded-full p-2 text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         aria-label={label}
-        onClick={() => setTheme(isDark ? "light" : "dark")}
+        onClick={toggleTheme}
       >
         <span className="relative grid h-6 w-6 shrink-0 -translate-y-px place-items-center">
           {/* Icon shows the action a click performs, not the current theme: moon (go dark) while light, sun (go light) while dark. */}
