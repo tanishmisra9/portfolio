@@ -819,7 +819,7 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
       <div
         ref={tooltipRef}
         aria-hidden="true"
-        className={`pointer-events-none fixed left-0 top-0 z-[100] rounded-full border border-border-strong bg-fg/[0.08] px-3.5 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-opacity duration-150 ${
+        className={`pointer-events-none fixed left-0 top-0 z-[100] rounded-full border border-border-strong bg-fg/[0.08] px-3.5 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-opacity duration-150 ${
           tip.visible ? "opacity-100" : "opacity-0"
         }`}
       >

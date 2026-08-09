@@ -84,7 +84,7 @@ export function Tooltip({
             animate={{ opacity: 1, x: 0, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className={`pointer-events-none absolute z-[60] whitespace-nowrap rounded-full border border-border-strong bg-fg/[0.08] px-3.5 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl ${
+            className={`pointer-events-none absolute z-[60] whitespace-nowrap rounded-full border border-border-strong bg-fg/[0.08] px-3.5 py-1.5 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl ${
               side === "left"
                 ? "right-full top-1/2 mr-2 -translate-y-1/2"
                 : `top-full mt-2 ${ALIGN_CLASSES[align]}`
