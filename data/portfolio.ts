@@ -252,9 +252,9 @@ export const portfolio: PortfolioContent = {
       techStack: ['PostgreSQL', 'pgvector', 'RAG', 'React'],
       githubUrl: 'https://github.com/tanishmisra9/candle',
       links: [
-        { 
-          label: 'Website', 
-          url: 'https://candleforchm.org' 
+        {
+          label: 'Live site',
+          url: 'https://candleforchm.org'
         },
         {
           label: 'Press release',
