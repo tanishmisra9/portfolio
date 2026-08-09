@@ -36,6 +36,7 @@
 }
 
 :root {
+  --theme-transition-duration: 300ms;
   --bg: #fafaf9;
   --surface: rgba(0, 0, 0, 0.03);
   --surface-strong: #fafaf9;
@@ -59,6 +60,23 @@
   --heading-ghost: #a6a6a6ee;
   --quote-strong: #ffffffd5;
   --quote-muted: #8c8c93bf;
+}
+
+/* Smooth cross-fade between themes; --theme-transition-duration is the one knob to retune it. */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: var(--theme-transition-duration);
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms;
+  }
 }
 
 .heading-ghost {

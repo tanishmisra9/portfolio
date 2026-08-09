@@ -248,7 +248,7 @@ export function SiteHeader() {
               })}
             </nav>
 
-            <ThemeToggle />
+            <ThemeToggle className="md:ml-3.5" />
 
             <button
               ref={menuTriggerRef}
