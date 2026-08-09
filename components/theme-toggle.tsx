@@ -18,7 +18,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     <Tooltip label={label} align="end" className={className}>
       <button
         type="button"
-        className="flex shrink-0 items-center justify-center rounded-md p-2 text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+        className="flex shrink-0 items-center justify-center rounded-full p-2 text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         aria-label={label}
         onClick={() => setTheme(isDark ? "light" : "dark")}
       >
