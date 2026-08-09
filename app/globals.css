@@ -81,6 +81,21 @@
   z-index: 2147483646;
 }
 
+/* The header's own live rendering (incl. backdrop-blur-md) is replaced by a
+   static View Transition snapshot for the reveal's duration, and WebKit's
+   snapshot capture doesn't reliably preserve backdrop-filter — the glass look
+   visibly drops out for that window, then pops back once the live DOM returns.
+   Toggled by components/theme-toggle.tsx around the transition. Dropping just
+   the blur isn't enough: the header is still translucent, so whatever's
+   scrolled underneath shows through crisply instead of blurred — the same
+   "pop," just now on purpose. Swapping to the already-opaque --surface-strong
+   (used elsewhere for solid panels) means nothing shows through either way. */
+#site-header.theme-switching {
+  background-color: var(--surface-strong);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 .heading-ghost {
   -webkit-text-stroke: 5px var(--heading-ghost);
   paint-order: stroke fill;

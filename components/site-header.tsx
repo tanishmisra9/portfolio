@@ -186,6 +186,7 @@ export function SiteHeader() {
   return (
     <>
       <motion.header
+        id="site-header"
         className={`relative sticky top-0 border-b border-border bg-surface backdrop-blur-md ${
           menuOpen ? "z-[10001]" : "z-50"
         }`}

@@ -48,21 +48,32 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     const mask = (r: number) =>
       `radial-gradient(circle at ${x}px ${y}px, black ${Math.max(r - feather, 0)}px, transparent ${r}px)`;
 
-    document
-      .startViewTransition(() => flushSync(() => setTheme(next)))
-      .ready.then(() => {
-        document.documentElement.animate(
-          {
-            maskImage: [mask(0), mask(radius)],
-            WebkitMaskImage: [mask(0), mask(radius)],
-          },
-          {
-            duration: durationMs,
-            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-            pseudoElement: "::view-transition-new(root)",
-          },
-        );
-      });
+    // The header is replaced by a static snapshot for the transition's
+    // duration, and WebKit doesn't reliably preserve backdrop-filter when
+    // capturing that snapshot — the glass look drops out, then pops back once
+    // the live DOM returns. Go flat for the same window instead of flashing.
+    const header = document.getElementById("site-header");
+    header?.classList.add("theme-switching");
+
+    const transition = document.startViewTransition(() =>
+      flushSync(() => setTheme(next)),
+    );
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          maskImage: [mask(0), mask(radius)],
+          WebkitMaskImage: [mask(0), mask(radius)],
+        },
+        {
+          duration: durationMs,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+    });
+    transition.finished.finally(() => {
+      header?.classList.remove("theme-switching");
+    });
   };
 
   return (
