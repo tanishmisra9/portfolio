@@ -36,7 +36,7 @@
 }
 
 :root {
-  --theme-transition-duration: 300ms;
+  --theme-transition-duration: 500ms;
   --bg: #fafaf9;
   --surface: rgba(0, 0, 0, 0.03);
   --surface-strong: #fafaf9;
