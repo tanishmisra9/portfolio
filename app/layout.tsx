@@ -55,7 +55,7 @@ export default async function RootLayout({
           </a>
           <RadioKeystrokeListener samples={radioSamples} />
           <SiteHeader />
-          <div className="pt-20">{children}</div>
+          {children}
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

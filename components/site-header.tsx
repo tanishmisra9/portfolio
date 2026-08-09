@@ -31,7 +31,7 @@ const SECTION_SCROLL_SPY_IDS = [
   "about",
 ] as const;
 
-/** Fixed header (h-20) + small buffer so active swaps near where anchors land. */
+/** Sticky header (h-20) + small buffer so active swaps near where anchors land. */
 const SCROLL_SPY_HEADER_OFFSET = 88;
 
 function resolveNavHref(href: string, pathname: string): string {
@@ -181,12 +181,12 @@ export function SiteHeader() {
   const closeMenu = () => setMenuOpen(false);
 
   const logoClassName =
-    "font-display text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-60";
+    "font-display text-xl font-bold tracking-tight text-fg transition-colors hover:text-muted";
 
   return (
     <>
       <motion.header
-        className={`fixed top-0 left-0 right-0 mix-blend-difference ${
+        className={`relative sticky top-0 border-b border-border bg-surface backdrop-blur-md ${
           menuOpen ? "z-[10001]" : "z-50"
         }`}
         initial={{ opacity: 0 }}
@@ -224,12 +224,17 @@ export function SiteHeader() {
                           : "page"
                         : undefined
                     }
-                    className="relative inline-flex items-center justify-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide text-white transition-opacity hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    className={[
+                      "relative inline-flex items-center justify-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors hover:ring-1 hover:ring-inset hover:ring-hover-outline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70",
+                      active
+                        ? "text-fg"
+                        : "text-muted hover:text-fg",
+                    ].join(" ")}
                   >
                     {active ? (
                       <motion.span
                         layoutId="nav-active-indicator"
-                        className="pointer-events-none absolute inset-x-4 bottom-1.5 h-px bg-white/70"
+                        className="pointer-events-none absolute inset-0 rounded-full bg-fg/[0.07] ring-1 ring-inset ring-fg/[0.1]"
                         transition={{
                           type: "spring",
                           stiffness: 420,
@@ -248,7 +253,7 @@ export function SiteHeader() {
             <button
               ref={menuTriggerRef}
               type="button"
-              className="flex shrink-0 items-center justify-center rounded-full p-2 text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:hidden"
+              className="flex shrink-0 items-center justify-center rounded-md p-2 text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:hidden"
               aria-expanded={menuOpen}
               aria-controls="mobile-nav-overlay"
               aria-label={menuOpen ? "Close menu" : "Open menu"}

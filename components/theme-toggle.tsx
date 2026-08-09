@@ -29,13 +29,15 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     // Circular reveal instead of a cross-fade: a cross-fade between inverted
     // light/dark palettes always passes through a mid-grey where every bit of
     // text hits ~zero contrast — the longer the transition, the more visible
-    // that washout reads as a flicker. A hard clip-path boundary means every
-    // pixel is always fully one theme or the other, so the washout can't happen.
+    // that washout reads as a flicker. A boundary where every pixel is always
+    // fully one theme or the other means the washout can't happen. A feathered
+    // mask (vs. a hard clip-path) softens that boundary into a gradient band.
     const { clientX: x, clientY: y } = e;
     const radius = Math.hypot(
       Math.max(x, window.innerWidth - x),
       Math.max(y, window.innerHeight - y),
     );
+    const feather = 120;
     const durationMs =
       parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue(
@@ -43,15 +45,16 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         ),
       ) || 650;
 
+    const mask = (r: number) =>
+      `radial-gradient(circle at ${x}px ${y}px, black ${Math.max(r - feather, 0)}px, transparent ${r}px)`;
+
     document
       .startViewTransition(() => flushSync(() => setTheme(next)))
       .ready.then(() => {
         document.documentElement.animate(
           {
-            clipPath: [
-              `circle(0px at ${x}px ${y}px)`,
-              `circle(${radius}px at ${x}px ${y}px)`,
-            ],
+            maskImage: [mask(0), mask(radius)],
+            WebkitMaskImage: [mask(0), mask(radius)],
           },
           {
             duration: durationMs,
@@ -66,7 +69,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     <Tooltip label={label} align="end" className={className}>
       <button
         type="button"
-        className="flex shrink-0 items-center justify-center rounded-full p-2 text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        className="flex shrink-0 items-center justify-center rounded-md p-2 text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
         aria-label={label}
         onClick={toggleTheme}
       >
