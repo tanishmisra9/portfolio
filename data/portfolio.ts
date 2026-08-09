@@ -28,7 +28,7 @@ export const portfolio: PortfolioContent = {
     },
     {
       id: 'exp-04',
-      date: 'Aug 2025 - Present',
+      date: 'Aug 2025 - Apr 2026',
       org: 'Purdue Electric Vehicle Club',
       role: 'OpenCV Developer',
       tags: ['Python', 'OpenCV', 'Docker'],
