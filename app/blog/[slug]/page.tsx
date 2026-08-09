@@ -22,17 +22,17 @@ const DEFAULT_IMG_H = 900;
 const components: Components = {
   h1: ({ node, ...rest }) => (
     <ScrollReveal variant="slide" className="mt-10">
-      <h2 className="font-display text-3xl font-bold text-white" {...rest} />
+      <h2 className="font-display text-3xl font-bold text-fg" {...rest} />
     </ScrollReveal>
   ),
   h2: ({ node, ...rest }) => (
     <ScrollReveal variant="slide" className="mt-8">
-      <h3 className="font-display text-2xl font-bold text-white" {...rest} />
+      <h3 className="font-display text-2xl font-bold text-fg" {...rest} />
     </ScrollReveal>
   ),
   h3: ({ node, ...rest }) => (
     <ScrollReveal variant="slide" className="mt-6">
-      <h4 className="font-display text-xl font-bold text-white" {...rest} />
+      <h4 className="font-display text-xl font-bold text-fg" {...rest} />
     </ScrollReveal>
   ),
   p: ({ node, children, ...rest }) => {
@@ -52,7 +52,7 @@ const components: Components = {
   },
   a: ({ node, ...rest }) => (
     <a
-      className="text-white underline decoration-white/40 underline-offset-2 hover:decoration-white"
+      className="text-fg underline decoration-fg/40 underline-offset-2 hover:decoration-fg"
       {...rest}
     />
   ),
@@ -69,7 +69,7 @@ const components: Components = {
   blockquote: ({ node, ...rest }) => (
     <ScrollReveal variant="slide">
       <blockquote
-        className="border-l-2 border-white/20 pl-4 italic text-neutral-400"
+        className="border-l-2 border-border-strong pl-4 italic text-muted"
         {...rest}
       />
     </ScrollReveal>
@@ -85,7 +85,7 @@ const components: Components = {
     }
     return (
       <code
-        className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm text-white"
+        className="rounded bg-fg/10 px-1.5 py-0.5 font-mono text-sm text-fg"
         {...rest}
       >
         {children}
@@ -95,7 +95,7 @@ const components: Components = {
   pre: ({ node, ...rest }) => (
     <ScrollReveal variant="slide">
       <pre
-        className="overflow-x-auto rounded-lg border border-white/10 bg-white/5 p-4 font-mono text-sm"
+        className="overflow-x-auto rounded-lg border border-border bg-fg/5 p-4 font-mono text-sm"
         {...rest}
       />
     </ScrollReveal>
@@ -115,7 +115,7 @@ const components: Components = {
           placeholder="blur"
           blurDataURL={BLOG_IMAGE_BLUR_DATA_URL}
           quality={72}
-          className="rounded-lg border border-white/10"
+          className="rounded-lg border border-border"
         />
       </ScrollReveal>
     );
@@ -164,14 +164,14 @@ export default async function BlogPostPage({ params }: Props) {
       <article className="mx-auto max-w-3xl">
         <Link
           href="/blog"
-          className="mb-10 inline-flex items-center gap-2 text-[0.9625rem] text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:mb-12"
+          className="mb-10 inline-flex items-center gap-2 text-[0.9625rem] text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:mb-12"
         >
           <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
           Back to blog
         </Link>
 
         <header className="text-center">
-          <time className="font-mono text-xs uppercase tracking-wide text-neutral-500">
+          <time className="font-mono text-xs uppercase tracking-wide text-muted">
             {new Date(`${post.date}T00:00`).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
@@ -179,16 +179,16 @@ export default async function BlogPostPage({ params }: Props) {
             })}
           </time>
           <h1
-            className={`heading-bleed-mobile mx-auto max-w-full select-none py-2 font-display ${titleSizeClasses} font-extrabold uppercase leading-[1.08] tracking-tighter text-white md:text-8xl`}
+            className={`heading-bleed-mobile mx-auto max-w-full select-none py-2 font-display ${titleSizeClasses} font-extrabold uppercase leading-[1.08] tracking-tighter text-fg md:text-8xl`}
           >
             {post.title}
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-400 md:text-xl">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted md:text-xl">
             {post.description}
           </p>
         </header>
 
-        <div className="mt-12 space-y-6 text-neutral-300">
+        <div className="mt-12 space-y-6 text-fg">
           <Markdown remarkPlugins={[remarkGfm]} components={components}>
             {post.content}
           </Markdown>

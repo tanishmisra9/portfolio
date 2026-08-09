@@ -24,7 +24,7 @@ const VISIBLE_COUNT = 2;
 function ProjectCard({ project }: { project: ProjectEntry }) {
   const pills = project.pills ?? [];
   return (
-    <article className="relative flex h-full min-h-[15.5rem] flex-col rounded-md border border-white/10 bg-black/40 backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-neutral-400 sm:min-h-[16.75rem]">
+    <article className="relative flex h-full min-h-[15.5rem] flex-col rounded-md border border-border bg-surface backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-border-strong sm:min-h-[16.75rem]">
       <div className="flex items-center justify-between gap-4">
         {pills.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
@@ -49,7 +49,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
+                  className="text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
                   aria-label={label}
                 >
                   <Icon className="h-4 w-4" strokeWidth={1.8} aria-hidden />
@@ -62,7 +62,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
+              className="text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
               aria-label={`${project.title} on GitHub`}
             >
               <Github className="h-4 w-4" strokeWidth={1.8} aria-hidden />
@@ -70,10 +70,10 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
           </Tooltip>
         </div>
       </div>
-      <h3 className="mt-5 font-display text-2xl font-semibold text-white">
+      <h3 className="mt-5 font-display text-2xl font-semibold text-fg">
         {project.title}
       </h3>
-      <p className="mt-4 flex-1 leading-relaxed text-neutral-400">
+      <p className="mt-4 flex-1 leading-relaxed text-muted">
         {project.description}
       </p>
       <ul className="mt-10 flex flex-wrap gap-2 font-sans text-[10px] uppercase tracking-widest">

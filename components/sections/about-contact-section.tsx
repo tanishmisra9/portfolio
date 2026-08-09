@@ -52,7 +52,7 @@ function renderHighlightedParagraph(paragraph: string): ReactNode {
         <Link
           key={`shot-${index}`}
           href="/photos"
-          className="select-none font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          className="select-none font-bold text-fg/80 transition-colors duration-300 ease-out hover:text-fg focus-visible:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
         >
           {part}
         </Link>
@@ -63,7 +63,7 @@ function renderHighlightedParagraph(paragraph: string): ReactNode {
         <Link
           key={`f1-${index}`}
           href="/photos/super-max"
-          className="font-bold text-white/80 transition-colors duration-300 ease-out hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          className="font-bold text-fg/80 transition-colors duration-300 ease-out hover:text-fg focus-visible:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
         >
           {part}
         </Link>
@@ -71,7 +71,7 @@ function renderHighlightedParagraph(paragraph: string): ReactNode {
     }
     if (HIGHLIGHT_TERMS.includes(part as (typeof HIGHLIGHT_TERMS)[number])) {
       return (
-        <strong key={`${part}-${index}`} className="font-bold text-white">
+        <strong key={`${part}-${index}`} className="font-bold text-fg">
           {part}
         </strong>
       );
@@ -99,10 +99,10 @@ export function AboutContactSection({ bio, social }: Props) {
         </ScrollReveal>
         <ScrollReveal>
           <div className="mx-auto max-w-[min(44.16rem,calc(100vw-3rem))] px-6 text-center">
-            <p className={`${bioBodyClass} text-white`}>
+            <p className={`${bioBodyClass} text-fg`}>
               {renderHighlightedParagraph(paragraphOne)}
             </p>
-            <p className={`${bioBodyClass} mt-7 text-neutral-400 md:mt-9`}>
+            <p className={`${bioBodyClass} mt-7 text-muted md:mt-9`}>
               {renderHighlightedParagraph(paragraphTwo)}
             </p>
           </div>
@@ -116,7 +116,7 @@ export function AboutContactSection({ bio, social }: Props) {
                   <a
                     href={link.href}
                     aria-label={link.label}
-                    className="rounded-md p-2 text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    className="rounded-md p-2 text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
                     {...(link.label === 'Resume' ? { download: 'Tanish_Misra_Resume.pdf' } : {})}
                     {...(link.href.startsWith('http')
                       ? { target: '_blank', rel: 'noopener noreferrer' }
@@ -134,7 +134,7 @@ export function AboutContactSection({ bio, social }: Props) {
           </div>
         </ScrollReveal>
         <ScrollReveal variant="fade">
-          <p className="mt-14 text-center text-[0.805rem] text-neutral-400 md:mt-[4.6rem]">
+          <p className="mt-14 text-center text-[0.805rem] text-muted md:mt-[4.6rem]">
             © {new Date().getFullYear()} Tanish Misra
           </p>
         </ScrollReveal>

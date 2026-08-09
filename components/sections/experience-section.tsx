@@ -33,14 +33,14 @@ export function ExperienceSection({ entries }: Props) {
           {entries.map((entry) => (
             <ScrollReveal key={entry.id} homeIntroComplete={homeIntroDone}>
               <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
-                <div className="font-mono text-sm uppercase tracking-wider text-neutral-400">
+                <div className="font-mono text-sm uppercase tracking-wider text-muted">
                   {entry.date}
                 </div>
                 <div>
-                  <p className="font-display text-xl font-semibold text-white">{entry.org}</p>
-                  <p className="mt-1 text-neutral-400">{entry.role}</p>
+                  <p className="font-display text-xl font-semibold text-fg">{entry.org}</p>
+                  <p className="mt-1 text-muted">{entry.role}</p>
                   {entry.description ? (
-                    <p className="mt-3 max-w-2xl text-neutral-400">{entry.description}</p>
+                    <p className="mt-3 max-w-2xl text-muted">{entry.description}</p>
                   ) : null}
                   <ul className="mt-3 flex flex-wrap gap-2 md:mt-4">
                     {entry.tags.map((tag) => (

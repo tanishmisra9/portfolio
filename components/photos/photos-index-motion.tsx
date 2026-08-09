@@ -103,7 +103,7 @@ function CollectionTile({ collection, index }: CollectionTileProps) {
   return (
     <Link
       href={`/photos/${collection.slug}`}
-      className="collection-tile group relative block min-h-[280px] overflow-hidden rounded-md border border-white/10 transition-colors duration-200 hover:border-neutral-400"
+      className="collection-tile group relative block min-h-[280px] overflow-hidden rounded-md border border-border transition-colors duration-200 hover:border-border-strong"
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
@@ -225,7 +225,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
           variants={item}
           className="mt-6 flex flex-wrap items-center justify-center gap-4 md:mt-8"
         >
-          <p className="select-none text-[1.375rem] leading-snug text-neutral-400">
+          <p className="select-none text-[1.375rem] leading-snug text-muted">
             #ShotOniPhone17Pro
           </p>
           <Tooltip label="Instagram">
@@ -233,7 +233,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
               href="https://www.instagram.com/tanishtakespics/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-full border border-white/10 p-[0.6875rem] text-neutral-400 transition-colors hover:border-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              className="inline-flex items-center justify-center rounded-full border border-border p-[0.6875rem] text-muted transition-colors hover:border-border-strong hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
               aria-label="Instagram"
             >
               <Instagram

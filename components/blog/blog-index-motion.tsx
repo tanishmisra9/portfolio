@@ -43,7 +43,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
       </motion.h1>
 
       {posts.length === 0 ? (
-        <motion.p variants={item} className="mt-8 text-neutral-500">
+        <motion.p variants={item} className="mt-8 text-muted">
           No posts yet.
         </motion.p>
       ) : (
@@ -52,18 +52,18 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
             <motion.li key={post.slug} variants={item}>
               <Link
                 href={`/blog/${post.slug}`}
-                className="group block rounded-md border border-white/10 bg-black/40 p-8 backdrop-blur-md transition-colors duration-200 hover:border-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="group block rounded-md border border-border bg-surface p-8 backdrop-blur-md transition-colors duration-200 hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
               >
-                <time className="font-mono text-xs uppercase tracking-wide text-neutral-500">
+                <time className="font-mono text-xs uppercase tracking-wide text-muted">
                   {new Date(`${post.date}T00:00`).toLocaleDateString(
                     "en-US",
                     { year: "numeric", month: "long", day: "numeric" },
                   )}
                 </time>
-                <h2 className="mt-2 font-display text-2xl font-bold text-white transition-colors group-hover:text-neutral-300">
+                <h2 className="mt-2 font-display text-2xl font-bold text-fg transition-colors group-hover:text-fg">
                   {post.title}
                 </h2>
-                <p className="mt-2 text-neutral-400">{post.description}</p>
+                <p className="mt-2 text-muted">{post.description}</p>
               </Link>
             </motion.li>
           ))}

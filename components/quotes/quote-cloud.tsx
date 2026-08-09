@@ -84,8 +84,8 @@ const TIER_DELAY_STEP_MS = 420;
 /** Two-value contrast only: bright white or dark grey, nothing in between.
  * Colour is assigned after packing (see assignSpreadColors) so neighbours
  * alternate and same-colour quotes never cluster into chunks. */
-const QUOTE_WHITE = "#ffffffd5";
-const QUOTE_DARK = "#8c8c93bf";
+const QUOTE_WHITE = "var(--quote-strong)";
+const QUOTE_DARK = "var(--quote-muted)";
 
 /** How many nearest already-coloured blocks a new block checks to pick the
  * locally-minority colour. */
@@ -646,7 +646,7 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
           <h1 className="heading-bleed-mobile select-none text-center font-display text-[clamp(2.75rem,10.5vw,6.5rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(3rem,11.5vw,7rem)] md:max-w-full md:text-[min(8.2vw,6.75rem)] heading-ghost heading-ghost-photos">
             Quotes
           </h1>
-          <p className="mt-6 select-none text-[1.375rem] leading-snug text-neutral-400 md:mt-8">
+          <p className="mt-6 select-none text-[1.375rem] leading-snug text-muted md:mt-8">
             &ldquo; Lines worth keeping. &rdquo;
           </p>
         </motion.header>
@@ -786,7 +786,7 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
                   >
                     <blockquote
                       aria-hidden="true"
-                      className="text-neutral-100"
+                      className="text-fg"
                       style={{
                         fontFamily: a.fontFamily,
                         fontStyle: a.fontStyle,
@@ -802,7 +802,7 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
                     {a.quote.attribution ? (
                       <figcaption
                         aria-hidden="true"
-                        className="mt-3 font-mono text-xs uppercase tracking-[0.2em] text-neutral-500"
+                        className="mt-3 font-mono text-xs uppercase tracking-[0.2em] text-muted"
                       >
                         {a.quote.attribution}
                       </figcaption>
@@ -819,7 +819,7 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
       <div
         ref={tooltipRef}
         aria-hidden="true"
-        className={`pointer-events-none fixed left-0 top-0 z-[100] rounded-full border border-white/15 bg-white/[0.08] px-3.5 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-neutral-100 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-opacity duration-150 ${
+        className={`pointer-events-none fixed left-0 top-0 z-[100] rounded-full border border-border-strong bg-fg/[0.08] px-3.5 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-opacity duration-150 ${
           tip.visible ? "opacity-100" : "opacity-0"
         }`}
       >

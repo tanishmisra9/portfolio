@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import { RadioKeystrokeListener } from "@/components/easter-eggs/radio-keystroke-listener";
 import { SiteHeader } from "@/components/site-header";
 import { getRadioSampleUrls } from "@/lib/radio-samples";
@@ -40,20 +41,22 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} ${spaceMono.variable}`}
+      className={`${inter.variable} ${spaceMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-black text-neutral-200 text-base font-sans font-[120] antialiased md:text-lg">
-        <div id="top" tabIndex={-1} aria-hidden="true" />
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[10002] focus:rounded-full focus:border focus:border-white/15 focus:bg-black focus:px-5 focus:py-3 focus:font-sans focus:text-xs focus:uppercase focus:tracking-[0.2em] focus:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-white/70"
-        >
-          Skip to content
-        </a>
-        <RadioKeystrokeListener samples={radioSamples} />
-        <SiteHeader />
-        {children}
+      <body className="min-h-screen bg-bg text-fg text-base font-sans font-[120] antialiased md:text-lg">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <div id="top" tabIndex={-1} aria-hidden="true" />
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[10002] focus:rounded-full focus:border focus:border-border-strong focus:bg-bg focus:px-5 focus:py-3 focus:font-sans focus:text-xs focus:uppercase focus:tracking-[0.2em] focus:text-fg focus:outline-none focus:ring-2 focus:ring-fg/70"
+          >
+            Skip to content
+          </a>
+          <RadioKeystrokeListener samples={radioSamples} />
+          <SiteHeader />
+          {children}
+        </ThemeProvider>
         <Analytics />
         <SpeedInsights />
       </body>

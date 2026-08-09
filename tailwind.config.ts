@@ -9,6 +9,15 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        bg: "var(--bg)",
+        fg: "var(--fg)",
+        muted: "var(--muted)",
+        surface: "var(--surface)",
+        "surface-strong": "var(--surface-strong)",
+        border: "var(--border)",
+        "border-strong": "var(--border-strong)",
+      },
       fontFamily: {
         sans: [
           '"YD Gothic"',

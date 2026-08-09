@@ -114,7 +114,7 @@ export function Hero({ subtitle }: HeroProps) {
                 role="button"
                 tabIndex={0}
                 aria-label="Play name pit-stop animation"
-                className="heading-bleed-mobile flex flex-col items-center cursor-pointer select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:text-[clamp(2.256rem,9.026vw,8.726rem)]"
+                className="heading-bleed-mobile flex flex-col items-center cursor-pointer select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:text-[clamp(2.256rem,9.026vw,8.726rem)]"
                 onPointerMove={onNamePointerMove}
                 onPointerLeave={onNamePointerLeaveOrCancel}
                 onPointerCancel={onNamePointerLeaveOrCancel}
@@ -126,7 +126,7 @@ export function Hero({ subtitle }: HeroProps) {
                   }
                 }}
               >
-                <div className="text-white">
+                <div className="text-fg">
                   <ScatterName
                     text="TANISH"
                     lineId="tanish"
@@ -138,7 +138,7 @@ export function Hero({ subtitle }: HeroProps) {
                     onScatterComplete={onLineScatterComplete}
                   />
                 </div>
-                <div className="-mt-3 translate-x-[0.14em] text-neutral-500 md:-mt-5">
+                <div className="-mt-3 translate-x-[0.14em] text-muted md:-mt-5">
                   <ScatterName
                     text="MISRA"
                     lineId="misra"
@@ -167,8 +167,8 @@ export function Hero({ subtitle }: HeroProps) {
             }}
             onAnimationComplete={markHomeIntroDone}
           >
-            <span className="block text-white">{topLine}</span>
-            <span className="block text-neutral-400">{bottomLine}</span>
+            <span className="block text-fg">{topLine}</span>
+            <span className="block text-muted">{bottomLine}</span>
           </motion.div>
         </div>
       </div>

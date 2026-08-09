@@ -12,7 +12,7 @@ const orgPillClassName =
 
 function CoursePill({ label }: { label: string }) {
   return (
-    <li className="group relative inline-flex rounded-full border border-white/15 bg-white/[0.06] backdrop-blur-xl px-3 py-1 font-sans text-[10px] uppercase tracking-widest text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_4px_12px_-4px_rgba(0,0,0,0.5)] select-none cursor-default transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.1]">
+    <li className="group relative inline-flex rounded-full border border-border-strong bg-fg/[0.06] backdrop-blur-xl px-3 py-1 font-sans text-[10px] uppercase tracking-widest text-fg select-none cursor-default transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1]">
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -43,12 +43,12 @@ export function EducationSection({ entries }: Props) {
           {entries.map((edu) => (
             <ScrollReveal key={edu.id}>
               <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
-                <span className="font-mono text-sm uppercase tracking-wider text-neutral-400">
+                <span className="font-mono text-sm uppercase tracking-wider text-muted">
                   {edu.date}
                 </span>
                 <div>
-                  <p className="font-display text-xl font-semibold text-white">{edu.institution}</p>
-                  <p className="mt-1 text-neutral-400">{edu.credential}</p>
+                  <p className="font-display text-xl font-semibold text-fg">{edu.institution}</p>
+                  <p className="mt-1 text-muted">{edu.credential}</p>
                   {edu.pillRows?.length ? (
                     <div className="mt-4 flex flex-col gap-2">
                       {edu.pillRows.map((row, rowIndex) => (

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { SITE_HEADER_FADE_DURATION_S } from "@/lib/site-motion";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -180,12 +181,12 @@ export function SiteHeader() {
   const closeMenu = () => setMenuOpen(false);
 
   const logoClassName =
-    "font-display text-xl font-bold tracking-tight text-white transition-colors hover:text-neutral-300";
+    "font-display text-xl font-bold tracking-tight text-fg transition-colors hover:text-muted";
 
   return (
     <>
       <motion.header
-        className={`relative sticky top-0 border-b border-white/10 bg-black/40 backdrop-blur-md ${
+        className={`relative sticky top-0 border-b border-border bg-surface backdrop-blur-md ${
           menuOpen ? "z-[10001]" : "z-50"
         }`}
         initial={{ opacity: 0 }}
@@ -224,16 +225,16 @@ export function SiteHeader() {
                         : undefined
                     }
                     className={[
-                      "relative inline-flex items-center justify-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
+                      "relative inline-flex items-center justify-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70",
                       active
-                        ? "text-white"
-                        : "text-neutral-400 hover:text-white",
+                        ? "text-fg"
+                        : "text-muted hover:text-fg",
                     ].join(" ")}
                   >
                     {active ? (
                       <motion.span
                         layoutId="nav-active-indicator"
-                        className="pointer-events-none absolute inset-0 rounded-full bg-white/[0.07] ring-1 ring-inset ring-white/[0.1]"
+                        className="pointer-events-none absolute inset-0 rounded-full bg-fg/[0.07] ring-1 ring-inset ring-fg/[0.1]"
                         transition={{
                           type: "spring",
                           stiffness: 420,
@@ -247,10 +248,12 @@ export function SiteHeader() {
               })}
             </nav>
 
+            <ThemeToggle />
+
             <button
               ref={menuTriggerRef}
               type="button"
-              className="flex shrink-0 items-center justify-center rounded-md p-2 text-neutral-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:hidden"
+              className="flex shrink-0 items-center justify-center rounded-md p-2 text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:hidden"
               aria-expanded={menuOpen}
               aria-controls="mobile-nav-overlay"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -293,7 +296,7 @@ export function SiteHeader() {
                   role="dialog"
                   aria-modal="true"
                   aria-label="Navigation"
-                  className="fixed inset-x-0 bottom-0 top-20 z-[10000] flex flex-col bg-black md:hidden"
+                  className="fixed inset-x-0 bottom-0 top-20 z-[10000] flex flex-col bg-surface-strong md:hidden"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -330,8 +333,8 @@ export function SiteHeader() {
                             className={[
                               "block py-1 text-center font-display text-4xl font-extrabold uppercase tracking-tighter transition-colors",
                               active
-                                ? "text-white underline decoration-white/30 decoration-1 underline-offset-[0.4em]"
-                                : "text-neutral-500 hover:text-neutral-300",
+                                ? "text-fg underline decoration-fg/30 decoration-1 underline-offset-[0.4em]"
+                                : "text-muted hover:text-fg",
                             ].join(" ")}
                             onClick={closeMenu}
                           >

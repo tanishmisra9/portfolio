@@ -134,7 +134,7 @@ export function AlbumTitle({ title, slug }: Props) {
         className={`${baseClasses} mx-auto max-w-full py-2 ${
           isInteractive ? "cursor-pointer" : "cursor-default"
         } ${isLongSingleWordTitle ? "[overflow-wrap:anywhere]" : ""} ${
-          ukFlying ? "uk-flag-fly" : "text-white"
+          ukFlying ? "uk-flag-fly" : "text-fg"
         }`}
         onClick={handleClick}
       >

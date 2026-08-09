@@ -36,17 +36,36 @@
 }
 
 :root {
+  --bg: #fafaf9;
+  --surface: rgba(0, 0, 0, 0.03);
+  --surface-strong: #fafaf9;
+  --fg: #1c1c1a;
+  --muted: #6b6b68;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --heading-ghost: #57574f;
+  --quote-strong: rgba(28, 28, 26, 0.88);
+  --quote-muted: rgba(28, 28, 26, 0.45);
+}
+
+.dark {
+  --bg: #000000;
+  --surface: rgba(0, 0, 0, 0.4);
+  --surface-strong: #000000;
   --fg: #e5e5e5;
   --muted: #b4b4b8;
   --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
   --heading-ghost: #a6a6a6ee;
+  --quote-strong: #ffffffd5;
+  --quote-muted: #8c8c93bf;
 }
 
 .heading-ghost {
   -webkit-text-stroke: 5px var(--heading-ghost);
   paint-order: stroke fill;
-  /* black fill masks inner stroke; only the outer ring reads as outline */
-  color: #000;
+  /* fill masks inner stroke; only the outer ring reads as outline */
+  color: var(--bg);
   letter-spacing: 0.004em;
 }
 
@@ -126,7 +145,6 @@ html {
 }
 
 body {
-  background-color: #000000;
   overflow-x: clip;
 }
 

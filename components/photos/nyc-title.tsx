@@ -108,7 +108,7 @@ export function NYCTitle({ baseClasses }: Props) {
     <>
       <h1
         onClick={handleClick}
-        className="nyc-title-container relative inline-flex cursor-pointer select-none items-center justify-center whitespace-nowrap py-2 text-white"
+        className="nyc-title-container relative inline-flex cursor-pointer select-none items-center justify-center whitespace-nowrap py-2 text-fg"
       >
         <span
           className={`${baseClasses} nyc-title-layer block ${

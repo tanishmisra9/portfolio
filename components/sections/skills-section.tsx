@@ -34,7 +34,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
   const hasPills = pills.length > 0;
 
   return (
-    <article className="relative flex h-full min-h-[12rem] flex-col rounded-md border border-white/10 bg-black/40 backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-neutral-400 sm:min-h-[13.5rem]">
+    <article className="relative flex h-full min-h-[12rem] flex-col rounded-md border border-border bg-surface backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-border-strong sm:min-h-[13.5rem]">
       {isProgram ? (
         <div
           role="button"
@@ -52,7 +52,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
           }}
           aria-expanded={coursesOpen}
           aria-label={`${coursesOpen ? 'Hide' : 'Show'} courses for ${cert.title}`}
-          className="group -m-2 cursor-pointer rounded p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          className="group -m-2 cursor-pointer rounded p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
         >
           <div className="flex items-center justify-between gap-4">
             {hasPills ? (
@@ -73,7 +73,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
               <span />
             )}
             <Tooltip label={`${coursesOpen ? 'Hide' : 'Show'} courses`} align="end">
-              <span className="text-neutral-500 transition-colors group-hover:text-white">
+              <span className="text-muted transition-colors group-hover:text-fg">
                 <ChevronDown
                   className={`h-5 w-5 transition-transform duration-300 ${coursesOpen ? 'rotate-180' : ''}`}
                   strokeWidth={1.8}
@@ -82,7 +82,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
               </span>
             </Tooltip>
           </div>
-          <h4 className="mt-5 font-display text-xl font-semibold text-white">
+          <h4 className="mt-5 font-display text-xl font-semibold text-fg">
             {cert.title}
           </h4>
         </div>
@@ -108,14 +108,14 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
                 href={cert.credentialUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 -m-1.5 p-1.5"
+                className="text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
                 aria-label={`View credential for ${cert.title}`}
               >
                 <ExternalLink className="h-4 w-4" strokeWidth={1.8} aria-hidden />
               </a>
             </Tooltip>
           </div>
-          <h4 className="mt-5 font-display text-xl font-semibold text-white">
+          <h4 className="mt-5 font-display text-xl font-semibold text-fg">
             {cert.title}
           </h4>
         </>
@@ -144,19 +144,19 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
               transition={reducedMotion ? { duration: 0 } : { duration: 0.4, ease: EASE }}
               onAnimationComplete={() => setCoursesSettled(true)}
             >
-              <ul className="mt-6 space-y-2 border-t border-white/10 pt-5">
+              <ul className="mt-6 space-y-2 border-t border-border pt-5">
                 {courses.map((course) => (
                   <li key={course.title}>
                     <a
                       href={course.credentialUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center justify-between gap-3 rounded px-2 py-1.5 -mx-2 text-base text-neutral-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                      className="group flex items-center justify-between gap-3 rounded px-2 py-1.5 -mx-2 text-base text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
                     >
                       <span>{course.title}</span>
                       <Tooltip label="View credential" side="left">
                         <ExternalLink
-                          className="h-4 w-4 shrink-0 text-neutral-600 transition-colors group-hover:text-white"
+                          className="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-fg"
                           strokeWidth={1.8}
                           aria-hidden
                         />
