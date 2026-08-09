@@ -186,7 +186,7 @@ export function SiteHeader() {
   return (
     <>
       <motion.header
-        className={`relative sticky top-0 border-b border-border bg-surface backdrop-blur-md [transform:translateZ(0)] will-change-[backdrop-filter] ${
+        className={`relative sticky top-0 border-b border-border bg-surface backdrop-blur-md transition-none ${
           menuOpen ? "z-[10001]" : "z-50"
         }`}
         initial={{ opacity: 0 }}
