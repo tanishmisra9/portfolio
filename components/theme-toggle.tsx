@@ -4,7 +4,6 @@ import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { flushSync } from "react-dom";
 import { Tooltip } from "@/components/ui/tooltip";
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
@@ -15,66 +14,13 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   const isDark = mounted ? resolvedTheme === "dark" : true;
   const label = isDark ? "Switch to light mode" : "Switch to dark mode";
 
-  const toggleTheme = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const next = isDark ? "light" : "dark";
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    if (reducedMotion || !document.startViewTransition) {
-      setTheme(next);
-      return;
-    }
-
-    // Circular reveal instead of a cross-fade: a cross-fade between inverted
-    // light/dark palettes always passes through a mid-grey where every bit of
-    // text hits ~zero contrast — the longer the transition, the more visible
-    // that washout reads as a flicker. A boundary where every pixel is always
-    // fully one theme or the other means the washout can't happen. A feathered
-    // mask (vs. a hard clip-path) softens that boundary into a gradient band.
-    const { clientX: x, clientY: y } = e;
-    const radius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y),
-    );
-    const feather = 120;
-    const durationMs =
-      parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue(
-          "--theme-transition-duration",
-        ),
-      ) || 650;
-
-    const mask = (r: number) =>
-      `radial-gradient(circle at ${x}px ${y}px, black ${Math.max(r - feather, 0)}px, transparent ${r}px)`;
-
-    // The header is replaced by a static snapshot for the transition's
-    // duration, and WebKit doesn't reliably preserve backdrop-filter when
-    // capturing that snapshot — the glass look drops out, then pops back once
-    // the live DOM returns. Go flat for the same window instead of flashing.
-    const header = document.getElementById("site-header");
-    header?.classList.add("theme-switching");
-
-    const transition = document.startViewTransition(() =>
-      flushSync(() => setTheme(next)),
-    );
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        {
-          maskImage: [mask(0), mask(radius)],
-          WebkitMaskImage: [mask(0), mask(radius)],
-        },
-        {
-          duration: durationMs,
-          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-          pseudoElement: "::view-transition-new(root)",
-        },
-      );
-    });
-    transition.finished.finally(() => {
-      header?.classList.remove("theme-switching");
-    });
-  };
+  // The theme swap is deliberately instant. Anything that animates it has to
+  // put the page in an intermediate state, and every such state broke
+  // something in Safari: a colour cross-fade drives all text through a
+  // mid-grey where contrast hits ~zero, and a View Transition replaces the
+  // header with a snapshot that loses backdrop-filter, so the frosted glass
+  // visibly drops out for the duration. With no intermediate state there is
+  // nothing to render wrong.
 
   return (
     <Tooltip label={label} align="end" className={className}>
@@ -82,7 +28,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         type="button"
         className="flex shrink-0 items-center justify-center rounded-md p-2 text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
         aria-label={label}
-        onClick={toggleTheme}
+        onClick={() => setTheme(isDark ? "light" : "dark")}
       >
         <span className="relative grid h-6 w-6 shrink-0 -translate-y-px place-items-center">
           {/* Icon shows the action a click performs, not the current theme: moon (go dark) while light, sun (go light) while dark. */}

@@ -45,7 +45,12 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-bg text-fg text-base font-sans font-[120] antialiased md:text-lg">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
           <div id="top" tabIndex={-1} aria-hidden="true" />
           <a
             href="#main-content"

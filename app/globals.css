@@ -36,7 +36,6 @@
 }
 
 :root {
-  --theme-transition-duration: 650ms;
   --bg: #fafaf9;
   --surface: rgba(0, 0, 0, 0.03);
   --surface-strong: #fafaf9;
@@ -64,36 +63,6 @@
   --heading-ghost: #a6a6a6ee;
   --quote-strong: #ffffffd5;
   --quote-muted: #8c8c93bf;
-}
-
-/* Theme change is a circular reveal (see components/theme-toggle.tsx), not a
-   cross-fade — a cross-fade passes through a mid-grey where all text hits zero
-   contrast. Old snapshot sits still underneath; new one is clipped open on top. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-::view-transition-old(root) {
-  z-index: 1;
-}
-::view-transition-new(root) {
-  z-index: 2147483646;
-}
-
-/* The header's own live rendering (incl. backdrop-blur-md) is replaced by a
-   static View Transition snapshot for the reveal's duration, and WebKit's
-   snapshot capture doesn't reliably preserve backdrop-filter — the glass look
-   visibly drops out for that window, then pops back once the live DOM returns.
-   Toggled by components/theme-toggle.tsx around the transition. Dropping just
-   the blur isn't enough: the header is still translucent, so whatever's
-   scrolled underneath shows through crisply instead of blurred — the same
-   "pop," just now on purpose. Swapping to the already-opaque --surface-strong
-   (used elsewhere for solid panels) means nothing shows through either way. */
-#site-header.theme-switching {
-  background-color: var(--surface-strong);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .heading-ghost {
