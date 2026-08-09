@@ -8,8 +8,8 @@ export const portfolio: PortfolioContent = {
     {
       id: 'exp-01',
       date: 'May 2026 - Aug 2026',
-      org: 'Toyota Connected Experiences Division (CXD)',
-      role: 'Automation Co-op',
+      org: 'Toyota Motor North America',
+      role: 'STEM Co-op, Automation Team, Connected Experiences Division (CXD)',
       tags: ['Software Engineering', 'AI/ML', 'QA'],
     },
     {
