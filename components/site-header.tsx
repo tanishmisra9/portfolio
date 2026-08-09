@@ -225,7 +225,7 @@ export function SiteHeader() {
                         : undefined
                     }
                     className={[
-                      "relative inline-flex items-center justify-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70",
+                      "relative inline-flex items-center justify-center rounded-full px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors hover:ring-1 hover:ring-inset hover:ring-hover-outline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70",
                       active
                         ? "text-fg"
                         : "text-muted hover:text-fg",

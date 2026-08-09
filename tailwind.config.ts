@@ -17,6 +17,7 @@ const config: Config = {
         "surface-strong": "var(--surface-strong)",
         border: "var(--border)",
         "border-strong": "var(--border-strong)",
+        "hover-outline": "var(--hover-outline)",
       },
       fontFamily: {
         sans: [

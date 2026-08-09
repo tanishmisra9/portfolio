@@ -24,7 +24,7 @@ const VISIBLE_COUNT = 2;
 function ProjectCard({ project }: { project: ProjectEntry }) {
   const pills = project.pills ?? [];
   return (
-    <article className="relative flex h-full min-h-[15.5rem] flex-col rounded-md border border-border bg-surface backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-border-strong sm:min-h-[16.75rem]">
+    <article className="relative flex h-full min-h-[15.5rem] flex-col rounded-md border border-border bg-surface backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-hover-outline sm:min-h-[16.75rem]">
       <div className="flex items-center justify-between gap-4">
         {pills.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">

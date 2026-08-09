@@ -34,7 +34,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
   const hasPills = pills.length > 0;
 
   return (
-    <article className="relative flex h-full min-h-[12rem] flex-col rounded-md border border-border bg-surface backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-border-strong sm:min-h-[13.5rem]">
+    <article className="relative flex h-full min-h-[12rem] flex-col rounded-md border border-border bg-surface backdrop-blur-md p-8 font-sans transition-colors duration-200 hover:border-hover-outline sm:min-h-[13.5rem]">
       {isProgram ? (
         <div
           role="button"
