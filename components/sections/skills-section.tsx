@@ -73,7 +73,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
               <span />
             )}
             <Tooltip label={`${coursesOpen ? 'Hide' : 'Show'} courses`} align="end">
-              <span className="text-muted transition-colors group-hover:text-fg">
+              <span className="text-dim transition-colors group-hover:text-fg">
                 <ChevronDown
                   className={`h-5 w-5 transition-transform duration-300 ${coursesOpen ? 'rotate-180' : ''}`}
                   strokeWidth={1.8}
@@ -108,7 +108,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
                 href={cert.credentialUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
+                className="text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
                 aria-label={`View credential for ${cert.title}`}
               >
                 <ExternalLink className="h-4 w-4" strokeWidth={1.8} aria-hidden />
@@ -156,7 +156,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
                       <span>{course.title}</span>
                       <Tooltip label="View credential" side="left">
                         <ExternalLink
-                          className="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-fg"
+                          className="h-4 w-4 shrink-0 text-dim transition-colors group-hover:text-fg"
                           strokeWidth={1.8}
                           aria-hidden
                         />

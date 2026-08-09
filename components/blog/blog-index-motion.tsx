@@ -43,7 +43,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
       </motion.h1>
 
       {posts.length === 0 ? (
-        <motion.p variants={item} className="mt-8 text-muted">
+        <motion.p variants={item} className="mt-8 text-dim">
           No posts yet.
         </motion.p>
       ) : (
@@ -54,7 +54,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
                 href={`/blog/${post.slug}`}
                 className="group block rounded-md border border-border bg-surface p-8 backdrop-blur-md transition-colors duration-200 hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
               >
-                <time className="font-mono text-xs uppercase tracking-wide text-muted">
+                <time className="font-mono text-xs uppercase tracking-wide text-dim">
                   {new Date(`${post.date}T00:00`).toLocaleDateString(
                     "en-US",
                     { year: "numeric", month: "long", day: "numeric" },

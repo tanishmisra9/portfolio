@@ -171,7 +171,7 @@ export default async function BlogPostPage({ params }: Props) {
         </Link>
 
         <header className="text-center">
-          <time className="font-mono text-xs uppercase tracking-wide text-muted">
+          <time className="font-mono text-xs uppercase tracking-wide text-dim">
             {new Date(`${post.date}T00:00`).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",

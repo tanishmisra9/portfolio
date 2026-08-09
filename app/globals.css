@@ -42,6 +42,7 @@
   --surface-strong: #fafaf9;
   --fg: #1c1c1a;
   --muted: #6b6b68;
+  --dim: #75756f;
   --border: rgba(0, 0, 0, 0.1);
   --border-strong: rgba(0, 0, 0, 0.16);
   --hover-outline: rgba(0, 0, 0, 0.32);
@@ -56,6 +57,7 @@
   --surface-strong: #000000;
   --fg: #e5e5e5;
   --muted: #b4b4b8;
+  --dim: #737373;
   --border: rgba(255, 255, 255, 0.12);
   --border-strong: rgba(255, 255, 255, 0.2);
   --hover-outline: rgba(255, 255, 255, 0.4);

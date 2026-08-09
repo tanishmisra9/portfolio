@@ -334,7 +334,7 @@ export function SiteHeader() {
                               "block py-1 text-center font-display text-4xl font-extrabold uppercase tracking-tighter transition-colors",
                               active
                                 ? "text-fg underline decoration-fg/30 decoration-1 underline-offset-[0.4em]"
-                                : "text-muted hover:text-fg",
+                                : "text-dim hover:text-fg",
                             ].join(" ")}
                             onClick={closeMenu}
                           >

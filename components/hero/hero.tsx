@@ -138,7 +138,7 @@ export function Hero({ subtitle }: HeroProps) {
                     onScatterComplete={onLineScatterComplete}
                   />
                 </div>
-                <div className="-mt-3 translate-x-[0.14em] text-muted md:-mt-5">
+                <div className="-mt-3 translate-x-[0.14em] text-dim md:-mt-5">
                   <ScatterName
                     text="MISRA"
                     lineId="misra"

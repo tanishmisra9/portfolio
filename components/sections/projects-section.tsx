@@ -49,7 +49,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
+                  className="text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
                   aria-label={label}
                 >
                   <Icon className="h-4 w-4" strokeWidth={1.8} aria-hidden />
@@ -62,7 +62,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
+              className="text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
               aria-label={`${project.title} on GitHub`}
             >
               <Github className="h-4 w-4" strokeWidth={1.8} aria-hidden />

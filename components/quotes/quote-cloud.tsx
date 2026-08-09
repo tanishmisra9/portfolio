@@ -802,7 +802,7 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
                     {a.quote.attribution ? (
                       <figcaption
                         aria-hidden="true"
-                        className="mt-3 font-mono text-xs uppercase tracking-[0.2em] text-muted"
+                        className="mt-3 font-mono text-xs uppercase tracking-[0.2em] text-dim"
                       >
                         {a.quote.attribution}
                       </figcaption>

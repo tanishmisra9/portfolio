@@ -13,6 +13,7 @@ const config: Config = {
         bg: "var(--bg)",
         fg: "var(--fg)",
         muted: "var(--muted)",
+        dim: "var(--dim)",
         surface: "var(--surface)",
         "surface-strong": "var(--surface-strong)",
         border: "var(--border)",
