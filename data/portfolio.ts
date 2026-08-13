@@ -15,20 +15,20 @@ export const portfolio: PortfolioContent = {
     {
       id: 'exp-02',
       date: 'Jan 2026 - Present',
-      org: 'Purdue Electric Racing',
-      role: 'Software Team Developer',
-      tags: ['C', 'STM32', 'Embedded Firmware'],
-    },
-    {
-      id: 'exp-03',
-      date: 'Jan 2026 - Present',
       org: 'The Data Mine',
       role: 'Undergraduate Data Science Researcher',
       tags: ['Python', 'SQL', 'Pandas', 'NumPy', 'Matplotlib'],
     },
     {
+      id: 'exp-03',
+      date: 'Aug 2025 - Present',
+      org: 'Purdue Electric Racing',
+      role: 'Software Team Developer',
+      tags: ['C', 'STM32', 'Embedded Firmware'],
+    },
+    {
       id: 'exp-04',
-      date: 'Aug 2025 - Apr 2026',
+      date: 'Aug 2025 - Present',
       org: 'Purdue Electric Vehicle Club',
       role: 'OpenCV Developer',
       tags: ['Python', 'OpenCV', 'Docker'],
