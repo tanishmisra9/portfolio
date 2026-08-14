@@ -27,6 +27,8 @@ export const metadata: Metadata = {
   description:
     "Tanish Misra, CS student at Purdue University focused on ML/AI and software engineering. Incoming STEM Co-op at Toyota Connected Technologies.",
   icons: {
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
     apple: "/favicon.png",
   },
 };
