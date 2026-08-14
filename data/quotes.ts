@@ -350,27 +350,9 @@ export const quotes: QuoteEntry[] = [
     emphasis: 2,
   },
   {
-    id: "russell-1",
-    text: "I believe I can beat anybody.",
-    attribution: "George Russell",
-    emphasis: 3,
-  },
-  {
-    id: "norris-1",
-    text: "I just won it my way.",
-    attribution: "Lando Norris",
-    emphasis: 2,
-  },
-  {
     id: "imam-1",
     text: "What was meant for me will never miss me, and that which misses me was never meant for me.",
     attribution: "Imam Al-Shafi'i",
     emphasis: 2,
-  },
-  {
-    id: "aman-1",
-    text: "Always burn your bridges.",
-    attribution: "Aman Patel",
-    emphasis: 3
   }
 ];
