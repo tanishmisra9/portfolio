@@ -11,7 +11,7 @@ const config: Config = {
     extend: {
       colors: {
         bg: "var(--bg)",
-        fg: "var(--fg)",
+        fg: "rgb(var(--fg-rgb) / <alpha-value>)",
         muted: "var(--muted)",
         dim: "var(--dim)",
         surface: "var(--surface)",

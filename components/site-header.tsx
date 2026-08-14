@@ -6,7 +6,13 @@ import { SITE_HEADER_FADE_DURATION_S } from "@/lib/site-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 
 type NavItem = { href: string; label: string };
@@ -141,6 +147,22 @@ export function SiteHeader() {
     };
   }, [menuOpen]);
 
+  const navRef = useRef<HTMLElement>(null);
+  const [pill, setPill] = useState<{ x: number; w: number } | null>(null);
+
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const measure = () => {
+      const el = nav.querySelector<HTMLElement>("[aria-current]");
+      setPill(el ? { x: el.offsetLeft, w: el.offsetWidth } : null);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, [pathname, activeSectionId]);
+
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -204,9 +226,19 @@ export function SiteHeader() {
 
           <div className="flex min-w-0 flex-1 items-center justify-end">
             <nav
-              className="hidden items-center gap-x-1 md:flex md:-mr-1"
+              ref={navRef}
+              className="relative hidden items-center gap-x-1 md:flex md:-mr-1"
               aria-label="Primary"
             >
+              {pill && (
+                <motion.span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 left-0 rounded-full bg-fg/[0.07] ring-1 ring-inset ring-fg/[0.1]"
+                  initial={false}
+                  animate={{ x: pill.x, width: pill.w }}
+                  transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                />
+              )}
               {NAV.map((item) => {
                 const active = navItemIsActive(
                   item,
@@ -232,17 +264,6 @@ export function SiteHeader() {
                         : "text-muted hover:text-fg",
                     ].join(" ")}
                   >
-                    {active ? (
-                      <motion.span
-                        layoutId="nav-active-indicator"
-                        className="pointer-events-none absolute inset-0 rounded-full bg-fg/[0.07] ring-1 ring-inset ring-fg/[0.1]"
-                        transition={{
-                          type: "spring",
-                          stiffness: 420,
-                          damping: 34,
-                        }}
-                      />
-                    ) : null}
                     <span className="relative z-10">{item.label}</span>
                   </Link>
                 );

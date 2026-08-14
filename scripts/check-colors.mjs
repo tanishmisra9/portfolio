@@ -30,6 +30,7 @@ const DARK_TOKEN_BASELINE = {
   "--surface": "rgba(0, 0, 0, 0.4)",
   "--surface-strong": "#000000",
   "--fg": "#e5e5e5",
+  "--fg-rgb": "229 229 229",
   "--muted": "#b4b4b8",
   "--dim": "#737373",
   "--border": "rgba(255, 255, 255, 0.12)",
@@ -92,10 +93,15 @@ check(
 // 3. tailwind.config.ts must still map every color token to its CSS variable.
 console.log("\ntailwind.config.ts token mapping:");
 const twConfig = read("tailwind.config.ts");
-for (const token of ["bg", "fg", "muted", "dim", "surface", "surface-strong", "border", "border-strong", "hover-outline"]) {
+for (const token of ["bg", "muted", "dim", "surface", "surface-strong", "border", "border-strong", "hover-outline"]) {
   const re = new RegExp(`["']?${token}["']?:\\s*"var\\(--${token}\\)"`);
   check(`colors.${token} -> var(--${token})`, re.test(twConfig));
 }
+// fg maps through --fg-rgb (not --fg directly) so opacity modifiers like ring-fg/70 compile.
+check(
+  'colors.fg -> rgb(var(--fg-rgb) / <alpha-value>)',
+  /fg:\s*"rgb\(var\(--fg-rgb\)\s*\/\s*<alpha-value>\)"/.test(twConfig),
+);
 
 console.log(
   failures === 0
