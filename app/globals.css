@@ -244,9 +244,9 @@ body {
 }
 
 .supermax-title[data-phase="idle"] {
-  color: #ffffff;
+  color: var(--fg);
   background: none;
-  -webkit-text-fill-color: #ffffff;
+  -webkit-text-fill-color: var(--fg);
   transform: translateX(0);
   opacity: 1;
 }
