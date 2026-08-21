@@ -258,8 +258,8 @@ body {
     90deg,
     #ff8c00 0%,
     #ff8c00 50%,
-    #ffffff 50%,
-    #ffffff 100%
+    var(--fg) 50%,
+    var(--fg) 100%
   );
   background-size: 200% 100%;
   background-position: 100% 50%;
@@ -335,8 +335,8 @@ body {
     90deg,
     #ff8c00 0%,
     #ff8c00 50%,
-    #ffffff 50%,
-    #ffffff 100%
+    var(--fg) 50%,
+    var(--fg) 100%
   );
   background-size: 200% 100%;
   background-position: 0% 50%;
