@@ -27,7 +27,10 @@ async function uploadPublicFile(publicSrc: string, blobPathnamePrefix: string) {
   const filePath = path.join(PUBLIC_DIR, relativePath);
   const buffer = fs.readFileSync(filePath);
   const filename = path.basename(filePath);
-  const blob = await put(`${blobPathnamePrefix}/${filename}`, buffer, { access: "public" });
+  const blob = await put(`${blobPathnamePrefix}/${filename}`, buffer, {
+    access: "public",
+    addRandomSuffix: true,
+  });
 
   let dims: { width: number; height: number } | null = null;
   try {

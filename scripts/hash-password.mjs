@@ -7,6 +7,9 @@ if (!password) {
 }
 
 const hash = await bcrypt.hash(password, 12);
-console.log("\nAdd this to your .env (as ADMIN_PASSWORD_HASH):\n");
-console.log(hash);
+// Next.js expands $VAR references in .env files, so literal $ in a bcrypt hash
+// must be escaped as \$ or it gets silently mangled before your code ever sees it.
+const escaped = hash.replace(/\$/g, "\\$");
+console.log("\nAdd this to your .env (as ADMIN_PASSWORD_HASH) — already escaped for Next.js:\n");
+console.log(`ADMIN_PASSWORD_HASH=${escaped}`);
 console.log();
