@@ -7,8 +7,8 @@ import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { getPublicImageDimensions } from "@/lib/image-dimensions";
-import { getAllSlugs, getPostBySlug } from "@/lib/blog";
+import { getImageDimensions } from "@/lib/image-dimensions";
+import { getPublishedData } from "@/lib/site-content";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -100,9 +100,9 @@ const components: Components = {
       />
     </ScrollReveal>
   ),
-  img: ({ src, alt }) => {
+  img: async ({ src, alt }) => {
     if (typeof src !== "string" || !src) return null;
-    const dims = getPublicImageDimensions(src);
+    const dims = await getImageDimensions(src);
     return (
       <ScrollReveal variant="slide" className="my-6">
         <Image
@@ -123,18 +123,19 @@ const components: Components = {
 };
 
 export async function generateStaticParams() {
-  return getAllSlugs().map((slug) => ({ slug }));
+  const data = await getPublishedData();
+  return data.posts.map((post) => ({ slug: post.slug }));
 }
 
-// All valid slugs are known at build time — no runtime fallback needed. Without this,
-// Vercel bundles the whole public/blog/<slug>/ image folder into a fallback serverless
-// function (lib/image-dimensions.ts reads a dynamically-built path), which blew past the
-// 250MB function size limit.
-export const dynamicParams = false;
+// Posts now come from the DB, so a newly published post must render on first request
+// without a redeploy — unlike the old fs-backed content, dynamicParams stays at its
+// default (true). The public/blog/** file-tracing exclusion in next.config.ts is now
+// moot too once migrated posts stop referencing local /public/blog paths.
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const data = await getPublishedData();
+  const post = data.posts.find((p) => p.slug === slug);
   if (!post) return { title: "Not Found — Tanish Misra" };
   return {
     title: `${post.title} — Tanish Misra`,
@@ -144,7 +145,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const data = await getPublishedData();
+  const post = data.posts.find((p) => p.slug === slug);
   if (!post) notFound();
 
   // Album titles are 1-2 words; post titles are full sentences — the album clamp's mobile

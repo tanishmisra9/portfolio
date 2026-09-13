@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PhotoAlbumMotion } from "@/components/photos/photo-album-motion";
-import { getCollectionBySlug, getAllCollectionSlugs } from "@/data/photos";
+import { getPublishedData } from "@/lib/site-content";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
-  return getAllCollectionSlugs().map((slug) => ({ slug }));
+  const data = await getPublishedData();
+  return data.collections.map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const collection = getCollectionBySlug(slug);
+  const data = await getPublishedData();
+  const collection = data.collections.find((c) => c.slug === slug);
   if (!collection) return { title: "Not Found — Tanish Misra" };
   return {
     title: `${collection.title} — Tanish Misra`,
@@ -21,7 +23,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PhotoCollectionPage({ params }: Props) {
   const { slug } = await params;
-  const collection = getCollectionBySlug(slug);
+  const data = await getPublishedData();
+  const collection = data.collections.find((c) => c.slug === slug);
   if (!collection) notFound();
 
   return (

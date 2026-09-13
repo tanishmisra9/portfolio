@@ -1,8 +1,9 @@
 import { BlogIndexMotion } from "@/components/blog/blog-index-motion";
-import { getAllPosts } from "@/lib/blog";
+import { getPublishedData } from "@/lib/site-content";
 
-export default function BlogPage() {
-  const posts = getAllPosts();
+export default async function BlogPage() {
+  const data = await getPublishedData();
+  const posts = [...data.posts].sort((a, b) => (a.date < b.date ? 1 : -1));
 
   return (
     <main

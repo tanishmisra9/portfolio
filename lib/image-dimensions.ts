@@ -14,3 +14,23 @@ export function getPublicImageDimensions(
     return null;
   }
 }
+
+/** Blog images uploaded via the admin live on Vercel Blob (an external URL) rather than under public/. */
+export async function getRemoteImageDimensions(
+  url: string,
+): Promise<{ width: number; height: number } | null> {
+  try {
+    const res = await fetch(url);
+    const buffer = Buffer.from(await res.arrayBuffer());
+    const { width, height } = imageSize(buffer);
+    return { width, height };
+  } catch {
+    return null;
+  }
+}
+
+export async function getImageDimensions(
+  src: string,
+): Promise<{ width: number; height: number } | null> {
+  return src.startsWith("/") ? getPublicImageDimensions(src) : getRemoteImageDimensions(src);
+}

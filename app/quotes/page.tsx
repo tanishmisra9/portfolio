@@ -1,6 +1,7 @@
 import { QuoteCloud } from "@/components/quotes/quote-cloud";
-import { quotes } from "@/data/quotes";
+import { getPublishedData } from "@/lib/site-content";
 
-export default function QuotesPage() {
-  return <QuoteCloud quotes={quotes} />;
+export default async function QuotesPage() {
+  const data = await getPublishedData();
+  return <QuoteCloud quotes={data.quotes} />;
 }

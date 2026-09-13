@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   experimental: {
     /* Avoid dev-only SegmentViewNode / client-manifest errors with App Router + RSC */
     devtoolSegmentExplorer: false,
+    /* Admin photo-upload Server Action sends the raw file in the request body */
+    serverActions: {
+      bodySizeLimit: "25mb",
+    },
   },
   images: {
     formats: ["image/avif", "image/webp"],
