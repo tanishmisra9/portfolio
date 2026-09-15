@@ -10,6 +10,9 @@ export const sessionOptions: SessionOptions = {
   cookieName: "portfolio_admin_session",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
+    // No maxAge → a true session cookie: cleared when the browser closes, instead of
+    // iron-session's 14-day default that silently re-admits you on your next visit.
+    maxAge: undefined,
   },
 };
 
