@@ -32,7 +32,7 @@ export function AdminHeader() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-4 border-b border-border px-6 py-3">
+    <div className="sticky top-0 z-50 flex flex-wrap items-center gap-4 border-b border-border bg-surface px-6 py-3 backdrop-blur-md">
       {!isDashboard && (
         <Link href="/admin" className="text-sm text-muted transition-colors hover:text-fg">
           ← Dashboard

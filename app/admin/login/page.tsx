@@ -19,8 +19,8 @@ export default function LoginPage() {
           placeholder="Password"
           autoFocus
           aria-invalid={!!error}
-          className={`w-full rounded border bg-transparent px-3 py-2 text-fg outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
-            error ? "border-red-500" : "border-fg/20"
+          className={`w-full rounded border bg-transparent px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+            error ? "border-red-500 text-red-500 placeholder:text-red-500" : "border-fg/20 text-fg"
           }`}
         />
         <span role="alert" className="sr-only">
@@ -29,7 +29,9 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded bg-fg px-3 py-2 text-bg disabled:opacity-50"
+          className={`w-full rounded bg-fg px-3 py-2 disabled:opacity-50 ${
+            error ? "text-red-500" : "text-bg"
+          }`}
         >
           {pending ? "Checking..." : "Log in"}
         </button>
