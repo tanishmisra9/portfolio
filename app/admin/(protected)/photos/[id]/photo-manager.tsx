@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import type { InferSelectModel } from "drizzle-orm";
 import type { photos } from "@/db/schema";
 import { ReorderableList } from "@/components/admin/reorderable-list";
@@ -58,7 +59,7 @@ export function PhotoManager({
           addFiles(e.dataTransfer.files);
         }}
         onClick={() => inputRef.current?.click()}
-        className={`cursor-pointer rounded border-2 border-dashed p-6 text-center text-sm ${
+        className={`cursor-pointer rounded border-2 border-dashed p-6 text-center text-base ${
           dragOver ? "border-fg bg-fg/5" : "border-fg/20 text-dim"
         }`}
       >
@@ -75,9 +76,9 @@ export function PhotoManager({
 
       {pending.map((item, index) => (
         <div key={index} className="flex items-center gap-3 rounded-md border border-border bg-surface p-3 backdrop-blur-md">
-          <span className="text-sm">{item.file.name}</span>
+          <span className="text-base">{item.file.name}</span>
           <input
-            className="flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"
+            className="flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
             placeholder="Alt text (required)"
             value={item.alt}
             onChange={(e) =>
@@ -87,7 +88,7 @@ export function PhotoManager({
             }
           />
           <input
-            className="flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"
+            className="flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
             placeholder="Caption (optional)"
             value={item.caption}
             onChange={(e) =>
@@ -100,7 +101,7 @@ export function PhotoManager({
             type="button"
             disabled={!item.alt}
             onClick={() => uploadPending(index)}
-            className="rounded bg-fg px-3 py-1 text-xs text-bg disabled:opacity-50"
+            className="rounded bg-fg px-3 py-1 text-sm text-bg disabled:opacity-50"
           >
             Upload
           </button>
@@ -121,11 +122,16 @@ export function PhotoManager({
             className="flex cursor-grab items-center gap-3 rounded-md border border-border bg-surface p-2 backdrop-blur-md"
           >
             <span className="text-dim">⠿</span>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photo.blobUrl} alt={photo.alt} className="h-16 w-16 rounded object-cover" />
+            <Image
+              src={photo.blobUrl}
+              alt={photo.alt}
+              width={64}
+              height={64}
+              className="h-16 w-16 rounded object-cover"
+            />
             <div className="flex-1 space-y-1">
               <input
-                className="w-full bg-transparent text-sm outline-none"
+                className="w-full bg-transparent text-base outline-none"
                 defaultValue={photo.alt}
                 onBlur={(e) =>
                   e.target.value !== photo.alt &&
@@ -136,7 +142,7 @@ export function PhotoManager({
                 }
               />
               <input
-                className="w-full bg-transparent text-xs text-dim outline-none"
+                className="w-full bg-transparent text-sm text-dim outline-none"
                 placeholder="Caption"
                 defaultValue={photo.caption ?? ""}
                 onBlur={(e) =>
@@ -156,7 +162,7 @@ export function PhotoManager({
                   router.refresh();
                 })
               }
-              className="text-xs text-red-500"
+              className="text-sm text-red-500"
             >
               Delete
             </button>

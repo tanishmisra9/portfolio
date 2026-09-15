@@ -1,11 +1,14 @@
 "use client";
 
-import { iconFor } from "@/components/social-icon";
+import { ICON_OPTIONS, resolveIcon } from "@/components/social-icon";
 import { ResumeUploader } from "./resume-uploader";
 import type { SocialLink } from "@/types/content";
 
 const inputClass =
-  "w-full rounded border border-fg/20 bg-transparent px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+  "w-full rounded border border-fg/20 bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+
+/** These four are load-bearing: iconFor/email/resume special-casing all key off the label text, so renaming or deleting one would silently break the site. */
+const LOCKED_IDS = new Set(["social-github", "social-linkedin", "social-email", "social-resume"]);
 
 export function SocialEditor({
   items,
@@ -28,9 +31,10 @@ export function SocialEditor({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid items-start gap-5 sm:grid-cols-2">
         {items.map((item) => {
-          const Icon = iconFor(item.label);
+          const Icon = resolveIcon(item);
+          const locked = LOCKED_IDS.has(item.id);
           return (
             <div
               key={item.id}
@@ -38,12 +42,28 @@ export function SocialEditor({
             >
               <div className="flex items-center gap-2">
                 <Icon className="h-4 w-4 shrink-0 text-muted" aria-hidden />
-                <input
-                  className={inputClass}
-                  placeholder="Label"
-                  value={item.label}
-                  onChange={(e) => update(item.id, { label: e.target.value })}
-                />
+                {locked ? (
+                  <span className="flex-1 text-sm text-fg">{item.label}</span>
+                ) : (
+                  <input
+                    className={inputClass}
+                    placeholder="Label"
+                    value={item.label}
+                    onChange={(e) => update(item.id, { label: e.target.value })}
+                  />
+                )}
+                <select
+                  className="rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"
+                  value={item.icon ?? ""}
+                  onChange={(e) => update(item.id, { icon: e.target.value || undefined })}
+                >
+                  <option value="">Auto</option>
+                  {ICON_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {item.label === "Email" ? (
@@ -75,14 +95,16 @@ export function SocialEditor({
                 </>
               )}
 
-              <button type="button" onClick={() => remove(item.id)} className="text-xs text-red-500">
-                Remove
-              </button>
+              {!locked && (
+                <button type="button" onClick={() => remove(item.id)} className="text-sm text-red-500">
+                  Remove
+                </button>
+              )}
             </div>
           );
         })}
       </div>
-      <button type="button" onClick={addLink} className="rounded border border-fg/20 px-3 py-1.5 text-sm">
+      <button type="button" onClick={addLink} className="rounded border border-fg/20 px-3 py-1.5 text-base">
         + Add link
       </button>
     </div>

@@ -94,7 +94,7 @@ export function DateRangeFields({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-xs text-dim">{endMode === "single" ? "Date" : "Start"}</span>
+        <span className="text-sm text-dim">{endMode === "single" ? "Date" : "Start"}</span>
         <MonthYearSelect
           value={value.startDate}
           onChange={(startDate) => onChange({ ...value, startDate })}
@@ -110,7 +110,7 @@ export function DateRangeFields({
         </select>
         {endMode === "range" && (
           <>
-            <span className="text-xs text-dim">End</span>
+            <span className="text-sm text-dim">End</span>
             <MonthYearSelect
               value={typeof value.endDate === "string" && value.endDate !== "present" ? value.endDate : ""}
               onChange={(endDate) => onChange({ ...value, endDate })}
@@ -118,7 +118,7 @@ export function DateRangeFields({
           </>
         )}
       </div>
-      {invalid && <p className="text-xs text-red-500">End date must be after the start date.</p>}
+      {invalid && <p className="text-sm text-red-500">End date must be after the start date.</p>}
     </div>
   );
 }

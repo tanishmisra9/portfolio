@@ -17,7 +17,7 @@ export default async function BlogAdminPage() {
             className="block rounded-md border border-border bg-surface p-4 backdrop-blur-md transition-colors hover:border-hover-outline"
           >
             <div className="font-display text-sm font-semibold text-fg">{p.title}</div>
-            <div className="mt-1 font-mono text-xs uppercase tracking-wide text-muted">
+            <div className="mt-1 font-mono text-sm uppercase tracking-wide text-muted">
               /{p.slug} — {p.date}
             </div>
           </Link>

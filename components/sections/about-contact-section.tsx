@@ -3,7 +3,7 @@ import { ScrollReveal } from '@/components/scroll-reveal';
 import { SECTION_GHOST_HEADING_BASE } from '@/components/ui/class-constants';
 import { Tooltip } from '@/components/ui/tooltip';
 import { bioMarkdownComponents } from '@/components/bio-markdown';
-import { iconFor } from '@/components/social-icon';
+import { resolveIcon } from '@/components/social-icon';
 import type { SocialLink } from '@/types/content';
 
 type Props = {
@@ -41,14 +41,18 @@ export function AboutContactSection({ bio, social }: Props) {
         <ScrollReveal>
           <div className="mt-14 flex flex-wrap items-center justify-center gap-9 md:mt-[4.6rem]">
             {social.map((link) => {
-              const Icon = iconFor(link.label);
+              const Icon = resolveIcon(link);
+              // The resume's filename lives in its own stored href (…/resume/<name>.pdf) —
+              // parsed here rather than duplicated as a second hardcoded literal.
+              const resumeFilename =
+                link.label === 'Resume' ? link.href.split('?')[0].split('/').pop() : undefined;
               return (
                 <Tooltip key={link.id} label={link.label}>
                   <a
                     href={link.href}
                     aria-label={link.label}
                     className="rounded-md p-2 text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-                    {...(link.label === 'Resume' ? { download: 'Tanish_Misra_Resume.pdf' } : {})}
+                    {...(resumeFilename ? { download: resumeFilename } : {})}
                     {...(link.href.startsWith('http')
                       ? { target: '_blank', rel: 'noopener noreferrer' }
                       : {})}

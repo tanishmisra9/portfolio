@@ -72,14 +72,14 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
         <button
           type="button"
           onClick={() => wrapSelection("**", "**")}
-          className="rounded border border-fg/20 px-2 py-1 text-xs font-bold"
+          className="rounded border border-fg/20 px-2 py-1 text-sm font-bold"
         >
           B
         </button>
         <button
           type="button"
           onClick={startLink}
-          className="rounded border border-fg/20 px-2 py-1 text-xs underline"
+          className="rounded border border-fg/20 px-2 py-1 text-sm underline"
         >
           Link
         </button>
@@ -97,13 +97,13 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
               setLinkError(null);
             }}
           />
-          <button type="button" onClick={confirmLink} className="rounded bg-fg px-2 py-1 text-xs text-bg">
+          <button type="button" onClick={confirmLink} className="rounded bg-fg px-2 py-1 text-sm text-bg">
             Insert
           </button>
-          <button type="button" onClick={() => setLinkPrompt(null)} className="text-xs text-dim">
+          <button type="button" onClick={() => setLinkPrompt(null)} className="text-sm text-dim">
             Cancel
           </button>
-          {linkError && <p className="w-full text-xs text-red-500">{linkError}</p>}
+          {linkError && <p className="w-full text-sm text-red-500">{linkError}</p>}
         </div>
       )}
 
@@ -116,7 +116,7 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
       />
 
       <div className="space-y-2 rounded border border-fg/10 bg-fg/[0.02] p-3 text-sm">
-        <p className="text-xs text-dim">Preview</p>
+        <p className="text-sm text-dim">Preview</p>
         <p>
           <Markdown components={bioMarkdownComponents}>{previewOne}</Markdown>
         </p>

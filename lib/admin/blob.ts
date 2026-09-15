@@ -17,13 +17,15 @@ export async function deleteAsset(url: string) {
 }
 
 /**
- * Fixed pathname + allowOverwrite (rather than uploadAsset's timestamped, ever-growing
- * names) so the resume always lives at one URL and the filename download() gets is
- * controlled by the blob's own pathname, not the HTML `download` attribute — which
- * browsers ignore for cross-origin links once Content-Disposition is present.
+ * The filename is user-editable (default "Resume-TanishMisra.pdf") but always lands
+ * directly in a Blob pathname, so it's sanitized to a safe basename first. Uses
+ * allowOverwrite so re-uploading under the same name replaces it rather than growing a
+ * pile of blobs; renaming does leave the previous blob orphaned (negligible on the free
+ * tier, not worth cleanup code).
  */
-export async function uploadResume(file: File) {
-  return put("resume/Tanish_Misra_Resume.pdf", file, {
+export async function uploadResume(file: File, filename: string) {
+  const safeName = filename.replace(/[^a-zA-Z0-9.\-_]/g, "") || "Resume-TanishMisra.pdf";
+  return put(`resume/${safeName}`, file, {
     access: "public",
     allowOverwrite: true,
   });

@@ -76,6 +76,8 @@ export type SocialLink = {
   label: string;
   href: string;
   display: string;
+  /** Manual icon override — see components/social-icon.tsx's ICON_OPTIONS. Falls back to label-matching when unset. */
+  icon?: string;
 };
 
 export type PortfolioContent = {

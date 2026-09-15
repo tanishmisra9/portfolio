@@ -35,7 +35,7 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
             <span className="text-dim">⠿</span>
             <div className="flex-1">
               <input
-                className="w-full bg-transparent text-sm outline-none"
+                className="w-full bg-transparent text-base outline-none"
                 defaultValue={c.title}
                 onBlur={(e) =>
                   e.target.value !== c.title &&
@@ -46,7 +46,7 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
                 }
               />
               <input
-                className="w-full bg-transparent text-xs text-dim outline-none"
+                className="w-full bg-transparent text-sm text-dim outline-none"
                 defaultValue={c.description}
                 onBlur={(e) =>
                   e.target.value !== c.description &&
@@ -57,7 +57,7 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
                 }
               />
             </div>
-            <Link href={`/admin/photos/${c.id}`} className="text-sm underline">
+            <Link href={`/admin/photos/${c.id}`} className="text-base underline">
               Manage photos
             </Link>
             <button
@@ -68,7 +68,7 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
                   router.refresh();
                 })
               }
-              className="text-xs text-red-500"
+              className="text-sm text-red-500"
             >
               Delete
             </button>
@@ -91,26 +91,26 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
       >
         <h2 className="text-sm text-dim">New collection</h2>
         <input
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"
+          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
           placeholder="slug (e.g. tokyo-2026)"
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
           required
         />
         <input
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"
+          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
         <input
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"
+          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-        <button type="submit" className="rounded border border-fg/20 px-3 py-1.5 text-sm">
+        <button type="submit" className="rounded border border-fg/20 px-3 py-1.5 text-base">
           + Add collection
         </button>
       </form>

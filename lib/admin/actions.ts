@@ -26,8 +26,8 @@ export async function getDraftPortfolio(): Promise<PortfolioContent | null> {
 }
 
 /** Returns the downloadUrl (serves with Content-Disposition: attachment) so the resume downloads with a clean filename cross-origin. */
-export async function uploadResume(file: File): Promise<string> {
-  const blob = await uploadResumeBlob(file);
+export async function uploadResume(file: File, filename: string): Promise<string> {
+  const blob = await uploadResumeBlob(file, filename);
   return blob.downloadUrl;
 }
 

@@ -49,7 +49,7 @@ export function ArrayEditor({
 
   return (
     <div className={layout === "cards" ? "space-y-4" : "space-y-3"}>
-      <div className={layout === "cards" ? "grid gap-5 sm:grid-cols-2" : "space-y-3"}>
+      <div className={layout === "cards" ? "grid items-start gap-5 sm:grid-cols-2" : "space-y-3"}>
         {items.map((item) => (
           <div key={item.id} className={itemClassName}>
             {fields.map((field) => (
@@ -63,7 +63,7 @@ export function ArrayEditor({
             <button
               type="button"
               onClick={() => removeItem(item.id)}
-              className="text-xs text-red-500"
+              className="text-sm text-red-500"
             >
               Remove
             </button>
@@ -74,7 +74,7 @@ export function ArrayEditor({
         <button
           type="button"
           onClick={() => onChange([...items, newItem()])}
-          className="rounded border border-fg/20 px-3 py-1.5 text-sm"
+          className="rounded border border-fg/20 px-3 py-1.5 text-base"
         >
           + Add
         </button>
@@ -93,13 +93,13 @@ export function FieldInput({
   onChange: (v: unknown) => void;
 }) {
   const base =
-    "w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+    "w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
   if (field.type === "tags") {
     const list = Array.isArray(value) ? (value as string[]) : [];
     return (
       <label className="block">
-        <span className="mb-1 block text-xs text-dim">{field.label} (comma-separated)</span>
+        <span className="mb-1 block text-sm text-dim">{field.label} (comma-separated)</span>
         <input
           className={base}
           defaultValue={list.join(", ")}
@@ -119,7 +119,7 @@ export function FieldInput({
   if (field.type === "textarea") {
     return (
       <label className="block">
-        <span className="mb-1 block text-xs text-dim">{field.label}</span>
+        <span className="mb-1 block text-sm text-dim">{field.label}</span>
         <textarea
           className={base}
           rows={3}
@@ -133,7 +133,7 @@ export function FieldInput({
   if (field.type === "select") {
     return (
       <label className="block">
-        <span className="mb-1 block text-xs text-dim">{field.label}</span>
+        <span className="mb-1 block text-sm text-dim">{field.label}</span>
         <select
           className={base}
           defaultValue={typeof value === "string" ? value : ""}
@@ -153,7 +153,7 @@ export function FieldInput({
     const list = Array.isArray(value) ? (value as Item[]) : [];
     return (
       <div>
-        <span className="mb-1 block text-xs text-dim">{field.label}</span>
+        <span className="mb-1 block text-sm text-dim">{field.label}</span>
         <ArrayEditor
           items={list}
           fields={field.subFields ?? []}
@@ -167,7 +167,7 @@ export function FieldInput({
 
   return (
     <label className="block">
-      <span className="mb-1 block text-xs text-dim">{field.label}</span>
+      <span className="mb-1 block text-sm text-dim">{field.label}</span>
       <input
         className={base}
         defaultValue={typeof value === "string" ? value : ""}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { FieldInput, type FieldDef, type Item } from "./array-editor";
+import { EntryList } from "./entry-list";
 
 const SINGLE_FIELDS: FieldDef[] = [
   { key: "issuer", label: "Issuer (aria-label only)", type: "text" },
@@ -17,16 +18,11 @@ const SERIES_FIELDS: FieldDef[] = [
   { key: "title", label: "Title", type: "text" },
   { key: "pills", label: "Pills", type: "tags" },
   { key: "skills", label: "Skills", type: "tags" },
-  {
-    key: "courses",
-    label: "Courses",
-    type: "sublist",
-    subFields: [
-      { key: "title", label: "Course title", type: "text" },
-      { key: "credentialUrl", label: "Credential URL", type: "text" },
-    ],
-    newSubItem: () => ({ id: crypto.randomUUID(), title: "", credentialUrl: "" }),
-  },
+];
+
+const COURSE_FIELDS: FieldDef[] = [
+  { key: "title", label: "Course title", type: "text" },
+  { key: "credentialUrl", label: "Credential URL", type: "text" },
 ];
 
 /**
@@ -41,12 +37,12 @@ export function CertificationsEditor({
   items: Item[];
   onChange: (items: Item[]) => void;
 }) {
-  // Course series default collapsed (they can hold many course rows and clutter the
-  // grid); a newly added one is opened immediately so there's something to fill in.
-  const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set());
+  // Every card defaults collapsed (existing cards can be long, especially a series with
+  // several courses); a newly added one opens immediately so there's something to fill in.
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  function toggleSeries(id: string) {
-    setExpandedSeries((prev) => {
+  function toggle(id: string) {
+    setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -63,51 +59,49 @@ export function CertificationsEditor({
   }
 
   function addSingle() {
-    onChange([...items, { id: crypto.randomUUID(), issuer: "", title: "" }]);
+    const item = { id: crypto.randomUUID(), issuer: "", title: "" };
+    onChange([...items, item]);
+    setExpanded((prev) => new Set(prev).add(item.id));
   }
 
   function addSeries() {
     const item = { id: crypto.randomUUID(), issuer: "", title: "", courses: [] };
     onChange([...items, item]);
-    setExpandedSeries((prev) => new Set(prev).add(item.id));
+    setExpanded((prev) => new Set(prev).add(item.id));
   }
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid items-start gap-5 sm:grid-cols-2">
         {items.map((item) => {
           const isSeries = item.courses !== undefined;
           const fields = isSeries ? SERIES_FIELDS : SINGLE_FIELDS;
-          const isOpen = !isSeries || expandedSeries.has(item.id);
+          const isOpen = expanded.has(item.id);
           const courseCount = Array.isArray(item.courses) ? item.courses.length : 0;
+          const name = (item.title as string) || "Untitled";
+          const label = isSeries && courseCount ? `${name} (${courseCount})` : name;
 
           return (
             <div key={item.id} className="space-y-2 rounded-md border border-border bg-surface p-6 backdrop-blur-md">
-              {isSeries ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => toggleSeries(item.id)}
-                    className="flex flex-1 items-center gap-2 text-left"
-                  >
-                    <ChevronDown
-                      className={`h-4 w-4 shrink-0 text-muted transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-                      aria-hidden
-                    />
-                    <span className="text-xs uppercase tracking-wide text-dim">
-                      Course series{!isOpen && (item.title || item.issuer) ? ` — ${item.title || item.issuer} (${courseCount})` : ""}
-                    </span>
-                  </button>
-                  <button type="button" onClick={() => remove(item.id)} className="text-xs text-red-500">
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <p className="text-xs uppercase tracking-wide text-dim">Certification</p>
-              )}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggle(item.id)}
+                  className="flex flex-1 items-center gap-2 text-left"
+                >
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 text-muted transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                    aria-hidden
+                  />
+                  <span className="text-sm text-fg">{label}</span>
+                </button>
+                <button type="button" onClick={() => remove(item.id)} className="text-sm text-red-500">
+                  Remove
+                </button>
+              </div>
 
               {isOpen && (
-                <>
+                <div className="space-y-2 pl-6">
                   {fields.map((field) => (
                     <FieldInput
                       key={field.key}
@@ -116,22 +110,30 @@ export function CertificationsEditor({
                       onChange={(v) => update(item.id, field.key, v)}
                     />
                   ))}
-                  {!isSeries && (
-                    <button type="button" onClick={() => remove(item.id)} className="text-xs text-red-500">
-                      Remove
-                    </button>
+                  {isSeries && (
+                    <div>
+                      <span className="mb-1 block text-sm text-dim">Courses</span>
+                      <EntryList
+                        nested
+                        items={(item.courses as Item[]) ?? []}
+                        onChange={(courses) => update(item.id, "courses", courses)}
+                        newItem={() => ({ id: crypto.randomUUID(), title: "", credentialUrl: "" })}
+                        summary={(c) => (c.title as string) || "Untitled course"}
+                        fields={COURSE_FIELDS}
+                      />
+                    </div>
                   )}
-                </>
+                </div>
               )}
             </div>
           );
         })}
       </div>
       <div className="flex gap-2">
-        <button type="button" onClick={addSingle} className="rounded border border-fg/20 px-3 py-1.5 text-sm">
+        <button type="button" onClick={addSingle} className="rounded border border-fg/20 px-3 py-1.5 text-base">
           + Add certification
         </button>
-        <button type="button" onClick={addSeries} className="rounded border border-fg/20 px-3 py-1.5 text-sm">
+        <button type="button" onClick={addSeries} className="rounded border border-fg/20 px-3 py-1.5 text-base">
           + Add course series
         </button>
       </div>

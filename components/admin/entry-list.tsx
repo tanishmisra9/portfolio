@@ -15,6 +15,8 @@ interface EntryListProps {
   summary: (item: Item) => string;
   /** Experience/Education entries carry a start/end date pair edited as one unit. */
   hasDateRange?: boolean;
+  /** Lighter styling for a list nested inside another card (e.g. courses inside a certification). */
+  nested?: boolean;
 }
 
 /**
@@ -22,7 +24,7 @@ interface EntryListProps {
  * Experience/Education, where entries are numerous enough that showing every field for
  * every entry at once buries the ones you actually want to change.
  */
-export function EntryList({ items, fields, onChange, newItem, summary, hasDateRange }: EntryListProps) {
+export function EntryList({ items, fields, onChange, newItem, summary, hasDateRange, nested }: EntryListProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   function updateItem(id: string, key: string, value: unknown) {
@@ -58,8 +60,14 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
         items={items}
         onReorder={(ids) => onChange(ids.map((id) => items.find((i) => i.id === id)!))}
         renderItem={(item, dragProps) => (
-          <div className="rounded-md border border-border bg-surface backdrop-blur-md">
-            <div className="flex items-center gap-3 p-4">
+          <div
+            className={
+              nested
+                ? "rounded border border-fg/10 bg-fg/[0.02]"
+                : "rounded-md border border-border bg-surface backdrop-blur-md"
+            }
+          >
+            <div className={`flex items-center gap-3 ${nested ? "p-3" : "p-4"}`}>
               <span {...dragProps} className="cursor-grab text-dim" aria-hidden>
                 ⠿
               </span>
@@ -67,16 +75,22 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
               <button
                 type="button"
                 onClick={() => toggle(item.id)}
-                className="text-xs underline decoration-fg/40 underline-offset-2"
+                className="text-sm underline decoration-fg/40 underline-offset-2"
               >
                 {expanded.has(item.id) ? "Close" : "Edit"}
               </button>
-              <button type="button" onClick={() => removeItem(item.id)} className="text-xs text-red-500">
+              <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-red-500">
                 Remove
               </button>
             </div>
             {expanded.has(item.id) && (
-              <div className="space-y-2 border-t border-border p-4">
+              <div
+                className={
+                  nested
+                    ? "space-y-2 border-t border-fg/10 p-3"
+                    : "space-y-2 border-t border-border p-4"
+                }
+              >
                 {hasDateRange && (
                   <DateRangeFields
                     value={{
@@ -99,7 +113,7 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
           </div>
         )}
       />
-      <button type="button" onClick={addItem} className="rounded border border-fg/20 px-3 py-1.5 text-sm">
+      <button type="button" onClick={addItem} className="rounded border border-fg/20 px-3 py-1.5 text-base">
         + Add
       </button>
     </div>

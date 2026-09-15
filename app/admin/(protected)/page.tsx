@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ADMIN_SECTION_HEADING_CLASSES } from "@/components/ui/class-constants";
+import { SECTION_GHOST_HEADING_CLASSES } from "@/components/ui/class-constants";
 
 const SECTIONS = [
   { href: "/admin/portfolio", title: "Portfolio", description: "Bio, experience, education, skills, certifications, projects, social." },
@@ -11,8 +11,8 @@ const SECTIONS = [
 export default function AdminDashboardPage() {
   return (
     <div>
-      <h1 className={ADMIN_SECTION_HEADING_CLASSES}>Admin</h1>
-      <div className="mt-8 grid gap-5 sm:grid-cols-2">
+      <h1 className={SECTION_GHOST_HEADING_CLASSES}>ADMIN</h1>
+      <div className="grid gap-5 sm:grid-cols-2">
         {SECTIONS.map((section) => (
           <Link
             key={section.href}

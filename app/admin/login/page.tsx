@@ -7,7 +7,7 @@ export default function LoginPage() {
   const [error, formAction, pending] = useActionState(login, undefined);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+    <div className="flex min-h-screen items-center justify-center bg-bg px-4 font-display">
       <form
         action={formAction}
         className="w-full max-w-sm space-y-4 rounded-lg border border-fg/10 p-6"

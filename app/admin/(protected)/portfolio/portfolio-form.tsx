@@ -14,7 +14,7 @@ import { formatDateRange } from "@/lib/format-date-range";
 import { updatePortfolio } from "@/lib/admin/actions";
 
 const inputClass =
-  "w-full rounded border border-fg/20 bg-transparent px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+  "w-full rounded border border-fg/20 bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 const SECTION_KEYS = [
   "bio",
@@ -25,6 +25,31 @@ const SECTION_KEYS = [
   "projects",
   "social",
 ] as const;
+
+const SECTION_LABELS: Record<(typeof SECTION_KEYS)[number], string> = {
+  bio: "Bio",
+  experience: "Experience",
+  education: "Education",
+  skills: "Skills",
+  certifications: "Certifications",
+  projects: "Projects",
+  social: "Social",
+};
+
+function sectionChanged(
+  key: (typeof SECTION_KEYS)[number],
+  data: PortfolioContent,
+  baseline: PortfolioContent,
+): boolean {
+  if (key === "bio") {
+    return (
+      data.name !== baseline.name ||
+      data.heroSubtitle !== baseline.heroSubtitle ||
+      data.aboutBio !== baseline.aboutBio
+    );
+  }
+  return JSON.stringify(data[key]) !== JSON.stringify(baseline[key]);
+}
 
 export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
   const [data, setData] = useState(initial);
@@ -45,7 +70,15 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
   });
 
   const dirty = useMemo(() => JSON.stringify(data) !== JSON.stringify(baseline), [data, baseline]);
-  useRegisterDirty(dirty);
+  const changedKeys = useMemo(
+    () => SECTION_KEYS.filter((key) => sectionChanged(key, data, baseline)),
+    [data, baseline],
+  );
+  const changes = useMemo(
+    () => changedKeys.map((key) => ({ key, label: SECTION_LABELS[key] })),
+    [changedKeys],
+  );
+  useRegisterDirty(dirty, changes);
 
   useEffect(() => {
     if (!dirty) return;
@@ -72,19 +105,25 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       <div className="mb-4 flex items-center gap-3">
         <h1 className={ADMIN_SECTION_HEADING_CLASSES}>Portfolio</h1>
         <div className="ml-auto flex gap-2">
-          <button type="button" onClick={() => setAll(true)} className="text-xs text-muted hover:text-fg">
+          <button type="button" onClick={() => setAll(true)} className="text-sm text-muted hover:text-fg">
             Expand all
           </button>
-          <button type="button" onClick={() => setAll(false)} className="text-xs text-muted hover:text-fg">
+          <button type="button" onClick={() => setAll(false)} className="text-sm text-muted hover:text-fg">
             Collapse all
           </button>
         </div>
       </div>
 
-      <CollapsibleSection title="Bio" open={open.bio} onToggle={(v) => setOpen({ ...open, bio: v })}>
+      <CollapsibleSection
+        id="section-bio"
+        title="Bio"
+        open={open.bio}
+        onToggle={(v) => setOpen({ ...open, bio: v })}
+        changed={changedKeys.includes("bio")}
+      >
         <div className="space-y-3">
           <label className="block">
-            <span className="mb-1 block text-xs text-dim">Name</span>
+            <span className="mb-1 block text-sm text-dim">Name</span>
             <input
               className={inputClass}
               value={data.name}
@@ -92,7 +131,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-xs text-dim">Hero subtitle</span>
+            <span className="mb-1 block text-sm text-dim">Hero subtitle</span>
             <input
               className={inputClass}
               value={data.heroSubtitle}
@@ -100,16 +139,18 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
             />
           </label>
           <div>
-            <span className="mb-1 block text-xs text-dim">About bio</span>
+            <span className="mb-1 block text-sm text-dim">About bio</span>
             <BioEditor value={data.aboutBio} onChange={(aboutBio) => setData({ ...data, aboutBio })} />
           </div>
         </div>
       </CollapsibleSection>
 
       <CollapsibleSection
+        id="section-experience"
         title="Experience"
         open={open.experience}
         onToggle={(v) => setOpen({ ...open, experience: v })}
+        changed={changedKeys.includes("experience")}
       >
         <EntryList
           items={data.experience as unknown as Item[]}
@@ -139,9 +180,11 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       </CollapsibleSection>
 
       <CollapsibleSection
+        id="section-education"
         title="Education"
         open={open.education}
         onToggle={(v) => setOpen({ ...open, education: v })}
+        changed={changedKeys.includes("education")}
       >
         <EntryList
           items={data.education as unknown as Item[]}
@@ -169,7 +212,13 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
         />
       </CollapsibleSection>
 
-      <CollapsibleSection title="Skills" open={open.skills} onToggle={(v) => setOpen({ ...open, skills: v })}>
+      <CollapsibleSection
+        id="section-skills"
+        title="Skills"
+        open={open.skills}
+        onToggle={(v) => setOpen({ ...open, skills: v })}
+        changed={changedKeys.includes("skills")}
+      >
         <ArrayEditor
           layout="cards"
           items={data.skills as unknown as Item[]}
@@ -183,9 +232,11 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       </CollapsibleSection>
 
       <CollapsibleSection
+        id="section-certifications"
         title="Certifications"
         open={open.certifications}
         onToggle={(v) => setOpen({ ...open, certifications: v })}
+        changed={changedKeys.includes("certifications")}
       >
         <CertificationsEditor
           items={data.certifications as unknown as Item[]}
@@ -194,9 +245,11 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       </CollapsibleSection>
 
       <CollapsibleSection
+        id="section-projects"
         title="Projects"
         open={open.projects}
         onToggle={(v) => setOpen({ ...open, projects: v })}
+        changed={changedKeys.includes("projects")}
       >
         <ArrayEditor
           layout="cards"
@@ -239,7 +292,13 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
         />
       </CollapsibleSection>
 
-      <CollapsibleSection title="Social" open={open.social} onToggle={(v) => setOpen({ ...open, social: v })}>
+      <CollapsibleSection
+        id="section-social"
+        title="Social"
+        open={open.social}
+        onToggle={(v) => setOpen({ ...open, social: v })}
+        changed={changedKeys.includes("social")}
+      >
         <SocialEditor
           items={data.social}
           onChange={(social) => setData({ ...data, social })}
@@ -247,12 +306,12 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       </CollapsibleSection>
 
       <div className="fixed bottom-0 left-0 right-0 flex items-center gap-3 border-t border-fg/10 bg-bg p-4">
-        {dirty && <span className="text-xs text-dim">Unsaved changes</span>}
+        {dirty && <span className="text-sm text-dim">Unsaved changes</span>}
         <button
           type="button"
           disabled={pending}
           onClick={save}
-          className="rounded bg-fg px-4 py-1.5 text-sm text-bg disabled:opacity-50"
+          className="rounded bg-fg px-4 py-1.5 text-base text-bg disabled:opacity-50"
         >
           {pending ? "Saving..." : saved ? "Saved ✓" : "Save draft"}
         </button>
