@@ -12,14 +12,14 @@ export default function LoginPage() {
         action={formAction}
         className="w-full max-w-sm space-y-4 rounded-lg border border-fg/10 p-6"
       >
-        <h1 className={`font-display text-lg ${error ? "text-red-500" : "text-fg"}`}>Log in</h1>
+        <h1 className="font-display text-lg text-fg">Log in</h1>
         <input
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder="Type here"
           autoFocus
           aria-invalid={!!error}
-          className={`w-full rounded border bg-transparent px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+          className={`w-full rounded border bg-transparent px-3 py-2 tracking-[0.3em] outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
             error ? "border-red-500 text-red-500 placeholder:text-red-500" : "border-fg/20 text-fg"
           }`}
         />
@@ -29,9 +29,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={pending}
-          className={`w-full rounded bg-fg px-3 py-2 disabled:opacity-50 ${
-            error ? "text-red-500" : "text-bg"
-          }`}
+          className="w-full rounded bg-fg px-3 py-2 text-bg disabled:opacity-50"
         >
           {pending ? "Checking..." : "Log in"}
         </button>
