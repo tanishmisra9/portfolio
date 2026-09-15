@@ -13,7 +13,7 @@ export function NewPostForm() {
         e.preventDefault();
         if (slug) router.push(`/admin/blog/${slug}`);
       }}
-      className="flex gap-2 rounded border border-fg/10 p-3"
+      className="flex gap-2 rounded-md border border-border bg-surface p-4 backdrop-blur-md"
     >
       <input
         className="flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"

@@ -12,7 +12,7 @@ export default async function PostEditorPage({
   const [post] = await db.select().from(posts).where(eq(posts.slug, slug));
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-5xl">
       <PostEditor
         slug={slug}
         initial={

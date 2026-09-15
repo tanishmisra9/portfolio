@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import { RadioKeystrokeListener } from "@/components/easter-eggs/radio-keystroke-listener";
-import { SiteHeader } from "@/components/site-header";
+import { SiteChrome } from "@/components/site-chrome";
 import { getRadioSampleUrls } from "@/lib/radio-samples";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -60,8 +59,7 @@ export default async function RootLayout({
           >
             Skip to content
           </a>
-          <RadioKeystrokeListener samples={radioSamples} />
-          <SiteHeader />
+          <SiteChrome radioSamples={radioSamples} />
           {children}
         </ThemeProvider>
         <Analytics />

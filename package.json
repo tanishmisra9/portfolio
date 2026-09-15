@@ -13,6 +13,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:migrate-content": "tsx scripts/migrate-to-db.ts",
+    "db:backfill-portfolio-v2": "tsx scripts/backfill-portfolio-v2.ts",
     "admin:hash-password": "node scripts/hash-password.mjs"
   },
   "dependencies": {

@@ -74,7 +74,7 @@ export function PhotoManager({
       </div>
 
       {pending.map((item, index) => (
-        <div key={index} className="flex items-center gap-3 rounded border border-fg/10 p-3">
+        <div key={index} className="flex items-center gap-3 rounded-md border border-border bg-surface p-3 backdrop-blur-md">
           <span className="text-sm">{item.file.name}</span>
           <input
             className="flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"
@@ -111,14 +111,14 @@ export function PhotoManager({
         items={photos}
         onReorder={(ids) =>
           startTransition(async () => {
-            await reorderPhotos(ids);
+            await reorderPhotos(ids as number[]);
             router.refresh();
           })
         }
         renderItem={(photo, dragProps) => (
           <div
             {...dragProps}
-            className="flex cursor-grab items-center gap-3 rounded border border-fg/10 p-2"
+            className="flex cursor-grab items-center gap-3 rounded-md border border-border bg-surface p-2 backdrop-blur-md"
           >
             <span className="text-dim">⠿</span>
             {/* eslint-disable-next-line @next/next/no-img-element */}

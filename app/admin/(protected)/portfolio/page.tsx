@@ -5,8 +5,7 @@ export default async function PortfolioAdminPage() {
   const draft = await getDraftPortfolio();
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="mb-4 font-display text-xl">Portfolio</h1>
+    <div className="max-w-5xl">
       <PortfolioForm
         initial={
           draft ?? {

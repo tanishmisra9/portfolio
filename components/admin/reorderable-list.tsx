@@ -2,20 +2,22 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 
-interface ReorderableListProps<T extends { id: number }> {
+type ItemId = string | number;
+
+interface ReorderableListProps<T extends { id: ItemId }> {
   items: T[];
-  onReorder: (orderedIds: number[]) => void;
+  onReorder: (orderedIds: ItemId[]) => void;
   renderItem: (item: T, dragHandleProps: { draggable: true; onDragStart: () => void }) => ReactNode;
 }
 
 /** Native HTML5 drag-and-drop reordering — no dnd library needed for a plain vertical list. */
-export function ReorderableList<T extends { id: number }>({
+export function ReorderableList<T extends { id: ItemId }>({
   items,
   onReorder,
   renderItem,
 }: ReorderableListProps<T>) {
   const [order, setOrder] = useState(items);
-  const [draggingId, setDraggingId] = useState<number | null>(null);
+  const [draggingId, setDraggingId] = useState<ItemId | null>(null);
   const itemIds = items.map((i) => i.id).join(",");
 
   // Resync local order when the parent's item set changes (add/remove), without
@@ -30,7 +32,7 @@ export function ReorderableList<T extends { id: number }>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemIds]);
 
-  function handleDrop(targetId: number) {
+  function handleDrop(targetId: ItemId) {
     if (draggingId === null || draggingId === targetId) return;
     const next = [...order];
     const fromIndex = next.findIndex((i) => i.id === draggingId);

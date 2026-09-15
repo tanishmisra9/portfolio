@@ -18,3 +18,11 @@ export const SECTION_GHOST_HEADING_CLASSES = `${SECTION_GHOST_HEADING_BASE} mb-8
 /** Certifications — no mobile bleed; uses section-ghost-heading-long in globals.css */
 export const CERTIFICATIONS_GHOST_HEADING_CLASSES =
   "section-ghost-heading-long select-none text-center font-display font-extrabold uppercase leading-none heading-ghost focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:text-left";
+
+/**
+ * Admin-only: same type system as the public ghost headings (font-display, extrabold,
+ * uppercase) but at working scale with a solid fill — the public site's outline-stroke
+ * treatment is built for showcase content, not dense forms you're editing quickly.
+ */
+export const ADMIN_SECTION_HEADING_CLASSES =
+  "font-display text-2xl font-extrabold uppercase tracking-tight text-fg md:text-3xl";

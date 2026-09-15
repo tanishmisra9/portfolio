@@ -23,14 +23,14 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
         items={collections}
         onReorder={(ids) =>
           startTransition(async () => {
-            await reorderCollections(ids);
+            await reorderCollections(ids as number[]);
             router.refresh();
           })
         }
         renderItem={(c, dragProps) => (
           <div
             {...dragProps}
-            className="flex cursor-grab items-center gap-3 rounded border border-fg/10 p-3"
+            className="flex cursor-grab items-center gap-3 rounded-md border border-border bg-surface p-3 backdrop-blur-md"
           >
             <span className="text-dim">⠿</span>
             <div className="flex-1">
@@ -87,7 +87,7 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
             router.refresh();
           });
         }}
-        className="space-y-2 rounded border border-fg/10 p-3"
+        className="space-y-2 rounded-md border border-border bg-surface p-4 backdrop-blur-md"
       >
         <h2 className="text-sm text-dim">New collection</h2>
         <input

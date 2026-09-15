@@ -1,19 +1,36 @@
-export type ExperienceEntry = {
+/**
+ * `endDate: null` = a single-point date (e.g. a graduation date), `"present"` = ongoing,
+ * anything else = a closed range ending that month. Avoids an `isPresent` boolean that
+ * could disagree with `endDate` (e.g. present=true with an end date still set).
+ */
+export type StartEndDate = {
+  startDate: string; // "YYYY-MM"
+  endDate: string | "present" | null; // "YYYY-MM" | "present" | null
+};
+
+export type ExperienceEntry = StartEndDate & {
   id: string;
   org: string;
   role: string;
-  date: string;
   tags: string[];
   description?: string;
 };
 
-export type EducationEntry = {
+export type EducationEntry = StartEndDate & {
   id: string;
   institution: string;
   credential: string;
-  date: string;
-  /** Each inner array is one flex-wrap row of pills (same styling as skills). */
-  pillRows?: string[][];
+  /** Clubs/activities row — plain pills. */
+  activities?: string[];
+  /** Coursework row — rendered with the glassy CoursePill hover treatment. */
+  coursework?: string[];
+};
+
+export type ProjectLink = {
+  id: string;
+  label: string;
+  url: string;
+  icon?: 'external' | 'newspaper';
 };
 
 export type ProjectEntry = {
@@ -22,7 +39,7 @@ export type ProjectEntry = {
   description: string;
   techStack: string[];
   githubUrl: string;
-  links?: { label: string; url: string; icon?: 'external' | 'newspaper' }[];
+  links?: ProjectLink[];
   /** Label(s) shown at the top-left of the card; hidden when empty. */
   pills?: string[];
 };
@@ -31,6 +48,12 @@ export type SkillCategory = {
   id: string;
   category: string;
   items: string[];
+};
+
+export type CertificationCourse = {
+  id: string;
+  title: string;
+  credentialUrl: string;
 };
 
 export type CertificationEntry = {
@@ -45,10 +68,11 @@ export type CertificationEntry = {
   /** Bottom tag row, like techStack in projects. */
   skills?: string[];
   /** When set, renders as one expandable "program" card enclosing these courses, instead of one card per course. */
-  courses?: { title: string; credentialUrl: string }[];
+  courses?: CertificationCourse[];
 };
 
 export type SocialLink = {
+  id: string;
   label: string;
   href: string;
   display: string;

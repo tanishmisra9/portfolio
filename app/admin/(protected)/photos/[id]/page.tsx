@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { collections } from "@/db/schema";
 import { listDraftPhotos } from "@/lib/admin/actions";
+import { ADMIN_SECTION_HEADING_CLASSES } from "@/components/ui/class-constants";
 import { PhotoManager } from "./photo-manager";
 
 export default async function CollectionPhotosPage({
@@ -18,9 +19,9 @@ export default async function CollectionPhotosPage({
   const photos = await listDraftPhotos(collectionId);
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="mb-1 font-display text-xl">{collection.title}</h1>
-      <p className="mb-4 text-sm text-dim">/{collection.slug}</p>
+    <div className="max-w-5xl">
+      <h1 className={ADMIN_SECTION_HEADING_CLASSES}>{collection.title}</h1>
+      <p className="mb-6 mt-1 font-mono text-sm text-dim">/{collection.slug}</p>
       <PhotoManager collectionId={collection.id} collectionSlug={collection.slug} photos={photos} />
     </div>
   );

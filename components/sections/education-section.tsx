@@ -3,6 +3,7 @@ import {
   PILL_CLASSES,
   SECTION_GHOST_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
+import { formatDateRange } from '@/lib/format-date-range';
 import type { EducationEntry } from '@/types/content';
 
 type Props = { entries: EducationEntry[] };
@@ -44,26 +45,29 @@ export function EducationSection({ entries }: Props) {
             <ScrollReveal key={edu.id}>
               <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
                 <span className="font-mono text-sm uppercase tracking-wider text-muted">
-                  {edu.date}
+                  {formatDateRange(edu)}
                 </span>
                 <div>
                   <p className="font-display text-xl font-semibold text-fg">{edu.institution}</p>
                   <p className="mt-1 text-muted">{edu.credential}</p>
-                  {edu.pillRows?.length ? (
+                  {edu.activities?.length || edu.coursework?.length ? (
                     <div className="mt-4 flex flex-col gap-2">
-                      {edu.pillRows.map((row, rowIndex) => (
-                        <ul key={rowIndex} className="flex flex-wrap gap-2">
-                          {row.map((pill) =>
-                            rowIndex === 1 ? (
-                              <CoursePill key={`${edu.id}-${rowIndex}-${pill}`} label={pill} />
-                            ) : (
-                              <li key={`${edu.id}-${rowIndex}-${pill}`} className={orgPillClassName}>
-                                {pill}
-                              </li>
-                            )
-                          )}
+                      {edu.activities?.length ? (
+                        <ul className="flex flex-wrap gap-2">
+                          {edu.activities.map((pill) => (
+                            <li key={`${edu.id}-activity-${pill}`} className={orgPillClassName}>
+                              {pill}
+                            </li>
+                          ))}
                         </ul>
-                      ))}
+                      ) : null}
+                      {edu.coursework?.length ? (
+                        <ul className="flex flex-wrap gap-2">
+                          {edu.coursework.map((pill) => (
+                            <CoursePill key={`${edu.id}-course-${pill}`} label={pill} />
+                          ))}
+                        </ul>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>

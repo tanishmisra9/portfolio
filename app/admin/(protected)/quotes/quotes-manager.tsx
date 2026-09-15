@@ -19,7 +19,7 @@ export function QuotesManager({ quotes }: { quotes: Quote[] }) {
     <div className="space-y-6">
       <div className="space-y-2">
         {quotes.map((q) => (
-          <div key={q.id} className="flex items-center gap-3 rounded border border-fg/10 p-3">
+          <div key={q.id} className="flex items-center gap-3 rounded-md border border-border bg-surface p-4 backdrop-blur-md">
             <div className="flex-1 space-y-1">
               <textarea
                 className="w-full bg-transparent text-sm outline-none"
@@ -86,7 +86,7 @@ export function QuotesManager({ quotes }: { quotes: Quote[] }) {
             router.refresh();
           });
         }}
-        className="space-y-2 rounded border border-fg/10 p-3"
+        className="space-y-2 rounded-md border border-border bg-surface p-4 backdrop-blur-md"
       >
         <h2 className="text-sm text-dim">New quote</h2>
         <textarea

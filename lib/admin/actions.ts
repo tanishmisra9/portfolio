@@ -5,7 +5,7 @@ import { imageSize } from "image-size";
 import matter from "gray-matter";
 import { db } from "@/db/client";
 import { portfolio, collections, photos, quotes, posts } from "@/db/schema";
-import { uploadAsset, listAssetFilenames } from "./blob";
+import { uploadAsset, listAssetFilenames, uploadResume as uploadResumeBlob } from "./blob";
 import { findClosestMatch } from "./image-match";
 import { publish as publishSnapshot } from "./publish";
 import type { PortfolioContent } from "@/types/content";
@@ -23,6 +23,12 @@ export async function updatePortfolio(data: PortfolioContent) {
 export async function getDraftPortfolio(): Promise<PortfolioContent | null> {
   const [row] = await db.select().from(portfolio);
   return row ?? null;
+}
+
+/** Returns the downloadUrl (serves with Content-Disposition: attachment) so the resume downloads with a clean filename cross-origin. */
+export async function uploadResume(file: File): Promise<string> {
+  const blob = await uploadResumeBlob(file);
+  return blob.downloadUrl;
 }
 
 // ---- Collections ----

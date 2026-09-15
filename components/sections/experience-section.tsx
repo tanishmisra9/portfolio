@@ -6,6 +6,7 @@ import {
   PILL_CLASSES,
   SECTION_GHOST_HEADING_CLASSES,
 } from "@/components/ui/class-constants";
+import { formatDateRange } from "@/lib/format-date-range";
 import type { ExperienceEntry } from "@/types/content";
 
 type Props = { entries: ExperienceEntry[] };
@@ -34,7 +35,7 @@ export function ExperienceSection({ entries }: Props) {
             <ScrollReveal key={entry.id} homeIntroComplete={homeIntroDone}>
               <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
                 <div className="font-mono text-sm uppercase tracking-wider text-muted">
-                  {entry.date}
+                  {formatDateRange(entry)}
                 </div>
                 <div>
                   <p className="font-display text-xl font-semibold text-fg">{entry.org}</p>

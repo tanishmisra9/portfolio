@@ -7,42 +7,48 @@ export const portfolio: PortfolioContent = {
   experience: [
     {
       id: 'exp-01',
-      date: 'May 2026 - Aug 2026',
+      startDate: '2026-05',
+      endDate: '2026-08',
       org: 'Toyota Motor North America',
       role: 'STEM Co-op, Automation Team, Connected Experiences Division (CXD)',
       tags: ['Software Engineering', 'AI/ML', 'QA'],
     },
     {
       id: 'exp-02',
-      date: 'Jan 2026 - Present',
+      startDate: '2026-01',
+      endDate: 'present',
       org: 'The Data Mine',
       role: 'Undergraduate Data Science Researcher',
       tags: ['Python', 'SQL', 'Pandas', 'NumPy', 'Matplotlib'],
     },
     {
       id: 'exp-03',
-      date: 'Aug 2025 - Present',
+      startDate: '2025-08',
+      endDate: 'present',
       org: 'Purdue Electric Racing',
       role: 'Software Team Developer',
       tags: ['C', 'STM32', 'Embedded Firmware'],
     },
     {
       id: 'exp-04',
-      date: 'Aug 2025 - Present',
+      startDate: '2025-08',
+      endDate: 'present',
       org: 'Purdue Electric Vehicle Club',
       role: 'OpenCV Developer',
       tags: ['Python', 'OpenCV', 'Docker'],
     },
     {
       id: 'exp-05',
-      date: 'Mar 2024 - Jul 2025',
+      startDate: '2024-03',
+      endDate: '2025-07',
       org: 'Q Spark Group',
       role: 'Data, Analytics, and AI Intern',
       tags: ['NER Models', 'spaCy', 'Python', 'SQL', 'Pandas'],
     },
     {
       id: 'exp-06',
-      date: 'June 2023 - August 2025',
+      startDate: '2023-06',
+      endDate: '2025-08',
       org: "Karen Dillard's College Prep",
       role: 'Student Worker',
       tags: ['CRM', 'Operations', 'Customer Service', 'Office Administration'],
@@ -51,45 +57,44 @@ export const portfolio: PortfolioContent = {
   education: [
     {
       id: 'edu-01',
-      date: 'Aug 2025 - Dec 2028',
+      startDate: '2025-08',
+      endDate: '2028-12',
       institution: 'Purdue University',
       credential: 'B.S. Computer Science (Machine Intelligence & Security)',
-      pillRows: [
-        [
-          'PER',
-          'EVC',
-          'Google Developer Group',
-          'Claude Builder Club',
-          'F1@P',
-        ],
-        [
-          'Problem Solving & OOP',
-          'Programming in C',
-          'Discrete Math',
-          'The Data Mine',
-          'Linear Algebra',
-          'Multivariable Calculus',
-        ],
+      activities: [
+        'PER',
+        'EVC',
+        'Google Developer Group',
+        'Claude Builder Club',
+        'F1@P',
+      ],
+      coursework: [
+        'Problem Solving & OOP',
+        'Programming in C',
+        'Discrete Math',
+        'The Data Mine',
+        'Linear Algebra',
+        'Multivariable Calculus',
       ],
     },
     {
       id: 'edu-01-stats',
-      date: 'Aug 2025 - Dec 2028',
+      startDate: '2025-08',
+      endDate: '2028-12',
       institution: 'Purdue University',
       credential: 'Minor, Statistics',
     },
     {
       id: 'edu-02',
-      date: 'May 2025',
+      startDate: '2025-05',
+      endDate: null,
       institution: 'Plano West Senior High School',
       credential:
         'Distinguished Level of Achievement, Summa Cum Laude',
-      pillRows: [
-        [
-          'Clarinet player & Logistics Captain',
-          'AI Club Officer',
-          'NHS',
-        ],
+      activities: [
+        'Clarinet player & Logistics Captain',
+        'AI Club Officer',
+        'NHS',
       ],
     },
   ],
@@ -163,16 +168,19 @@ export const portfolio: PortfolioContent = {
       skills: ['OWASP', 'SIEM', 'Network Security', 'Incident Response'],
       courses: [
         {
+          id: 'course-cyber-foundations',
           title: 'Foundations of Cybersecurity',
           credentialUrl:
             'https://www.coursera.org/account/accomplishments/verify/HUNYVIPGYIO0',
         },
         {
+          id: 'course-cyber-risks',
           title: 'Manage Security Risks',
           credentialUrl:
             'https://www.coursera.org/account/accomplishments/verify/SR4FKRAQKNEQ',
         },
         {
+          id: 'course-cyber-networks',
           title: 'Networks and Network Security',
           credentialUrl:
             'https://www.coursera.org/account/accomplishments/verify/WVO8VIFCW4UH',
@@ -187,30 +195,37 @@ export const portfolio: PortfolioContent = {
       skills: ['Claude', 'Agent Skills', 'MCP', 'Subagents'],
       courses: [
         {
+          id: 'course-anthropic-fluency',
           title: 'AI Fluency: Framework & Foundations',
           credentialUrl: 'https://verify.skilljar.com/c/y9yk8txvrpzz',
         },
         {
+          id: 'course-anthropic-claude101',
           title: 'Claude 101',
           credentialUrl: 'https://verify.skilljar.com/c/gtthy7hboonf',
         },
         {
+          id: 'course-anthropic-code101',
           title: 'Claude Code 101',
           credentialUrl: 'https://verify.skilljar.com/c/uuec2qzoim8w',
         },
         {
+          id: 'course-anthropic-code-action',
           title: 'Claude Code in Action',
           credentialUrl: 'https://verify.skilljar.com/c/rrt9vezg6wtk',
         },
         {
+          id: 'course-anthropic-agent-skills',
           title: 'Introduction to Agent Skills',
           credentialUrl: 'https://verify.skilljar.com/c/qvgzqqh5g8nm',
         },
         {
+          id: 'course-anthropic-subagents',
           title: 'Introduction to Subagents',
           credentialUrl: 'https://verify.skilljar.com/c/m566yornfpov',
         },
         {
+          id: 'course-anthropic-mcp',
           title: 'Introduction to Model Context Protocol',
           credentialUrl: 'https://verify.skilljar.com/c/yo6bb4g8shnb',
         },
@@ -253,10 +268,12 @@ export const portfolio: PortfolioContent = {
       githubUrl: 'https://github.com/tanishmisra9/candle',
       links: [
         {
+          id: 'link-candle-live',
           label: 'Live site',
           url: 'https://candleforchm.org'
         },
         {
+          id: 'link-candle-press',
           label: 'Press release',
           url: 'https://www.einpresswire.com/article/918493577/choroideremia-research-foundation-highlights-candle-a-patient-developed-resource-hub-advancing-access-to-chm-research',
           icon: 'newspaper',
@@ -271,7 +288,7 @@ export const portfolio: PortfolioContent = {
         'F1 telemetry pipeline turning a race weekend into deterministic pace, degradation, and deployment insights, delivered as an editorial-brutalist dashboard.',
       techStack: ['PostgreSQL', 'FastAPI', 'LangGraph', 'React', 'TypeScript', 'Tailwind CSS', 'FastF1'],
       githubUrl: 'https://github.com/tanishmisra9/telogify',
-      links: [{ label: 'Live site', url: 'https://www.telogify.com' }],
+      links: [{ id: 'link-telogify-live', label: 'Live site', url: 'https://www.telogify.com' }],
       pills: ['f1', 'website', 'dashboard'],
     },
     {
@@ -290,7 +307,7 @@ export const portfolio: PortfolioContent = {
         'Deployed a 4-agent LangGraph pipeline for deduplicating vendor records using fuzzy matching and GPT-4.',
       techStack: ['Python', 'LangGraph', 'OpenAI', 'MySQL'],
       githubUrl: 'https://github.com/tanishmisra9/VendorOrchestrator',
-      links: [{ label: 'Live site', url: 'https://vendororchestrator-production.up.railway.app' }],
+      links: [{ id: 'link-vendor-live', label: 'Live site', url: 'https://vendororchestrator-production.up.railway.app' }],
       pills: ['project'],
     },
     {
@@ -300,7 +317,7 @@ export const portfolio: PortfolioContent = {
         'Built a personal website, leaning into minimalism.',
       techStack: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
       githubUrl: 'https://github.com/tanishmisra9/portfolio',
-      links: [{ label: 'Live site', url: 'https://www.tanishmisra.com' }],
+      links: [{ id: 'link-portfolio-live', label: 'Live site', url: 'https://www.tanishmisra.com' }],
       pills: ['website'],
     },
     {
@@ -319,7 +336,7 @@ export const portfolio: PortfolioContent = {
         'Tailwind CSS',
       ],
       githubUrl: 'https://github.com/tanishmisra9/securify',
-      links: [{ label: 'Live site', url: 'https://securify-production-136f.up.railway.app' }],
+      links: [{ id: 'link-securify-live', label: 'Live site', url: 'https://securify-production-136f.up.railway.app' }],
       pills: ['algofest', 'semi-finalist', '2026'],
     },
     {
@@ -347,7 +364,7 @@ export const portfolio: PortfolioContent = {
         'Railway',
       ],
       githubUrl: 'https://github.com/tanishmisra9/tokenwise',
-      links: [{ label: 'Live site', url: 'https://tokenwise-production.up.railway.app' }],
+      links: [{ id: 'link-tokenwise-live', label: 'Live site', url: 'https://tokenwise-production.up.railway.app' }],
       pills: ['global fusion', '2026'],
     },
     {
@@ -361,24 +378,28 @@ export const portfolio: PortfolioContent = {
     },
   ],
   aboutBio:
-    "I study computer science at Purdue, concentrating in Machine Intelligence and Security. I like building AI systems that hold up against messy data and real-world constraints, from a PII redaction pipeline for Securify to a Choroideremia research platform CureCHM now uses as its official patient resource. Most recently, that's meant writing LLM-driven test generation pipelines for in-vehicle infotainment as a co-op at Toyota's Connected Experiences Division.\n\nThat automotive interest carries into my free time too. I'm an avid Formula 1 fan, I built Telogify to turn race weekend telemetry into pace and strategy insights, I built an autonomous broadcast director that rotates onboard camera feeds to catch the best action, and I write embedded firmware for Purdue Electric Racing. When I'm not building something, I'm out with a camera, shooting #ShotOniPhone17Pro.",
+    "I study computer science at Purdue, concentrating in **Machine Intelligence and Security**. I like building AI systems that hold up against messy data and real-world constraints, from a PII redaction pipeline for **Securify** to a Choroideremia research platform **CureCHM** now uses as its official patient resource. Most recently, that's meant writing LLM-driven test generation pipelines for in-vehicle infotainment as a co-op at **Toyota**'s Connected Experiences Division.\n\nThat automotive interest carries into my free time too. I'm an avid [Formula 1](/photos/super-max) fan, I built **Telogify** to turn race weekend telemetry into pace and strategy insights, I built an autonomous broadcast director that rotates onboard camera feeds to catch the best action, and I write embedded firmware for **Purdue Electric Racing**. When I'm not building something, I'm out with a camera, shooting [#ShotOniPhone17Pro](/photos).",
   social: [
     {
+      id: 'social-github',
       label: 'GitHub',
       href: 'https://github.com/tanishmisra9',
       display: 'github.com/tanishmisra9',
     },
     {
+      id: 'social-linkedin',
       label: 'LinkedIn',
       href: 'https://linkedin.com/in/tanish-misra',
       display: 'linkedin.com/in/tanish-misra',
     },
     {
+      id: 'social-email',
       label: 'Email',
       href: 'mailto:tmisra@purdue.edu',
       display: 'tmisra@purdue.edu',
     },
     {
+      id: 'social-resume',
       label: 'Resume',
       href: '/resume.pdf',
       display: 'Resume',

@@ -1,5 +1,29 @@
-import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ADMIN_SECTION_HEADING_CLASSES } from "@/components/ui/class-constants";
 
-export default function AdminIndexPage() {
-  redirect("/admin/portfolio");
+const SECTIONS = [
+  { href: "/admin/portfolio", title: "Portfolio", description: "Bio, experience, education, skills, certifications, projects, social." },
+  { href: "/admin/photos", title: "Photos", description: "Collections, uploads, captions, ordering." },
+  { href: "/admin/quotes", title: "Quotes", description: "The quote cloud on /quotes." },
+  { href: "/admin/blog", title: "Blog", description: "Posts, drafts, and markdown import." },
+];
+
+export default function AdminDashboardPage() {
+  return (
+    <div>
+      <h1 className={ADMIN_SECTION_HEADING_CLASSES}>Admin</h1>
+      <div className="mt-8 grid gap-5 sm:grid-cols-2">
+        {SECTIONS.map((section) => (
+          <Link
+            key={section.href}
+            href={section.href}
+            className="rounded-md border border-border bg-surface p-8 backdrop-blur-md transition-colors hover:border-hover-outline"
+          >
+            <p className="font-display text-xl font-semibold text-fg">{section.title}</p>
+            <p className="mt-2 text-muted">{section.description}</p>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
 }

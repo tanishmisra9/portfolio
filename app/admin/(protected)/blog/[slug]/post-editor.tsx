@@ -186,7 +186,7 @@ export function PostEditor({
         />
       </label>
 
-      <div className="fixed bottom-0 left-48 right-0 border-t border-fg/10 bg-bg p-4">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-fg/10 bg-bg p-4">
         <button
           type="button"
           disabled={pending}

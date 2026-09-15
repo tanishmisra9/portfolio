@@ -12,15 +12,20 @@ export default function LoginPage() {
         action={formAction}
         className="w-full max-w-sm space-y-4 rounded-lg border border-fg/10 p-6"
       >
-        <h1 className="font-display text-lg text-fg">Admin login</h1>
+        <h1 className="font-display text-lg text-fg">Log in</h1>
         <input
           type="password"
           name="password"
           placeholder="Password"
           autoFocus
-          className="w-full rounded border border-fg/20 bg-transparent px-3 py-2 text-fg outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+          aria-invalid={!!error}
+          className={`w-full rounded border bg-transparent px-3 py-2 text-fg outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+            error ? "border-red-500" : "border-fg/20"
+          }`}
         />
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        <span role="alert" className="sr-only">
+          {error}
+        </span>
         <button
           type="submit"
           disabled={pending}

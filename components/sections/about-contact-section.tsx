@@ -1,9 +1,9 @@
-import Link from 'next/link';
+import Markdown from 'react-markdown';
 import { ScrollReveal } from '@/components/scroll-reveal';
 import { SECTION_GHOST_HEADING_BASE } from '@/components/ui/class-constants';
 import { Tooltip } from '@/components/ui/tooltip';
-import { FileDown, Github, Linkedin, Mail } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { bioMarkdownComponents } from '@/components/bio-markdown';
+import { iconFor } from '@/components/social-icon';
 import type { SocialLink } from '@/types/content';
 
 type Props = {
@@ -11,78 +11,9 @@ type Props = {
   social: SocialLink[];
 };
 
-function iconFor(label: string) {
-  const key = label.toLowerCase();
-  if (key.includes('github')) return Github;
-  if (key.includes('linkedin')) return Linkedin;
-  if (key.includes('email')) return Mail;
-  if (key.includes('resume')) return FileDown;
-  if (process.env.NODE_ENV === 'development') {
-    console.warn(
-      `[iconFor] Unrecognized social label: "${label}". Falling back to Mail icon.`,
-    );
-  }
-  return Mail;
-}
-
-const HIGHLIGHT_TERMS = [
-  'Machine Intelligence and Security',
-  'Securify',
-  'CureCHM',
-  'Toyota',
-  'Telogify',
-  'Purdue Electric Racing',
-  'Formula 1',
-  '#ShotOniPhone17Pro',
-] as const;
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 /** Shared typography for both bio blocks; color applied per paragraph. (~8% smaller than 2xl/3xl scale.) */
 const bioBodyClass =
   "text-[1.38rem] font-[200] subpixel-antialiased leading-[1.486] md:text-[1.725rem] md:leading-[1.53]";
-
-function renderHighlightedParagraph(paragraph: string): ReactNode {
-  const pattern = new RegExp(`(${HIGHLIGHT_TERMS.map(escapeRegExp).join('|')})`, 'g');
-  return paragraph.split(pattern).map((part, index) => {
-    if (part === '#ShotOniPhone17Pro') {
-      return (
-        <Link
-          key={`shot-${index}`}
-          href="/photos"
-          className="select-none font-bold text-fg/80 transition-colors duration-300 ease-out hover:text-fg focus-visible:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-        >
-          {part}
-        </Link>
-      );
-    }
-    if (part === 'Formula 1') {
-      return (
-        <Link
-          key={`f1-${index}`}
-          href="/photos/super-max"
-          className="font-bold text-fg/80 transition-colors duration-300 ease-out hover:text-fg focus-visible:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-        >
-          {part}
-        </Link>
-      );
-    }
-    if (HIGHLIGHT_TERMS.includes(part as (typeof HIGHLIGHT_TERMS)[number])) {
-      return (
-        <strong key={`${part}-${index}`} className="font-bold text-fg">
-          {part}
-        </strong>
-      );
-    }
-    return (
-      <span key={`text-${index}`} className="text-inherit">
-        {part}
-      </span>
-    );
-  });
-}
 
 export function AboutContactSection({ bio, social }: Props) {
   const [paragraphOne = '', paragraphTwo = ''] = bio.split('\n\n');
@@ -100,10 +31,10 @@ export function AboutContactSection({ bio, social }: Props) {
         <ScrollReveal>
           <div className="mx-auto max-w-[min(44.16rem,calc(100vw-3rem))] px-6 text-center">
             <p className={`${bioBodyClass} text-fg`}>
-              {renderHighlightedParagraph(paragraphOne)}
+              <Markdown components={bioMarkdownComponents}>{paragraphOne}</Markdown>
             </p>
             <p className={`${bioBodyClass} mt-7 text-muted md:mt-9`}>
-              {renderHighlightedParagraph(paragraphTwo)}
+              <Markdown components={bioMarkdownComponents}>{paragraphTwo}</Markdown>
             </p>
           </div>
         </ScrollReveal>
@@ -112,7 +43,7 @@ export function AboutContactSection({ bio, social }: Props) {
             {social.map((link) => {
               const Icon = iconFor(link.label);
               return (
-                <Tooltip key={link.href} label={link.label}>
+                <Tooltip key={link.id} label={link.label}>
                   <a
                     href={link.href}
                     aria-label={link.label}
