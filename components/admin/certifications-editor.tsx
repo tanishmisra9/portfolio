@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { FieldInput, type FieldDef, type Item } from "./array-editor";
 
 const SINGLE_FIELDS: FieldDef[] = [
@@ -39,6 +41,19 @@ export function CertificationsEditor({
   items: Item[];
   onChange: (items: Item[]) => void;
 }) {
+  // Course series default collapsed (they can hold many course rows and clutter the
+  // grid); a newly added one is opened immediately so there's something to fill in.
+  const [expandedSeries, setExpandedSeries] = useState<Set<string>>(new Set());
+
+  function toggleSeries(id: string) {
+    setExpandedSeries((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   function update(id: string, key: string, value: unknown) {
     onChange(items.map((item) => (item.id === id ? { ...item, [key]: value } : item)));
   }
@@ -52,7 +67,9 @@ export function CertificationsEditor({
   }
 
   function addSeries() {
-    onChange([...items, { id: crypto.randomUUID(), issuer: "", title: "", courses: [] }]);
+    const item = { id: crypto.randomUUID(), issuer: "", title: "", courses: [] };
+    onChange([...items, item]);
+    setExpandedSeries((prev) => new Set(prev).add(item.id));
   }
 
   return (
@@ -61,22 +78,51 @@ export function CertificationsEditor({
         {items.map((item) => {
           const isSeries = item.courses !== undefined;
           const fields = isSeries ? SERIES_FIELDS : SINGLE_FIELDS;
+          const isOpen = !isSeries || expandedSeries.has(item.id);
+          const courseCount = Array.isArray(item.courses) ? item.courses.length : 0;
+
           return (
             <div key={item.id} className="space-y-2 rounded-md border border-border bg-surface p-6 backdrop-blur-md">
-              <p className="text-xs uppercase tracking-wide text-dim">
-                {isSeries ? "Course series" : "Certification"}
-              </p>
-              {fields.map((field) => (
-                <FieldInput
-                  key={field.key}
-                  field={field}
-                  value={item[field.key]}
-                  onChange={(v) => update(item.id, field.key, v)}
-                />
-              ))}
-              <button type="button" onClick={() => remove(item.id)} className="text-xs text-red-500">
-                Remove
-              </button>
+              {isSeries ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleSeries(item.id)}
+                    className="flex flex-1 items-center gap-2 text-left"
+                  >
+                    <ChevronDown
+                      className={`h-4 w-4 shrink-0 text-muted transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                      aria-hidden
+                    />
+                    <span className="text-xs uppercase tracking-wide text-dim">
+                      Course series{!isOpen && (item.title || item.issuer) ? ` — ${item.title || item.issuer} (${courseCount})` : ""}
+                    </span>
+                  </button>
+                  <button type="button" onClick={() => remove(item.id)} className="text-xs text-red-500">
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <p className="text-xs uppercase tracking-wide text-dim">Certification</p>
+              )}
+
+              {isOpen && (
+                <>
+                  {fields.map((field) => (
+                    <FieldInput
+                      key={field.key}
+                      field={field}
+                      value={item[field.key]}
+                      onChange={(v) => update(item.id, field.key, v)}
+                    />
+                  ))}
+                  {!isSeries && (
+                    <button type="button" onClick={() => remove(item.id)} className="text-xs text-red-500">
+                      Remove
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           );
         })}
