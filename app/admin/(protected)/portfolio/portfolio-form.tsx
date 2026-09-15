@@ -9,6 +9,7 @@ import { CollapsibleSection } from "@/components/admin/collapsible-section";
 import { CertificationsEditor } from "@/components/admin/certifications-editor";
 import { SocialEditor } from "@/components/admin/social-editor";
 import { BioEditor } from "@/components/admin/bio-editor";
+import { useRegisterDirty } from "@/components/admin/dirty-context";
 import { formatDateRange } from "@/lib/format-date-range";
 import { updatePortfolio } from "@/lib/admin/actions";
 
@@ -27,6 +28,10 @@ const SECTION_KEYS = [
 
 export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
   const [data, setData] = useState(initial);
+  // The baseline for the dirty check — starts as the server-loaded value, then moves to
+  // whatever was last saved so "Unsaved changes" doesn't stay stuck on after a save
+  // (the `initial` prop itself never updates without a full page reload).
+  const [baseline, setBaseline] = useState(initial);
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [open, setOpen] = useState<Record<(typeof SECTION_KEYS)[number], boolean>>({
@@ -39,7 +44,8 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
     social: false,
   });
 
-  const dirty = useMemo(() => JSON.stringify(data) !== JSON.stringify(initial), [data, initial]);
+  const dirty = useMemo(() => JSON.stringify(data) !== JSON.stringify(baseline), [data, baseline]);
+  useRegisterDirty(dirty);
 
   useEffect(() => {
     if (!dirty) return;
@@ -51,6 +57,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
   function save() {
     startTransition(async () => {
       await updatePortfolio(data);
+      setBaseline(data);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     });

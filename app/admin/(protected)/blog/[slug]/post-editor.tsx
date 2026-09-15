@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   deletePost,
@@ -9,6 +9,7 @@ import {
   uploadBlogImage,
   type ImageCheckResult,
 } from "@/lib/admin/actions";
+import { useRegisterDirty } from "@/components/admin/dirty-context";
 
 interface PostFields {
   slug: string;
@@ -32,6 +33,9 @@ export function PostEditor({
 }) {
   const router = useRouter();
   const [fields, setFields] = useState(initial);
+  const [baseline, setBaseline] = useState(initial);
+  const dirty = useMemo(() => JSON.stringify(fields) !== JSON.stringify(baseline), [fields, baseline]);
+  useRegisterDirty(dirty);
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [imageChecks, setImageChecks] = useState<ImageCheckResult[] | null>(null);
@@ -41,6 +45,7 @@ export function PostEditor({
   function save() {
     startTransition(async () => {
       await savePost(fields);
+      setBaseline(fields);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
       if (isNew) router.replace(`/admin/blog/${slug}`);
@@ -52,8 +57,11 @@ export function PostEditor({
     reader.onload = () => {
       const raw = String(reader.result);
       startTransition(async () => {
+        // importMarkdownPost already persists the post inside the action, so the
+        // imported result is itself the new saved baseline, not a pending edit.
         const { post, imageChecks } = await importMarkdownPost(raw, slug);
         setFields(post);
+        setBaseline(post);
         setImageChecks(imageChecks);
       });
     };

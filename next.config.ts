@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 448, 600],
     minimumCacheTTL: 60 * 60 * 24 * 365,
     qualities: [68, 72, 75],
+    /* Photos/blog images now live on Vercel Blob (public.blob.vercel-storage.com), not
+     * public/ — next/image refuses to optimize a remote host that isn't explicitly
+     * allow-listed here, regardless of the URL being HTTPS and publicly readable. */
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+    ],
   },
   /* lib/image-dimensions.ts reads a dynamically-built path under public/blog/ at build
    * time, which makes Next's file tracer conservatively bundle the whole directory into

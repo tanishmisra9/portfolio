@@ -6,12 +6,30 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { logout } from "@/lib/auth/actions";
 import { publishAll } from "@/lib/admin/actions";
+import { useAdminDirty } from "@/components/admin/dirty-context";
 
 export function AdminHeader() {
   const pathname = usePathname();
   const isDashboard = pathname === "/admin";
   const [pending, startTransition] = useTransition();
   const [justPublished, setJustPublished] = useState(false);
+  const dirty = useAdminDirty();
+
+  function handlePublish() {
+    if (
+      dirty &&
+      !confirm(
+        "This page has unsaved changes that won't be included in the publish. Save your edits first, or continue to publish without them?",
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      await publishAll();
+      setJustPublished(true);
+      setTimeout(() => setJustPublished(false), 3000);
+    });
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-4 border-b border-border px-6 py-3">
@@ -24,16 +42,11 @@ export function AdminHeader() {
         Edits save as drafts. Nothing goes live until you publish.
       </span>
       <div className="ml-auto flex items-center gap-3">
+        {dirty && <span className="text-xs text-red-500">This page has unsaved changes</span>}
         <button
           type="button"
           disabled={pending}
-          onClick={() =>
-            startTransition(async () => {
-              await publishAll();
-              setJustPublished(true);
-              setTimeout(() => setJustPublished(false), 3000);
-            })
-          }
+          onClick={handlePublish}
           className="rounded bg-fg px-4 py-1.5 text-sm text-bg disabled:opacity-50"
         >
           {pending ? "Publishing..." : justPublished ? "Published ✓" : "Publish"}
