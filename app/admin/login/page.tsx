@@ -12,7 +12,7 @@ export default function LoginPage() {
         action={formAction}
         className="w-full max-w-sm space-y-4 rounded-lg border border-fg/10 p-6"
       >
-        <h1 className="font-display text-lg text-fg">Log in</h1>
+        <h1 className={`font-display text-lg ${error ? "text-red-500" : "text-fg"}`}>Log in</h1>
         <input
           type="password"
           name="password"
