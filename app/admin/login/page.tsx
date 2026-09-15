@@ -19,7 +19,7 @@ export default function LoginPage() {
           placeholder="Type here"
           autoFocus
           aria-invalid={!!error}
-          className={`w-full rounded border bg-transparent px-3 py-2 tracking-[0.3em] outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+          className={`w-full rounded border bg-transparent px-3 py-2 tracking-[0.3em] outline-none placeholder:tracking-normal focus-visible:ring-2 focus-visible:ring-fg/70 ${
             error ? "border-red-500 text-red-500 placeholder:text-red-500" : "border-fg/20 text-fg"
           }`}
         />
