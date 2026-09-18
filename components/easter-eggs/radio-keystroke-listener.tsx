@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import {
-  RADIO_REFERENCE_SAMPLE,
+  RADIO_REFERENCE_SAMPLE_FILENAME,
   RADIO_SAMPLE_FALLBACK,
 } from "@/lib/radio-samples.constants";
 
@@ -130,9 +130,8 @@ async function buildGainMap(pool: string[]): Promise<Map<string, number>> {
   }
 
   try {
-    const referenceUrl = pool.includes(RADIO_REFERENCE_SAMPLE)
-      ? RADIO_REFERENCE_SAMPLE
-      : pool[0];
+    const referenceUrl =
+      pool.find((url) => url.endsWith(`/${RADIO_REFERENCE_SAMPLE_FILENAME}`)) ?? pool[0];
 
     const referenceBuffer = await fetchAndDecode(context, referenceUrl);
     if (!referenceBuffer) return fallback;

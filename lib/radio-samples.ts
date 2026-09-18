@@ -1,27 +1,34 @@
-import { readdir } from "node:fs/promises";
 import path from "node:path";
+import { listRadioSamples } from "@/lib/admin/blob";
 import { RADIO_SAMPLE_FALLBACK } from "@/lib/radio-samples.constants";
 
-const RADIO_DIR = path.join(process.cwd(), "public", "sfx", "radio");
-const PUBLIC_PREFIX = "/sfx/radio";
+export const ALLOWED_AUDIO_EXTENSIONS = new Set([".mp3", ".m4a", ".wav", ".ogg", ".webm"]);
 
-const ALLOWED_EXTENSIONS = new Set([".mp3", ".m4a", ".wav", ".ogg", ".webm"]);
+/** Extension whitelist + a permissive MIME check (only rejects a MIME type that's
+ * definitely non-audio; an empty/unrecognized MIME doesn't fail a correctly-extensioned
+ * file, since browsers don't reliably classify every audio format). */
+export function isAllowedAudioFile(filename: string, mimeType: string): boolean {
+  const hasAudioExtension = ALLOWED_AUDIO_EXTENSIONS.has(path.extname(filename).toLowerCase());
+  const hasNonAudioMimeType = mimeType !== "" && !mimeType.startsWith("audio/");
+  return hasAudioExtension && !hasNonAudioMimeType;
+}
 
 /**
- * Discover radio easter-egg samples from `public/sfx/radio` at build/request time.
- * New files are included automatically after rebuild or deploy.
+ * Radio easter-egg samples now live in Vercel Blob (uploaded via /admin/radio), not
+ * public/sfx/radio — that directory is read-only in production. Falls back to a fixed
+ * local list if Blob is unreachable or empty (e.g. before the first upload).
  */
 export async function getRadioSampleUrls(): Promise<string[]> {
   try {
-    const entries = await readdir(RADIO_DIR, { withFileTypes: true });
-    const urls = entries
-      .filter((entry) => entry.isFile() && ALLOWED_EXTENSIONS.has(path.extname(entry.name).toLowerCase()))
-      .map((entry) => `${PUBLIC_PREFIX}/${entry.name}`)
+    const samples = await listRadioSamples();
+    const urls = samples
+      .filter((s) => ALLOWED_AUDIO_EXTENSIONS.has(path.extname(s.pathname).toLowerCase()))
+      .map((s) => s.url)
       .sort((a, b) => a.localeCompare(b));
 
     if (urls.length > 0) return urls;
   } catch {
-    // Directory missing or unreadable — use fallback.
+    // Blob unreachable — use fallback.
   }
 
   return [...RADIO_SAMPLE_FALLBACK];

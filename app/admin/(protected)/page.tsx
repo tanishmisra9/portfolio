@@ -6,6 +6,7 @@ const SECTIONS = [
   { href: "/admin/photos", title: "Photos", description: "Collections, uploads, captions, ordering." },
   { href: "/admin/quotes", title: "Quotes", description: "The quote cloud on /quotes." },
   { href: "/admin/blog", title: "Blog", description: "Posts, drafts, and markdown import." },
+  { href: "/admin/radio", title: "Radio", description: "Race-radio clips for the boxbox easter egg." },
 ];
 
 export default function AdminDashboardPage() {

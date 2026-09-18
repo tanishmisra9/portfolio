@@ -17,16 +17,27 @@ export async function deleteAsset(url: string) {
 }
 
 /**
- * The filename is user-editable (default "Resume-TanishMisra.pdf") but always lands
- * directly in a Blob pathname, so it's sanitized to a safe basename first. Uses
- * allowOverwrite so re-uploading under the same name replaces it rather than growing a
- * pile of blobs; renaming does leave the previous blob orphaned (negligible on the free
- * tier, not worth cleanup code).
+ * The filename is user-editable but always lands directly in a Blob pathname, so it's
+ * sanitized to a safe basename first. Uses allowOverwrite so re-uploading under the same
+ * name replaces it rather than growing a pile of blobs; renaming does leave the previous
+ * blob orphaned (negligible on the free tier, not worth cleanup code).
  */
-export async function uploadResume(file: File, filename: string) {
-  const safeName = filename.replace(/[^a-zA-Z0-9.\-_]/g, "") || "Resume-TanishMisra.pdf";
-  return put(`resume/${safeName}`, file, {
+export async function uploadNamedAsset(prefix: string, file: File, filename: string) {
+  const safeName =
+    filename.replace(/[^a-zA-Z0-9.\-_]/g, "") ||
+    file.name.replace(/[^a-zA-Z0-9.\-_]/g, "") ||
+    "file";
+  return put(`${prefix}/${safeName}`, file, {
     access: "public",
     allowOverwrite: true,
   });
+}
+
+export async function uploadResume(file: File, filename: string) {
+  return uploadNamedAsset("resume", file, filename || "Resume-TanishMisra.pdf");
+}
+
+export async function listRadioSamples(): Promise<{ url: string; pathname: string }[]> {
+  const { blobs } = await list({ prefix: "radio/" });
+  return blobs.map((b) => ({ url: b.url, pathname: b.pathname }));
 }

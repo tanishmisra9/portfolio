@@ -5,9 +5,17 @@ import { imageSize } from "image-size";
 import matter from "gray-matter";
 import { db } from "@/db/client";
 import { portfolio, collections, photos, quotes, posts } from "@/db/schema";
-import { uploadAsset, listAssetFilenames, uploadResume as uploadResumeBlob } from "./blob";
+import {
+  uploadAsset,
+  listAssetFilenames,
+  uploadResume as uploadResumeBlob,
+  uploadNamedAsset,
+  listRadioSamples,
+  deleteAsset,
+} from "./blob";
 import { findClosestMatch } from "./image-match";
 import { publish as publishSnapshot } from "./publish";
+import { isAllowedAudioFile } from "@/lib/radio-samples";
 import type { PortfolioContent } from "@/types/content";
 import { revalidatePath } from "next/cache";
 
@@ -29,6 +37,28 @@ export async function getDraftPortfolio(): Promise<PortfolioContent | null> {
 export async function uploadResume(file: File, filename: string): Promise<string> {
   const blob = await uploadResumeBlob(file, filename);
   return blob.downloadUrl;
+}
+
+// ---- Radio easter-egg samples ----
+// No draft/publish gating here — there's nothing to preview differently for a sound
+// effect, so uploads/deletes take effect immediately via revalidating the root layout
+// (getRadioSampleUrls is read there, shared by every route).
+
+export async function listDraftRadioSamples() {
+  return listRadioSamples();
+}
+
+/** Returns the uploaded blob's URL, or null if the file failed the audio check. */
+export async function uploadRadioSample(file: File): Promise<string | null> {
+  if (!isAllowedAudioFile(file.name, file.type)) return null;
+  const blob = await uploadNamedAsset("radio", file, file.name);
+  revalidatePath("/", "layout");
+  return blob.url;
+}
+
+export async function deleteRadioSample(url: string) {
+  await deleteAsset(url);
+  revalidatePath("/", "layout");
 }
 
 // ---- Collections ----
