@@ -6,8 +6,6 @@ import {
   RADIO_SAMPLE_FALLBACK,
 } from "@/lib/radio-samples.constants";
 
-const TRIGGERS = ["bbb", "boxbox"] as const;
-const BUFFER_MAX = 6;
 const TRIPLE_TAP_COUNT = 3;
 const TRIPLE_TAP_WINDOW_MS = 800;
 const BASE_VOLUME = 0.72;
@@ -17,6 +15,7 @@ const GAIN_MAX = 2.2;
 
 type Props = {
   samples: string[];
+  triggers: string[];
 };
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -38,8 +37,14 @@ function normalizeKey(key: string): string | null {
   return null;
 }
 
-function matchesTrigger(buffer: string): boolean {
-  return TRIGGERS.some((trigger) => buffer.endsWith(trigger));
+function matchesTrigger(buffer: string, triggers: string[]): boolean {
+  return triggers.some((trigger) => trigger.length > 0 && buffer.endsWith(trigger));
+}
+
+/** No hardcoded buffer cap — a trigger longer than a fixed limit would otherwise be
+ * silently unmatchable, since the buffer only ever keeps this many trailing characters. */
+function computeBufferMax(triggers: string[]): number {
+  return triggers.reduce((max, t) => Math.max(max, t.length), 1);
 }
 
 function shuffleCopy(pool: string[]): string[] {
@@ -169,7 +174,7 @@ function playbackVolume(gainBySample: Map<string, number>, src: string): number 
   return Math.min(1, BASE_VOLUME * gain);
 }
 
-export function RadioKeystrokeListener({ samples }: Props) {
+export function RadioKeystrokeListener({ samples, triggers }: Props) {
   const bufferRef = useRef("");
   const playingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -177,6 +182,8 @@ export function RadioKeystrokeListener({ samples }: Props) {
   const remainingPoolRef = useRef<string[]>(shuffleCopy(samples));
   const lastPlayedRef = useRef<string | null>(null);
   const gainBySampleRef = useRef<Map<string, number>>(new Map<string, number>(samples.map((url) => [url, 1])));
+  const triggersRef = useRef(triggers);
+  const bufferMaxRef = useRef(computeBufferMax(triggers));
   const tapCountRef = useRef(0);
   const lastTapAtRef = useRef(0);
   const tapInactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -195,6 +202,14 @@ export function RadioKeystrokeListener({ samples }: Props) {
       cancelled = true;
     };
   }, [samples]);
+
+  useEffect(() => {
+    triggersRef.current = triggers;
+    bufferMaxRef.current = computeBufferMax(triggers);
+    // A stale trailing buffer longer than the new max can never usefully match anyway;
+    // trimming it avoids holding onto keystrokes typed under the old (possibly longer) cap.
+    bufferRef.current = bufferRef.current.slice(-bufferMaxRef.current);
+  }, [triggers]);
 
   useEffect(() => {
     const playRandomRadio = (): boolean => {
@@ -252,10 +267,10 @@ export function RadioKeystrokeListener({ samples }: Props) {
       const letter = normalizeKey(event.key);
       if (!letter) return;
 
-      const next = (bufferRef.current + letter).slice(-BUFFER_MAX);
+      const next = (bufferRef.current + letter).slice(-bufferMaxRef.current);
       bufferRef.current = next;
 
-      if (!matchesTrigger(next)) return;
+      if (!matchesTrigger(next, triggersRef.current)) return;
 
       if (playRandomRadio()) bufferRef.current = "";
     };

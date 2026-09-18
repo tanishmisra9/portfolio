@@ -3,6 +3,7 @@ import { Inter, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { SiteChrome } from "@/components/site-chrome";
 import { getRadioSampleUrls } from "@/lib/radio-samples";
+import { getRadioTriggers } from "@/lib/radio-triggers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -38,6 +39,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const radioSamples = await getRadioSampleUrls();
+  const radioTriggers = await getRadioTriggers();
 
   return (
     <html
@@ -59,7 +61,7 @@ export default async function RootLayout({
           >
             Skip to content
           </a>
-          <SiteChrome radioSamples={radioSamples} />
+          <SiteChrome radioSamples={radioSamples} radioTriggers={radioTriggers} />
           {children}
         </ThemeProvider>
         <Analytics />

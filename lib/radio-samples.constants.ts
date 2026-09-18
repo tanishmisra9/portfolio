@@ -11,3 +11,6 @@ export const RADIO_SAMPLE_FALLBACK = [
   "/sfx/radio/max-squeaky.mp3",
   "/sfx/radio/stupid.mp3",
 ] as const;
+
+/** Used when no keystroke triggers can be read from the DB (unreachable, or none saved yet). */
+export const RADIO_TRIGGER_FALLBACK = ["bbb", "boxbox"] as const;

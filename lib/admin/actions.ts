@@ -4,7 +4,7 @@ import { eq, asc } from "drizzle-orm";
 import { imageSize } from "image-size";
 import matter from "gray-matter";
 import { db } from "@/db/client";
-import { portfolio, collections, photos, quotes, posts } from "@/db/schema";
+import { portfolio, collections, photos, quotes, posts, radioTriggers } from "@/db/schema";
 import {
   uploadAsset,
   listAssetFilenames,
@@ -58,6 +58,69 @@ export async function uploadRadioSample(file: File): Promise<string | null> {
 
 export async function deleteRadioSample(url: string) {
   await deleteAsset(url);
+  revalidatePath("/", "layout");
+}
+
+// ---- Radio easter-egg keystroke triggers ----
+// Same immediate-effect reasoning as the samples above. Triggers are validated against
+// exactly what normalizeKey() in the listener can ever produce (lowercase a–z), so
+// nothing that's saved here can be a silently-dead trigger.
+
+function normalizeTrigger(raw: string): string {
+  return raw.trim().toLowerCase();
+}
+
+function validateTrigger(text: string): string | null {
+  if (text.length === 0) return "Enter a trigger.";
+  if (!/^[a-z]+$/.test(text)) return "Letters a–z only.";
+  return null;
+}
+
+function isUniqueViolation(err: unknown): boolean {
+  // Drizzle wraps the driver error in a DrizzleQueryError — the Postgres error code
+  // lives on `.cause.code`, not on the wrapper itself.
+  const cause = typeof err === "object" && err !== null ? (err as { cause?: unknown }).cause : undefined;
+  return typeof cause === "object" && cause !== null && (cause as { code?: string }).code === "23505";
+}
+
+export async function listDraftRadioTriggers() {
+  return db.select().from(radioTriggers);
+}
+
+/** Returns an error message, or null on success. */
+export async function createRadioTrigger(raw: string): Promise<string | null> {
+  const text = normalizeTrigger(raw);
+  const invalid = validateTrigger(text);
+  if (invalid) return invalid;
+
+  try {
+    await db.insert(radioTriggers).values({ text });
+  } catch (err) {
+    if (isUniqueViolation(err)) return "That trigger already exists.";
+    throw err;
+  }
+  revalidatePath("/", "layout");
+  return null;
+}
+
+/** Returns an error message, or null on success. */
+export async function updateRadioTrigger(id: number, raw: string): Promise<string | null> {
+  const text = normalizeTrigger(raw);
+  const invalid = validateTrigger(text);
+  if (invalid) return invalid;
+
+  try {
+    await db.update(radioTriggers).set({ text }).where(eq(radioTriggers.id, id));
+  } catch (err) {
+    if (isUniqueViolation(err)) return "That trigger already exists.";
+    throw err;
+  }
+  revalidatePath("/", "layout");
+  return null;
+}
+
+export async function deleteRadioTrigger(id: number) {
+  await db.delete(radioTriggers).where(eq(radioTriggers.id, id));
   revalidatePath("/", "layout");
 }
 

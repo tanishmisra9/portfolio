@@ -69,6 +69,11 @@ export const posts = pgTable("posts", {
   body: text("body").notNull().default(""),
 });
 
+export const radioTriggers = pgTable("radio_triggers", {
+  id: serial("id").primaryKey(),
+  text: text("text").notNull().unique(),
+});
+
 /** What the public site actually reads. Written only by the global publish() action. */
 export const publishedSnapshot = pgTable("published_snapshot", {
   id: integer("id").primaryKey().default(1),
