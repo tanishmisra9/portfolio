@@ -82,20 +82,13 @@ export function SocialEditor({
               ) : item.label === "Resume" ? (
                 <ResumeUploader currentUrl={item.href} onUploaded={(url) => update(item.id, { href: url })} />
               ) : (
-                <>
-                  <input
-                    className={inputClass}
-                    placeholder="URL"
-                    value={item.href}
-                    onChange={(e) => update(item.id, { href: e.target.value })}
-                  />
-                  <input
-                    className={inputClass}
-                    placeholder="Display text"
-                    value={item.display}
-                    onChange={(e) => update(item.id, { display: e.target.value })}
-                  />
-                </>
+                <input
+                  aria-label="URL"
+                  className={inputClass}
+                  placeholder="URL"
+                  value={item.href}
+                  onChange={(e) => update(item.id, { href: e.target.value })}
+                />
               )}
 
               {!locked && (
