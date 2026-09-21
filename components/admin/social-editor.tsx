@@ -52,18 +52,21 @@ export function SocialEditor({
                     onChange={(e) => update(item.id, { label: e.target.value })}
                   />
                 )}
-                <select
-                  className="rounded border border-border-strong bg-transparent px-2 py-1 text-base"
-                  value={item.icon ?? ""}
-                  onChange={(e) => update(item.id, { icon: e.target.value || undefined })}
-                >
-                  <option value="">Auto</option>
-                  {ICON_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
+                {!locked && (
+                  <select
+                    aria-label="Icon"
+                    className="rounded border border-border-strong bg-transparent px-2 py-1 text-base"
+                    value={item.icon ?? ""}
+                    onChange={(e) => update(item.id, { icon: e.target.value || undefined })}
+                  >
+                    <option value="">Auto</option>
+                    {ICON_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {item.label === "Email" ? (
