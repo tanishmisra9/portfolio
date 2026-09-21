@@ -54,9 +54,9 @@ export function ResumeUploader({
       )}
 
       <label className="block">
-        <span className="mb-1 block text-sm text-dim">Download filename</span>
+        <span className="mb-1 block text-base text-dim">Download filename</span>
         <input
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+          className="w-full rounded border border-border-strong bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
           value={filename}
           onChange={(e) => setFilename(e.target.value)}
         />
@@ -74,8 +74,8 @@ export function ResumeUploader({
           selectFile(e.dataTransfer.files[0]);
         }}
         onClick={() => inputRef.current?.click()}
-        className={`cursor-pointer rounded border-2 border-dashed p-4 text-center text-sm ${
-          dragOver ? "border-fg bg-fg/5" : "border-fg/20 text-dim"
+        className={`cursor-pointer rounded border-2 border-dashed p-4 text-center text-base ${
+          dragOver ? "border-fg bg-fg/5" : "border-border-strong text-dim"
         }`}
       >
         Drag and drop a PDF here, or click to choose a file

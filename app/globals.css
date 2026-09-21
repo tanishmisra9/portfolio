@@ -67,6 +67,20 @@
   --quote-muted: #8c8c93bf;
 }
 
+/* Admin only: brighter secondary text and stronger field borders. The public palette above is untouched. */
+.admin-scope {
+  --dim: #5f5f5a;
+  --border: rgba(0, 0, 0, 0.14);
+  --border-strong: rgba(0, 0, 0, 0.24);
+}
+
+.dark .admin-scope {
+  --dim: #a8a8a8;
+  --muted: #cfcfd2;
+  --border: rgba(255, 255, 255, 0.2);
+  --border-strong: rgba(255, 255, 255, 0.32);
+}
+
 .heading-ghost {
   -webkit-text-stroke: 5px var(--heading-ghost);
   paint-order: stroke fill;

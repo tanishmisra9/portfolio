@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GripVertical } from "lucide-react";
 import { ReorderableList } from "./reorderable-list";
 import { DateRangeFields } from "./date-range-fields";
 import { FieldInput, type FieldDef, type Item } from "./array-editor";
@@ -68,18 +69,16 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
             }
           >
             <div className={`flex items-center gap-3 ${nested ? "p-3" : "p-4"}`}>
-              <span {...dragProps} className="cursor-grab text-dim" aria-hidden>
-                ⠿
-              </span>
-              <span className="flex-1 truncate text-sm text-fg">{summary(item)}</span>
+              <GripVertical {...dragProps} className="h-5 w-5 shrink-0 cursor-grab text-dim" aria-hidden />
+              <span className="flex-1 truncate text-base text-fg">{summary(item)}</span>
               <button
                 type="button"
                 onClick={() => toggle(item.id)}
-                className="text-sm underline decoration-fg/40 underline-offset-2"
+                className="rounded px-2 py-2 text-base text-fg underline decoration-fg/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
               >
                 {expanded.has(item.id) ? "Close" : "Edit"}
               </button>
-              <button type="button" onClick={() => removeItem(item.id)} className="text-sm text-red-500">
+              <button type="button" onClick={() => removeItem(item.id)} className="px-2 py-2 text-base text-red-500">
                 Remove
               </button>
             </div>
@@ -113,7 +112,7 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
           </div>
         )}
       />
-      <button type="button" onClick={addItem} className="rounded border border-fg/20 px-3 py-1.5 text-base">
+      <button type="button" onClick={addItem} className="rounded border border-border-strong px-3 py-1.5 text-base">
         + Add
       </button>
     </div>

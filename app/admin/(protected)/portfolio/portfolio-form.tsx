@@ -10,11 +10,10 @@ import { CertificationsEditor } from "@/components/admin/certifications-editor";
 import { SocialEditor } from "@/components/admin/social-editor";
 import { BioEditor } from "@/components/admin/bio-editor";
 import { useRegisterDirty } from "@/components/admin/dirty-context";
-import { formatDateRange } from "@/lib/format-date-range";
 import { updatePortfolio } from "@/lib/admin/actions";
 
 const inputClass =
-  "w-full rounded border border-fg/20 bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+  "w-full rounded border border-border-strong bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 const SECTION_KEYS = [
   "bio",
@@ -105,10 +104,10 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       <div className="mb-4 flex items-center gap-3">
         <h1 className={ADMIN_SECTION_HEADING_CLASSES}>Portfolio</h1>
         <div className="ml-auto flex gap-2">
-          <button type="button" onClick={() => setAll(true)} className="text-sm text-muted hover:text-fg">
+          <button type="button" onClick={() => setAll(true)} className="text-base text-muted hover:text-fg">
             Expand all
           </button>
-          <button type="button" onClick={() => setAll(false)} className="text-sm text-muted hover:text-fg">
+          <button type="button" onClick={() => setAll(false)} className="text-base text-muted hover:text-fg">
             Collapse all
           </button>
         </div>
@@ -123,23 +122,32 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       >
         <div className="space-y-3">
           <label className="block">
-            <span className="mb-1 block text-sm text-dim">Name</span>
+            <span className="mb-1 block text-base text-dim">Name</span>
             <input
               className={inputClass}
               value={data.name}
               onChange={(e) => setData({ ...data, name: e.target.value })}
             />
           </label>
-          <label className="block">
-            <span className="mb-1 block text-sm text-dim">Hero subtitle</span>
-            <input
-              className={inputClass}
-              value={data.heroSubtitle}
-              onChange={(e) => setData({ ...data, heroSubtitle: e.target.value })}
-            />
-          </label>
+          {(["Line 1", "Line 2"] as const).map((label, index) => {
+            const lines = data.heroSubtitle.split("\n");
+            return (
+              <label key={label} className="block">
+                <span className="mb-1 block text-base text-dim">Hero subtitle, {label.toLowerCase()}</span>
+                <input
+                  className={inputClass}
+                  value={lines[index] ?? ""}
+                  onChange={(e) => {
+                    const next = [lines[0] ?? "", lines[1] ?? ""];
+                    next[index] = e.target.value;
+                    setData({ ...data, heroSubtitle: next.filter((l, i) => i === 0 || l).join("\n") });
+                  }}
+                />
+              </label>
+            );
+          })}
           <div>
-            <span className="mb-1 block text-sm text-dim">About bio</span>
+            <span className="mb-1 block text-base text-dim">About bio</span>
             <BioEditor value={data.aboutBio} onChange={(aboutBio) => setData({ ...data, aboutBio })} />
           </div>
         </div>
@@ -156,12 +164,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
           items={data.experience as unknown as Item[]}
           onChange={(v) => setData({ ...data, experience: v as unknown as PortfolioContent["experience"] })}
           hasDateRange
-          summary={(item) =>
-            `${item.org || "Untitled"} — ${item.role || "—"} — ${formatDateRange({
-              startDate: (item.startDate as string) || "",
-              endDate: (item.endDate as string | "present" | null) ?? null,
-            })}`
-          }
+          summary={(item) => (item.org as string) || "Untitled"}
           newItem={() => ({
             id: crypto.randomUUID(),
             org: "",
@@ -190,12 +193,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
           items={data.education as unknown as Item[]}
           onChange={(v) => setData({ ...data, education: v as unknown as PortfolioContent["education"] })}
           hasDateRange
-          summary={(item) =>
-            `${item.institution || "Untitled"} — ${item.credential || "—"} — ${formatDateRange({
-              startDate: (item.startDate as string) || "",
-              endDate: (item.endDate as string | "present" | null) ?? null,
-            })}`
-          }
+          summary={(item) => (item.credential as string) || "Untitled"}
           newItem={() => ({
             id: crypto.randomUUID(),
             institution: "",
@@ -221,6 +219,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       >
         <ArrayEditor
           layout="cards"
+          cardLabel={(item) => item.category as string}
           items={data.skills as unknown as Item[]}
           onChange={(v) => setData({ ...data, skills: v as unknown as PortfolioContent["skills"] })}
           newItem={() => ({ id: crypto.randomUUID(), category: "", items: [] })}
@@ -253,6 +252,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       >
         <ArrayEditor
           layout="cards"
+          cardLabel={(item) => item.title as string}
           items={data.projects as unknown as Item[]}
           onChange={(v) => setData({ ...data, projects: v as unknown as PortfolioContent["projects"] })}
           newItem={() => ({
@@ -306,7 +306,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
       </CollapsibleSection>
 
       <div className="fixed bottom-0 left-0 right-0 flex items-center gap-3 border-t border-fg/10 bg-bg p-4">
-        {dirty && <span className="text-sm text-dim">Unsaved changes</span>}
+        {dirty && <span className="text-base text-dim">Unsaved changes</span>}
         <button
           type="button"
           disabled={pending}

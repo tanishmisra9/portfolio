@@ -5,7 +5,7 @@ import { ResumeUploader } from "./resume-uploader";
 import type { SocialLink } from "@/types/content";
 
 const inputClass =
-  "w-full rounded border border-fg/20 bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+  "w-full rounded border border-border-strong bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 /** These four are load-bearing: iconFor/email/resume special-casing all key off the label text, so renaming or deleting one would silently break the site. */
 const LOCKED_IDS = new Set(["social-github", "social-linkedin", "social-email", "social-resume"]);
@@ -43,7 +43,7 @@ export function SocialEditor({
               <div className="flex items-center gap-2">
                 <Icon className="h-4 w-4 shrink-0 text-muted" aria-hidden />
                 {locked ? (
-                  <span className="flex-1 text-sm text-fg">{item.label}</span>
+                  <span className="flex-1 text-base text-fg">{item.label}</span>
                 ) : (
                   <input
                     className={inputClass}
@@ -53,7 +53,7 @@ export function SocialEditor({
                   />
                 )}
                 <select
-                  className="rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"
+                  className="rounded border border-border-strong bg-transparent px-2 py-1 text-base"
                   value={item.icon ?? ""}
                   onChange={(e) => update(item.id, { icon: e.target.value || undefined })}
                 >
@@ -96,7 +96,7 @@ export function SocialEditor({
               )}
 
               {!locked && (
-                <button type="button" onClick={() => remove(item.id)} className="text-sm text-red-500">
+                <button type="button" onClick={() => remove(item.id)} className="text-base text-red-500">
                   Remove
                 </button>
               )}
@@ -104,7 +104,7 @@ export function SocialEditor({
           );
         })}
       </div>
-      <button type="button" onClick={addLink} className="rounded border border-fg/20 px-3 py-1.5 text-base">
+      <button type="button" onClick={addLink} className="rounded border border-border-strong px-3 py-1.5 text-base">
         + Add link
       </button>
     </div>

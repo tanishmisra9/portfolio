@@ -9,9 +9,27 @@ import { logout } from "@/lib/auth/actions";
 import { publishAll } from "@/lib/admin/actions";
 import { useAdminDirty } from "@/components/admin/dirty-context";
 
+const SECTION_NAMES: Record<string, string> = {
+  portfolio: "Portfolio",
+  photos: "Photos",
+  quotes: "Quotes",
+  blog: "Blog",
+  radio: "Radio",
+};
+
+/** One level up: /admin/photos/3 -> /admin/photos, /admin/photos -> /admin. */
+function parentOf(pathname: string): { href: string; label: string } {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length > 2) {
+    return { href: "/" + segments.slice(0, 2).join("/"), label: SECTION_NAMES[segments[1]] ?? "previous page" };
+  }
+  return { href: "/admin", label: "Dashboard" };
+}
+
 export function AdminHeader({ hasChanges }: { hasChanges: boolean }) {
   const pathname = usePathname();
   const isDashboard = pathname === "/admin";
+  const parent = parentOf(pathname ?? "/admin");
   const [pending, startTransition] = useTransition();
   const [justPublished, setJustPublished] = useState(false);
   const [showChanges, setShowChanges] = useState(false);
@@ -34,16 +52,22 @@ export function AdminHeader({ hasChanges }: { hasChanges: boolean }) {
   }
 
   return (
-    <div className="sticky top-0 z-50 flex flex-wrap items-center gap-4 border-b border-border bg-surface px-6 py-3 backdrop-blur-md">
-      {!isDashboard && (
-        <Link href="/admin" aria-label="Back to dashboard" className="text-muted transition-colors hover:text-fg">
-          <ArrowLeft className="h-5 w-5" aria-hidden />
-        </Link>
-      )}
-      <span className="text-sm text-dim">
+    <div className="sticky top-0 z-50 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-surface px-6 py-3 backdrop-blur-md lg:grid lg:grid-cols-[1fr_auto_1fr]">
+      <div className="flex items-center lg:justify-self-start">
+        {!isDashboard && (
+          <Link
+            href={parent.href}
+            aria-label={`Back to ${parent.label}`}
+            className="-my-2 ml-2 flex h-11 w-11 items-center justify-center rounded text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+          >
+            <ArrowLeft className="h-5 w-5" aria-hidden />
+          </Link>
+        )}
+      </div>
+      <span className="order-last w-full text-center text-sm text-dim lg:order-none lg:w-auto">
         Edits save as drafts. Nothing goes live until you publish.
       </span>
-      <div className="relative ml-auto flex items-center gap-3">
+      <div className="relative ml-auto flex items-center gap-3 lg:justify-self-end">
         {dirty && (
           <button
             type="button"

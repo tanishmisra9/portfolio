@@ -16,13 +16,13 @@ export function NewPostForm() {
       className="flex gap-2 rounded-md border border-border bg-surface p-4 backdrop-blur-md"
     >
       <input
-        className="flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
+        className="flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
         placeholder="new-post-slug"
         value={slug}
         onChange={(e) => setSlug(e.target.value.trim().toLowerCase().replace(/\s+/g, "-"))}
         required
       />
-      <button type="submit" className="rounded border border-fg/20 px-3 py-1.5 text-base">
+      <button type="submit" className="rounded border border-border-strong px-3 py-1.5 text-base">
         + New post
       </button>
     </form>

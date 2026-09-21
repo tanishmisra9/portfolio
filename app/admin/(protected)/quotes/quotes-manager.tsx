@@ -2,18 +2,116 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import type { InferSelectModel } from "drizzle-orm";
 import type { quotes } from "@/db/schema";
 import { createQuote, deleteQuote, updateQuote } from "@/lib/admin/actions";
 
 type Quote = InferSelectModel<typeof quotes>;
+type Size = 1 | 2 | 3;
+
+const SIZES: { value: Size; label: string }[] = [
+  { value: 1, label: "Standard" },
+  { value: 2, label: "Large" },
+  { value: 3, label: "Featured" },
+];
+
+const fieldClass =
+  "w-full rounded border border-border-strong bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+
+function SizePicker({ value, onChange }: { value: Size; onChange: (v: Size) => void }) {
+  return (
+    <div role="radiogroup" aria-label="Size on the Quotes page" className="inline-flex rounded border border-border-strong p-0.5">
+      {SIZES.map((s) => (
+        <button
+          key={s.value}
+          type="button"
+          role="radio"
+          aria-checked={value === s.value}
+          onClick={() => onChange(s.value)}
+          className={`min-h-9 rounded px-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+            value === s.value ? "bg-fg text-bg" : "text-muted hover:text-fg"
+          }`}
+        >
+          {s.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function QuoteRow({ quote }: { quote: Quote }) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+  const [size, setSize] = useState<Size>((quote.emphasis as Size) ?? 1);
+  const [saved, setSaved] = useState(false);
+
+  function save(fields: Parameters<typeof updateQuote>[1]) {
+    startTransition(async () => {
+      await updateQuote(quote.id, fields);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1500);
+    });
+  }
+
+  return (
+    <div className="space-y-3 rounded-md border border-border bg-surface p-4 backdrop-blur-md">
+      <textarea
+        aria-label="Quote text"
+        rows={2}
+        className={`${fieldClass} text-lg`}
+        defaultValue={quote.text}
+        onBlur={(e) => e.target.value !== quote.text && save({ text: e.target.value })}
+      />
+      <div className="flex flex-wrap items-end gap-4">
+        <label className="block min-w-48 flex-1">
+          <span className="mb-1 block text-base text-dim">Attribution</span>
+          <input
+            className={fieldClass}
+            defaultValue={quote.attribution ?? ""}
+            onBlur={(e) =>
+              e.target.value !== (quote.attribution ?? "") && save({ attribution: e.target.value || null })
+            }
+          />
+        </label>
+        <div>
+          <span className="mb-1 block text-base text-dim">Size</span>
+          <SizePicker
+            value={size}
+            onChange={(v) => {
+              setSize(v);
+              save({ emphasis: v });
+            }}
+          />
+        </div>
+        <span aria-live="polite" className="min-w-14 pb-2 text-base text-dim">
+          {saved ? "Saved ✓" : ""}
+        </span>
+        <button
+          type="button"
+          aria-label="Delete quote"
+          onClick={() => {
+            if (!confirm("Delete this quote?")) return;
+            startTransition(async () => {
+              await deleteQuote(quote.id);
+              router.refresh();
+            });
+          }}
+          className="-m-1 rounded p-3 text-muted transition-colors hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+        >
+          <Trash2 className="h-5 w-5" aria-hidden />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function QuotesManager({ quotes }: { quotes: Quote[] }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [text, setText] = useState("");
   const [attribution, setAttribution] = useState("");
-  const [emphasis, setEmphasis] = useState<1 | 2 | 3>(1);
+  const [size, setSize] = useState<Size>(1);
   const [authorFilter, setAuthorFilter] = useState("");
 
   const authors = useMemo(
@@ -25,9 +123,9 @@ export function QuotesManager({ quotes }: { quotes: Quote[] }) {
   return (
     <div className="space-y-6">
       <label className="block">
-        <span className="mb-1 block text-sm text-dim">Filter by author</span>
+        <span className="mb-1 block text-base text-dim">Filter by author</span>
         <select
-          className="rounded border border-fg/20 bg-transparent px-2 py-1.5 text-sm"
+          className="rounded border border-border-strong bg-transparent px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
           value={authorFilter}
           onChange={(e) => setAuthorFilter(e.target.value)}
         >
@@ -40,58 +138,9 @@ export function QuotesManager({ quotes }: { quotes: Quote[] }) {
         </select>
       </label>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {visibleQuotes.map((q) => (
-          <div key={q.id} className="flex items-center gap-3 rounded-md border border-border bg-surface p-4 backdrop-blur-md">
-            <div className="flex-1 space-y-1">
-              <textarea
-                className="w-full bg-transparent text-base outline-none"
-                defaultValue={q.text}
-                onBlur={(e) =>
-                  e.target.value !== q.text &&
-                  startTransition(async () => {
-                    await updateQuote(q.id, { text: e.target.value });
-                  })
-                }
-              />
-              <input
-                className="w-full bg-transparent text-sm text-dim outline-none"
-                placeholder="Attribution"
-                defaultValue={q.attribution ?? ""}
-                onBlur={(e) =>
-                  e.target.value !== (q.attribution ?? "") &&
-                  startTransition(async () => {
-                    await updateQuote(q.id, { attribution: e.target.value || null });
-                  })
-                }
-              />
-            </div>
-            <select
-              className="rounded border border-fg/20 bg-transparent px-1 py-1 text-sm"
-              defaultValue={q.emphasis}
-              onChange={(e) =>
-                startTransition(async () => {
-                  await updateQuote(q.id, { emphasis: Number(e.target.value) });
-                })
-              }
-            >
-              <option value={1}>Emphasis 1</option>
-              <option value={2}>Emphasis 2</option>
-              <option value={3}>Emphasis 3</option>
-            </select>
-            <button
-              type="button"
-              onClick={() =>
-                startTransition(async () => {
-                  await deleteQuote(q.id);
-                  router.refresh();
-                })
-              }
-              className="text-sm text-red-500"
-            >
-              Delete
-            </button>
-          </div>
+          <QuoteRow key={q.id} quote={q} />
         ))}
       </div>
 
@@ -99,39 +148,35 @@ export function QuotesManager({ quotes }: { quotes: Quote[] }) {
         onSubmit={(e) => {
           e.preventDefault();
           startTransition(async () => {
-            await createQuote({ text, attribution: attribution || undefined, emphasis });
+            await createQuote({ text, attribution: attribution || undefined, emphasis: size });
             setText("");
             setAttribution("");
-            setEmphasis(1);
+            setSize(1);
             router.refresh();
           });
         }}
-        className="space-y-2 rounded-md border border-border bg-surface p-4 backdrop-blur-md"
+        className="space-y-4 rounded-md border border-border bg-surface p-4 backdrop-blur-md"
       >
-        <h2 className="text-sm text-dim">New quote</h2>
-        <textarea
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
-          placeholder="Quote text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          required
-        />
-        <input
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
-          placeholder="Attribution"
-          value={attribution}
-          onChange={(e) => setAttribution(e.target.value)}
-        />
-        <select
-          className="rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
-          value={emphasis}
-          onChange={(e) => setEmphasis(Number(e.target.value) as 1 | 2 | 3)}
-        >
-          <option value={1}>Emphasis 1</option>
-          <option value={2}>Emphasis 2</option>
-          <option value={3}>Emphasis 3</option>
-        </select>
-        <button type="submit" className="rounded border border-fg/20 px-3 py-1.5 text-base">
+        <h2 className="text-lg font-semibold text-fg">New quote</h2>
+        <label className="block">
+          <span className="mb-1 block text-base text-dim">Quote</span>
+          <textarea
+            className={fieldClass}
+            rows={2}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            required
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-base text-dim">Attribution</span>
+          <input className={fieldClass} value={attribution} onChange={(e) => setAttribution(e.target.value)} />
+        </label>
+        <div>
+          <span className="mb-1 block text-base text-dim">Size</span>
+          <SizePicker value={size} onChange={setSize} />
+        </div>
+        <button type="submit" className="rounded bg-fg px-4 py-2 text-base text-bg">
           + Add quote
         </button>
       </form>

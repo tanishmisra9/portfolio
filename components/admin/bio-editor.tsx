@@ -72,24 +72,24 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
         <button
           type="button"
           onClick={() => wrapSelection("**", "**")}
-          className="rounded border border-fg/20 px-2 py-1 text-sm font-bold"
+          className="rounded border border-border-strong px-2 py-1 text-base font-bold"
         >
           B
         </button>
         <button
           type="button"
           onClick={startLink}
-          className="rounded border border-fg/20 px-2 py-1 text-sm underline"
+          className="rounded border border-border-strong px-2 py-1 text-base underline"
         >
           Link
         </button>
       </div>
 
       {linkPrompt && (
-        <div className="flex flex-wrap items-center gap-2 rounded border border-fg/20 p-2">
+        <div className="flex flex-wrap items-center gap-2 rounded border border-border-strong p-2">
           <input
             autoFocus
-            className="min-w-0 flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-sm"
+            className="min-w-0 flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
             placeholder="/photos or https://example.com"
             value={linkUrl}
             onChange={(e) => {
@@ -97,10 +97,10 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
               setLinkError(null);
             }}
           />
-          <button type="button" onClick={confirmLink} className="rounded bg-fg px-2 py-1 text-sm text-bg">
+          <button type="button" onClick={confirmLink} className="rounded bg-fg px-2 py-1 text-base text-bg">
             Insert
           </button>
-          <button type="button" onClick={() => setLinkPrompt(null)} className="text-sm text-dim">
+          <button type="button" onClick={() => setLinkPrompt(null)} className="text-base text-dim">
             Cancel
           </button>
           {linkError && <p className="w-full text-sm text-red-500">{linkError}</p>}
@@ -109,14 +109,14 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
 
       <textarea
         ref={textareaRef}
-        className="w-full rounded border border-fg/20 bg-transparent px-2 py-1.5 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+        className="w-full rounded border border-border-strong bg-transparent px-2 py-1.5 font-mono text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
         rows={6}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
 
-      <div className="space-y-2 rounded border border-fg/10 bg-fg/[0.02] p-3 text-sm">
-        <p className="text-sm text-dim">Preview</p>
+      <div className="space-y-2 rounded border border-fg/10 bg-fg/[0.02] p-3 text-base">
+        <p className="text-base text-dim">Preview</p>
         <p>
           <Markdown components={bioMarkdownComponents}>{previewOne}</Markdown>
         </p>

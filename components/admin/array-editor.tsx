@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+
 export interface FieldDef {
   key: string;
   label: string;
@@ -22,6 +25,8 @@ interface ArrayEditorProps {
   newItem?: () => Item;
   /** "cards" gives a 2-col bordered-card grid (skills/certifications/projects); "rows" (default) stacks entries. */
   layout?: "rows" | "cards";
+  /** Collapsible cards: a header (chevron + this label) toggles the fields; cards start closed and a new one opens. */
+  cardLabel?: (item: Item) => string;
   /** Internal — true when rendering a sublist one level deep, for tighter nested spacing. */
   nested?: boolean;
 }
@@ -33,8 +38,27 @@ export function ArrayEditor({
   onChange,
   newItem,
   layout = "rows",
+  cardLabel,
   nested = false,
 }: ArrayEditorProps) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  function toggle(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function addItem() {
+    if (!newItem) return;
+    const item = newItem();
+    onChange([...items, item]);
+    setExpanded((prev) => new Set(prev).add(item.id));
+  }
+
   function updateItem(id: string, key: string, value: unknown) {
     onChange(items.map((item) => (item.id === id ? { ...item, [key]: value } : item)));
   }
@@ -50,31 +74,65 @@ export function ArrayEditor({
   return (
     <div className={layout === "cards" ? "space-y-4" : "space-y-3"}>
       <div className={layout === "cards" ? "grid items-start gap-5 sm:grid-cols-2" : "space-y-3"}>
-        {items.map((item) => (
-          <div key={item.id} className={itemClassName}>
-            {fields.map((field) => (
-              <FieldInput
-                key={field.key}
-                field={field}
-                value={item[field.key]}
-                onChange={(v) => updateItem(item.id, field.key, v)}
-              />
-            ))}
-            <button
-              type="button"
-              onClick={() => removeItem(item.id)}
-              className="text-sm text-red-500"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
+        {items.map((item) => {
+          if (cardLabel) {
+            const isOpen = expanded.has(item.id);
+            return (
+              <div key={item.id} className={itemClassName}>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    onClick={() => toggle(item.id)}
+                    className="flex min-h-9 flex-1 items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                  >
+                    <ChevronDown
+                      className={`h-4 w-4 shrink-0 text-muted transition-transform duration-200 motion-reduce:transition-none ${isOpen ? "rotate-180" : ""}`}
+                      aria-hidden
+                    />
+                    <span className="text-base text-fg">{cardLabel(item) || "Untitled"}</span>
+                  </button>
+                  <button type="button" onClick={() => removeItem(item.id)} className="px-2 py-1 text-base text-red-500">
+                    Remove
+                  </button>
+                </div>
+                {isOpen && (
+                  <div className="space-y-2 pl-6">
+                    {fields.map((field) => (
+                      <FieldInput
+                        key={field.key}
+                        field={field}
+                        value={item[field.key]}
+                        onChange={(v) => updateItem(item.id, field.key, v)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+          return (
+            <div key={item.id} className={itemClassName}>
+              {fields.map((field) => (
+                <FieldInput
+                  key={field.key}
+                  field={field}
+                  value={item[field.key]}
+                  onChange={(v) => updateItem(item.id, field.key, v)}
+                />
+              ))}
+              <button type="button" onClick={() => removeItem(item.id)} className="text-base text-red-500">
+                Remove
+              </button>
+            </div>
+          );
+        })}
       </div>
       {newItem && (
         <button
           type="button"
-          onClick={() => onChange([...items, newItem()])}
-          className="rounded border border-fg/20 px-3 py-1.5 text-base"
+          onClick={addItem}
+          className="rounded border border-border-strong px-3 py-1.5 text-base"
         >
           + Add
         </button>
@@ -93,13 +151,13 @@ export function FieldInput({
   onChange: (v: unknown) => void;
 }) {
   const base =
-    "w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+    "w-full rounded border border-border-strong bg-transparent px-2 py-1 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
   if (field.type === "tags") {
     const list = Array.isArray(value) ? (value as string[]) : [];
     return (
       <label className="block">
-        <span className="mb-1 block text-sm text-dim">{field.label} (comma-separated)</span>
+        <span className="mb-1 block text-base text-dim">{field.label} (comma-separated)</span>
         <input
           className={base}
           defaultValue={list.join(", ")}
@@ -119,7 +177,7 @@ export function FieldInput({
   if (field.type === "textarea") {
     return (
       <label className="block">
-        <span className="mb-1 block text-sm text-dim">{field.label}</span>
+        <span className="mb-1 block text-base text-dim">{field.label}</span>
         <textarea
           className={base}
           rows={3}
@@ -133,7 +191,7 @@ export function FieldInput({
   if (field.type === "select") {
     return (
       <label className="block">
-        <span className="mb-1 block text-sm text-dim">{field.label}</span>
+        <span className="mb-1 block text-base text-dim">{field.label}</span>
         <select
           className={base}
           defaultValue={typeof value === "string" ? value : ""}
@@ -153,7 +211,7 @@ export function FieldInput({
     const list = Array.isArray(value) ? (value as Item[]) : [];
     return (
       <div>
-        <span className="mb-1 block text-sm text-dim">{field.label}</span>
+        <span className="mb-1 block text-base text-dim">{field.label}</span>
         <ArrayEditor
           items={list}
           fields={field.subFields ?? []}
@@ -167,7 +225,7 @@ export function FieldInput({
 
   return (
     <label className="block">
-      <span className="mb-1 block text-sm text-dim">{field.label}</span>
+      <span className="mb-1 block text-base text-dim">{field.label}</span>
       <input
         className={base}
         defaultValue={typeof value === "string" ? value : ""}

@@ -56,8 +56,8 @@ export function RadioManager({ samples }: { samples: Sample[] }) {
           uploadFiles(e.dataTransfer.files);
         }}
         onClick={() => inputRef.current?.click()}
-        className={`cursor-pointer rounded border-2 border-dashed p-6 text-center text-sm ${
-          dragOver ? "border-fg bg-fg/5" : "border-fg/20 text-dim"
+        className={`cursor-pointer rounded border-2 border-dashed p-6 text-center text-base ${
+          dragOver ? "border-fg bg-fg/5" : "border-border-strong text-dim"
         }`}
       >
         Drag and drop audio clips here (multiple allowed), or click to choose files
@@ -72,7 +72,7 @@ export function RadioManager({ samples }: { samples: Sample[] }) {
       </div>
 
       {errors.length > 0 && (
-        <div className="space-y-1 rounded border border-fg/10 p-3 text-sm text-red-500">
+        <div className="space-y-1 rounded border border-fg/10 p-3 text-base text-red-500">
           {errors.map((msg) => (
             <p key={msg}>{msg}</p>
           ))}
@@ -87,7 +87,7 @@ export function RadioManager({ samples }: { samples: Sample[] }) {
           >
             <span className="flex-1 truncate text-base text-fg">{filenameOf(sample.pathname)}</span>
             <audio controls src={sample.url} className="h-8" />
-            <button type="button" onClick={() => remove(sample.url)} className="text-sm text-red-500">
+            <button type="button" onClick={() => remove(sample.url)} className="text-base text-red-500">
               Delete
             </button>
           </div>

@@ -13,7 +13,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 2000 + 6 }, (_, i) => CURRENT_YEAR + 5 - i);
 
 const selectClass =
-  "rounded border border-fg/20 bg-transparent px-2 py-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+  "rounded border border-border-strong bg-transparent px-2 py-1 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 function MonthYearSelect({
   value,
@@ -94,7 +94,7 @@ export function DateRangeFields({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-sm text-dim">{endMode === "single" ? "Date" : "Start"}</span>
+        <span className="text-base text-dim">{endMode === "single" ? "Date" : "Start"}</span>
         <MonthYearSelect
           value={value.startDate}
           onChange={(startDate) => onChange({ ...value, startDate })}
@@ -110,7 +110,7 @@ export function DateRangeFields({
         </select>
         {endMode === "range" && (
           <>
-            <span className="text-sm text-dim">End</span>
+            <span className="text-base text-dim">End</span>
             <MonthYearSelect
               value={typeof value.endDate === "string" && value.endDate !== "present" ? value.endDate : ""}
               onChange={(endDate) => onChange({ ...value, endDate })}

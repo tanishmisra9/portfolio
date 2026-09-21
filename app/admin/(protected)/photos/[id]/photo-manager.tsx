@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { GripVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { InferSelectModel } from "drizzle-orm";
@@ -60,7 +61,7 @@ export function PhotoManager({
         }}
         onClick={() => inputRef.current?.click()}
         className={`cursor-pointer rounded border-2 border-dashed p-6 text-center text-base ${
-          dragOver ? "border-fg bg-fg/5" : "border-fg/20 text-dim"
+          dragOver ? "border-fg bg-fg/5" : "border-border-strong text-dim"
         }`}
       >
         Drag and drop images here, or click to choose files
@@ -78,7 +79,7 @@ export function PhotoManager({
         <div key={index} className="flex items-center gap-3 rounded-md border border-border bg-surface p-3 backdrop-blur-md">
           <span className="text-base">{item.file.name}</span>
           <input
-            className="flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
+            className="flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
             placeholder="Alt text (required)"
             value={item.alt}
             onChange={(e) =>
@@ -88,7 +89,7 @@ export function PhotoManager({
             }
           />
           <input
-            className="flex-1 rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
+            className="flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
             placeholder="Caption (optional)"
             value={item.caption}
             onChange={(e) =>
@@ -101,7 +102,7 @@ export function PhotoManager({
             type="button"
             disabled={!item.alt}
             onClick={() => uploadPending(index)}
-            className="rounded bg-fg px-3 py-1 text-sm text-bg disabled:opacity-50"
+            className="rounded bg-fg px-3 py-1 text-base text-bg disabled:opacity-50"
           >
             Upload
           </button>
@@ -121,7 +122,7 @@ export function PhotoManager({
             {...dragProps}
             className="flex cursor-grab items-center gap-3 rounded-md border border-border bg-surface p-2 backdrop-blur-md"
           >
-            <span className="text-dim">⠿</span>
+            <GripVertical className="h-5 w-5 shrink-0 text-dim" aria-hidden />
             <Image
               src={photo.blobUrl}
               alt={photo.alt}
@@ -131,7 +132,8 @@ export function PhotoManager({
             />
             <div className="flex-1 space-y-1">
               <input
-                className="w-full bg-transparent text-base outline-none"
+                aria-label="Alt text"
+                className="w-full rounded border border-border-strong bg-transparent px-3 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
                 defaultValue={photo.alt}
                 onBlur={(e) =>
                   e.target.value !== photo.alt &&
@@ -142,7 +144,8 @@ export function PhotoManager({
                 }
               />
               <input
-                className="w-full bg-transparent text-sm text-dim outline-none"
+                aria-label="Caption"
+                className="w-full rounded border border-border-strong bg-transparent px-3 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
                 placeholder="Caption"
                 defaultValue={photo.caption ?? ""}
                 onBlur={(e) =>
@@ -156,13 +159,14 @@ export function PhotoManager({
             </div>
             <button
               type="button"
-              onClick={() =>
+              onClick={() => {
+                if (!confirm("Delete this photo?")) return;
                 startTransition(async () => {
                   await deletePhoto(photo.id);
                   router.refresh();
-                })
-              }
-              className="text-sm text-red-500"
+                });
+              }}
+              className="px-2 py-2 text-base text-red-500"
             >
               Delete
             </button>

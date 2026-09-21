@@ -16,8 +16,8 @@ export default async function BlogAdminPage() {
             href={`/admin/blog/${p.slug}`}
             className="block rounded-md border border-border bg-surface p-4 backdrop-blur-md transition-colors hover:border-hover-outline"
           >
-            <div className="font-display text-sm font-semibold text-fg">{p.title}</div>
-            <div className="mt-1 font-mono text-sm uppercase tracking-wide text-muted">
+            <div className="font-display text-base font-semibold text-fg">{p.title}</div>
+            <div className="mt-1 font-mono text-base uppercase tracking-wide text-muted">
               /{p.slug} — {p.date}
             </div>
           </Link>

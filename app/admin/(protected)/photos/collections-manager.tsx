@@ -3,10 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { GripVertical } from "lucide-react";
 import type { InferSelectModel } from "drizzle-orm";
 import type { collections } from "@/db/schema";
 import { ReorderableList } from "@/components/admin/reorderable-list";
-import { createCollection, deleteCollection, reorderCollections, updateCollection } from "@/lib/admin/actions";
+import { createCollection, deleteCollection, reorderCollections } from "@/lib/admin/actions";
 
 type Collection = InferSelectModel<typeof collections>;
 
@@ -32,43 +33,27 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
             {...dragProps}
             className="flex cursor-grab items-center gap-3 rounded-md border border-border bg-surface p-3 backdrop-blur-md"
           >
-            <span className="text-dim">⠿</span>
-            <div className="flex-1">
-              <input
-                className="w-full bg-transparent text-base outline-none"
-                defaultValue={c.title}
-                onBlur={(e) =>
-                  e.target.value !== c.title &&
-                  startTransition(async () => {
-                    await updateCollection(c.id, { title: e.target.value });
-                    router.refresh();
-                  })
-                }
-              />
-              <input
-                className="w-full bg-transparent text-sm text-dim outline-none"
-                defaultValue={c.description}
-                onBlur={(e) =>
-                  e.target.value !== c.description &&
-                  startTransition(async () => {
-                    await updateCollection(c.id, { description: e.target.value });
-                    router.refresh();
-                  })
-                }
-              />
+            <GripVertical className="h-5 w-5 shrink-0 text-dim" aria-hidden />
+            <div className="min-w-0 flex-1">
+              <div className="break-words text-base text-fg">{c.title}</div>
+              {c.description && <div className="break-words text-base text-dim">{c.description}</div>}
             </div>
-            <Link href={`/admin/photos/${c.id}`} className="text-base underline">
-              Manage photos
+            <Link
+              href={`/admin/photos/${c.id}`}
+              className="rounded border border-border-strong px-4 py-2 text-base text-fg transition-colors hover:border-hover-outline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+            >
+              Manage
             </Link>
             <button
               type="button"
-              onClick={() =>
+              onClick={() => {
+                if (!confirm(`Delete "${c.title}" and all its photos?`)) return;
                 startTransition(async () => {
                   await deleteCollection(c.id);
                   router.refresh();
-                })
-              }
-              className="text-sm text-red-500"
+                });
+              }}
+              className="px-2 py-2 text-base text-red-500"
             >
               Delete
             </button>
@@ -89,28 +74,35 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
         }}
         className="space-y-2 rounded-md border border-border bg-surface p-4 backdrop-blur-md"
       >
-        <h2 className="text-sm text-dim">New collection</h2>
-        <input
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
-          placeholder="slug (e.g. tokyo-2026)"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          required
-        />
-        <input
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-        <input
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <button type="submit" className="rounded border border-fg/20 px-3 py-1.5 text-base">
+        <h2 className="text-base text-dim">New collection</h2>
+        <label className="block">
+          <span className="mb-1 block text-base text-dim">Slug (used in the URL)</span>
+          <input
+            className="w-full rounded border border-border-strong bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+            placeholder="e.g. tokyo-2026"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            required
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-base text-dim">Title</span>
+          <input
+            className="w-full rounded border border-border-strong bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-base text-dim">Description</span>
+          <input
+            className="w-full rounded border border-border-strong bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </label>
+        <button type="submit" className="rounded bg-fg px-4 py-2 text-base text-bg">
           + Add collection
         </button>
       </form>

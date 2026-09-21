@@ -20,7 +20,7 @@ interface PostFields {
 }
 
 const inputClass =
-  "w-full rounded border border-fg/20 bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+  "w-full rounded border border-border-strong bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 export function PostEditor({
   slug,
@@ -90,7 +90,7 @@ export function PostEditor({
                 });
               }
             }}
-            className="text-sm text-red-500"
+            className="text-base text-red-500"
           >
             Delete post
           </button>
@@ -98,7 +98,7 @@ export function PostEditor({
       </div>
 
       <label className="block">
-        <span className="mb-1 block text-sm text-dim">Title</span>
+        <span className="mb-1 block text-base text-dim">Title</span>
         <input
           className={inputClass}
           value={fields.title}
@@ -106,7 +106,7 @@ export function PostEditor({
         />
       </label>
       <label className="block">
-        <span className="mb-1 block text-sm text-dim">Date</span>
+        <span className="mb-1 block text-base text-dim">Date</span>
         <input
           type="date"
           className={inputClass}
@@ -115,7 +115,7 @@ export function PostEditor({
         />
       </label>
       <label className="block">
-        <span className="mb-1 block text-sm text-dim">Description</span>
+        <span className="mb-1 block text-base text-dim">Description</span>
         <input
           className={inputClass}
           value={fields.description}
@@ -137,8 +137,8 @@ export function PostEditor({
           if (file.name.endsWith(".md")) importMdFile(file);
           else uploadImage(file);
         }}
-        className={`rounded border-2 border-dashed p-4 text-center text-sm ${
-          dragOver ? "border-fg bg-fg/5" : "border-fg/20 text-dim"
+        className={`rounded border-2 border-dashed p-4 text-center text-base ${
+          dragOver ? "border-fg bg-fg/5" : "border-border-strong text-dim"
         }`}
       >
         Drop a .md file to import its content, or drop/click to upload an image into the post
@@ -165,7 +165,7 @@ export function PostEditor({
       </div>
 
       {imageChecks && imageChecks.length > 0 && (
-        <div className="space-y-1 rounded border border-fg/10 p-3 text-sm">
+        <div className="space-y-1 rounded border border-fg/10 p-3 text-base">
           <p className="text-dim">Image references in the imported markdown:</p>
           {imageChecks.map((check, i) => (
             <div key={i}>
@@ -185,7 +185,7 @@ export function PostEditor({
       )}
 
       <label className="block">
-        <span className="mb-1 block text-sm text-dim">Body (markdown)</span>
+        <span className="mb-1 block text-base text-dim">Body (markdown)</span>
         <textarea
           className={`${inputClass} font-mono`}
           rows={20}

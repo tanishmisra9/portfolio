@@ -52,13 +52,14 @@ export function TriggerManager({ triggers }: { triggers: Trigger[] }) {
           >
             <div className="flex-1">
               <input
-                className="w-full bg-transparent text-base outline-none"
+                aria-label="Trigger word"
+                className="w-full rounded border border-border-strong bg-transparent px-3 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
                 defaultValue={t.text}
                 onBlur={(e) => handleUpdate(t.id, e.target.value, t.text)}
               />
               {errors[t.id] && <p className="text-sm text-red-500">{errors[t.id]}</p>}
             </div>
-            <button type="button" onClick={() => handleDelete(t.id)} className="text-sm text-red-500">
+            <button type="button" onClick={() => handleDelete(t.id)} className="px-2 py-2 text-base text-red-500">
               Delete
             </button>
           </div>
@@ -74,16 +75,19 @@ export function TriggerManager({ triggers }: { triggers: Trigger[] }) {
         onSubmit={handleCreate}
         className="space-y-2 rounded-md border border-border bg-surface p-4 backdrop-blur-md"
       >
-        <h2 className="text-sm text-dim">New trigger</h2>
-        <input
-          className="w-full rounded border border-fg/20 bg-transparent px-2 py-1 text-base"
+        <h2 className="text-base text-dim">New trigger</h2>
+        <label className="block">
+          <span className="mb-1 block text-base text-dim">Word</span>
+          <input
+          className="w-full rounded border border-border-strong bg-transparent px-2 py-1 text-base"
           placeholder="e.g. telemetry"
           value={newText}
           onChange={(e) => setNewText(e.target.value)}
           required
         />
+        </label>
         {errors.new && <p className="text-sm text-red-500">{errors.new}</p>}
-        <button type="submit" className="rounded border border-fg/20 px-3 py-1.5 text-base">
+        <button type="submit" className="rounded border border-border-strong px-3 py-1.5 text-base">
           + Add trigger
         </button>
       </form>

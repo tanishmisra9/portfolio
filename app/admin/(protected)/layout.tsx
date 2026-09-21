@@ -6,7 +6,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const hasChanges = await hasUnpublishedChanges();
   return (
     <DirtyProvider>
-      <div className="min-h-screen bg-bg font-display text-fg">
+      <div className="admin-scope min-h-screen bg-bg font-display text-fg">
         <AdminHeader hasChanges={hasChanges} />
         <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
       </div>

@@ -93,9 +93,9 @@ export function CertificationsEditor({
                     className={`h-4 w-4 shrink-0 text-muted transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                     aria-hidden
                   />
-                  <span className="text-sm text-fg">{label}</span>
+                  <span className="text-base text-fg">{label}</span>
                 </button>
-                <button type="button" onClick={() => remove(item.id)} className="text-sm text-red-500">
+                <button type="button" onClick={() => remove(item.id)} className="px-2 py-2 text-base text-red-500">
                   Remove
                 </button>
               </div>
@@ -112,7 +112,7 @@ export function CertificationsEditor({
                   ))}
                   {isSeries && (
                     <div>
-                      <span className="mb-1 block text-sm text-dim">Courses</span>
+                      <span className="mb-1 block text-base text-dim">Courses</span>
                       <EntryList
                         nested
                         items={(item.courses as Item[]) ?? []}
@@ -130,10 +130,10 @@ export function CertificationsEditor({
         })}
       </div>
       <div className="flex gap-2">
-        <button type="button" onClick={addSingle} className="rounded border border-fg/20 px-3 py-1.5 text-base">
+        <button type="button" onClick={addSingle} className="rounded border border-border-strong px-3 py-1.5 text-base">
           + Add certification
         </button>
-        <button type="button" onClick={addSeries} className="rounded border border-fg/20 px-3 py-1.5 text-base">
+        <button type="button" onClick={addSeries} className="rounded border border-border-strong px-3 py-1.5 text-base">
           + Add course series
         </button>
       </div>
