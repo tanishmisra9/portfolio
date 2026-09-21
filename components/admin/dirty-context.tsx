@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export interface DirtyChange {
   key: string;
@@ -19,9 +19,8 @@ const DirtyContext = createContext<DirtyState | null>(null);
 export function DirtyProvider({ children }: { children: ReactNode }) {
   const [dirty, setDirty] = useState(false);
   const [changes, setChanges] = useState<DirtyChange[]>([]);
-  return (
-    <DirtyContext.Provider value={{ dirty, setDirty, changes, setChanges }}>{children}</DirtyContext.Provider>
-  );
+  const value = useMemo(() => ({ dirty, setDirty, changes, setChanges }), [dirty, changes]);
+  return <DirtyContext.Provider value={value}>{children}</DirtyContext.Provider>;
 }
 
 /** Editor pages (portfolio, blog posts) that buffer edits locally before an explicit
@@ -30,16 +29,20 @@ export function DirtyProvider({ children }: { children: ReactNode }) {
  * include what's on screen, and link to where the changes are. */
 export function useRegisterDirty(dirty: boolean, changes: DirtyChange[] = []) {
   const ctx = useContext(DirtyContext);
+  const setDirty = ctx?.setDirty;
+  const setChanges = ctx?.setChanges;
   const changesKey = changes.map((c) => c.key).join(",");
+  // Depends on the (stable) setters, not the context value — the value changes whenever this
+  // effect sets state, which would otherwise re-run the effect forever.
   useEffect(() => {
-    ctx?.setDirty(dirty);
-    ctx?.setChanges(changes);
+    setDirty?.(dirty);
+    setChanges?.(changes);
     return () => {
-      ctx?.setDirty(false);
-      ctx?.setChanges([]);
+      setDirty?.(false);
+      setChanges?.([]);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty, changesKey, ctx]);
+  }, [dirty, changesKey, setDirty, setChanges]);
 }
 
 export function useAdminDirty() {

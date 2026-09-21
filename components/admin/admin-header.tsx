@@ -9,7 +9,7 @@ import { logout } from "@/lib/auth/actions";
 import { publishAll } from "@/lib/admin/actions";
 import { useAdminDirty } from "@/components/admin/dirty-context";
 
-export function AdminHeader() {
+export function AdminHeader({ hasChanges }: { hasChanges: boolean }) {
   const pathname = usePathname();
   const isDashboard = pathname === "/admin";
   const [pending, startTransition] = useTransition();
@@ -70,11 +70,11 @@ export function AdminHeader() {
         )}
         <button
           type="button"
-          disabled={pending}
+          disabled={pending || !hasChanges}
           onClick={handlePublish}
           className="rounded bg-fg px-4 py-1.5 text-base text-bg disabled:opacity-50"
         >
-          {pending ? "Publishing..." : justPublished ? "Published ✓" : "Publish"}
+          {pending ? "Publishing..." : justPublished ? "Published ✓" : hasChanges ? "Publish" : "Up to date"}
         </button>
         <ThemeToggle />
         <form action={logout}>

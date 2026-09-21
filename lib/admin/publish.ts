@@ -17,8 +17,8 @@ export interface PublishedData {
   posts: PublishedBlogPost[];
 }
 
-/** Assembles the current draft state into the shape the public site reads, and stores it as the live snapshot. */
-export async function publish() {
+/** Assembles the current draft state into the shape the public site reads. */
+async function buildPublishedData(): Promise<PublishedData> {
   const [portfolioRow] = await db.select().from(portfolio);
   const collectionRows = await db.select().from(collections).orderBy(asc(collections.sortOrder));
   const photoRows = await db.select().from(photos).orderBy(asc(photos.sortOrder));
@@ -100,6 +100,12 @@ export async function publish() {
     })),
   };
 
+  return data;
+}
+
+/** Stores the current draft state as the live snapshot. */
+export async function publish() {
+  const data = await buildPublishedData();
   await db
     .insert(publishedSnapshot)
     .values({ id: 1, data, publishedAt: new Date() })
@@ -107,4 +113,23 @@ export async function publish() {
       target: publishedSnapshot.id,
       set: { data, publishedAt: new Date() },
     });
+}
+
+// jsonb doesn't preserve key order, so compare with keys sorted; JSON.stringify also drops
+// undefined values, matching what was actually stored.
+function canonical(value: unknown): string {
+  return JSON.stringify(value, (_key, v) =>
+    v && typeof v === "object" && !Array.isArray(v)
+      ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : 1)))
+      : v,
+  );
+}
+
+/** True when the drafts differ from what's currently live (or nothing has been published yet). */
+export async function hasUnpublishedChanges(): Promise<boolean> {
+  const [draft, [snapshot]] = await Promise.all([
+    buildPublishedData(),
+    db.select().from(publishedSnapshot),
+  ]);
+  return !snapshot || canonical(draft) !== canonical(snapshot.data);
 }

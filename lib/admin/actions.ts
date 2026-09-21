@@ -19,6 +19,11 @@ import { isAllowedAudioFile } from "@/lib/radio-samples";
 import type { PortfolioContent } from "@/types/content";
 import { revalidatePath } from "next/cache";
 
+// Draft edits change whether there's anything to publish; refresh the admin layout so the header's Publish button reflects it.
+function draftChanged() {
+  revalidatePath("/admin", "layout");
+}
+
 // ---- Portfolio ----
 
 export async function updatePortfolio(data: PortfolioContent) {
@@ -26,6 +31,7 @@ export async function updatePortfolio(data: PortfolioContent) {
     .insert(portfolio)
     .values({ id: 1, ...data })
     .onConflictDoUpdate({ target: portfolio.id, set: data });
+  draftChanged();
 }
 
 export async function getDraftPortfolio(): Promise<PortfolioContent | null> {
@@ -138,6 +144,7 @@ export async function createCollection(input: {
   const existing = await db.select({ sortOrder: collections.sortOrder }).from(collections);
   const nextOrder = existing.length ? Math.max(...existing.map((c) => c.sortOrder)) + 1 : 0;
   await db.insert(collections).values({ ...input, coverImage: "", sortOrder: nextOrder });
+  draftChanged();
 }
 
 export async function updateCollection(
@@ -145,10 +152,12 @@ export async function updateCollection(
   fields: Partial<{ title: string; description: string; coverImage: string }>,
 ) {
   await db.update(collections).set(fields).where(eq(collections.id, id));
+  draftChanged();
 }
 
 export async function deleteCollection(id: number) {
   await db.delete(collections).where(eq(collections.id, id));
+  draftChanged();
 }
 
 export async function reorderCollections(orderedIds: number[]) {
@@ -157,6 +166,7 @@ export async function reorderCollections(orderedIds: number[]) {
       db.update(collections).set({ sortOrder: index }).where(eq(collections.id, id)),
     ),
   );
+  draftChanged();
 }
 
 // ---- Photos ----
@@ -203,6 +213,7 @@ export async function uploadPhoto(
     height,
     sortOrder: nextOrder,
   });
+  draftChanged();
 }
 
 export async function updatePhoto(
@@ -215,10 +226,12 @@ export async function updatePhoto(
   }>,
 ) {
   await db.update(photos).set(fields).where(eq(photos.id, id));
+  draftChanged();
 }
 
 export async function deletePhoto(id: number) {
   await db.delete(photos).where(eq(photos.id, id));
+  draftChanged();
 }
 
 export async function reorderPhotos(orderedIds: number[]) {
@@ -227,6 +240,7 @@ export async function reorderPhotos(orderedIds: number[]) {
       db.update(photos).set({ sortOrder: index }).where(eq(photos.id, id)),
     ),
   );
+  draftChanged();
 }
 
 // ---- Quotes ----
@@ -243,6 +257,7 @@ export async function createQuote(input: {
   const existing = await db.select({ sortOrder: quotes.sortOrder }).from(quotes);
   const nextOrder = existing.length ? Math.max(...existing.map((q) => q.sortOrder)) + 1 : 0;
   await db.insert(quotes).values({ ...input, sortOrder: nextOrder });
+  draftChanged();
 }
 
 export async function updateQuote(
@@ -250,10 +265,12 @@ export async function updateQuote(
   fields: Partial<{ text: string; attribution: string | null; emphasis: number }>,
 ) {
   await db.update(quotes).set(fields).where(eq(quotes.id, id));
+  draftChanged();
 }
 
 export async function deleteQuote(id: number) {
   await db.delete(quotes).where(eq(quotes.id, id));
+  draftChanged();
 }
 
 export async function reorderQuotes(orderedIds: number[]) {
@@ -262,6 +279,7 @@ export async function reorderQuotes(orderedIds: number[]) {
       db.update(quotes).set({ sortOrder: index }).where(eq(quotes.id, id)),
     ),
   );
+  draftChanged();
 }
 
 // ---- Blog posts ----
@@ -281,10 +299,12 @@ export async function savePost(input: {
     .insert(posts)
     .values(input)
     .onConflictDoUpdate({ target: posts.slug, set: input });
+  draftChanged();
 }
 
 export async function deletePost(slug: string) {
   await db.delete(posts).where(eq(posts.slug, slug));
+  draftChanged();
 }
 
 const MARKDOWN_IMAGE_RE = /!\[[^\]]*\]\(([^)\s]+)\)/g;
@@ -340,6 +360,7 @@ const PUBLIC_PATHS = ["/", "/photos", "/blog", "/quotes"];
 
 export async function publishAll() {
   await publishSnapshot();
+  draftChanged();
 
   const collectionSlugs = await db.select({ slug: collections.slug }).from(collections);
   const postSlugs = await db.select({ slug: posts.slug }).from(posts);
