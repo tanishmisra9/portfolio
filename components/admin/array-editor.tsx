@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Eye, EyeOff } from "lucide-react";
+import { ChevronDown, Eye, EyeOff, GripVertical } from "lucide-react";
 
 export interface FieldDef {
   key: string;
@@ -29,6 +29,8 @@ interface ArrayEditorProps {
   cardLabel?: (item: Item) => string;
   /** With cardLabel: adds a hide/show eye toggle that sets `hidden` on the item. */
   hideToggle?: boolean;
+  /** With cardLabel: cards can be reordered by dragging their grip handle (or Arrow keys on the focused handle). */
+  reorderable?: boolean;
   /** Internal — true when rendering a sublist one level deep, for tighter nested spacing. */
   nested?: boolean;
 }
@@ -42,9 +44,21 @@ export function ArrayEditor({
   layout = "rows",
   cardLabel,
   hideToggle,
+  reorderable,
   nested = false,
 }: ArrayEditorProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+
+  function move(id: string, toIndex: number) {
+    const from = items.findIndex((i) => i.id === id);
+    if (from < 0 || toIndex < 0 || toIndex >= items.length || from === toIndex) return;
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(toIndex, 0, moved);
+    onChange(next);
+  }
 
   function toggle(id: string) {
     setExpanded((prev) => {
@@ -81,8 +95,53 @@ export function ArrayEditor({
           if (cardLabel) {
             const isOpen = expanded.has(item.id);
             return (
-              <div key={item.id} className={itemClassName}>
+              <div
+                key={item.id}
+                data-reorder-card
+                className={`${itemClassName} ${overId === item.id && dragId !== item.id ? "ring-2 ring-fg/60" : ""} ${dragId === item.id ? "opacity-50" : ""}`}
+                onDragOver={(e) => {
+                  if (!reorderable || dragId === null) return;
+                  e.preventDefault();
+                  setOverId(item.id);
+                }}
+                onDrop={() => {
+                  if (dragId !== null) move(dragId, items.findIndex((i) => i.id === item.id));
+                }}
+              >
                 <div className="flex items-center gap-2">
+                  {reorderable && (
+                    // Only the grip is draggable (not the whole card) so text selection inside inputs still works.
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      draggable
+                      aria-label={`Reorder ${cardLabel(item) || "item"}. Drag, or use arrow keys.`}
+                      onDragStart={(e) => {
+                        setDragId(item.id);
+                        e.dataTransfer.effectAllowed = "move";
+                        e.dataTransfer.setData("text/plain", item.id);
+                        const card = e.currentTarget.closest("[data-reorder-card]");
+                        if (card) e.dataTransfer.setDragImage(card, 16, 16);
+                      }}
+                      onDragEnd={() => {
+                        setDragId(null);
+                        setOverId(null);
+                      }}
+                      onKeyDown={(e) => {
+                        const index = items.findIndex((i) => i.id === item.id);
+                        if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+                          e.preventDefault();
+                          move(item.id, index - 1);
+                        } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+                          e.preventDefault();
+                          move(item.id, index + 1);
+                        }
+                      }}
+                      className="flex h-11 w-7 shrink-0 cursor-grab items-center justify-center rounded text-dim hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                    >
+                      <GripVertical className="h-5 w-5" aria-hidden />
+                    </div>
+                  )}
                   <button
                     type="button"
                     aria-expanded={isOpen}

@@ -254,6 +254,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
           layout="cards"
           cardLabel={(item) => item.title as string}
           hideToggle
+          reorderable
           items={data.projects as unknown as Item[]}
           onChange={(v) => setData({ ...data, projects: v as unknown as PortfolioContent["projects"] })}
           newItem={() => ({
