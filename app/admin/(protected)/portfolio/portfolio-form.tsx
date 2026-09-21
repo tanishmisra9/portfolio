@@ -310,7 +310,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
         {dirty && <span className="text-base text-dim">Unsaved changes</span>}
         <button
           type="button"
-          disabled={pending}
+          disabled={pending || !dirty}
           onClick={save}
           className="rounded bg-fg px-4 py-1.5 text-base text-bg disabled:opacity-50"
         >

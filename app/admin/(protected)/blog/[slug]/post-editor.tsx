@@ -197,7 +197,7 @@ export function PostEditor({
       <div className="fixed bottom-0 left-0 right-0 border-t border-fg/10 bg-bg p-4">
         <button
           type="button"
-          disabled={pending}
+          disabled={pending || (!dirty && !isNew)}
           onClick={save}
           className="rounded bg-fg px-4 py-1.5 text-base text-bg disabled:opacity-50"
         >
