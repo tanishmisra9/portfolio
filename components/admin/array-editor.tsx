@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Eye, EyeOff } from "lucide-react";
 
 export interface FieldDef {
   key: string;
@@ -27,6 +27,8 @@ interface ArrayEditorProps {
   layout?: "rows" | "cards";
   /** Collapsible cards: a header (chevron + this label) toggles the fields; cards start closed and a new one opens. */
   cardLabel?: (item: Item) => string;
+  /** With cardLabel: adds a hide/show eye toggle that sets `hidden` on the item. */
+  hideToggle?: boolean;
   /** Internal — true when rendering a sublist one level deep, for tighter nested spacing. */
   nested?: boolean;
 }
@@ -39,6 +41,7 @@ export function ArrayEditor({
   newItem,
   layout = "rows",
   cardLabel,
+  hideToggle,
   nested = false,
 }: ArrayEditorProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -90,8 +93,28 @@ export function ArrayEditor({
                       className={`h-4 w-4 shrink-0 text-muted transition-transform duration-200 motion-reduce:transition-none ${isOpen ? "rotate-180" : ""}`}
                       aria-hidden
                     />
-                    <span className="text-base text-fg">{cardLabel(item) || "Untitled"}</span>
+                    <span className={`text-base text-fg ${item.hidden ? "opacity-60" : ""}`}>
+                      {cardLabel(item) || "Untitled"}
+                    </span>
+                    {hideToggle && item.hidden ? (
+                      <span className="rounded-full border border-border-strong px-2 py-0.5 text-base text-dim">Hidden</span>
+                    ) : null}
                   </button>
+                  {hideToggle && (
+                    <button
+                      type="button"
+                      aria-pressed={Boolean(item.hidden)}
+                      aria-label={item.hidden ? "Show on site" : "Hide from site"}
+                      title={item.hidden ? "Show on site" : "Hide from site"}
+                      onClick={() => {
+                        const { hidden: _hidden, ...rest } = item;
+                        onChange(items.map((i) => (i.id === item.id ? (item.hidden ? rest : { ...item, hidden: true }) : i)));
+                      }}
+                      className="flex h-11 w-11 items-center justify-center rounded text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                    >
+                      {item.hidden ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
+                    </button>
+                  )}
                   <button type="button" onClick={() => removeItem(item.id)} className="px-2 py-1 text-base text-red-500">
                     Remove
                   </button>

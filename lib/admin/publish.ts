@@ -43,7 +43,7 @@ async function buildPublishedData(): Promise<PublishedData> {
           education: portfolioRow.education,
           skills: portfolioRow.skills,
           certifications: portfolioRow.certifications,
-          projects: portfolioRow.projects,
+          projects: portfolioRow.projects.filter((p) => !p.hidden),
           social: portfolioRow.social,
         }
       : {

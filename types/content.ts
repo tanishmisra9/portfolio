@@ -42,6 +42,8 @@ export type ProjectEntry = {
   links?: ProjectLink[];
   /** Label(s) shown at the top-left of the card; hidden when empty. */
   pills?: string[];
+  /** Kept in the admin but left out of the published snapshot. */
+  hidden?: boolean;
 };
 
 export type SkillCategory = {

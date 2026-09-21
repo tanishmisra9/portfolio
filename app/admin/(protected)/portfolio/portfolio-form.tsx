@@ -253,6 +253,7 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
         <ArrayEditor
           layout="cards"
           cardLabel={(item) => item.title as string}
+          hideToggle
           items={data.projects as unknown as Item[]}
           onChange={(v) => setData({ ...data, projects: v as unknown as PortfolioContent["projects"] })}
           newItem={() => ({
