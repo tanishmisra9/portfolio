@@ -47,7 +47,7 @@ export function AboutContactSection({ bio, social }: Props) {
               const resumeFilename =
                 link.label === 'Resume' ? link.href.split('?')[0].split('/').pop() : undefined;
               return (
-                <Tooltip key={link.id} label={link.label}>
+                <Tooltip key={link.id} label={link.tooltip || link.label}>
                   <a
                     href={link.href}
                     aria-label={link.label}

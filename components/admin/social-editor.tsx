@@ -69,6 +69,16 @@ export function SocialEditor({
                 )}
               </div>
 
+              <label className="block">
+                <span className="mb-1 block text-base text-dim">Tooltip (shown on hover)</span>
+                <input
+                  className={inputClass}
+                  placeholder={item.label || "Tooltip"}
+                  value={item.tooltip ?? ""}
+                  onChange={(e) => update(item.id, { tooltip: e.target.value || undefined })}
+                />
+              </label>
+
               {item.label === "Email" ? (
                 <input
                   type="email"

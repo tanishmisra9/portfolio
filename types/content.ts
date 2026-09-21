@@ -78,6 +78,8 @@ export type SocialLink = {
   label: string;
   href: string;
   display: string;
+  /** Hover tooltip on the contact icon; falls back to `label` when empty. */
+  tooltip?: string;
   /** Manual icon override — see components/social-icon.tsx's ICON_OPTIONS. Falls back to label-matching when unset. */
   icon?: string;
 };
