@@ -6,9 +6,9 @@ import {
   deletePost,
   importMarkdownPost,
   savePost,
-  uploadBlogImage,
   type ImageCheckResult,
 } from "@/lib/admin/actions";
+import { uploadImageToBlob } from "@/lib/admin/client-upload";
 import { useRegisterDirty } from "@/components/admin/dirty-context";
 
 interface PostFields {
@@ -39,6 +39,7 @@ export function PostEditor({
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [imageChecks, setImageChecks] = useState<ImageCheckResult[] | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,9 +70,14 @@ export function PostEditor({
   }
 
   function uploadImage(file: File) {
+    setUploadError(null);
     startTransition(async () => {
-      const url = await uploadBlogImage(slug, file);
-      setFields((f) => ({ ...f, body: `${f.body}\n\n![${file.name}](${url})\n` }));
+      try {
+        const { url } = await uploadImageToBlob(file, `blog/${slug}`);
+        setFields((f) => ({ ...f, body: `${f.body}\n\n![${file.name}](${url})\n` }));
+      } catch (err) {
+        setUploadError(err instanceof Error ? err.message : "Upload failed.");
+      }
     });
   }
 
@@ -163,6 +169,8 @@ export function PostEditor({
           </button>
         </div>
       </div>
+
+      {uploadError && <p className="text-base text-red-500">{uploadError}</p>}
 
       {imageChecks && imageChecks.length > 0 && (
         <div className="space-y-1 rounded border border-fg/10 p-3 text-base">

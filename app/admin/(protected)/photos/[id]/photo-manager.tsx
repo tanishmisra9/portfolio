@@ -8,6 +8,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import type { photos } from "@/db/schema";
 import { ReorderableList } from "@/components/admin/reorderable-list";
 import { deletePhoto, reorderPhotos, updatePhoto, uploadPhoto } from "@/lib/admin/actions";
+import { uploadImageToBlob } from "@/lib/admin/client-upload";
 
 type Photo = InferSelectModel<typeof photos>;
 
@@ -22,7 +23,8 @@ export function PhotoManager({
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
-  const [pending, setPending] = useState<{ file: File; alt: string; caption: string }[]>([]);
+  const [pending, setPending] = useState<{ key: string; file: File; alt: string; caption: string }[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -30,19 +32,25 @@ export function PhotoManager({
     if (!files) return;
     setPending((prev) => [
       ...prev,
-      ...Array.from(files).map((file) => ({ file, alt: "", caption: "" })),
+      ...Array.from(files).map((file) => ({ key: crypto.randomUUID(), file, alt: "", caption: "" })),
     ]);
   }
 
-  function uploadPending(index: number) {
-    const item = pending[index];
+  // Removed by key, not index — index goes stale if two uploads are in flight at once and
+  // finish out of order, which previously dropped or duplicated a queued photo.
+  function uploadPending(key: string) {
+    const item = pending.find((p) => p.key === key);
+    if (!item) return;
+    setErrors((prev) => ({ ...prev, [key]: "" }));
     startTransition(async () => {
-      await uploadPhoto(collectionId, collectionSlug, item.file, {
-        alt: item.alt,
-        caption: item.caption,
-      });
-      setPending((prev) => prev.filter((_, i) => i !== index));
-      router.refresh();
+      try {
+        const { url, width, height } = await uploadImageToBlob(item.file, `photos/${collectionSlug}`);
+        await uploadPhoto(collectionId, url, { alt: item.alt, caption: item.caption, width, height });
+        setPending((prev) => prev.filter((p) => p.key !== key));
+        router.refresh();
+      } catch (err) {
+        setErrors((prev) => ({ ...prev, [key]: err instanceof Error ? err.message : "Upload failed." }));
+      }
     });
   }
 
@@ -75,37 +83,40 @@ export function PhotoManager({
         />
       </div>
 
-      {pending.map((item, index) => (
-        <div key={index} className="flex items-center gap-3 rounded-md border border-border bg-surface p-3 backdrop-blur-md">
-          <span className="text-base">{item.file.name}</span>
-          <input
-            className="flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
-            placeholder="Alt text (required)"
-            value={item.alt}
-            onChange={(e) =>
-              setPending((prev) =>
-                prev.map((p, i) => (i === index ? { ...p, alt: e.target.value } : p)),
-              )
-            }
-          />
-          <input
-            className="flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
-            placeholder="Caption (optional)"
-            value={item.caption}
-            onChange={(e) =>
-              setPending((prev) =>
-                prev.map((p, i) => (i === index ? { ...p, caption: e.target.value } : p)),
-              )
-            }
-          />
-          <button
-            type="button"
-            disabled={!item.alt}
-            onClick={() => uploadPending(index)}
-            className="rounded bg-fg px-3 py-1 text-base text-bg disabled:opacity-50"
-          >
-            Upload
-          </button>
+      {pending.map((item) => (
+        <div key={item.key} className="space-y-2 rounded-md border border-border bg-surface p-3 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <span className="text-base">{item.file.name}</span>
+            <input
+              className="flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
+              placeholder="Alt text (required)"
+              value={item.alt}
+              onChange={(e) =>
+                setPending((prev) =>
+                  prev.map((p) => (p.key === item.key ? { ...p, alt: e.target.value } : p)),
+                )
+              }
+            />
+            <input
+              className="flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
+              placeholder="Caption (optional)"
+              value={item.caption}
+              onChange={(e) =>
+                setPending((prev) =>
+                  prev.map((p) => (p.key === item.key ? { ...p, caption: e.target.value } : p)),
+                )
+              }
+            />
+            <button
+              type="button"
+              disabled={!item.alt}
+              onClick={() => uploadPending(item.key)}
+              className="rounded bg-fg px-3 py-1 text-base text-bg disabled:opacity-50"
+            >
+              Upload
+            </button>
+          </div>
+          {errors[item.key] && <p className="text-base text-red-500">{errors[item.key]}</p>}
         </div>
       ))}
 

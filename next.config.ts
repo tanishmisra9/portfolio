@@ -4,7 +4,10 @@ const nextConfig: NextConfig = {
   experimental: {
     /* Avoid dev-only SegmentViewNode / client-manifest errors with App Router + RSC */
     devtoolSegmentExplorer: false,
-    /* Admin photo-upload Server Action sends the raw file in the request body */
+    /* Resume/radio-sample uploads still send the raw file through a Server Action (small
+     * PDFs/audio, well under Vercel's separate 4.5MB request-body cap this doesn't affect).
+     * Photos and blog images upload directly to Blob from the browser instead — see
+     * lib/admin/client-upload.ts — since that cap applies regardless of this setting. */
     serverActions: {
       bodySizeLimit: "25mb",
     },
