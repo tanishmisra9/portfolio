@@ -10,7 +10,14 @@ export async function login(_prevState: string | undefined, formData: FormData) 
     return "Enter your password.";
   }
 
-  const valid = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH!);
+  const hash = process.env.ADMIN_PASSWORD_HASH;
+  if (!hash) {
+    // bcrypt.compare throws on an undefined hash rather than returning false, which
+    // would otherwise surface as an unhandled 500 instead of a diagnosable message.
+    throw new Error("ADMIN_PASSWORD_HASH is not set.");
+  }
+
+  const valid = await bcrypt.compare(password, hash);
   if (!valid) {
     return "Incorrect password.";
   }
