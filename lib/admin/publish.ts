@@ -1,10 +1,7 @@
 import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
 import { portfolio, collections, photos, quotes, posts, publishedSnapshot } from "@/db/schema";
-import type { PortfolioContent } from "@/types/content";
-import type { PhotoCollection } from "@/data/photos";
-import type { QuoteEntry } from "@/data/quotes";
-import type { BlogPostMeta } from "@/lib/blog";
+import type { PortfolioContent, PhotoCollection, QuoteEntry, BlogPostMeta } from "@/types/content";
 
 export interface PublishedBlogPost extends BlogPostMeta {
   content: string;
@@ -19,11 +16,13 @@ export interface PublishedData {
 
 /** Assembles the current draft state into the shape the public site reads. */
 async function buildPublishedData(): Promise<PublishedData> {
-  const [portfolioRow] = await db.select().from(portfolio);
-  const collectionRows = await db.select().from(collections).orderBy(asc(collections.sortOrder));
-  const photoRows = await db.select().from(photos).orderBy(asc(photos.sortOrder));
-  const quoteRows = await db.select().from(quotes).orderBy(asc(quotes.sortOrder));
-  const postRows = await db.select().from(posts);
+  const [[portfolioRow], collectionRows, photoRows, quoteRows, postRows] = await Promise.all([
+    db.select().from(portfolio),
+    db.select().from(collections).orderBy(asc(collections.sortOrder)),
+    db.select().from(photos).orderBy(asc(photos.sortOrder)),
+    db.select().from(quotes).orderBy(asc(quotes.sortOrder)),
+    db.select().from(posts),
+  ]);
 
   const photosByCollection = new Map<number, typeof photoRows>();
   for (const photo of photoRows) {
@@ -32,6 +31,9 @@ async function buildPublishedData(): Promise<PublishedData> {
     photosByCollection.set(photo.collectionId, list);
   }
   const photoById = new Map(photoRows.map((p) => [p.id, p]));
+  const duetPartnerIds = new Set(
+    photoRows.filter((p) => p.duetWithPhotoId !== null).map((p) => p.duetWithPhotoId),
+  );
 
   const data: PublishedData = {
     portfolio: portfolioRow
@@ -57,34 +59,40 @@ async function buildPublishedData(): Promise<PublishedData> {
           projects: [],
           social: [],
         },
-    collections: collectionRows.map((c) => ({
-      slug: c.slug,
-      title: c.title,
-      description: c.description,
-      coverImage: c.coverImage,
-      photos: (photosByCollection.get(c.id) ?? [])
-        // A photo referenced as another photo's duet partner renders nested inside that
-        // photo's `duetWith`, not as its own top-level entry.
-        .filter((p) => !photoRows.some((other) => other.duetWithPhotoId === p.id))
-        .map((p) => {
-          const duet = p.duetWithPhotoId ? photoById.get(p.duetWithPhotoId) : undefined;
-          return {
-            src: p.blobUrl,
-            alt: p.alt,
-            caption: p.caption ?? undefined,
-            width: p.width ?? undefined,
-            height: p.height ?? undefined,
-            duetWith: duet
-              ? {
-                  src: duet.blobUrl,
-                  alt: duet.alt,
-                  width: duet.width ?? undefined,
-                  height: duet.height ?? undefined,
-                }
-              : undefined,
-          };
-        }),
-    })),
+    collections: collectionRows
+      // A collection with no cover and no photos has nothing to show on the /photos
+      // index — an empty tile there with no way to fix it from the admin.
+      .filter((c) => (photosByCollection.get(c.id) ?? []).length > 0)
+      .map((c) => ({
+        slug: c.slug,
+        title: c.title,
+        description: c.description,
+        // New collections start with coverImage: "" and have no way to set one in the
+        // admin — fall back to the first photo rather than shipping a blank <Image src="">.
+        coverImage: c.coverImage || photosByCollection.get(c.id)![0].blobUrl,
+        photos: (photosByCollection.get(c.id) ?? [])
+          // A photo referenced as another photo's duet partner renders nested inside that
+          // photo's `duetWith`, not as its own top-level entry.
+          .filter((p) => !duetPartnerIds.has(p.id))
+          .map((p) => {
+            const duet = p.duetWithPhotoId ? photoById.get(p.duetWithPhotoId) : undefined;
+            return {
+              src: p.blobUrl,
+              alt: p.alt,
+              caption: p.caption ?? undefined,
+              width: p.width ?? undefined,
+              height: p.height ?? undefined,
+              duetWith: duet
+                ? {
+                    src: duet.blobUrl,
+                    alt: duet.alt,
+                    width: duet.width ?? undefined,
+                    height: duet.height ?? undefined,
+                  }
+                : undefined,
+            };
+          }),
+      })),
     quotes: quoteRows.map((q) => ({
       id: String(q.id),
       text: q.text,
