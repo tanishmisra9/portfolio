@@ -10,8 +10,11 @@ export interface SessionData {
 
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 
-export const sessionOptions: SessionOptions = {
-  password: process.env.SESSION_SECRET!,
+// The password is read lazily inside getSession(), not baked into this module-level
+// object — module-level evaluation runs on every import (e.g. every request through
+// middleware.ts), so validating eagerly here would turn a config error into a crash on
+// paths that never actually call getSession(), like the GET /admin/login middleware skips.
+const cookieOptions: Omit<SessionOptions, "password"> = {
   cookieName: "portfolio_admin_session",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
@@ -24,7 +27,16 @@ export const sessionOptions: SessionOptions = {
 };
 
 export async function getSession() {
-  return getIronSession<SessionData>(await cookies(), sessionOptions);
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    throw new Error(
+      "SESSION_SECRET is not set. Generate one (e.g. `openssl rand -base64 32`) and add it as an environment variable.",
+    );
+  }
+  if (secret.length < 32) {
+    throw new Error("SESSION_SECRET must be at least 32 characters long.");
+  }
+  return getIronSession<SessionData>(await cookies(), { ...cookieOptions, password: secret });
 }
 
 export function isSessionExpired(session: Partial<SessionData>): boolean {
