@@ -17,6 +17,7 @@ export async function login(_prevState: string | undefined, formData: FormData) 
 
   const session = await getSession();
   session.isLoggedIn = true;
+  session.issuedAt = Date.now();
   await session.save();
   redirect("/admin");
 }
