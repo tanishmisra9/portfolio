@@ -17,6 +17,7 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="space-y-6">
@@ -64,8 +65,13 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          setError(null);
           startTransition(async () => {
-            await createCollection({ slug, title, description });
+            const err = await createCollection({ slug, title, description });
+            if (err) {
+              setError(err);
+              return;
+            }
             setSlug("");
             setTitle("");
             setDescription("");
@@ -102,6 +108,7 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
             onChange={(e) => setDescription(e.target.value)}
           />
         </label>
+        {error && <p className="text-base text-red-500">{error}</p>}
         <button type="submit" className="rounded bg-fg px-4 py-2 text-base text-bg">
           + Add collection
         </button>

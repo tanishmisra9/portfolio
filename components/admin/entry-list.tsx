@@ -40,6 +40,15 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
     onChange(items.filter((item) => item.id !== id));
   }
 
+  function move(id: string, toIndex: number) {
+    const from = items.findIndex((i) => i.id === id);
+    if (from < 0 || toIndex < 0 || toIndex >= items.length || from === toIndex) return;
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(toIndex, 0, moved);
+    onChange(next);
+  }
+
   function toggle(id: string) {
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -69,7 +78,27 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
             }
           >
             <div className={`flex items-center gap-3 ${nested ? "p-3" : "p-4"}`}>
-              <GripVertical {...dragProps} className="h-5 w-5 shrink-0 cursor-grab text-dim" aria-hidden />
+              {/* draggable lives on this div, not the SVG — browsers don't honor draggable
+                  on SVG elements, so the drag previously never started. */}
+              <div
+                {...dragProps}
+                role="button"
+                tabIndex={0}
+                aria-label={`Reorder ${summary(item) || "item"}. Drag, or use arrow keys.`}
+                onKeyDown={(e) => {
+                  const index = items.findIndex((i) => i.id === item.id);
+                  if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    move(item.id, index - 1);
+                  } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+                    e.preventDefault();
+                    move(item.id, index + 1);
+                  }
+                }}
+                className="flex h-9 w-7 shrink-0 cursor-grab items-center justify-center rounded text-dim hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+              >
+                <GripVertical className="h-5 w-5" aria-hidden />
+              </div>
               <span className="flex-1 truncate text-base text-fg">{summary(item)}</span>
               <button
                 type="button"
