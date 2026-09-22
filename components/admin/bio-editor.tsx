@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Markdown from "react-markdown";
-import { bioMarkdownComponents } from "@/components/bio-markdown";
+import { bioMarkdownComponents, bioMarkdownAllowedElements } from "@/components/bio-markdown";
 
 function validateUrl(raw: string): string | null {
   const value = raw.trim();
@@ -118,11 +118,11 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
       <div className="space-y-2 rounded border border-fg/10 bg-fg/[0.02] p-3 text-base">
         <p className="text-base text-dim">Preview</p>
         <p>
-          <Markdown components={bioMarkdownComponents}>{previewOne}</Markdown>
+          <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{previewOne}</Markdown>
         </p>
         {previewTwo && (
           <p>
-            <Markdown components={bioMarkdownComponents}>{previewTwo}</Markdown>
+            <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{previewTwo}</Markdown>
           </p>
         )}
       </div>

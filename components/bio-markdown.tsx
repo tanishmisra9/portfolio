@@ -10,6 +10,15 @@ const highlightLinkClassName =
  * inline formatting (bold, links) is expected — `p` collapses to a fragment so the
  * caller's own styled <p> stays the one paragraph wrapper.
  */
+/**
+ * `p` collapses into the caller's own <p>, so block-level markdown (a heading, list,
+ * blockquote) can't be allowed through — react-markdown would nest a block element
+ * inside that <p>, which is invalid HTML and throws a hydration error. Paired with
+ * `unwrapDisallowed` on the <Markdown> element so text inside a disallowed block still
+ * renders (just without its block wrapper) instead of being dropped.
+ */
+export const bioMarkdownAllowedElements = ["p", "strong", "em", "a", "br"];
+
 export const bioMarkdownComponents: Components = {
   p: ({ children }) => <>{children}</>,
   strong: ({ children }) => <strong className="font-bold text-fg">{children}</strong>,

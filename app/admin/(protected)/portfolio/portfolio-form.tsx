@@ -121,14 +121,6 @@ export function PortfolioForm({ initial }: { initial: PortfolioContent }) {
         changed={changedKeys.includes("bio")}
       >
         <div className="space-y-3">
-          <label className="block">
-            <span className="mb-1 block text-base text-dim">Name</span>
-            <input
-              className={inputClass}
-              value={data.name}
-              onChange={(e) => setData({ ...data, name: e.target.value })}
-            />
-          </label>
           {(["Line 1", "Line 2"] as const).map((label, index) => {
             const lines = data.heroSubtitle.split("\n");
             return (

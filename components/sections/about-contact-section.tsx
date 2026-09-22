@@ -2,7 +2,7 @@ import Markdown from 'react-markdown';
 import { ScrollReveal } from '@/components/scroll-reveal';
 import { SECTION_GHOST_HEADING_BASE } from '@/components/ui/class-constants';
 import { Tooltip } from '@/components/ui/tooltip';
-import { bioMarkdownComponents } from '@/components/bio-markdown';
+import { bioMarkdownComponents, bioMarkdownAllowedElements } from '@/components/bio-markdown';
 import { resolveIcon } from '@/components/social-icon';
 import type { SocialLink } from '@/types/content';
 
@@ -31,10 +31,10 @@ export function AboutContactSection({ bio, social }: Props) {
         <ScrollReveal>
           <div className="mx-auto max-w-[min(44.16rem,calc(100vw-3rem))] px-6 text-center">
             <p className={`${bioBodyClass} text-fg`}>
-              <Markdown components={bioMarkdownComponents}>{paragraphOne}</Markdown>
+              <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{paragraphOne}</Markdown>
             </p>
             <p className={`${bioBodyClass} mt-7 text-muted md:mt-9`}>
-              <Markdown components={bioMarkdownComponents}>{paragraphTwo}</Markdown>
+              <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{paragraphTwo}</Markdown>
             </p>
           </div>
         </ScrollReveal>
