@@ -33,13 +33,24 @@ export function ReorderableList<T extends { id: ItemId }>({
   const itemIds = items.map((i) => i.id).join(",");
   const itemsById = new Map(items.map((i) => [i.id, i]));
 
-  // Resync local order when the parent's item set changes (add/remove), without
-  // clobbering an in-progress drag reorder on every unrelated re-render.
+  // Resync local order whenever the parent's items change, without clobbering an
+  // in-progress drag reorder on every unrelated re-render (drag already updates `order`
+  // itself in handleDrop, synchronously ahead of the parent's items prop catching up).
   useEffect(() => {
     setOrder((current) => {
       if (current.join(",") === itemIds) return current;
-      const stillPresent = current.filter((id) => items.some((i) => i.id === id));
-      const added = items.filter((i) => !current.includes(i.id)).map((i) => i.id);
+      const currentIds = new Set(current);
+      const nextIds = new Set(items.map((i) => i.id));
+      const sameSet = current.length === items.length && current.every((id) => nextIds.has(id));
+      if (sameSet) {
+        // Same items, different order — a reorder that didn't go through this
+        // component's own handleDrop (e.g. EntryList's arrow-key move, which updates
+        // the parent's state directly). Adopt the parent's order rather than keeping
+        // this component's now-stale one, which otherwise never picks up such a change.
+        return items.map((i) => i.id);
+      }
+      const stillPresent = current.filter((id) => nextIds.has(id));
+      const added = items.filter((i) => !currentIds.has(i.id)).map((i) => i.id);
       return [...stillPresent, ...added];
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

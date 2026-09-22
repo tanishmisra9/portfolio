@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, Eye, EyeOff, GripVertical } from "lucide-react";
+import { useExpandedSet, moveItem } from "./use-expanded-set";
 
 export interface FieldDef {
   key: string;
@@ -47,33 +48,19 @@ export function ArrayEditor({
   reorderable,
   nested = false,
 }: ArrayEditorProps) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const { expanded, toggle, expand } = useExpandedSet();
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
   function move(id: string, toIndex: number) {
-    const from = items.findIndex((i) => i.id === id);
-    if (from < 0 || toIndex < 0 || toIndex >= items.length || from === toIndex) return;
-    const next = [...items];
-    const [moved] = next.splice(from, 1);
-    next.splice(toIndex, 0, moved);
-    onChange(next);
-  }
-
-  function toggle(id: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    onChange(moveItem(items, id, toIndex));
   }
 
   function addItem() {
     if (!newItem) return;
     const item = newItem();
     onChange([...items, item]);
-    setExpanded((prev) => new Set(prev).add(item.id));
+    expand(item.id);
   }
 
   function updateItem(id: string, key: string, value: unknown) {

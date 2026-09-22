@@ -136,7 +136,10 @@ async function migrateBlogPosts() {
     for (const [fullMatch, alt, refPath] of references) {
       if (!refPath.startsWith("/blog/")) continue;
       const upload = await uploadPublicFile(refPath, `blog/${slug}`);
-      body = body.replace(fullMatch, `![${alt}](${upload.url})`);
+      // .replace(fullMatch, ...) with a string argument only replaces the first match — a
+      // post referencing the same image twice would leave the second reference dangling
+      // once public/blog is deleted, per this script's own printed instructions below.
+      body = body.split(fullMatch).join(`![${alt}](${upload.url})`);
     }
 
     await db

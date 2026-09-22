@@ -58,6 +58,7 @@ export function AdminHeader({ hasChanges }: { hasChanges: boolean }) {
           <Link
             href={parent.href}
             aria-label={`Back to ${parent.label}`}
+            onMouseDown={(e) => e.preventDefault()}
             className="-my-2 ml-2 flex h-11 w-11 items-center justify-center rounded text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
           >
             <ArrowLeft className="h-5 w-5" aria-hidden />

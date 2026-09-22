@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { GripVertical } from "lucide-react";
 import { ReorderableList } from "./reorderable-list";
+import { useExpandedSet, moveItem } from "./use-expanded-set";
 import { DateRangeFields } from "./date-range-fields";
 import { FieldInput, type FieldDef, type Item } from "./array-editor";
 import type { StartEndDate } from "@/types/content";
@@ -26,7 +26,7 @@ interface EntryListProps {
  * every entry at once buries the ones you actually want to change.
  */
 export function EntryList({ items, fields, onChange, newItem, summary, hasDateRange, nested }: EntryListProps) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const { expanded, toggle, expand } = useExpandedSet();
 
   function updateItem(id: string, key: string, value: unknown) {
     onChange(items.map((item) => (item.id === id ? { ...item, [key]: value } : item)));
@@ -41,27 +41,13 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
   }
 
   function move(id: string, toIndex: number) {
-    const from = items.findIndex((i) => i.id === id);
-    if (from < 0 || toIndex < 0 || toIndex >= items.length || from === toIndex) return;
-    const next = [...items];
-    const [moved] = next.splice(from, 1);
-    next.splice(toIndex, 0, moved);
-    onChange(next);
-  }
-
-  function toggle(id: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    onChange(moveItem(items, id, toIndex));
   }
 
   function addItem() {
     const item = newItem();
     onChange([...items, item]);
-    setExpanded((prev) => new Set(prev).add(item.id));
+    expand(item.id);
   }
 
   return (
