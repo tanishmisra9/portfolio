@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { QuoteEntry } from "@/data/quotes";
+import type { QuoteEntry } from "@/types/content";
 import {
   MAX_START_DELAY_MS,
   QUOTE_FADE_DURATION_S,

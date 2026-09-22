@@ -1,37 +1,8 @@
 import { PhotosIndexMotion } from "@/components/photos/photos-index-motion";
 import { getPublishedData } from "@/lib/site-content";
-import type { RandomPhotoCandidate } from "@/data/photos";
+import { getRandomPhotoCandidates } from "@/lib/random-photo-candidates";
 
 const PINNED_FIRST_SLUG = "super-max";
-
-function getRandomPhotoCandidates(
-  collections: Awaited<ReturnType<typeof getPublishedData>>["collections"],
-): RandomPhotoCandidate[] {
-  return collections
-    .filter((collection) => collection.slug !== "super-max")
-    .flatMap((collection) =>
-      collection.photos.flatMap((photo) => {
-        const primary: RandomPhotoCandidate = {
-          src: photo.src,
-          alt: photo.alt,
-          caption: photo.caption,
-          collectionTitle: collection.title,
-          collectionSlug: collection.slug,
-        };
-        return photo.duetWith
-          ? [
-              primary,
-              {
-                src: photo.duetWith.src,
-                alt: photo.duetWith.alt,
-                collectionTitle: collection.title,
-                collectionSlug: collection.slug,
-              },
-            ]
-          : [primary];
-      }),
-    );
-}
 
 export default async function PhotosPage() {
   const data = await getPublishedData();

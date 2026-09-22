@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/class-constants";
 import { Tooltip } from "@/components/ui/tooltip";
 import { photosEntranceVariants } from "@/lib/photos-motion";
-import type { RandomPhotoCandidate } from "@/data/photos";
+import type { RandomPhotoCandidate } from "@/types/content";
 
 const OVERLAY_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const SURPRISE_BOKEH_ORBS = [

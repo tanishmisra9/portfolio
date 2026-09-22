@@ -95,3 +95,61 @@ export type PortfolioContent = {
   aboutBio: string;
   social: SocialLink[];
 };
+
+// ---- Photos ----
+// Shared with data/photos.ts (the migration script's seed data) and the published-snapshot
+// shape in lib/admin/publish.ts — kept here, not in data/photos.ts, so nothing that only
+// needs the type has to import a file whose seed-data instructions say to delete it.
+
+export type Photo = {
+  src: string;
+  alt: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+  duetWith?: {
+    src: string;
+    alt: string;
+    width?: number;
+    height?: number;
+  };
+};
+
+export type PhotoCollection = {
+  slug: string;
+  title: string;
+  description: string;
+  coverImage: string;
+  photos: Photo[];
+};
+
+export type RandomPhotoCandidate = {
+  src: string;
+  alt: string;
+  caption?: string;
+  collectionTitle: string;
+  collectionSlug: string;
+};
+
+// ---- Quotes ----
+
+export type QuoteEntry = {
+  id: string;
+  text: string;
+  attribution?: string;
+  /** Biases the size tier: 3 = can land in the largest tier. Defaults to 1. */
+  emphasis?: 1 | 2 | 3;
+};
+
+// ---- Blog ----
+
+export type BlogPostMeta = {
+  slug: string;
+  title: string;
+  date: string;
+  description: string;
+};
+
+export type BlogPost = BlogPostMeta & {
+  content: string;
+};

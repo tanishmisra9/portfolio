@@ -1,32 +1,5 @@
-export interface Photo {
-  src: string;
-  alt: string;
-  caption?: string;
-  width?: number;
-  height?: number;
-  duetWith?: {
-    src: string;
-    alt: string;
-    width?: number;
-    height?: number;
-  };
-}
-
-export interface PhotoCollection {
-  slug: string;
-  title: string;
-  description: string;
-  coverImage: string;
-  photos: Photo[];
-}
-
-export interface RandomPhotoCandidate {
-  src: string;
-  alt: string;
-  caption?: string;
-  collectionTitle: string;
-  collectionSlug: string;
-}
+import type { Photo, PhotoCollection } from "@/types/content";
+export type { Photo, PhotoCollection };
 
 export const collections: PhotoCollection[] = [
   {
@@ -647,30 +620,3 @@ export function getAllCollectionSlugs(): string[] {
   return collections.map((c) => c.slug);
 }
 
-export function getRandomPhotoCandidates(): RandomPhotoCandidate[] {
-  return collections
-    .filter((collection) => collection.slug !== "super-max")
-    .flatMap((collection) =>
-    collection.photos.flatMap((photo) => {
-      const primary: RandomPhotoCandidate = {
-        src: photo.src,
-        alt: photo.alt,
-        caption: photo.caption,
-        collectionTitle: collection.title,
-        collectionSlug: collection.slug,
-      };
-
-      return photo.duetWith
-        ? [
-            primary,
-            {
-              src: photo.duetWith.src,
-              alt: photo.duetWith.alt,
-              collectionTitle: collection.title,
-              collectionSlug: collection.slug,
-            },
-          ]
-        : [primary];
-    }),
-  );
-}

@@ -1,10 +1,5 @@
-export interface QuoteEntry {
-  id: string;
-  text: string;
-  attribution?: string;
-  /** Biases the size tier: 3 = can land in the largest tier. Defaults to 1. */
-  emphasis?: 1 | 2 | 3;
-}
+import type { QuoteEntry } from "@/types/content";
+export type { QuoteEntry };
 
 export const quotes: QuoteEntry[] = [
   {

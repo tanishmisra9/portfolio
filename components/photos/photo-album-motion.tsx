@@ -8,7 +8,7 @@ import { useCallback, useRef, useState } from "react";
 import { AlbumTitle } from "@/components/photos/album-title";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { photosEntranceVariants } from "@/lib/photos-motion";
-import type { Photo } from "@/data/photos";
+import type { Photo } from "@/types/content";
 
 const BLUR_DATA_URL =
   "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AJQAB/9k=";

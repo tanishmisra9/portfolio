@@ -3,7 +3,11 @@ import { getPublishedData } from "@/lib/site-content";
 
 export default async function BlogPage() {
   const data = await getPublishedData();
-  const posts = [...data.posts].sort((a, b) => (a.date < b.date ? 1 : -1));
+  // BlogIndexMotion only renders title/date/description/slug — drop each post's full
+  // markdown body rather than shipping it to the client for every post on the index.
+  const posts = [...data.posts]
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .map(({ content: _content, ...meta }) => meta);
 
   return (
     <main

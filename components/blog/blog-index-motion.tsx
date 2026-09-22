@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
-import type { BlogPostMeta } from "@/lib/blog";
+import type { BlogPostMeta } from "@/types/content";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
