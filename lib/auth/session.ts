@@ -27,6 +27,14 @@ const cookieOptions: Omit<SessionOptions, "password"> = {
 };
 
 export async function getSession() {
+  // cookies() must be called — and awaited — before any other code in this function can
+  // throw. Next.js detects a route's need for dynamic (per-request) rendering by reading
+  // the exception it throws internally when cookies()/headers() are called during static
+  // generation; validating SESSION_SECRET first pre-empted that signal with an ordinary
+  // Error, which Next then treated as a hard build failure on every admin route instead of
+  // correctly bailing them to dynamic rendering.
+  const cookieStore = await cookies();
+
   const secret = process.env.SESSION_SECRET;
   if (!secret) {
     throw new Error(
@@ -36,7 +44,7 @@ export async function getSession() {
   if (secret.length < 32) {
     throw new Error("SESSION_SECRET must be at least 32 characters long.");
   }
-  return getIronSession<SessionData>(await cookies(), { ...cookieOptions, password: secret });
+  return getIronSession<SessionData>(cookieStore, { ...cookieOptions, password: secret });
 }
 
 export function isSessionExpired(session: Partial<SessionData>): boolean {
