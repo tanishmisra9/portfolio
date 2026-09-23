@@ -5,7 +5,6 @@ import {
   useEffect,
   useRef,
   useState,
-  type PointerEvent,
 } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useHomeIntroMarkDone } from "@/components/home-intro-gate";
@@ -91,17 +90,26 @@ export function Hero({ subtitle }: HeroProps) {
     setScatterTrigger((t) => t + 1);
   };
 
-  const onNamePointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isDesktopRef.current) return;
-    tanishMagnetRef.current?.(e.clientX, e.clientY);
-    misraMagnetRef.current?.(e.clientX, e.clientY);
-  };
-
-  const onNamePointerLeaveOrCancel = () => {
-    if (!isDesktopRef.current) return;
-    tanishResetRef.current?.();
-    misraResetRef.current?.();
-  };
+  /* Window-level so the pull starts as the cursor approaches, not only once it is over the name box. */
+  useEffect(() => {
+    const move = (e: globalThis.PointerEvent) => {
+      if (!isDesktopRef.current) return;
+      tanishMagnetRef.current?.(e.clientX, e.clientY);
+      misraMagnetRef.current?.(e.clientX, e.clientY);
+    };
+    const reset = () => {
+      tanishResetRef.current?.();
+      misraResetRef.current?.();
+    };
+    window.addEventListener("pointermove", move);
+    document.documentElement.addEventListener("pointerleave", reset);
+    window.addEventListener("pointercancel", reset);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      document.documentElement.removeEventListener("pointerleave", reset);
+      window.removeEventListener("pointercancel", reset);
+    };
+  }, []);
 
   return (
     <section className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[82vh] md:items-center md:py-24">
@@ -115,9 +123,6 @@ export function Hero({ subtitle }: HeroProps) {
                 tabIndex={0}
                 aria-label="Play name pit-stop animation"
                 className="heading-bleed-mobile flex flex-col items-center cursor-pointer select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:text-[clamp(2.256rem,9.026vw,8.726rem)]"
-                onPointerMove={onNamePointerMove}
-                onPointerLeave={onNamePointerLeaveOrCancel}
-                onPointerCancel={onNamePointerLeaveOrCancel}
                 onClick={onNameClick}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {

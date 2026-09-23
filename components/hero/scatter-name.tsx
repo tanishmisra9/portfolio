@@ -155,7 +155,7 @@ function ScatterEntranceSpace({
   );
 }
 
-const MAGNET_RADIUS = 400;
+const MAGNET_RADIUS = 350;
 const PULL_FACTOR = 0.5;
 const MAX_PULL = 100;
 
