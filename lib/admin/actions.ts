@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, ne, sql } from "drizzle-orm";
 import matter from "gray-matter";
 import { db } from "@/db/client";
 import { portfolio, collections, photos, quotes, posts, radioTriggers } from "@/db/schema";
@@ -192,6 +192,64 @@ export async function reorderCollections(orderedIds: number[]) {
     ),
   );
   draftChanged();
+}
+
+// ---- AI alt text ----
+
+const ALT_MODEL = "gpt-4.1-nano";
+const MAX_ALT_IMAGE_CHARS = 400_000;
+
+/**
+ * Suggests alt text for a new photo, styled after the alts already on the site. The
+ * client sends a small downscaled JPEG data URL (not the original file) so this stays far
+ * under Vercel's 4.5MB request-body cap. Returns null on any failure or a missing
+ * OPENAI_API_KEY -- uploading never depends on this.
+ */
+export async function suggestAltText(imageDataUrl: string): Promise<string | null> {
+  await requireAdmin();
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return null;
+  if (!imageDataUrl.startsWith("data:image/jpeg;base64,") || imageDataUrl.length > MAX_ALT_IMAGE_CHARS) {
+    return null;
+  }
+
+  const examples = await db
+    .select({ alt: photos.alt })
+    .from(photos)
+    .where(ne(photos.alt, ""))
+    .orderBy(sql`random()`)
+    .limit(20);
+
+  const system = [
+    "You write alt text for photos on a personal portfolio site.",
+    "Write ONE sentence in the same style as the examples: concrete and visual, roughly 100-180 characters,",
+    "describing what is actually visible. Never start with 'Image of' or 'Photo of'. Reply with the alt text only.",
+    "",
+    "Examples:",
+    ...examples.map((e) => `- ${e.alt}`),
+  ].join("\n");
+
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: ALT_MODEL,
+        max_tokens: 120,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: [{ type: "image_url", image_url: { url: imageDataUrl, detail: "low" } }] },
+        ],
+      }),
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const text = json.choices?.[0]?.message?.content?.trim().replace(/^["']|["']$/g, "");
+    return text || null;
+  } catch {
+    return null;
+  }
 }
 
 // ---- Photos ----

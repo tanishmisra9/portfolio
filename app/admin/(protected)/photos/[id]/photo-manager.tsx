@@ -1,16 +1,35 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Loader2, RotateCcw, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { InferSelectModel } from "drizzle-orm";
 import type { photos } from "@/db/schema";
 import { ReorderableList } from "@/components/admin/reorderable-list";
-import { deletePhoto, reorderPhotos, updatePhoto, uploadPhoto } from "@/lib/admin/actions";
-import { uploadImageToBlob } from "@/lib/admin/client-upload";
+import { deletePhoto, reorderPhotos, suggestAltText, updatePhoto, uploadPhoto } from "@/lib/admin/actions";
+import { toAltPreviewDataUrl, uploadImageToBlob } from "@/lib/admin/client-upload";
 
 type Photo = InferSelectModel<typeof photos>;
+
+interface PendingPhoto {
+  key: string;
+  file: File;
+  previewUrl: string;
+  alt: string;
+  caption: string;
+  /** First AI suggestion, kept so Reset can restore it without another API call. */
+  aiAlt: string | null;
+  aiStatus: "generating" | "ready" | "failed";
+  status: "idle" | "uploading" | "saving";
+  progress: number;
+}
+
+const fieldClass =
+  "w-full rounded border border-border-strong bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70 disabled:opacity-60";
+// Single-line height at rest, grows on focus — pure CSS so it works in Safari.
+const growClass =
+  "h-10 resize-none overflow-hidden whitespace-nowrap transition-[height] duration-200 focus:h-32 focus:overflow-auto focus:whitespace-normal motion-reduce:transition-none";
 
 export function PhotoManager({
   collectionId,
@@ -23,35 +42,74 @@ export function PhotoManager({
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
-  const [pending, setPending] = useState<{ key: string; file: File; alt: string; caption: string }[]>([]);
+  const [pending, setPending] = useState<PendingPhoto[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  function addFiles(files: FileList | null) {
-    if (!files) return;
-    setPending((prev) => [
-      ...prev,
-      ...Array.from(files).map((file) => ({ key: crypto.randomUUID(), file, alt: "", caption: "" })),
-    ]);
+  function patchPending(key: string, patch: Partial<PendingPhoto>) {
+    setPending((prev) => prev.map((p) => (p.key === key ? { ...p, ...patch } : p)));
   }
 
-  // Removed by key, not index — index goes stale if two uploads are in flight at once and
-  // finish out of order, which previously dropped or duplicated a queued photo.
-  function uploadPending(key: string) {
+  function removePending(key: string) {
+    setPending((prev) => {
+      const gone = prev.find((p) => p.key === key);
+      if (gone) URL.revokeObjectURL(gone.previewUrl);
+      return prev.filter((p) => p.key !== key);
+    });
+  }
+
+  async function requestAiAlt(key: string, file: File) {
+    const preview = await toAltPreviewDataUrl(file);
+    const suggestion = preview ? await suggestAltText(preview).catch(() => null) : null;
+    setPending((prev) =>
+      prev.map((p) => {
+        if (p.key !== key) return p;
+        if (!suggestion) return { ...p, aiStatus: "failed" };
+        // Never overwrite something the user already typed while this was loading.
+        return { ...p, aiAlt: suggestion, aiStatus: "ready", alt: p.alt === "" ? suggestion : p.alt };
+      }),
+    );
+  }
+
+  function addFiles(files: FileList | null) {
+    if (!files) return;
+    const added: PendingPhoto[] = Array.from(files).map((file) => ({
+      key: crypto.randomUUID(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+      alt: "",
+      caption: "",
+      aiAlt: null,
+      aiStatus: "generating",
+      status: "idle",
+      progress: 0,
+    }));
+    setPending((prev) => [...prev, ...added]);
+    for (const item of added) void requestAiAlt(item.key, item.file);
+  }
+
+  // Tracked per item (not one shared transition) so concurrent uploads each show their own
+  // progress, and removal is by key so out-of-order completion can't drop or duplicate a row.
+  async function uploadPending(key: string) {
     const item = pending.find((p) => p.key === key);
     if (!item) return;
     setErrors((prev) => ({ ...prev, [key]: "" }));
-    startTransition(async () => {
-      try {
-        const { url, width, height } = await uploadImageToBlob(item.file, `photos/${collectionSlug}`);
-        await uploadPhoto(collectionId, url, { alt: item.alt, caption: item.caption, width, height });
-        setPending((prev) => prev.filter((p) => p.key !== key));
-        router.refresh();
-      } catch (err) {
-        setErrors((prev) => ({ ...prev, [key]: err instanceof Error ? err.message : "Upload failed." }));
-      }
-    });
+    patchPending(key, { status: "uploading", progress: 0 });
+    try {
+      const { url, width, height } = await uploadImageToBlob(
+        item.file,
+        `photos/${collectionSlug}`,
+        (percentage) => patchPending(key, { progress: percentage }),
+      );
+      patchPending(key, { status: "saving", progress: 100 });
+      await uploadPhoto(collectionId, url, { alt: item.alt, caption: item.caption, width, height });
+      removePending(key);
+      router.refresh();
+    } catch (err) {
+      patchPending(key, { status: "idle", progress: 0 });
+      setErrors((prev) => ({ ...prev, [key]: err instanceof Error ? err.message : "Upload failed." }));
+    }
   }
 
   return (
@@ -83,42 +141,95 @@ export function PhotoManager({
         />
       </div>
 
-      {pending.map((item) => (
-        <div key={item.key} className="space-y-2 rounded-md border border-border bg-surface p-3 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <span className="text-base">{item.file.name}</span>
-            <input
-              className="flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
-              placeholder="Alt text (required)"
-              value={item.alt}
-              onChange={(e) =>
-                setPending((prev) =>
-                  prev.map((p) => (p.key === item.key ? { ...p, alt: e.target.value } : p)),
-                )
-              }
-            />
-            <input
-              className="flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
-              placeholder="Caption (optional)"
-              value={item.caption}
-              onChange={(e) =>
-                setPending((prev) =>
-                  prev.map((p) => (p.key === item.key ? { ...p, caption: e.target.value } : p)),
-                )
-              }
-            />
-            <button
-              type="button"
-              disabled={!item.alt}
-              onClick={() => uploadPending(item.key)}
-              className="rounded bg-fg px-3 py-1 text-base text-bg disabled:opacity-50"
-            >
-              Upload
-            </button>
+      {pending.map((item) => {
+        const busy = item.status !== "idle";
+        return (
+          <div key={item.key} className="space-y-3 rounded-md border border-border bg-surface p-4 backdrop-blur-md">
+            <div className="flex gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.previewUrl} alt="" className="h-28 w-28 shrink-0 rounded object-cover" />
+              <div className="min-w-0 flex-1 space-y-3">
+                <p className="truncate text-base text-dim">{item.file.name}</p>
+                <div>
+                  <div className="mb-1 flex flex-wrap items-center gap-2 text-base text-dim">
+                    <label htmlFor={`alt-${item.key}`}>Alt text (required)</label>
+                    {item.aiStatus === "generating" && (
+                      <span className="inline-flex items-center gap-1">
+                        <Sparkles className="h-4 w-4 animate-pulse" aria-hidden /> Generating…
+                      </span>
+                    )}
+                    {item.aiStatus === "failed" && <span>Couldn&apos;t auto-generate</span>}
+                    {item.aiAlt && item.alt !== item.aiAlt && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => patchPending(item.key, { alt: item.aiAlt! })}
+                        className="ml-auto inline-flex items-center gap-1 rounded px-2 py-1 text-base text-fg underline decoration-fg/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                      >
+                        <RotateCcw className="h-4 w-4" aria-hidden /> Reset to suggestion
+                      </button>
+                    )}
+                  </div>
+                  <textarea
+                    id={`alt-${item.key}`}
+                    rows={4}
+                    disabled={busy}
+                    className={fieldClass}
+                    placeholder={item.aiStatus === "generating" ? "Generating alt text…" : "Describe the photo"}
+                    value={item.alt}
+                    onChange={(e) => patchPending(item.key, { alt: e.target.value })}
+                  />
+                </div>
+                <label className="block">
+                  <span className="mb-1 block text-base text-dim">Caption (optional)</span>
+                  <textarea
+                    rows={3}
+                    disabled={busy}
+                    className={fieldClass}
+                    value={item.caption}
+                    onChange={(e) => patchPending(item.key, { caption: e.target.value })}
+                  />
+                </label>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                disabled={!item.alt || busy}
+                onClick={() => void uploadPending(item.key)}
+                className="inline-flex min-w-36 items-center justify-center gap-2 rounded bg-fg px-4 py-2 text-base text-bg disabled:opacity-60"
+              >
+                {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+                {item.status === "uploading"
+                  ? `Uploading ${Math.round(item.progress)}%`
+                  : item.status === "saving"
+                    ? "Saving…"
+                    : "Upload"}
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => removePending(item.key)}
+                className="rounded px-3 py-2 text-base text-dim hover:text-fg disabled:opacity-60"
+              >
+                Remove
+              </button>
+            </div>
+            {busy && (
+              <div
+                role="progressbar"
+                aria-valuenow={Math.round(item.progress)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                className="h-1 overflow-hidden rounded bg-fg/10"
+              >
+                <div className="h-full bg-fg transition-[width] duration-200" style={{ width: `${item.progress}%` }} />
+              </div>
+            )}
+            {errors[item.key] && <p className="text-base text-red-500">{errors[item.key]}</p>}
           </div>
-          {errors[item.key] && <p className="text-base text-red-500">{errors[item.key]}</p>}
-        </div>
-      ))}
+        );
+      })}
 
       <ReorderableList
         items={photos}
@@ -142,9 +253,9 @@ export function PhotoManager({
               className="h-16 w-16 rounded object-cover"
             />
             <div className="flex-1 space-y-1">
-              <input
+              <textarea
                 aria-label="Alt text"
-                className="w-full rounded border border-border-strong bg-transparent px-3 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                className={`${fieldClass} ${growClass}`}
                 defaultValue={photo.alt}
                 onBlur={(e) =>
                   e.target.value !== photo.alt &&
@@ -154,9 +265,9 @@ export function PhotoManager({
                   })
                 }
               />
-              <input
+              <textarea
                 aria-label="Caption"
-                className="w-full rounded border border-border-strong bg-transparent px-3 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                className={`${fieldClass} ${growClass}`}
                 placeholder="Caption"
                 defaultValue={photo.caption ?? ""}
                 onBlur={(e) =>

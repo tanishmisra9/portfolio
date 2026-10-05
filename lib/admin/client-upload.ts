@@ -15,6 +15,7 @@ import { upload } from "@vercel/blob/client";
 export async function uploadImageToBlob(
   file: File,
   pathnamePrefix: string,
+  onProgress?: (percentage: number) => void,
 ): Promise<{ url: string; width: number; height: number }> {
   let width: number;
   let height: number;
@@ -30,7 +31,25 @@ export async function uploadImageToBlob(
   const blob = await upload(`${pathnamePrefix}/${file.name}`, file, {
     access: "public",
     handleUploadUrl: "/api/admin/blob-upload",
+    onUploadProgress: onProgress ? ({ percentage }) => onProgress(percentage) : undefined,
   });
 
   return { url: blob.url, width, height };
+}
+
+/** A small JPEG preview (longest side 512px) as a data URL — what the AI alt-text action
+ * receives instead of the full file, keeping that request tiny. Null if undecodable. */
+export async function toAltPreviewDataUrl(file: File): Promise<string | null> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 512 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    return canvas.toDataURL("image/jpeg", 0.7);
+  } catch {
+    return null;
+  }
 }
