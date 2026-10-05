@@ -21,6 +21,7 @@ interface PendingPhoto {
   /** First AI suggestion, kept so Reset can restore it without another API call. */
   aiAlt: string | null;
   aiStatus: "generating" | "ready" | "failed";
+  aiError?: string;
   status: "idle" | "uploading" | "saving";
   progress: number;
 }
@@ -76,11 +77,15 @@ export function PhotoManager({
 
   async function fetchAiAlt(key: string, file: File) {
     const preview = await toAltPreviewDataUrl(file);
-    const suggestion = preview ? await suggestAltText(preview).catch(() => null) : null;
+    const result = preview
+      ? await suggestAltText(preview).catch(() => ({ error: "request failed (are you still logged in?)" }))
+      : { error: "this image format can't be previewed in the browser" };
+    const suggestion = "alt" in result ? result.alt : null;
+    const reason = "error" in result ? result.error : "";
     setPending((prev) =>
       prev.map((p) => {
         if (p.key !== key) return p;
-        if (!suggestion) return { ...p, aiStatus: "failed" };
+        if (!suggestion) return { ...p, aiStatus: "failed", aiError: reason };
         // Never overwrite something the user already typed while this was loading.
         return { ...p, aiAlt: suggestion, aiStatus: "ready", alt: p.alt === "" ? suggestion : p.alt };
       }),
@@ -173,7 +178,11 @@ export function PhotoManager({
                         <Sparkles className="h-4 w-4 animate-pulse" aria-hidden /> Generating…
                       </span>
                     )}
-                    {item.aiStatus === "failed" && <span>Couldn&apos;t auto-generate</span>}
+                    {item.aiStatus === "failed" && (
+                      <span>
+                        Couldn&apos;t auto-generate{item.aiError ? ` — ${item.aiError}` : ""}
+                      </span>
+                    )}
                     {item.aiAlt && item.alt !== item.aiAlt && (
                       <button
                         type="button"

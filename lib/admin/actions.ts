@@ -205,12 +205,20 @@ const MAX_ALT_IMAGE_CHARS = 400_000;
  * under Vercel's 4.5MB request-body cap. Returns null on any failure or a missing
  * OPENAI_API_KEY -- uploading never depends on this.
  */
-export async function suggestAltText(imageDataUrl: string): Promise<string | null> {
+export async function suggestAltText(
+  imageDataUrl: string,
+): Promise<{ alt: string } | { error: string }> {
   await requireAdmin();
+  // Failures are returned (and logged, never including the key) so the UI can say *why*
+  // instead of a bare "couldn't generate" -- a missing key and a billing error look the same otherwise.
+  const fail = (error: string) => {
+    console.error("[suggestAltText]", error);
+    return { error };
+  };
   const key = process.env.OPENAI_API_KEY;
-  if (!key) return null;
+  if (!key) return fail("OPENAI_API_KEY is not set on this deployment");
   if (!imageDataUrl.startsWith("data:image/jpeg;base64,") || imageDataUrl.length > MAX_ALT_IMAGE_CHARS) {
-    return null;
+    return fail("preview image was invalid or too large");
   }
 
   try {
@@ -243,12 +251,15 @@ export async function suggestAltText(imageDataUrl: string): Promise<string | nul
       }),
       signal: AbortSignal.timeout(12_000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const detail = ((await res.json().catch(() => null)) as { error?: { message?: string } } | null)?.error?.message;
+      return fail(`OpenAI returned ${res.status}${detail ? `: ${detail.slice(0, 120)}` : ""}`);
+    }
     const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
     const text = json.choices?.[0]?.message?.content?.trim().replace(/^["']|["']$/g, "");
-    return text || null;
-  } catch {
-    return null;
+    return text ? { alt: text } : fail("OpenAI returned an empty response");
+  } catch (err) {
+    return fail(err instanceof Error ? `${err.name}: ${err.message}`.slice(0, 140) : "unknown error");
   }
 }
 
