@@ -47,7 +47,11 @@ export async function toAltPreviewDataUrl(file: File): Promise<string | null> {
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);
-    canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const ctx = canvas.getContext("2d")!;
+    // JPEG has no alpha: without this, transparent PNG/WebP areas encode as black.
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL("image/jpeg", 0.7);
   } catch {
     return null;

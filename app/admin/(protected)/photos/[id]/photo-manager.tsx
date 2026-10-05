@@ -65,7 +65,16 @@ export function PhotoManager({
     setPending((prev) => prev.filter((p) => p.key !== key));
   }
 
-  async function requestAiAlt(key: string, file: File) {
+  // Next.js runs client-invoked server actions strictly one at a time, so firing a
+  // suggestion per selected file at once would make an Upload click (uploadPhoto) wait
+  // behind all of them. Chaining them keeps at most one in flight ahead of any upload.
+  const aiQueue = useRef<Promise<unknown>>(Promise.resolve());
+
+  function requestAiAlt(key: string, file: File) {
+    aiQueue.current = aiQueue.current.then(() => fetchAiAlt(key, file));
+  }
+
+  async function fetchAiAlt(key: string, file: File) {
     const preview = await toAltPreviewDataUrl(file);
     const suggestion = preview ? await suggestAltText(preview).catch(() => null) : null;
     setPending((prev) =>
@@ -92,7 +101,7 @@ export function PhotoManager({
       progress: 0,
     }));
     setPending((prev) => [...prev, ...added]);
-    for (const item of added) void requestAiAlt(item.key, item.file);
+    for (const item of added) requestAiAlt(item.key, item.file);
   }
 
   // Tracked per item (not one shared transition) so concurrent uploads each show their own

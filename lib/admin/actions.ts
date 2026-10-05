@@ -241,7 +241,7 @@ export async function suggestAltText(imageDataUrl: string): Promise<string | nul
           { role: "user", content: [{ type: "image_url", image_url: { url: imageDataUrl, detail: "low" } }] },
         ],
       }),
-      signal: AbortSignal.timeout(20_000),
+      signal: AbortSignal.timeout(12_000),
     });
     if (!res.ok) return null;
     const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
