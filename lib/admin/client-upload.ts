@@ -40,16 +40,18 @@ export async function uploadImageToBlob(
 /** A small JPEG preview (longest side 512px) as a data URL — what the AI alt-text action
  * receives instead of the full file, keeping that request tiny. Null if undecodable. */
 export async function toAltPreviewDataUrl(file: File): Promise<string | null> {
+  let bitmap: ImageBitmap | null = null;
   try {
-    const bitmap = await createImageBitmap(file);
+    bitmap = await createImageBitmap(file);
     const scale = Math.min(1, 512 / Math.max(bitmap.width, bitmap.height));
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);
     canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    bitmap.close();
     return canvas.toDataURL("image/jpeg", 0.7);
   } catch {
     return null;
+  } finally {
+    bitmap?.close();
   }
 }

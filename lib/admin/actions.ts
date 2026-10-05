@@ -213,23 +213,23 @@ export async function suggestAltText(imageDataUrl: string): Promise<string | nul
     return null;
   }
 
-  const examples = await db
-    .select({ alt: photos.alt })
-    .from(photos)
-    .where(ne(photos.alt, ""))
-    .orderBy(sql`random()`)
-    .limit(20);
-
-  const system = [
-    "You write alt text for photos on a personal portfolio site.",
-    "Write ONE sentence in the same style as the examples: concrete and visual, roughly 100-180 characters,",
-    "describing what is actually visible. Never start with 'Image of' or 'Photo of'. Reply with the alt text only.",
-    "",
-    "Examples:",
-    ...examples.map((e) => `- ${e.alt}`),
-  ].join("\n");
-
   try {
+    const examples = await db
+      .select({ alt: photos.alt })
+      .from(photos)
+      .where(ne(photos.alt, ""))
+      .orderBy(sql`random()`)
+      .limit(20);
+
+    const system = [
+      "You write alt text for photos on a personal portfolio site.",
+      "Write ONE sentence in the same style as the examples: concrete and visual, roughly 100-180 characters,",
+      "describing what is actually visible. Never start with 'Image of' or 'Photo of'. Reply with the alt text only.",
+      "",
+      "Examples:",
+      ...examples.map((e) => `- ${e.alt}`),
+    ].join("\n");
+
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },

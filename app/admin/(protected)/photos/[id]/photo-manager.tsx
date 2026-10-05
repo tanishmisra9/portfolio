@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { GripVertical, Loader2, RotateCcw, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -24,6 +24,9 @@ interface PendingPhoto {
   status: "idle" | "uploading" | "saving";
   progress: number;
 }
+
+// Alt/caption are single logical lines; the textareas exist only for room to read and edit.
+const oneLine = (v: string) => v.replace(/\s*\n+\s*/g, " ").trim();
 
 const fieldClass =
   "w-full rounded border border-border-strong bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70 disabled:opacity-60";
@@ -51,12 +54,15 @@ export function PhotoManager({
     setPending((prev) => prev.map((p) => (p.key === key ? { ...p, ...patch } : p)));
   }
 
+  const pendingRef = useRef(pending);
+  pendingRef.current = pending;
+  // Previews are object URLs; release any still alive if the page is left.
+  useEffect(() => () => pendingRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl)), []);
+
   function removePending(key: string) {
-    setPending((prev) => {
-      const gone = prev.find((p) => p.key === key);
-      if (gone) URL.revokeObjectURL(gone.previewUrl);
-      return prev.filter((p) => p.key !== key);
-    });
+    const gone = pendingRef.current.find((p) => p.key === key);
+    if (gone) URL.revokeObjectURL(gone.previewUrl);
+    setPending((prev) => prev.filter((p) => p.key !== key));
   }
 
   async function requestAiAlt(key: string, file: File) {
@@ -103,7 +109,7 @@ export function PhotoManager({
         (percentage) => patchPending(key, { progress: percentage }),
       );
       patchPending(key, { status: "saving", progress: 100 });
-      await uploadPhoto(collectionId, url, { alt: item.alt, caption: item.caption, width, height });
+      await uploadPhoto(collectionId, url, { alt: oneLine(item.alt), caption: oneLine(item.caption), width, height });
       removePending(key);
       router.refresh();
     } catch (err) {
@@ -195,7 +201,7 @@ export function PhotoManager({
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                disabled={!item.alt || busy}
+                disabled={!item.alt.trim() || busy}
                 onClick={() => void uploadPending(item.key)}
                 className="inline-flex min-w-36 items-center justify-center gap-2 rounded bg-fg px-4 py-2 text-base text-bg disabled:opacity-60"
               >
@@ -258,9 +264,9 @@ export function PhotoManager({
                 className={`${fieldClass} ${growClass}`}
                 defaultValue={photo.alt}
                 onBlur={(e) =>
-                  e.target.value !== photo.alt &&
+                  oneLine(e.target.value) !== photo.alt &&
                   startTransition(async () => {
-                    await updatePhoto(photo.id, { alt: e.target.value });
+                    await updatePhoto(photo.id, { alt: oneLine(e.target.value) });
                     router.refresh();
                   })
                 }
@@ -271,9 +277,9 @@ export function PhotoManager({
                 placeholder="Caption"
                 defaultValue={photo.caption ?? ""}
                 onBlur={(e) =>
-                  e.target.value !== (photo.caption ?? "") &&
+                  oneLine(e.target.value) !== (photo.caption ?? "") &&
                   startTransition(async () => {
-                    await updatePhoto(photo.id, { caption: e.target.value || null });
+                    await updatePhoto(photo.id, { caption: oneLine(e.target.value) || null });
                     router.refresh();
                   })
                 }
