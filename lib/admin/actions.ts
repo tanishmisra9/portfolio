@@ -436,9 +436,9 @@ export async function importMarkdownPost(rawMarkdown: string, slug: string) {
     const filename = refPath.split("/").pop() ?? refPath;
     const exact = uploaded.find((u) => u.name === filename);
     if (exact) {
-      // The referenced path is almost always a local /blog/<slug>/... path from before the
-      // image lived on Blob — rewrite it to the real URL so the published post doesn't
-      // link to a path that no longer exists once public/blog is removed.
+      // The referenced path is usually a local /blog/<slug>/... path from the markdown's
+      // original home — rewrite it to the uploaded image's real Blob URL, since no such
+      // local path exists on the site.
       body = body.split(refPath).join(exact.url);
       imageChecks.push({ referencedPath: refPath, status: "ok" });
       continue;

@@ -97,9 +97,7 @@ export type PortfolioContent = {
 };
 
 // ---- Photos ----
-// Shared with data/photos.ts (the migration script's seed data) and the published-snapshot
-// shape in lib/admin/publish.ts — kept here, not in data/photos.ts, so nothing that only
-// needs the type has to import a file whose seed-data instructions say to delete it.
+// Shapes of the published snapshot (lib/admin/publish.ts) that the public pages render.
 
 export type Photo = {
   src: string;

@@ -6,7 +6,7 @@ Personal portfolio and photography site at [tanishmisra.com](https://tanishmisra
 
 - **Home (`/`)** — Hero, experience, education, skills, certifications, projects, and about/contact
 - **Photos (`/photos`)** — Collection grid, interactive header, and “Surprise me!” random photo overlay
-- **Album pages (`/photos/[slug]`)** — Static routes generated from `data/photos.ts`
+- **Album pages (`/photos/[slug]`)** — Statically generated from the published snapshot in the database
 - **Quotes (`/quotes`)** — Generative typographic quote cloud: a skyline-packed mosaic on desktop (different fonts, sizes, and arrangement every visit) and a clean vertical Playfair stack on mobile, both ordered by a per-load shuffle
 - **Box Box easter egg** — Global F1 team-radio SFX on any page (desktop: type `bbb` or `boxbox`; mobile: triple-tap within 800ms)
 - **Super Max easter egg** — Clicking any Max Verstappen quote on `/quotes` jumps to the Super Max photo album
@@ -24,7 +24,7 @@ Personal portfolio and photography site at [tanishmisra.com](https://tanishmisra
 
 ## Photography collections
 
-Eight live collections are defined in [`data/photos.ts`](data/photos.ts):
+Collections are managed in the admin panel (`/admin/photos`); the live set is:
 
 | Slug | Title | Notes |
 | --- | --- | --- |
@@ -37,11 +37,12 @@ Eight live collections are defined in [`data/photos.ts`](data/photos.ts):
 | `new-year` | New Year | Holiday + NYE photos; click title → fireworks |
 | `standalone` | Standalones | |
 
-Asset folders under `public/photos/` match collection slugs (`campus`, `snowfall`, `uk-2025`, `new-york`, `smokies`, `new-year`, `standalone`, `super-max`).
+Photos live in Vercel Blob, referenced by URL from the database.
 
 ## Tech stack
 
 - Next.js 15 · React 19 · TypeScript
+- Postgres (Neon) + Drizzle ORM · Vercel Blob · iron-session auth
 - Tailwind CSS 3 · PostCSS · Autoprefixer
 - Framer Motion · Lenis · Lucide React
 - ESLint 9 (`eslint.config.mjs`) · `@vercel/analytics`
@@ -54,6 +55,8 @@ Portfolio/
 │   ├── layout.tsx          # Root layout, skip link, radio easter egg, SmoothScroll, header
 │   ├── page.tsx            # Home page sections
 │   ├── globals.css         # Theme, ghost headings, album title animations
+│   ├── admin/              # Password-protected CMS (portfolio, photos, quotes, blog, radio)
+│   ├── api/admin/          # Blob client-upload token route
 │   ├── photos/
 │   │   ├── layout.tsx      # Photos metadata + font preloads
 │   │   ├── page.tsx        # Photos index
@@ -74,18 +77,17 @@ Portfolio/
 │   ├── smooth-scroll.tsx   # Lenis wrapper
 │   ├── scroll-reveal.tsx
 │   └── home-intro-gate.tsx
-├── data/
-│   ├── portfolio.ts        # Resume-style home content
-│   ├── photos.ts           # Collections, images, Surprise me pool
-│   └── quotes.ts           # Quote text, attributions, emphasis tiers
+├── db/                     # Drizzle schema + client
 ├── lib/
-│   ├── radio-samples.ts    # Scans public/sfx/radio at build time
+│   ├── admin/              # Server actions, publish (draft → live snapshot), Blob helpers
+│   ├── auth/               # Session + login
+│   ├── radio-samples.ts    # Lists radio clips from Blob
 │   ├── quotes-motion.ts    # Quote cloud reveal/stagger constants
 │   └── …                   # Motion timing helpers
 ├── public/
 │   ├── fonts/              # YD Gothic, ITC American Typewriter
-│   ├── photos/             # Image assets by collection
-│   └── sfx/                # camera.mp3, passby.mp3, pitstop.mp3, radio/*.mp3
+│   └── sfx/                # camera.mp3, passby.mp3, pitstop.mp3, radio/ (fallback clips)
+├── middleware.ts           # Gates /admin/*
 ├── types/content.ts
 ├── next.config.ts          # Image optimization config
 ├── tailwind.config.ts
@@ -128,34 +130,35 @@ npm run build
 npm run start
 ```
 
+### Environment variables
+
+Copy `.env.example` to `.env` and fill in `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `SESSION_SECRET` and `ADMIN_PASSWORD_HASH` (generate it with `npm run admin:hash-password -- "your password"`). `OPENAI_API_KEY` is optional — it powers the AI alt-text suggestion in the photo uploader. The same variables must be set in Vercel (Production) and the project redeployed after changing them.
+
 ### Other scripts
 
 ```bash
 npm run lint
 npm run clean
+npm run db:push     # apply db/schema.ts to the database
 ```
 
 ## Editing content
 
+Content is edited in the admin panel at `/admin` (password-protected) as **drafts**; nothing goes live until you click **Publish**, which copies the drafts into the snapshot the public pages read.
+
 ### Portfolio (home page)
 
-Edit [`data/portfolio.ts`](data/portfolio.ts) for hero copy, experience, education, skills, certifications, projects, and about/contact. Shapes are in [`types/content.ts`](types/content.ts).
+`/admin/portfolio` — hero copy, experience, education, skills, certifications, projects, and about/contact. Shapes are in [`types/content.ts`](types/content.ts).
 
 ### Photography
 
-Edit [`data/photos.ts`](data/photos.ts) for:
-
-- Collection titles, descriptions, and cover images
-- Photo order, captions, and alt text
-- Side-by-side **duet** layouts (`duetWith` on a photo entry)
-
-After adding images, place files under the matching folder in `public/photos/`. Album title interactions are wired in [`components/photos/album-title.tsx`](components/photos/album-title.tsx) (and [`nyc-title.tsx`](components/photos/nyc-title.tsx) for New York).
+`/admin/photos` — collections (titles, descriptions, order) and, per collection, photos: drag to reorder, alt text (auto-suggested by AI on upload), captions. Album title interactions are wired in [`components/photos/album-title.tsx`](components/photos/album-title.tsx) (and [`nyc-title.tsx`](components/photos/nyc-title.tsx) for New York).
 
 **Surprise me** on `/photos` draws from all collections except `super-max` via `getRandomPhotoCandidates()`.
 
 ### Quotes
 
-Edit [`data/quotes.ts`](data/quotes.ts) — each entry is `{ id, text, attribution?, emphasis? }`. `emphasis` (1–3) biases the size tier: `3` quotes can land in the largest hero tier (capped at one hero per render), `1` skews smaller; it defaults to `1`. Everything else is generated client-side in [`components/quotes/quote-cloud.tsx`](components/quotes/quote-cloud.tsx) on each load, so the same data renders a fresh layout every visit:
+`/admin/quotes` — each entry is `{ id, text, attribution?, emphasis? }`. `emphasis` (1–3) biases the size tier: `3` quotes can land in the largest hero tier (capped at one hero per render), `1` skews smaller; it defaults to `1`. Everything else is generated client-side in [`components/quotes/quote-cloud.tsx`](components/quotes/quote-cloud.tsx) on each load, so the same data renders a fresh layout every visit:
 
 - **Desktop** — A greedy skyline bin-packer lays quotes into an interlocking, overlap-free mosaic with sizes intermixed top-to-bottom. Typography is a two-face system (Playfair Display serif, leading; Inter sans, lighter accent) and a two-value colour scheme (bright white / dark grey) that is spread so neighbours alternate. Quotes by the same author are pushed apart. Hovering a quote shows its author in a cursor-following, liquid-glass tooltip.
 - **Mobile** — A single vertical Playfair stack with the author formatted beneath each quote, revealed on scroll.
@@ -164,11 +167,11 @@ Typeface-to-size pairing, size tiers, colours, gutter, and reveal timing are tun
 
 ### Box Box radio easter egg
 
-Team-radio clips live in [`public/sfx/radio/`](public/sfx/radio/). [`lib/radio-samples.ts`](lib/radio-samples.ts) discovers `.mp3` (and other audio) files at build/request time — add a file, rebuild or redeploy, and it joins the pool automatically.
+Team-radio clips and the trigger words are managed at `/admin/radio` (clips live in Vercel Blob; changes take effect immediately, no Publish step). [`lib/radio-samples.ts`](lib/radio-samples.ts) lists them; [`public/sfx/radio/`](public/sfx/radio/) holds a small fallback set.
 
 [`components/easter-eggs/radio-keystroke-listener.tsx`](components/easter-eggs/radio-keystroke-listener.tsx) is mounted in the root layout and plays a random clip with:
 
-- **Desktop** — Type `bbb` or `boxbox` anywhere except inputs/textareas (ignored while a clip is already playing; no back-to-back repeats of the same file)
+- **Desktop** — Type a trigger word (default `bbb` or `boxbox`) anywhere except inputs/textareas (ignored while a clip is already playing; no back-to-back repeats of the same file)
 - **Mobile / touch** — Triple-tap anywhere within 800ms
 
 Playback volume is normalized against a reference clip (`stupid.mp3` in [`lib/radio-samples.constants.ts`](lib/radio-samples.constants.ts)). If the radio folder is missing or empty, a small hard-coded fallback list is used instead.

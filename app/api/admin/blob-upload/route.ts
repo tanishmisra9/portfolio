@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth/session";
  * Photos and blog images upload directly from the browser to Blob, bypassing this
  * server — Vercel caps a server action / API route request body at 4.5MB regardless of
  * next.config.ts's serverActions.bodySizeLimit, which silently broke uploads of the
- * larger photos already in public/photos. This route only issues the client token and
+ * larger photos. This route only issues the client token and
  * records nothing itself.
  */
 export async function POST(request: Request) {

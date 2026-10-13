@@ -127,10 +127,8 @@ export async function generateStaticParams() {
   return data.posts.map((post) => ({ slug: post.slug }));
 }
 
-// Posts now come from the DB, so a newly published post must render on first request
-// without a redeploy — unlike the old fs-backed content, dynamicParams stays at its
-// default (true). The public/blog/** file-tracing exclusion in next.config.ts is now
-// moot too once migrated posts stop referencing local /public/blog paths.
+// Posts come from the DB, so a newly published post must render on first request
+// without a redeploy — dynamicParams therefore stays at its default (true).
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
