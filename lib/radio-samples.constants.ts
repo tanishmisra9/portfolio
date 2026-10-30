@@ -4,7 +4,7 @@
  */
 export const RADIO_REFERENCE_SAMPLE_FILENAME = "stupid.mp3";
 
-/** Used when no radio samples can be listed from Blob (unreachable, or none uploaded yet). */
+/** Used when the published snapshot has no radio clips (nothing published yet, or none left). */
 export const RADIO_SAMPLE_FALLBACK = [
   "/sfx/radio/stay-out.mp3",
   "/sfx/radio/simply-lovely.mp3",
@@ -12,5 +12,5 @@ export const RADIO_SAMPLE_FALLBACK = [
   "/sfx/radio/stupid.mp3",
 ] as const;
 
-/** Used when no keystroke triggers can be read from the DB (unreachable, or none saved yet). */
+/** Used when the published snapshot has no keystroke triggers (nothing published yet, or none left). */
 export const RADIO_TRIGGER_FALLBACK = ["bbb", "boxbox"] as const;

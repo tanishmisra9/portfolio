@@ -1,5 +1,5 @@
 import path from "node:path";
-import { listRadioSamples } from "@/lib/admin/blob";
+import { getPublishedData } from "@/lib/site-content";
 import { RADIO_SAMPLE_FALLBACK } from "@/lib/radio-samples.constants";
 
 export const ALLOWED_AUDIO_EXTENSIONS = new Set([".mp3", ".m4a", ".wav", ".ogg", ".webm"]);
@@ -14,21 +14,16 @@ export function isAllowedAudioFile(filename: string, mimeType: string): boolean 
 }
 
 /**
- * Radio easter-egg samples now live in Vercel Blob (uploaded via /admin/radio), not
- * public/sfx/radio — that directory is read-only in production. Falls back to a fixed
- * local list if Blob is unreachable or empty (e.g. before the first upload).
+ * Radio easter-egg samples are uploaded to Vercel Blob via /admin/radio and go live on
+ * Publish (read from the published snapshot). Falls back to a fixed local list if the
+ * snapshot has none (e.g. before the first publish) or is unreachable.
  */
 export async function getRadioSampleUrls(): Promise<string[]> {
   try {
-    const samples = await listRadioSamples();
-    const urls = samples
-      .filter((s) => ALLOWED_AUDIO_EXTENSIONS.has(path.extname(s.pathname).toLowerCase()))
-      .map((s) => s.url)
-      .sort((a, b) => a.localeCompare(b));
-
-    if (urls.length > 0) return urls;
+    const { radio } = await getPublishedData();
+    if (radio?.samples.length) return radio.samples;
   } catch {
-    // Blob unreachable — use fallback.
+    // No snapshot yet / DB unreachable — use fallback.
   }
 
   return [...RADIO_SAMPLE_FALLBACK];

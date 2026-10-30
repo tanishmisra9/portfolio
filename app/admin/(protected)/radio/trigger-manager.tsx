@@ -8,7 +8,7 @@ import { createRadioTrigger, deleteRadioTrigger, updateRadioTrigger } from "@/li
 
 type Trigger = InferSelectModel<typeof radioTriggers>;
 
-export function TriggerManager({ triggers }: { triggers: Trigger[] }) {
+export function TriggerManager({ triggers, liveTexts }: { triggers: Trigger[]; liveTexts: string[] }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [newText, setNewText] = useState("");
@@ -48,8 +48,11 @@ export function TriggerManager({ triggers }: { triggers: Trigger[] }) {
         {triggers.map((t) => (
           <div
             key={t.id}
-            className="flex items-center gap-3 rounded-md border border-border bg-surface p-3 backdrop-blur-md"
+            className={`flex items-center gap-3 rounded-md border bg-surface p-3 backdrop-blur-md ${
+              liveTexts.includes(t.text) ? "border-border" : "border-fg"
+            }`}
           >
+            {!liveTexts.includes(t.text) && <span className="text-sm uppercase text-dim">New</span>}
             <div className="flex-1">
               <input
                 aria-label="Trigger word"

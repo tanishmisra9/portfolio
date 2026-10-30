@@ -13,7 +13,7 @@ function filenameOf(pathname: string): string {
   return pathname.split("/").pop() ?? pathname;
 }
 
-export function RadioManager({ samples }: { samples: Sample[] }) {
+export function RadioManager({ samples, liveUrls }: { samples: Sample[]; liveUrls: string[] }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [dragOver, setDragOver] = useState(false);
@@ -83,9 +83,12 @@ export function RadioManager({ samples }: { samples: Sample[] }) {
         {samples.map((sample) => (
           <div
             key={sample.url}
-            className="flex items-center gap-3 rounded-md border border-border bg-surface p-3 backdrop-blur-md"
+            className={`flex items-center gap-3 rounded-md border bg-surface p-3 backdrop-blur-md ${
+              liveUrls.includes(sample.url) ? "border-border" : "border-fg"
+            }`}
           >
             <span className="flex-1 truncate text-base text-fg">{filenameOf(sample.pathname)}</span>
+            {!liveUrls.includes(sample.url) && <span className="text-sm uppercase text-dim">New</span>}
             <audio controls src={sample.url} className="h-8" />
             <button type="button" onClick={() => remove(sample.url)} className="text-base text-red-500">
               Delete

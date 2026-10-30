@@ -3,13 +3,11 @@
 import { eq, asc, ne, sql } from "drizzle-orm";
 import matter from "gray-matter";
 import { db } from "@/db/client";
-import { portfolio, collections, photos, quotes, posts, radioTriggers } from "@/db/schema";
+import { portfolio, collections, photos, quotes, posts, radioSamples, radioTriggers } from "@/db/schema";
 import {
   listAssetFilenames,
   uploadResume as uploadResumeBlob,
-  uploadNamedAsset,
-  listRadioSamples,
-  deleteAsset,
+  uploadRadioSample as uploadRadioBlob,
 } from "./blob";
 import { findClosestMatch } from "./image-match";
 import { publish as publishSnapshot } from "./publish";
@@ -49,32 +47,33 @@ export async function uploadResume(file: File, filename: string): Promise<string
 }
 
 // ---- Radio easter-egg samples ----
-// No draft/publish gating here — there's nothing to preview differently for a sound
-// effect, so uploads/deletes take effect immediately via revalidating the root layout
-// (getRadioSampleUrls is read there, shared by every route).
+// Draft rows in radio_samples; Publish copies the URLs into the snapshot the root layout
+// reads. Deleting only drops the row — the blob stays, since the live snapshot may still
+// point at it until the next Publish (orphaned blobs are negligible on the free tier).
 
 export async function listDraftRadioSamples() {
   await requireAdmin();
-  return listRadioSamples();
+  return db.select().from(radioSamples).orderBy(asc(radioSamples.id));
 }
 
 /** Returns the uploaded blob's URL, or null if the file failed the audio check. */
 export async function uploadRadioSample(file: File): Promise<string | null> {
   await requireAdmin();
   if (!isAllowedAudioFile(file.name, file.type)) return null;
-  const blob = await uploadNamedAsset("radio", file, file.name);
-  revalidatePath("/", "layout");
+  const blob = await uploadRadioBlob(file);
+  await db.insert(radioSamples).values({ url: blob.url, pathname: blob.pathname });
+  draftChanged();
   return blob.url;
 }
 
 export async function deleteRadioSample(url: string) {
   await requireAdmin();
-  await deleteAsset(url);
-  revalidatePath("/", "layout");
+  await db.delete(radioSamples).where(eq(radioSamples.url, url));
+  draftChanged();
 }
 
 // ---- Radio easter-egg keystroke triggers ----
-// Same immediate-effect reasoning as the samples above. Triggers are validated against
+// Draft rows like the samples above. Triggers are validated against
 // exactly what normalizeKey() in the listener can ever produce (lowercase a–z), so
 // nothing that's saved here can be a silently-dead trigger.
 
@@ -113,7 +112,7 @@ export async function createRadioTrigger(raw: string): Promise<string | null> {
     if (isUniqueViolation(err)) return "That trigger already exists.";
     throw err;
   }
-  revalidatePath("/", "layout");
+  draftChanged();
   return null;
 }
 
@@ -130,14 +129,14 @@ export async function updateRadioTrigger(id: number, raw: string): Promise<strin
     if (isUniqueViolation(err)) return "That trigger already exists.";
     throw err;
   }
-  revalidatePath("/", "layout");
+  draftChanged();
   return null;
 }
 
 export async function deleteRadioTrigger(id: number) {
   await requireAdmin();
   await db.delete(radioTriggers).where(eq(radioTriggers.id, id));
-  revalidatePath("/", "layout");
+  draftChanged();
 }
 
 // ---- Collections ----

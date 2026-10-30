@@ -43,7 +43,7 @@ All content lives in a database and is edited through a built-in, password-prote
 
 - **Drafts and Publish.** Edits in the admin are saved as drafts. Nothing reaches the public site until you click **Publish**, which assembles all drafts into a single snapshot (`lib/admin/publish.ts`) that the public pages read (`lib/site-content.ts`). The header button reads **Up to date** when drafts match what's live and is disabled until you change something.
 - **Where things are stored.** Text and structure live in Postgres (Neon, via Drizzle — `db/schema.ts`). Files — photos, blog images, radio clips, the resume — live in Vercel Blob; the database only stores their URLs. Small fixed design assets (fonts, favicons, three UI sounds) stay in `public/`.
-- **Radio is the exception.** Radio clips and trigger words take effect immediately, with no Publish step.
+- **Radio follows the same rule.** Radio clips and trigger words are drafts too; the radio page outlines anything not yet live with a "New" tag.
 - **Uploads go straight to Blob** from the browser (`app/api/admin/blob-upload`, `lib/admin/client-upload.ts`) so large photos aren't limited by Vercel's 4.5MB request-body cap.
 
 ## Photography collections
@@ -104,8 +104,8 @@ Portfolio/
 │   ├── admin/              # Server actions, publish (draft → snapshot), Blob helpers, client upload
 │   ├── auth/               # Session + login
 │   ├── site-content.ts     # Reads the published snapshot (the public pages' only data source)
-│   ├── radio-samples.ts    # Radio clips from Blob (+ local fallback)
-│   ├── radio-triggers.ts   # Trigger words from the database
+│   ├── radio-samples.ts    # Radio clips from the published snapshot (+ local fallback)
+│   ├── radio-triggers.ts   # Trigger words from the published snapshot
 │   └── …                   # Motion timing, slugs, image helpers
 ├── public/
 │   ├── fonts/              # YD Gothic, ITC American Typewriter
@@ -204,7 +204,7 @@ Sign in at `/admin/login`. Sessions last 12 hours and are enforced both by middl
 | **Photos** | Create and reorder collections; per collection edit the title/description, upload photos (with upload progress), reorder, and edit alt text and captions. |
 | **Quotes** | Add and edit quotes, set each one's size (Standard / Large / Featured), and filter by author. |
 | **Blog** | Write posts in markdown, upload images into a post, or drop in an existing `.md` file (its frontmatter and image references are matched against uploaded images). |
-| **Radio** | Upload/remove clips (audio only) and add/edit/delete the keystroke trigger words. Takes effect immediately. |
+| **Radio** | Upload/remove clips (audio only) and add/edit/delete the keystroke trigger words. Goes live on Publish. |
 
 **AI alt text.** When you add photos, each new one gets a suggested alt text from a small OpenAI vision model, styled after the alts already on the site. You can edit it freely; **Reset to suggestion** restores the original without another API call. If the key is missing or the call fails, the reason is shown next to the field and uploads are unaffected.
 
@@ -226,7 +226,7 @@ Size tiers, colours, gutter and reveal timing are tunable constants at the top o
 - **Desktop** — Type any trigger word (default `bbb` or `boxbox`; editable at `/admin/radio`) anywhere except inputs/textareas. It's ignored while a clip is already playing, and the same clip never plays twice in a row.
 - **Mobile / touch** — Triple-tap anywhere within 800ms.
 
-Clips are listed from Vercel Blob by [`lib/radio-samples.ts`](lib/radio-samples.ts); if none can be loaded, a 4-clip fallback in [`public/sfx/radio/`](public/sfx/radio/) is used. Playback volume is normalized against a reference clip (`stupid.mp3`, see [`lib/radio-samples.constants.ts`](lib/radio-samples.constants.ts)).
+Clips are uploaded to Vercel Blob and go live on Publish (read from the published snapshot by [`lib/radio-samples.ts`](lib/radio-samples.ts)); if none are published, a 4-clip fallback in [`public/sfx/radio/`](public/sfx/radio/) is used. Playback volume is normalized against a reference clip (`stupid.mp3`, see [`lib/radio-samples.constants.ts`](lib/radio-samples.constants.ts)).
 
 ### Metadata and styling
 

@@ -1,4 +1,4 @@
-import { put, list, del } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 
 export async function uploadAsset(pathnamePrefix: string, file: File) {
   const blob = await put(`${pathnamePrefix}/${Date.now()}-${file.name}`, file, {
@@ -24,29 +24,8 @@ export async function listAssetFilenames(
   return blobs.map((b) => ({ name: originalFilename(b.pathname.split("/").pop()!), url: b.url }));
 }
 
-export async function deleteAsset(url: string) {
-  await del(url);
-}
-
 /**
- * The filename is user-editable but always lands directly in a Blob pathname, so it's
- * sanitized to a safe basename first. Uses allowOverwrite so re-uploading under the same
- * name replaces it rather than growing a pile of blobs; renaming does leave the previous
- * blob orphaned (negligible on the free tier, not worth cleanup code).
- */
-export async function uploadNamedAsset(prefix: string, file: File, filename: string) {
-  const safeName =
-    filename.replace(/[^a-zA-Z0-9.\-_]/g, "") ||
-    file.name.replace(/[^a-zA-Z0-9.\-_]/g, "") ||
-    "file";
-  return put(`${prefix}/${safeName}`, file, {
-    access: "public",
-    allowOverwrite: true,
-  });
-}
-
-/**
- * Unlike uploadNamedAsset, this does NOT overwrite a fixed pathname: the resume link is
+ * This does NOT overwrite a fixed pathname: the resume link is
  * published-snapshot data (draft → Publish), and the previous implementation reused the
  * exact pathname the live snapshot already links to, so uploading a same-named file
  * replaced the live resume immediately, skipping Publish, and could keep serving the old
@@ -60,7 +39,8 @@ export async function uploadResume(file: File, filename: string) {
   return put(`resume/${Date.now()}/${safeName}`, file, { access: "public" });
 }
 
-export async function listRadioSamples(): Promise<{ url: string; pathname: string }[]> {
-  const { blobs } = await list({ prefix: "radio/" });
-  return blobs.map((b) => ({ url: b.url, pathname: b.pathname }));
+/** Same unique-folder scheme as uploadResume: a re-upload under an existing name must not replace a clip the live snapshot already points at. */
+export async function uploadRadioSample(file: File) {
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "") || "clip";
+  return put(`radio/${Date.now()}/${safeName}`, file, { access: "public" });
 }

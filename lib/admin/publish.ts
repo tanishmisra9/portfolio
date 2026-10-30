@@ -1,6 +1,6 @@
 import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
-import { portfolio, collections, photos, quotes, posts, publishedSnapshot } from "@/db/schema";
+import { portfolio, collections, photos, quotes, posts, radioSamples, radioTriggers, publishedSnapshot } from "@/db/schema";
 import type { PortfolioContent, PhotoCollection, QuoteEntry, BlogPostMeta } from "@/types/content";
 
 export interface PublishedBlogPost extends BlogPostMeta {
@@ -12,16 +12,20 @@ export interface PublishedData {
   collections: PhotoCollection[];
   quotes: QuoteEntry[];
   posts: PublishedBlogPost[];
+  /** Absent on snapshots published before radio was part of them. */
+  radio?: { samples: string[]; triggers: string[] };
 }
 
 /** Assembles the current draft state into the shape the public site reads. */
 async function buildPublishedData(): Promise<PublishedData> {
-  const [[portfolioRow], collectionRows, photoRows, quoteRows, postRows] = await Promise.all([
+  const [[portfolioRow], collectionRows, photoRows, quoteRows, postRows, sampleRows, triggerRows] = await Promise.all([
     db.select().from(portfolio),
     db.select().from(collections).orderBy(asc(collections.sortOrder)),
     db.select().from(photos).orderBy(asc(photos.sortOrder)),
     db.select().from(quotes).orderBy(asc(quotes.sortOrder)),
     db.select().from(posts),
+    db.select().from(radioSamples).orderBy(asc(radioSamples.url)),
+    db.select().from(radioTriggers).orderBy(asc(radioTriggers.id)),
   ]);
 
   const photosByCollection = new Map<number, typeof photoRows>();
@@ -106,6 +110,7 @@ async function buildPublishedData(): Promise<PublishedData> {
       description: p.description,
       content: p.body,
     })),
+    radio: { samples: sampleRows.map((s) => s.url), triggers: triggerRows.map((t) => t.text) },
   };
 
   return data;

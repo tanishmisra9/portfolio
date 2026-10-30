@@ -74,6 +74,13 @@ export const radioTriggers = pgTable("radio_triggers", {
   text: text("text").notNull().unique(),
 });
 
+/** Draft list of radio clips (files live in Blob) — publish() copies the URLs into publishedSnapshot. */
+export const radioSamples = pgTable("radio_samples", {
+  id: serial("id").primaryKey(),
+  url: text("url").notNull().unique(),
+  pathname: text("pathname").notNull(),
+});
+
 /** What the public site actually reads. Written only by the global publish() action. */
 export const publishedSnapshot = pgTable("published_snapshot", {
   id: integer("id").primaryKey().default(1),
