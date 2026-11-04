@@ -7,7 +7,7 @@ import Image from "next/image";
 import type { InferSelectModel } from "drizzle-orm";
 import type { photos } from "@/db/schema";
 import { ReorderableList } from "@/components/admin/reorderable-list";
-import { deletePhoto, reorderPhotos, suggestAltText, updatePhoto, uploadPhoto } from "@/lib/admin/actions";
+import { deletePhoto, reorderPhotos, suggestAltText, updateCollection, updatePhoto, uploadPhoto } from "@/lib/admin/actions";
 import { toAltPreviewDataUrl, uploadImageToBlob } from "@/lib/admin/client-upload";
 
 type Photo = InferSelectModel<typeof photos>;
@@ -38,10 +38,12 @@ const growClass =
 export function PhotoManager({
   collectionId,
   collectionSlug,
+  coverImage,
   photos,
 }: {
   collectionId: number;
   collectionSlug: string;
+  coverImage: string;
   photos: Photo[];
 }) {
   const router = useRouter();
@@ -303,6 +305,22 @@ export function PhotoManager({
                 }
               />
             </div>
+            <button
+              type="button"
+              aria-pressed={photo.blobUrl === coverImage}
+              onClick={() =>
+                photo.blobUrl !== coverImage &&
+                startTransition(async () => {
+                  await updateCollection(collectionId, { coverImage: photo.blobUrl });
+                  router.refresh();
+                })
+              }
+              className={`min-h-9 rounded border border-border-strong px-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+                photo.blobUrl === coverImage ? "bg-fg text-bg" : "text-muted hover:text-fg"
+              }`}
+            >
+              Cover
+            </button>
             <button
               type="button"
               onClick={() => {

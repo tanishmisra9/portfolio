@@ -73,7 +73,7 @@ async function buildPublishedData(): Promise<PublishedData> {
         slug: c.slug,
         title: c.title,
         description: c.description,
-        // New collections start with coverImage: "" and have no way to set one in the
+        // New collections start with coverImage: "" until one is picked in the
         // admin — fall back to the first photo rather than shipping a blank <Image src="">.
         coverImage: c.coverImage || photosByCollection.get(c.id)![0].blobUrl,
         photos: (photosByCollection.get(c.id) ?? [])
