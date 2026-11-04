@@ -195,7 +195,7 @@ export async function reorderCollections(orderedIds: number[]) {
 
 // ---- AI alt text ----
 
-const ALT_MODEL = "gpt-4.1-nano";
+const ALT_MODEL = "gpt-5.4-nano";
 const MAX_ALT_IMAGE_CHARS = 400_000;
 
 /**
@@ -242,7 +242,7 @@ export async function suggestAltText(
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: ALT_MODEL,
-        max_tokens: 120,
+        max_completion_tokens: 120,
         messages: [
           { role: "system", content: system },
           { role: "user", content: [{ type: "image_url", image_url: { url: imageDataUrl, detail: "low" } }] },

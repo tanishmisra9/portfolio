@@ -71,7 +71,7 @@ Collections are managed at `/admin/photos`. A few have code-driven title interac
 - Tailwind CSS 3 · PostCSS · Autoprefixer · `next-themes`
 - Framer Motion · Lucide React
 - `react-markdown` + `remark-gfm` (blog and bio rendering)
-- OpenAI (`gpt-4.1-nano`, optional) for suggested photo alt text
+- OpenAI (`gpt-5.4-nano`, optional) for suggested photo alt text
 - ESLint 9 · `@vercel/analytics` · `@vercel/speed-insights`
 
 ## Project structure
