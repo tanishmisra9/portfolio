@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import type { InferSelectModel } from "drizzle-orm";
 import type { radioTriggers } from "@/db/schema";
 import { createRadioTrigger, deleteRadioTrigger, updateRadioTrigger } from "@/lib/admin/actions";
@@ -9,7 +8,6 @@ import { createRadioTrigger, deleteRadioTrigger, updateRadioTrigger } from "@/li
 type Trigger = InferSelectModel<typeof radioTriggers>;
 
 export function TriggerManager({ triggers, liveTexts }: { triggers: Trigger[]; liveTexts: string[] }) {
-  const router = useRouter();
   const [, startTransition] = useTransition();
   const [newText, setNewText] = useState("");
   const [errors, setErrors] = useState<Record<number | "new", string>>({} as Record<number | "new", string>);
@@ -19,14 +17,12 @@ export function TriggerManager({ triggers, liveTexts }: { triggers: Trigger[]; l
     startTransition(async () => {
       const error = await updateRadioTrigger(id, value);
       setErrors((prev) => ({ ...prev, [id]: error ?? "" }));
-      if (!error) router.refresh();
     });
   }
 
   function handleDelete(id: number) {
     startTransition(async () => {
       await deleteRadioTrigger(id);
-      router.refresh();
     });
   }
 
@@ -37,7 +33,6 @@ export function TriggerManager({ triggers, liveTexts }: { triggers: Trigger[]; l
       setErrors((prev) => ({ ...prev, new: error ?? "" }));
       if (!error) {
         setNewText("");
-        router.refresh();
       }
     });
   }

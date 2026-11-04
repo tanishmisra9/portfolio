@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { updateCollection } from "@/lib/admin/actions";
 import { LOCKED_COLLECTION_SLUGS, slugify } from "@/lib/slug";
 
@@ -19,7 +18,6 @@ export function CollectionDetails({
   title: string;
   description: string;
 }) {
-  const router = useRouter();
   const [, startTransition] = useTransition();
   const [slugError, setSlugError] = useState<string | null>(null);
   const slugLocked = LOCKED_COLLECTION_SLUGS.includes(slug);
@@ -27,7 +25,6 @@ export function CollectionDetails({
   function save(fields: { title?: string; description?: string }) {
     startTransition(async () => {
       await updateCollection(id, fields);
-      router.refresh();
     });
   }
 
@@ -37,7 +34,6 @@ export function CollectionDetails({
       setSlugError(error);
       // A rejected value isn't saved, so don't leave it sitting in the field.
       if (error) input.value = slug;
-      router.refresh();
     });
   }
 

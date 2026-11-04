@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import type { InferSelectModel } from "drizzle-orm";
 import type { quotes } from "@/db/schema";
@@ -41,7 +40,6 @@ function SizePicker({ value, onChange }: { value: Size; onChange: (v: Size) => v
 }
 
 function QuoteRow({ quote }: { quote: Quote }) {
-  const router = useRouter();
   const [, startTransition] = useTransition();
   const [size, setSize] = useState<Size>((quote.emphasis as Size) ?? 1);
   const [saved, setSaved] = useState(false);
@@ -94,7 +92,6 @@ function QuoteRow({ quote }: { quote: Quote }) {
             if (!confirm("Delete this quote?")) return;
             startTransition(async () => {
               await deleteQuote(quote.id);
-              router.refresh();
             });
           }}
           className="-m-1 rounded p-3 text-muted transition-colors hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
@@ -107,7 +104,6 @@ function QuoteRow({ quote }: { quote: Quote }) {
 }
 
 export function QuotesManager({ quotes, subtitle }: { quotes: Quote[]; subtitle: string }) {
-  const router = useRouter();
   const [, startTransition] = useTransition();
   const [subtitleSaved, setSubtitleSaved] = useState(false);
   const [text, setText] = useState("");
@@ -175,7 +171,6 @@ export function QuotesManager({ quotes, subtitle }: { quotes: Quote[]; subtitle:
             setText("");
             setAttribution("");
             setSize(1);
-            router.refresh();
           });
         }}
         className="space-y-4 rounded-md border border-border bg-surface p-4 backdrop-blur-md"

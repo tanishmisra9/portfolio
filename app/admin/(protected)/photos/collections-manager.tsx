@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { GripVertical } from "lucide-react";
 import type { InferSelectModel } from "drizzle-orm";
@@ -13,7 +12,6 @@ import { PhotoUploader } from "./photo-uploader";
 type Collection = InferSelectModel<typeof collections>;
 
 export function CollectionsManager({ collections }: { collections: Collection[] }) {
-  const router = useRouter();
   const [, startTransition] = useTransition();
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
@@ -29,7 +27,6 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
         onReorder={(ids) =>
           startTransition(async () => {
             await reorderCollections(ids as number[]);
-            router.refresh();
           })
         }
         renderItem={(c, dragProps) => (
@@ -54,7 +51,6 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
                 if (!confirm(`Delete "${c.title}" and all its photos?`)) return;
                 startTransition(async () => {
                   await deleteCollection(c.id);
-                  router.refresh();
                 });
               }}
               className="px-2 py-2 text-base text-red-500"
@@ -78,7 +74,6 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
             setSlug("");
             setTitle("");
             setDescription("");
-            router.refresh();
           });
         }}
         className="space-y-2 rounded-md border border-border bg-surface p-4 backdrop-blur-md"

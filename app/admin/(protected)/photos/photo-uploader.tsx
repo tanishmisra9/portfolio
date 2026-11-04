@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2, RotateCcw, Sparkles } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { suggestAltText, uploadPhoto } from "@/lib/admin/actions";
 import { toAltPreviewDataUrl, uploadImageToBlob } from "@/lib/admin/client-upload";
 
@@ -32,7 +31,6 @@ type UploadTarget = { id: number; slug: string; title: string };
 
 /** Dropzone + pending-upload cards. With one collection the destination is fixed; with several, each card asks for one. */
 export function PhotoUploader({ collections }: { collections: UploadTarget[] }) {
-  const router = useRouter();
   const [pending, setPending] = useState<PendingPhoto[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [dragOver, setDragOver] = useState(false);
@@ -119,7 +117,6 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
         setAddedTo(target.title);
         setTimeout(() => setAddedTo(null), 3000);
       }
-      router.refresh();
     } catch (err) {
       patchPending(key, { status: "idle", progress: 0 });
       setErrors((prev) => ({ ...prev, [key]: err instanceof Error ? err.message : "Upload failed." }));

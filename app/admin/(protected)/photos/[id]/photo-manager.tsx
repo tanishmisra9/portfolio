@@ -2,7 +2,6 @@
 
 import { useCallback, useOptimistic, useRef, useState, useTransition } from "react";
 import { GripVertical } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { InferSelectModel } from "drizzle-orm";
 import type { photos } from "@/db/schema";
@@ -29,7 +28,6 @@ export function PhotoManager({
   coverImage: string;
   photos: Photo[];
 }) {
-  const router = useRouter();
   const [, startTransition] = useTransition();
   // The Cover button fills the instant it's clicked; it reverts by itself if the save doesn't land.
   const [optimisticCover, setOptimisticCover] = useOptimistic(coverImage);
@@ -51,7 +49,6 @@ export function PhotoManager({
         onReorder={(ids) =>
           startTransition(async () => {
             await reorderPhotos(ids as number[]);
-            router.refresh();
           })
         }
         renderItem={(photo, dragProps) => (
@@ -86,7 +83,6 @@ export function PhotoManager({
                   oneLine(e.target.value) !== photo.alt &&
                   startTransition(async () => {
                     await updatePhoto(photo.id, { alt: oneLine(e.target.value) });
-                    router.refresh();
                   })
                 }
               />
@@ -99,7 +95,6 @@ export function PhotoManager({
                   oneLine(e.target.value) !== (photo.caption ?? "") &&
                   startTransition(async () => {
                     await updatePhoto(photo.id, { caption: oneLine(e.target.value) || null });
-                    router.refresh();
                   })
                 }
               />
@@ -116,7 +111,6 @@ export function PhotoManager({
                   startTransition(async () => {
                     setOptimisticCover(photo.blobUrl);
                     await updateCollection(collectionId, { coverImage: photo.blobUrl });
-                    router.refresh();
                   })
                 }
                 className={`min-h-9 rounded border border-border-strong px-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
@@ -132,7 +126,6 @@ export function PhotoManager({
                 if (!confirm("Delete this photo?")) return;
                 startTransition(async () => {
                   await deletePhoto(photo.id);
-                  router.refresh();
                 });
               }}
               className="px-2 py-2 text-base text-red-500"

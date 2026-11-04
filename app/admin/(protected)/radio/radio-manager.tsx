@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { deleteRadioSample, uploadRadioSample } from "@/lib/admin/actions";
 
 interface Sample {
@@ -14,7 +13,6 @@ function filenameOf(pathname: string): string {
 }
 
 export function RadioManager({ samples, liveUrls }: { samples: Sample[]; liveUrls: string[] }) {
-  const router = useRouter();
   const [, startTransition] = useTransition();
   const [dragOver, setDragOver] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -31,14 +29,12 @@ export function RadioManager({ samples, liveUrls }: { samples: Sample[]; liveUrl
         if (!url) failed.push(file.name);
       }
       setErrors(failed.map((name) => `${name}: not an audio file`));
-      router.refresh();
     });
   }
 
   function remove(url: string) {
     startTransition(async () => {
       await deleteRadioSample(url);
-      router.refresh();
     });
   }
 
