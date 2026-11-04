@@ -10,6 +10,7 @@ import { ReorderableList } from "@/components/admin/reorderable-list";
 import { deletePhoto, reorderPhotos, updateCollection, updatePhoto } from "@/lib/admin/actions";
 import { fieldClass, oneLine, PhotoUploader } from "../photo-uploader";
 import { PhotoViewer } from "./photo-viewer";
+import { Tooltip } from "@/components/ui/tooltip";
 
 type Photo = InferSelectModel<typeof photos>;
 
@@ -54,7 +55,7 @@ export function PhotoManager({
         renderItem={(photo, dragProps) => (
           <div
             {...dragProps}
-            className="flex cursor-grab items-center gap-3 rounded-md border border-border bg-surface p-2 backdrop-blur-md"
+            className="relative flex cursor-grab items-center gap-3 rounded-md border border-border bg-surface p-2 backdrop-blur-md hover:z-10 focus-within:z-10"
           >
             <GripVertical className="h-5 w-5 shrink-0 text-dim" aria-hidden />
             <button
@@ -101,22 +102,27 @@ export function PhotoManager({
                 }
               />
             </div>
-            <button
-              type="button"
-              aria-pressed={photo.blobUrl === coverImage}
-              onClick={() =>
-                photo.blobUrl !== coverImage &&
-                startTransition(async () => {
-                  await updateCollection(collectionId, { coverImage: photo.blobUrl });
-                  router.refresh();
-                })
-              }
-              className={`min-h-9 rounded border border-border-strong px-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
-                photo.blobUrl === coverImage ? "bg-fg text-bg" : "text-muted hover:text-fg"
-              }`}
+            <Tooltip
+              align="end"
+              label={photo.blobUrl === coverImage ? "This is the collection thumbnail" : "Use as the collection thumbnail"}
             >
-              Cover
-            </button>
+              <button
+                type="button"
+                aria-pressed={photo.blobUrl === coverImage}
+                onClick={() =>
+                  photo.blobUrl !== coverImage &&
+                  startTransition(async () => {
+                    await updateCollection(collectionId, { coverImage: photo.blobUrl });
+                    router.refresh();
+                  })
+                }
+                className={`min-h-9 rounded border border-border-strong px-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+                  photo.blobUrl === coverImage ? "bg-fg text-bg" : "text-muted hover:text-fg"
+                }`}
+              >
+                Cover
+              </button>
+            </Tooltip>
             <button
               type="button"
               onClick={() => {
