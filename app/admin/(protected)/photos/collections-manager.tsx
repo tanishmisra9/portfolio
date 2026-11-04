@@ -8,6 +8,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import type { collections } from "@/db/schema";
 import { ReorderableList } from "@/components/admin/reorderable-list";
 import { createCollection, deleteCollection, reorderCollections } from "@/lib/admin/actions";
+import { PhotoUploader } from "./photo-uploader";
 
 type Collection = InferSelectModel<typeof collections>;
 
@@ -21,6 +22,8 @@ export function CollectionsManager({ collections }: { collections: Collection[] 
 
   return (
     <div className="space-y-6">
+      <PhotoUploader collections={collections} />
+
       <ReorderableList
         items={collections}
         onReorder={(ids) =>
