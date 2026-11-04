@@ -26,7 +26,8 @@ function parentOf(pathname: string): { href: string; label: string } {
   return { href: "/admin", label: "Dashboard" };
 }
 
-export function AdminHeader({ hasChanges }: { hasChanges: boolean }) {
+/** `hasChanges` is undefined while the layout is still working it out (streamed), so the button stays disabled without claiming "Up to date". */
+export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
   const pathname = usePathname();
   const isDashboard = pathname === "/admin";
   const parent = parentOf(pathname ?? "/admin");
@@ -99,7 +100,7 @@ export function AdminHeader({ hasChanges }: { hasChanges: boolean }) {
           onClick={handlePublish}
           className="rounded bg-fg px-4 py-1.5 text-base text-bg disabled:opacity-50"
         >
-          {pending ? "Publishing..." : justPublished ? "Published ✓" : hasChanges ? "Publish" : "Up to date"}
+          {pending ? "Publishing..." : justPublished ? "Published ✓" : hasChanges === false ? "Up to date" : "Publish"}
         </button>
         <ThemeToggle />
         <form action={logout}>
