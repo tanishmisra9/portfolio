@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, useTransition } from "react";
+import { useCallback, useOptimistic, useRef, useState, useTransition } from "react";
 import { GripVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -31,6 +31,8 @@ export function PhotoManager({
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  // The Cover button fills the instant it's clicked; it reverts by itself if the save doesn't land.
+  const [optimisticCover, setOptimisticCover] = useOptimistic(coverImage);
   // Held by id so the dialog always shows the freshest row (and closes itself if the photo is deleted).
   const [viewingId, setViewingId] = useState<number | null>(null);
   const viewing = photos.find((p) => p.id === viewingId) ?? null;
@@ -104,20 +106,21 @@ export function PhotoManager({
             </div>
             <Tooltip
               align="end"
-              label={photo.blobUrl === coverImage ? "This is the collection thumbnail" : "Use as the collection thumbnail"}
+              label={photo.blobUrl === optimisticCover ? "This is the collection thumbnail" : "Use as the collection thumbnail"}
             >
               <button
                 type="button"
-                aria-pressed={photo.blobUrl === coverImage}
+                aria-pressed={photo.blobUrl === optimisticCover}
                 onClick={() =>
-                  photo.blobUrl !== coverImage &&
+                  photo.blobUrl !== optimisticCover &&
                   startTransition(async () => {
+                    setOptimisticCover(photo.blobUrl);
                     await updateCollection(collectionId, { coverImage: photo.blobUrl });
                     router.refresh();
                   })
                 }
                 className={`min-h-9 rounded border border-border-strong px-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
-                  photo.blobUrl === coverImage ? "bg-fg text-bg" : "text-muted hover:text-fg"
+                  photo.blobUrl === optimisticCover ? "bg-fg text-bg" : "text-muted hover:text-fg"
                 }`}
               >
                 Cover
