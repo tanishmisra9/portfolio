@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import { GripVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import type { photos } from "@/db/schema";
 import { ReorderableList } from "@/components/admin/reorderable-list";
 import { deletePhoto, reorderPhotos, updateCollection, updatePhoto } from "@/lib/admin/actions";
 import { fieldClass, oneLine, PhotoUploader } from "../photo-uploader";
+import { PhotoViewer } from "./photo-viewer";
 
 type Photo = InferSelectModel<typeof photos>;
 
@@ -29,6 +30,14 @@ export function PhotoManager({
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  // Held by id so the dialog always shows the freshest row (and closes itself if the photo is deleted).
+  const [viewingId, setViewingId] = useState<number | null>(null);
+  const viewing = photos.find((p) => p.id === viewingId) ?? null;
+  const viewerTrigger = useRef<HTMLElement | null>(null);
+  const closeViewer = useCallback(() => {
+    setViewingId(null);
+    viewerTrigger.current?.focus();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -48,13 +57,23 @@ export function PhotoManager({
             className="flex cursor-grab items-center gap-3 rounded-md border border-border bg-surface p-2 backdrop-blur-md"
           >
             <GripVertical className="h-5 w-5 shrink-0 text-dim" aria-hidden />
-            <Image
-              src={photo.blobUrl}
-              alt={photo.alt}
-              width={64}
-              height={64}
-              className="h-16 w-16 rounded object-cover"
-            />
+            <button
+              type="button"
+              aria-label="View photo"
+              onClick={(e) => {
+                viewerTrigger.current = e.currentTarget;
+                setViewingId(photo.id);
+              }}
+              className="shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+            >
+              <Image
+                src={photo.blobUrl}
+                alt={photo.alt}
+                width={64}
+                height={64}
+                className="h-16 w-16 rounded object-cover"
+              />
+            </button>
             <div className="flex-1 space-y-1">
               <textarea
                 aria-label="Alt text"
@@ -114,6 +133,7 @@ export function PhotoManager({
           </div>
         )}
       />
+      <PhotoViewer photo={viewing} onClose={closeViewer} />
     </div>
   );
 }
