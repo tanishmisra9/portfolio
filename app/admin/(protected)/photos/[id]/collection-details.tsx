@@ -62,6 +62,7 @@ export function CollectionDetails({
           className={`${fieldClass} font-mono ${slugLocked ? "opacity-60" : ""}`}
           defaultValue={slug}
           readOnly={slugLocked}
+          onChange={() => setSlugError(null)}
           onBlur={(e) => {
             if (slugLocked) return;
             const next = slugify(e.target.value);
