@@ -15,7 +15,7 @@ import { isAllowedAudioFile } from "@/lib/radio-samples";
 import type { PortfolioContent } from "@/types/content";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/session";
-import { slugify } from "@/lib/slug";
+import { LOCKED_COLLECTION_SLUGS, slugify } from "@/lib/slug";
 
 // Draft edits change whether there's anything to publish; refresh the admin layout so the header's Publish button reflects it.
 function draftChanged() {
@@ -168,13 +168,28 @@ export async function createCollection(input: {
   return null;
 }
 
+/** Returns an error message, or null on success. */
 export async function updateCollection(
   id: number,
-  fields: Partial<{ title: string; description: string; coverImage: string }>,
-) {
+  fields: Partial<{ title: string; description: string; coverImage: string; slug: string }>,
+): Promise<string | null> {
   await requireAdmin();
-  await db.update(collections).set(fields).where(eq(collections.id, id));
+  const set = { ...fields };
+  if (fields.slug !== undefined) {
+    const slug = slugify(fields.slug);
+    if (!slug) return "Enter a slug.";
+    const [current] = await db.select({ slug: collections.slug }).from(collections).where(eq(collections.id, id));
+    if (current && current.slug !== slug && LOCKED_COLLECTION_SLUGS.includes(current.slug)) return "This collection's slug can't be changed.";
+    set.slug = slug;
+  }
+  try {
+    await db.update(collections).set(set).where(eq(collections.id, id));
+  } catch (err) {
+    if (isUniqueViolation(err)) return "A collection with that slug already exists.";
+    throw err;
+  }
   draftChanged();
+  return null;
 }
 
 export async function deleteCollection(id: number) {

@@ -23,7 +23,7 @@ export default async function CollectionPhotosPage({
     <div className="max-w-5xl">
       <h1 className={ADMIN_SECTION_HEADING_CLASSES}>{collection.title}</h1>
       <p className="mb-6 mt-1 font-mono text-base text-dim">/{collection.slug}</p>
-      <CollectionDetails id={collection.id} title={collection.title} description={collection.description} />
+      <CollectionDetails id={collection.id} slug={collection.slug} title={collection.title} description={collection.description} />
       <PhotoManager collectionId={collection.id} collectionSlug={collection.slug} coverImage={collection.coverImage} photos={photos} />
     </div>
   );

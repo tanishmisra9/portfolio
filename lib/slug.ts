@@ -8,3 +8,6 @@ export function slugify(raw: string): string {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 }
+
+/** Collections whose slug the code keys off (title effects, pinned order, easter eggs) — renaming one would silently disable that, so their slug is locked. */
+export const LOCKED_COLLECTION_SLUGS = ["super-max", "snowfall", "new-year", "new-york"];
