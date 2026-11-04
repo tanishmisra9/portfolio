@@ -14,6 +14,8 @@ export interface PublishedData {
   posts: PublishedBlogPost[];
   /** Absent on snapshots published before radio was part of them. */
   radio?: { samples: string[]; triggers: string[] };
+  /** Absent on snapshots published before it was editable; the page falls back to the default. */
+  quotesSubtitle?: string;
 }
 
 /** Assembles the current draft state into the shape the public site reads. */
@@ -111,6 +113,7 @@ async function buildPublishedData(): Promise<PublishedData> {
       content: p.body,
     })),
     radio: { samples: sampleRows.map((s) => s.url), triggers: triggerRows.map((t) => t.text) },
+    quotesSubtitle: portfolioRow?.quotesSubtitle,
   };
 
   return data;

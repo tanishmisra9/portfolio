@@ -331,6 +331,22 @@ export async function reorderPhotos(orderedIds: number[]) {
 
 // ---- Quotes ----
 
+export async function getDraftQuotesSubtitle(): Promise<string> {
+  await requireAdmin();
+  const [row] = await db.select({ s: portfolio.quotesSubtitle }).from(portfolio);
+  return row?.s ?? "Lines worth keeping.";
+}
+
+export async function updateQuotesSubtitle(quotesSubtitle: string) {
+  await requireAdmin();
+  const value = quotesSubtitle.replace(/\s+/g, " ").trim();
+  await db
+    .insert(portfolio)
+    .values({ id: 1, quotesSubtitle: value })
+    .onConflictDoUpdate({ target: portfolio.id, set: { quotesSubtitle: value } });
+  draftChanged();
+}
+
 export async function listDraftQuotes() {
   await requireAdmin();
   return db.select().from(quotes).orderBy(asc(quotes.sortOrder));

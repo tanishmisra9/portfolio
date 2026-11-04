@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import type { InferSelectModel } from "drizzle-orm";
 import type { quotes } from "@/db/schema";
-import { createQuote, deleteQuote, updateQuote } from "@/lib/admin/actions";
+import { createQuote, deleteQuote, updateQuote, updateQuotesSubtitle } from "@/lib/admin/actions";
 
 type Quote = InferSelectModel<typeof quotes>;
 type Size = 1 | 2 | 3;
@@ -106,9 +106,10 @@ function QuoteRow({ quote }: { quote: Quote }) {
   );
 }
 
-export function QuotesManager({ quotes }: { quotes: Quote[] }) {
+export function QuotesManager({ quotes, subtitle }: { quotes: Quote[]; subtitle: string }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  const [subtitleSaved, setSubtitleSaved] = useState(false);
   const [text, setText] = useState("");
   const [attribution, setAttribution] = useState("");
   const [size, setSize] = useState<Size>(1);
@@ -122,6 +123,28 @@ export function QuotesManager({ quotes }: { quotes: Quote[] }) {
 
   return (
     <div className="space-y-6">
+      <label className="block">
+        <span className="mb-1 block text-base text-dim">
+          Page subtitle <span aria-live="polite">{subtitleSaved ? "Saved ✓" : ""}</span>
+        </span>
+        <div className="flex items-center gap-2 rounded border border-border-strong px-3 py-2 text-base focus-within:ring-2 focus-within:ring-fg/70">
+          <span aria-hidden className="text-muted">&ldquo;</span>
+          <input
+            className="min-w-[8ch] max-w-full bg-transparent outline-none [field-sizing:content]"
+            defaultValue={subtitle}
+            onBlur={(e) => {
+              if (e.target.value === subtitle) return;
+              startTransition(async () => {
+                await updateQuotesSubtitle(e.target.value);
+                setSubtitleSaved(true);
+                setTimeout(() => setSubtitleSaved(false), 1500);
+              });
+            }}
+          />
+          <span aria-hidden className="text-muted">&rdquo;</span>
+        </div>
+      </label>
+
       <label className="block">
         <span className="mb-1 block text-base text-dim">Filter by author</span>
         <select

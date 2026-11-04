@@ -496,7 +496,7 @@ function packBlocks(
   return result;
 }
 
-export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
+export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitle: string }) {
   const reduceMotion = useReducedMotion();
   const router = useRouter();
 
@@ -646,9 +646,11 @@ export function QuoteCloud({ quotes }: { quotes: QuoteEntry[] }) {
           <h1 className="heading-bleed-mobile select-none text-center font-display text-[clamp(2.75rem,10.5vw,6.5rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(3rem,11.5vw,7rem)] md:max-w-full md:text-[min(8.2vw,6.75rem)] heading-ghost heading-ghost-photos">
             Quotes
           </h1>
-          <p className="mt-6 select-none text-[1.375rem] leading-snug text-muted md:mt-8">
-            &ldquo; Lines worth keeping. &rdquo;
-          </p>
+          {subtitle && (
+            <p className="mt-6 select-none text-[1.375rem] leading-snug text-muted md:mt-8">
+              &ldquo; {subtitle} &rdquo;
+            </p>
+          )}
         </motion.header>
         {assignments && isDesktop !== null ? (
           isDesktop ? (

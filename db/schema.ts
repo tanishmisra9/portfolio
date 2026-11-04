@@ -21,6 +21,7 @@ export const portfolio = pgTable("portfolio", {
   name: text("name").notNull().default(""),
   heroSubtitle: text("hero_subtitle").notNull().default(""),
   aboutBio: text("about_bio").notNull().default(""),
+  quotesSubtitle: text("quotes_subtitle").notNull().default("Lines worth keeping."),
   experience: jsonb("experience").$type<ExperienceEntry[]>().notNull().default([]),
   education: jsonb("education").$type<EducationEntry[]>().notNull().default([]),
   skills: jsonb("skills").$type<SkillCategory[]>().notNull().default([]),
