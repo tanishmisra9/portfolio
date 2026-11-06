@@ -1,11 +1,14 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { deleteRadioSample, uploadRadioSample } from "@/lib/admin/actions";
+import { Eye, EyeOff } from "lucide-react";
+import { Tooltip } from "@/components/ui/tooltip";
+import { deleteRadioSample, setRadioSampleDisabled, uploadRadioSample } from "@/lib/admin/actions";
 
 interface Sample {
   url: string;
   pathname: string;
+  disabled: boolean;
 }
 
 function filenameOf(pathname: string): string {
@@ -29,6 +32,12 @@ export function RadioManager({ samples, liveUrls }: { samples: Sample[]; liveUrl
         if (!url) failed.push(file.name);
       }
       setErrors(failed.map((name) => `${name}: not an audio file`));
+    });
+  }
+
+  function toggleDisabled(url: string, disabled: boolean) {
+    startTransition(async () => {
+      await setRadioSampleDisabled(url, disabled);
     });
   }
 
@@ -76,21 +85,39 @@ export function RadioManager({ samples, liveUrls }: { samples: Sample[]; liveUrl
       )}
 
       <div className="space-y-2">
-        {samples.map((sample) => (
-          <div
-            key={sample.url}
-            className={`flex items-center gap-3 rounded-md border bg-surface p-3 backdrop-blur-md ${
-              liveUrls.includes(sample.url) ? "border-border" : "border-fg"
-            }`}
-          >
-            <span className="flex-1 truncate text-base text-fg">{filenameOf(sample.pathname)}</span>
-            {!liveUrls.includes(sample.url) && <span className="text-sm uppercase text-dim">New</span>}
-            <audio controls src={sample.url} className="h-8" />
-            <button type="button" onClick={() => remove(sample.url)} className="text-base text-red-500">
-              Delete
-            </button>
-          </div>
-        ))}
+        {samples.map((sample) => {
+          const isLive = liveUrls.includes(sample.url);
+          // Differs from what's live (new, re-enabled, or about to be turned off) -> outlined until Publish.
+          const changed = !sample.disabled !== isLive;
+          const tag = sample.disabled ? (changed ? "Turning off" : "Disabled") : changed ? "New" : null;
+          return (
+            <div
+              key={sample.url}
+              className={`relative flex items-center gap-3 rounded-md border bg-surface p-3 backdrop-blur-md hover:z-10 focus-within:z-10 ${
+                changed ? "border-fg" : "border-border"
+              }`}
+            >
+              <span className={`flex-1 truncate text-base text-fg ${sample.disabled ? "opacity-50" : ""}`}>
+                {filenameOf(sample.pathname)}
+              </span>
+              {tag && <span className="text-sm uppercase text-dim">{tag}</span>}
+              <audio controls src={sample.url} className={`h-8 ${sample.disabled ? "opacity-50" : ""}`} />
+              <Tooltip label={sample.disabled ? "Enable clip" : "Disable clip"} align="end">
+                <button
+                  type="button"
+                  aria-label={sample.disabled ? "Enable clip" : "Disable clip"}
+                  onClick={() => toggleDisabled(sample.url, !sample.disabled)}
+                  className="rounded p-2 text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                >
+                  {sample.disabled ? <Eye className="h-5 w-5" aria-hidden /> : <EyeOff className="h-5 w-5" aria-hidden />}
+                </button>
+              </Tooltip>
+              <button type="button" onClick={() => remove(sample.url)} className="text-base text-red-500">
+                Delete
+              </button>
+            </div>
+          );
+        })}
         {samples.length === 0 && <p className="text-muted">No samples uploaded yet.</p>}
       </div>
     </div>

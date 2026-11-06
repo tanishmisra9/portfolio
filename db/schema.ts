@@ -5,6 +5,7 @@ import {
   integer,
   jsonb,
   timestamp,
+  boolean,
 } from "drizzle-orm/pg-core";
 import type {
   ExperienceEntry,
@@ -80,6 +81,8 @@ export const radioSamples = pgTable("radio_samples", {
   id: serial("id").primaryKey(),
   url: text("url").notNull().unique(),
   pathname: text("pathname").notNull(),
+  /** Kept in the admin but left out of the published snapshot, so it never plays. */
+  disabled: boolean("disabled").notNull().default(false),
 });
 
 /** What the public site actually reads. Written only by the global publish() action. */

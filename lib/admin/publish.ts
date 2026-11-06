@@ -112,7 +112,7 @@ async function buildPublishedData(): Promise<PublishedData> {
       description: p.description,
       content: p.body,
     })),
-    radio: { samples: sampleRows.map((s) => s.url), triggers: triggerRows.map((t) => t.text) },
+    radio: { samples: sampleRows.filter((s) => !s.disabled).map((s) => s.url), triggers: triggerRows.map((t) => t.text) },
     quotesSubtitle: portfolioRow?.quotesSubtitle,
   };
 

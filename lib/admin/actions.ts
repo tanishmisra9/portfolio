@@ -66,6 +66,12 @@ export async function uploadRadioSample(file: File): Promise<string | null> {
   return blob.url;
 }
 
+export async function setRadioSampleDisabled(url: string, disabled: boolean) {
+  await requireAdmin();
+  await db.update(radioSamples).set({ disabled }).where(eq(radioSamples.url, url));
+  draftChanged();
+}
+
 export async function deleteRadioSample(url: string) {
   await requireAdmin();
   await db.delete(radioSamples).where(eq(radioSamples.url, url));
