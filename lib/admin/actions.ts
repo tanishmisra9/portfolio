@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, asc, ne, sql } from "drizzle-orm";
+import { and, eq, asc, ne, sql } from "drizzle-orm";
 import matter from "gray-matter";
 import { db } from "@/db/client";
 import { portfolio, collections, photos, quotes, posts, radioSamples, radioTriggers } from "@/db/schema";
@@ -219,27 +219,16 @@ export async function reorderCollections(orderedIds: number[]) {
 const ALT_MODEL = "gpt-5.4-nano";
 const MAX_ALT_IMAGE_CHARS = 400_000;
 
-/**
- * Suggests alt text for a new photo, styled after the alts already on the site. The
- * client sends a small downscaled JPEG data URL (not the original file) so this stays far
- * under Vercel's 4.5MB request-body cap. Returns null on any failure or a missing
- * OPENAI_API_KEY -- uploading never depends on this.
- */
-export async function suggestAltText(
-  imageDataUrl: string,
-): Promise<{ alt: string } | { error: string }> {
-  await requireAdmin();
+/** Asks OpenAI for one alt-text sentence for an image (a data: URL, or a public https URL OpenAI fetches itself). */
+async function requestAlt(imageUrl: string): Promise<{ alt: string } | { error: string }> {
   // Failures are returned (and logged, never including the key) so the UI can say *why*
   // instead of a bare "couldn't generate" -- a missing key and a billing error look the same otherwise.
   const fail = (error: string) => {
-    console.error("[suggestAltText]", error);
+    console.error("[alt]", error);
     return { error };
   };
   const key = process.env.OPENAI_API_KEY;
   if (!key) return fail("OPENAI_API_KEY is not set on this deployment");
-  if (!imageDataUrl.startsWith("data:image/jpeg;base64,") || imageDataUrl.length > MAX_ALT_IMAGE_CHARS) {
-    return fail("preview image was invalid or too large");
-  }
 
   try {
     const examples = await db
@@ -266,7 +255,7 @@ export async function suggestAltText(
         max_completion_tokens: 120,
         messages: [
           { role: "system", content: system },
-          { role: "user", content: [{ type: "image_url", image_url: { url: imageDataUrl, detail: "low" } }] },
+          { role: "user", content: [{ type: "image_url", image_url: { url: imageUrl, detail: "low" } }] },
         ],
       }),
       signal: AbortSignal.timeout(12_000),
@@ -281,6 +270,40 @@ export async function suggestAltText(
   } catch (err) {
     return fail(err instanceof Error ? `${err.name}: ${err.message}`.slice(0, 140) : "unknown error");
   }
+}
+
+/**
+ * Suggests alt text for a new photo, styled after the alts already on the site. The
+ * client sends a small downscaled JPEG data URL (not the original file) so this stays far
+ * under Vercel's 4.5MB request-body cap. Failures (including a missing OPENAI_API_KEY) come
+ * back as `{ error }` -- uploading never depends on this.
+ */
+export async function suggestAltText(
+  imageDataUrl: string,
+): Promise<{ alt: string } | { error: string }> {
+  await requireAdmin();
+  if (!imageDataUrl.startsWith("data:image/jpeg;base64,") || imageDataUrl.length > MAX_ALT_IMAGE_CHARS) {
+    console.error("[alt]", "preview image was invalid or too large");
+    return { error: "preview image was invalid or too large" };
+  }
+  return requestAlt(imageDataUrl);
+}
+
+/** Fills in alt text for an already-uploaded photo that has none. Never overwrites existing alt text. Returns an error message, or null on success. */
+export async function generateAltForPhoto(id: number): Promise<string | null> {
+  await requireAdmin();
+  const [photo] = await db.select({ blobUrl: photos.blobUrl, alt: photos.alt }).from(photos).where(eq(photos.id, id));
+  if (!photo) return "Photo not found.";
+  if (photo.alt.trim()) return "This photo already has alt text.";
+  const result = await requestAlt(photo.blobUrl);
+  if ("error" in result) return result.error;
+  // Re-check emptiness in the UPDATE itself so a hand-written alt typed meanwhile wins.
+  await db
+    .update(photos)
+    .set({ alt: result.alt })
+    .where(and(eq(photos.id, id), sql`trim(${photos.alt}) = ''`));
+  draftChanged();
+  return null;
 }
 
 // ---- Photos ----

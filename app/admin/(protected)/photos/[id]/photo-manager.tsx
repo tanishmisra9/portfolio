@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useOptimistic, useRef, useState, useTransition } from "react";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Loader2, Sparkles } from "lucide-react";
 import Image from "next/image";
 import type { InferSelectModel } from "drizzle-orm";
 import type { photos } from "@/db/schema";
 import { ReorderableList } from "@/components/admin/reorderable-list";
-import { deletePhoto, reorderPhotos, updateCollection, updatePhoto } from "@/lib/admin/actions";
+import { deletePhoto, generateAltForPhoto, reorderPhotos, updateCollection, updatePhoto } from "@/lib/admin/actions";
 import { fieldClass, oneLine, PhotoUploader } from "../photo-uploader";
 import { PhotoViewer } from "./photo-viewer";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -29,6 +29,16 @@ export function PhotoManager({
   photos: Photo[];
 }) {
   const [, startTransition] = useTransition();
+  // Server actions run one at a time anyway, so a single "generating" id is enough.
+  const [generatingId, setGeneratingId] = useState<number | null>(null);
+  const [altErrors, setAltErrors] = useState<Record<number, string>>({});
+
+  async function generateAlt(id: number) {
+    setGeneratingId(id);
+    const error = await generateAltForPhoto(id).catch(() => "request failed (are you still logged in?)");
+    setAltErrors((prev) => ({ ...prev, [id]: error ?? "" }));
+    setGeneratingId(null);
+  }
   // The Cover button fills the instant it's clicked; it reverts by itself if the save doesn't land.
   const [optimisticCover, setOptimisticCover] = useOptimistic(coverImage);
   // Held by id so the dialog always shows the freshest row (and closes itself if the photo is deleted).
@@ -75,9 +85,29 @@ export function PhotoManager({
               />
             </button>
             <div className="flex-1 space-y-1">
+              {!photo.alt.trim() && (
+                <div className="flex flex-wrap items-center gap-x-3 text-base">
+                  <button
+                    type="button"
+                    disabled={generatingId !== null}
+                    onClick={() => void generateAlt(photo.id)}
+                    className="inline-flex items-center gap-1 rounded px-1 py-1 text-fg underline decoration-fg/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 disabled:opacity-60"
+                  >
+                    {generatingId === photo.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    ) : (
+                      <Sparkles className="h-4 w-4" aria-hidden />
+                    )}
+                    {generatingId === photo.id ? "Generating…" : "Generate alt text"}
+                  </button>
+                  {altErrors[photo.id] && <span className="text-red-500">Couldn&apos;t generate — {altErrors[photo.id]}</span>}
+                </div>
+              )}
               <textarea
+                key={photo.alt}
                 aria-label="Alt text"
                 className={`${fieldClass} ${growClass}`}
+                placeholder="No alt text"
                 defaultValue={photo.alt}
                 onBlur={(e) =>
                   oneLine(e.target.value) !== photo.alt &&
