@@ -20,7 +20,7 @@ export interface PublishedData {
 
 /** Assembles the current draft state into the shape the public site reads. */
 async function buildPublishedData(): Promise<PublishedData> {
-  const [[portfolioRow], collectionRows, photoRows, quoteRows, postRows, sampleRows, triggerRows] = await Promise.all([
+  const [[portfolioRow], collectionRows, allPhotoRows, quoteRows, postRows, sampleRows, triggerRows] = await Promise.all([
     db.select().from(portfolio),
     db.select().from(collections).orderBy(asc(collections.sortOrder)),
     db.select().from(photos).orderBy(asc(photos.sortOrder)),
@@ -30,6 +30,7 @@ async function buildPublishedData(): Promise<PublishedData> {
     db.select().from(radioTriggers).orderBy(asc(radioTriggers.id)),
   ]);
 
+  const photoRows = allPhotoRows.filter((p) => !p.hidden);
   const photosByCollection = new Map<number, typeof photoRows>();
   for (const photo of photoRows) {
     const list = photosByCollection.get(photo.collectionId) ?? [];
@@ -75,6 +76,7 @@ async function buildPublishedData(): Promise<PublishedData> {
         description: c.description,
         // New collections start with coverImage: "" until one is picked in the
         // admin — fall back to the first photo rather than shipping a blank <Image src="">.
+        // A hidden photo can still be the cover (the thumbnail), by design.
         coverImage: c.coverImage || photosByCollection.get(c.id)![0].blobUrl,
         photos: (photosByCollection.get(c.id) ?? [])
           // A photo referenced as another photo's duet partner renders nested inside that

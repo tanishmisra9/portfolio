@@ -350,6 +350,7 @@ export async function updatePhoto(
     caption: string | null;
     collectionId: number;
     duetWithPhotoId: number | null;
+    hidden: boolean;
   }>,
 ) {
   await requireAdmin();

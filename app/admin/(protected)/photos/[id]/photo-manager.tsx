@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useOptimistic, useRef, useState, useTransition } from "react";
-import { GripVertical, Loader2, Sparkles } from "lucide-react";
+import { Eye, EyeOff, GripVertical, Loader2, Sparkles } from "lucide-react";
 import Image from "next/image";
 import type { InferSelectModel } from "drizzle-orm";
 import type { photos } from "@/db/schema";
@@ -81,10 +81,11 @@ export function PhotoManager({
                 alt={photo.alt}
                 width={64}
                 height={64}
-                className="h-16 w-16 rounded object-cover"
+                className={`h-16 w-16 rounded object-cover ${photo.hidden ? "opacity-50" : ""}`}
               />
             </button>
             <div className="flex-1 space-y-1">
+              {photo.hidden && <span className="text-sm uppercase text-dim">Hidden</span>}
               {!photo.alt.trim() && (
                 <div className="flex flex-wrap items-center gap-x-3 text-base">
                   <button
@@ -129,6 +130,20 @@ export function PhotoManager({
                 }
               />
             </div>
+            <Tooltip align="end" label={photo.hidden ? "Show photo" : "Hide photo"}>
+              <button
+                type="button"
+                aria-label={photo.hidden ? "Show photo" : "Hide photo"}
+                onClick={() =>
+                  startTransition(async () => {
+                    await updatePhoto(photo.id, { hidden: !photo.hidden });
+                  })
+                }
+                className="rounded p-2 text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+              >
+                {photo.hidden ? <Eye className="h-5 w-5" aria-hidden /> : <EyeOff className="h-5 w-5" aria-hidden />}
+              </button>
+            </Tooltip>
             <Tooltip
               align="end"
               label={photo.blobUrl === optimisticCover ? "This is the collection thumbnail" : "Use as the collection thumbnail"}

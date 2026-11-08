@@ -52,6 +52,8 @@ export const photos = pgTable("photos", {
   height: integer("height"),
   sortOrder: integer("sort_order").notNull().default(0),
   duetWithPhotoId: integer("duet_with_photo_id"),
+  /** Kept in the admin but left out of the published snapshot, so it never shows. */
+  hidden: boolean("hidden").notNull().default(false),
 });
 
 export const quotes = pgTable("quotes", {
