@@ -13,10 +13,20 @@ export default function LoginPage() {
         className="w-full max-w-sm space-y-4 rounded-lg border border-fg/10 p-6"
       >
         <h1 className="font-display text-lg text-fg">Log in</h1>
+        {/* ponytail: not checked by login(); exists only so Safari's password manager sees a username + password pair */}
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          autoComplete="username"
+          aria-label="Username"
+          className="w-full rounded border border-fg/20 bg-transparent px-3 py-2 text-fg outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+        />
         <input
           type="password"
           name="password"
           placeholder="Type here"
+          autoComplete="current-password"
           autoFocus
           aria-invalid={!!error}
           className={`w-full rounded border bg-transparent px-3 py-2 tracking-[0.3em] outline-none placeholder:tracking-normal focus-visible:ring-2 focus-visible:ring-fg/70 ${
