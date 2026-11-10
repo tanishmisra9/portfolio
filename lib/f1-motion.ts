@@ -14,8 +14,8 @@ export const F1_CAR_RUN = 1500;
 /** Clip 72..152 as one continuous take. Source is 50fps; RATE < 1 slows it for weight. */
 export const F1_HANDOVER = 160;
 export const F1_FOOTAGE_RATE = 0.6;
-/** Phones: footage eases from the car's width-fit scale to cover. */
-export const F1_DOLLY = 900;
+/** Phones: over the last F1_ZOOM ms of the car's rush the scene eases from width-fit to cover (camera pushes in). */
+export const F1_ZOOM = 700;
 /** Closing tilt: playback ramps from F1_FOOTAGE_RATE to this, and the exit carries on at that speed. */
 export const F1_PAN_END_RATE = 0.8;
 

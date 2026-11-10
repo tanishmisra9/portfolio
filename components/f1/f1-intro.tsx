@@ -6,7 +6,6 @@ import { createF1Sound, type F1Sound } from "@/components/f1/f1-sound";
 import {
   F1_CAR_EMERGE,
   F1_CAR_RUN,
-  F1_DOLLY,
   F1_FOOTAGE_RATE,
   F1_HANDOVER,
   F1_HOLD_MAX,
@@ -16,6 +15,7 @@ import {
   F1_LIGHTS_RAISE,
   F1_PAN_END_RATE,
   F1_SFX_ROAR_PEAK_AT,
+  F1_ZOOM,
 } from "@/lib/f1-motion";
 
 type Frame = { x: number; y: number; w: number; h: number };
@@ -134,7 +134,8 @@ export function F1Intro() {
 
   const finish = useCallback(() => setPhase("done"), []);
   const sound = useRef<F1Sound | null>(null);
-  // Skip / Esc cut the sound; a natural finish lets the roar's tail ring out
+  // used when the intro can't run (assets failed): cut the sound and go to the end state.
+  // A natural finish uses finish(), which lets the roar's tail ring out
   const skip = useCallback(() => {
     sound.current?.stop();
     setPhase("done");
@@ -164,10 +165,6 @@ export function F1Intro() {
     let T0 = -1; // lights-out, ms since landing; decided once the car is ready
     let lit = -1;
     let curtainDown = false;
-    // stage colour = the theme's page background (#000 dark, off-white light), for the letterbox feather
-    const stage = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#000";
-    const rgb = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})/i.exec(stage);
-    const stageClear = rgb ? `rgba(${parseInt(rgb[1], 16)},${parseInt(rgb[2], 16)},${parseInt(rgb[3], 16)},0)` : "rgba(0,0,0,0)";
 
     const fit = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -181,13 +178,18 @@ export function F1Intro() {
     const ro = new ResizeObserver(fit);
     ro.observe(c);
 
-    // scene (1920x1080, centred on the stage): cover on desktop; phones start width-led so the car stays whole
-    const kCover = () => Math.max(cw / 1920, ch / 1080);
-    const kCar = () => (cw < 700 ? cw / 1100 : kCover());
+    // scene (1920x1080, centred on the stage). Desktop: cover throughout. Phones: the car starts width-led so it's
+    // whole, then the camera pushes in over the last F1_ZOOM ms of its rush, so the footage always arrives full-screen
+    // (no letterbox band). u = ms since lights-out.
+    const kAt = (u: number) => {
+      const cover = Math.max(cw / 1920, ch / 1080);
+      if (cw >= 700) return cover;
+      const z = easeInOut(clamp01((u - (F1_CAR_RUN - F1_ZOOM)) / F1_ZOOM));
+      return cw / 1100 + (cover - cw / 1100) * z;
+    };
 
-    const drawCar = (p: Pose, alpha: number, ox = 0, oy = 0) => {
+    const drawCar = (p: Pose, alpha: number, k: number, ox = 0, oy = 0) => {
       const car = assets.current.car!;
-      const k = kCar();
       const f = Math.round(p.f);
       const fr = car.m.frames[f];
       const cx = cw / 2 + ox, cy = ch / 2 + oy;
@@ -216,7 +218,7 @@ export function F1Intro() {
       return null;
     };
 
-    const drawFootage = (i: number, alpha: number, k: number, dy = 0, noFeather = false) => {
+    const drawFootage = (i: number, alpha: number, k: number, dy = 0) => {
       const im = footageImage(i);
       if (!im || alpha <= 0) return;
       const w = 1920 * k, h = 1080 * k;
@@ -224,23 +226,6 @@ export function F1Intro() {
       ctx.globalAlpha = alpha;
       ctx.drawImage(im, x, y, w, h);
       ctx.globalAlpha = 1;
-      // phones before the dolly finishes: melt the letterbox edges into the stage colour (not during the pan / exit)
-      if (noFeather) return;
-      const fh = h * 0.18;
-      if (y > 0) {
-        const g = ctx.createLinearGradient(0, y, 0, y + fh);
-        g.addColorStop(0, stage);
-        g.addColorStop(1, stageClear);
-        ctx.fillStyle = g;
-        ctx.fillRect(x, y - 1, w, fh + 1);
-      }
-      if (y + h < ch) {
-        const g = ctx.createLinearGradient(0, y + h, 0, y + h - fh);
-        g.addColorStop(0, stage);
-        g.addColorStop(1, stageClear);
-        ctx.fillStyle = g;
-        ctx.fillRect(x, y + h - fh, w, fh + 1);
-      }
     };
 
     const tick = (now: number) => {
@@ -282,7 +267,7 @@ export function F1Intro() {
         if (foot && fu >= 0) {
           const { first, frames, shifts, panFrom } = foot.m;
           const { msPerSrc, panMs, v0, panLen, acc } = tilt(foot.m); // panMs: footage clock when the closing tilt starts
-          const k = kCar() + (kCover() - kCar()) * easeInOut(clamp01(fu / F1_DOLLY));
+          const k = kAt(u); // always cover by now
           if (fu < panMs) {
             // hand-drawn section: keep its on-2s steps
             drawFootage(footageIndex(first + fu / msPerSrc), clamp01(fu / F1_HANDOVER), k);
@@ -302,17 +287,17 @@ export function F1Intro() {
               ctx.beginPath();
               ctx.rect(0, 0, cw, Math.max(0, y0 + da * k));
               ctx.clip();
-              drawFootage(i + 1, 1, k, -db, true);
+              drawFootage(i + 1, 1, k, -db);
               ctx.restore();
-              drawFootage(i, 1, k, da, true);
-              drawFootage(i + 1, frac, k, -db, true);
+              drawFootage(i, 1, k, da);
+              drawFootage(i + 1, frac, k, -db);
             } else {
               if (!curtainDown) {
                 curtainDown = true; // the footage covered the stage until now, so the page can sit behind it
                 curtain.style.display = "none";
               }
               const dy = y - panLen;
-              drawFootage(frames.length - 1, 1, k, dy, true);
+              drawFootage(frames.length - 1, 1, k, dy);
               if (y0 + dy * k >= ch) return finish();
             }
           }
@@ -325,16 +310,16 @@ export function F1Intro() {
           const pose: Pose = { f: last * Math.pow(clamp01(u / F1_CAR_RUN), 1.8), sc: 0.86 + 0.14 * e, a: e };
           for (const [lag, ga] of GHOSTS) {
             const g = history[history.length - lag];
-            if (g) drawCar(g, ga * carAlpha);
+            if (g) drawCar(g, ga * carAlpha, kAt(u));
           }
           const spread = (1 - e) * 14;
           if (spread > 0.5) {
             for (let j = 0; j < 6; j++) {
               const ang = (j / 6) * Math.PI * 2;
-              drawCar(pose, 0.22 * (1 - e) * carAlpha, Math.cos(ang) * spread, Math.sin(ang) * spread);
+              drawCar(pose, 0.22 * (1 - e) * carAlpha, kAt(u), Math.cos(ang) * spread, Math.sin(ang) * spread);
             }
           }
-          drawCar(pose, carAlpha);
+          drawCar(pose, carAlpha, kAt(u));
           history.push(pose);
           if (history.length > 14) history.shift();
         }
@@ -348,14 +333,6 @@ export function F1Intro() {
       ro.disconnect();
     };
   }, [phase, reduce, finish, skip]);
-
-  // Esc skips
-  useEffect(() => {
-    if (phase !== "run") return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && skip();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [phase, skip]);
 
   return (
     <div className="relative h-[calc(100svh-5rem)] w-full overflow-hidden">
@@ -391,14 +368,6 @@ export function F1Intro() {
             </div>
           </div>
           <canvas ref={canvasRef} aria-hidden className="absolute inset-0 h-full w-full" />
-          <button
-            type="button"
-            onClick={skip}
-            onMouseDown={(e) => e.preventDefault()}
-            className="absolute bottom-6 right-6 font-mono text-[11px] uppercase tracking-[0.25em] text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-          >
-            Skip
-          </button>
         </>
       )}
     </div>
