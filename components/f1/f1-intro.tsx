@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
+import { createF1Sound, type F1Sound } from "@/components/f1/f1-sound";
 import {
   F1_CAR_EMERGE,
   F1_CAR_RUN,
@@ -14,6 +15,7 @@ import {
   F1_LIGHT_STEP,
   F1_LIGHTS_RAISE,
   F1_PAN_END_RATE,
+  F1_SFX_ROAR_PEAK_AT,
 } from "@/lib/f1-motion";
 
 type Frame = { x: number; y: number; w: number; h: number };
@@ -47,6 +49,22 @@ const pad = (i: number) => String(i + 1).padStart(2, "0");
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 const easeOut = (p: number) => 1 - Math.pow(1 - p, 3);
 const easeInOut = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+
+/**
+ * Closing tilt timing. Driven by displacement: starts at the clip's own speed, ramps to its end speed at
+ * F1_PAN_END_RATE; `panMs` is when it begins and the same curve carries the last frame off the page.
+ */
+function tilt(m: FootageManifest) {
+  const msPerSrc = SRC_FRAME_MS / F1_FOOTAGE_RATE;
+  const panMs = (m.frames[m.panFrom] - m.first) * msPerSrc;
+  const gap0 = m.frames[m.panFrom + 1] - m.frames[m.panFrom];
+  const v0 = (m.shifts[m.panFrom] / gap0) * (F1_FOOTAGE_RATE / SRC_FRAME_MS); // px/ms
+  const v1 = m.endShift * (F1_PAN_END_RATE / SRC_FRAME_MS);
+  let panLen = 0;
+  for (let i = m.panFrom; i < m.shifts.length; i++) panLen += m.shifts[i];
+  const dur = (2 * panLen) / (v0 + v1);
+  return { msPerSrc, panMs, v0, panLen, dur, acc: (v1 - v0) / dur };
+}
 
 async function loadImage(src: string) {
   const im = new Image();
@@ -115,6 +133,22 @@ export function F1Intro() {
   }, [phase]);
 
   const finish = useCallback(() => setPhase("done"), []);
+  const sound = useRef<F1Sound | null>(null);
+  // Skip / Esc cut the sound; a natural finish lets the roar's tail ring out
+  const skip = useCallback(() => {
+    sound.current?.stop();
+    setPhase("done");
+  }, []);
+
+  useEffect(() => {
+    if (reduce) return;
+    const s = createF1Sound();
+    sound.current = s;
+    return () => {
+      s.dispose();
+      sound.current = null;
+    };
+  }, [reduce]);
 
   // black -> five lights -> lights out -> car resolves and rushes -> the clip's continuous take -> it carries on off the page
   useEffect(() => {
@@ -210,18 +244,25 @@ export function F1Intro() {
     };
 
     const tick = (now: number) => {
-      if (!start) start = now;
+      if (!start) {
+        start = now;
+        sound.current?.landing();
+      }
       const t = now - start;
       const a = assets.current;
-      if (a.failed) return finish();
+      if (a.failed) return skip(); // nothing to show: end state, and cut the rumble
 
       // lights: on one by one, all out together once the hold is over and the car + handover frame are ready
       // (on a slow connection the lights just hold longer, like a real start)
       const lightsDone = F1_LIGHT_START + 4 * F1_LIGHT_STEP;
       const ready = a.car && (a.footage?.imgs[0] || a.footageFailed);
-      if (T0 < 0 && ready && t >= lightsDone + hold) T0 = t;
+      if (T0 < 0 && ready && t >= lightsDone + hold) {
+        T0 = t;
+        sound.current?.lightsOut(F1_SFX_ROAR_PEAK_AT);
+      }
       const nowLit = T0 >= 0 ? 0 : Math.max(0, Math.min(5, Math.floor((t - F1_LIGHT_START) / F1_LIGHT_STEP) + 1));
       if (nowLit !== lit) {
+        if (nowLit > lit && nowLit > 0) sound.current?.light();
         lit = nowLit;
         lampsRef.current.forEach((el, i) => {
           if (el) el.dataset.on = i < lit ? "1" : "0";
@@ -239,9 +280,8 @@ export function F1Intro() {
         const foot = a.footage;
         if (fu >= F1_HANDOVER && a.footageFailed) return finish();
         if (foot && fu >= 0) {
-          const { first, frames, shifts, panFrom, endShift } = foot.m;
-          const msPerSrc = SRC_FRAME_MS / F1_FOOTAGE_RATE;
-          const panMs = (frames[panFrom] - first) * msPerSrc; // footage clock when the closing tilt starts
+          const { first, frames, shifts, panFrom } = foot.m;
+          const { msPerSrc, panMs, v0, panLen, acc } = tilt(foot.m); // panMs: footage clock when the closing tilt starts
           const k = kCar() + (kCover() - kCar()) * easeInOut(clamp01(fu / F1_DOLLY));
           if (fu < panMs) {
             // hand-drawn section: keep its on-2s steps
@@ -250,13 +290,6 @@ export function F1Intro() {
             // closing tilt + exit, driven by displacement so speed and acceleration never jump:
             // starts at the clip's own speed, ramps to its end speed at F1_PAN_END_RATE, then the same curve
             // simply carries the last frame off the page
-            const gap0 = frames[panFrom + 1] - frames[panFrom];
-            const v0 = (shifts[panFrom] / gap0) * (F1_FOOTAGE_RATE / SRC_FRAME_MS); // px/ms
-            const v1 = endShift * (F1_PAN_END_RATE / SRC_FRAME_MS);
-            let panLen = 0;
-            for (let i = panFrom; i < shifts.length; i++) panLen += shifts[i];
-            const dur = (2 * panLen) / (v0 + v1);
-            const acc = (v1 - v0) / dur;
             const tau = fu - panMs;
             const y = v0 * tau + 0.5 * acc * tau * tau; // px of content travel since the tilt began
             const y0 = (ch - 1080 * k) / 2;
@@ -314,15 +347,15 @@ export function F1Intro() {
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [phase, reduce, finish]);
+  }, [phase, reduce, finish, skip]);
 
   // Esc skips
   useEffect(() => {
     if (phase !== "run") return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && finish();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && skip();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [phase, finish]);
+  }, [phase, skip]);
 
   return (
     <div className="relative h-[calc(100svh-5rem)] w-full overflow-hidden">
@@ -360,7 +393,7 @@ export function F1Intro() {
           <canvas ref={canvasRef} aria-hidden className="absolute inset-0 h-full w-full" />
           <button
             type="button"
-            onClick={finish}
+            onClick={skip}
             onMouseDown={(e) => e.preventDefault()}
             className="absolute bottom-6 right-6 font-mono text-[11px] uppercase tracking-[0.25em] text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
           >
