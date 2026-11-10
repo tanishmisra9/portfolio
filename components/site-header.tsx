@@ -25,6 +25,7 @@ const NAV: NavItem[] = [
   { href: "/photos", label: "PHOTOS" },
   { href: "/blog", label: "BLOG" },
   { href: "/quotes", label: "QUOTES" },
+  { href: "/f1", label: "F1" },
 ];
 
 /** DOM order — must match home page sections for scroll-spy. */
