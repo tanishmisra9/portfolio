@@ -519,3 +519,16 @@ body {
   transition: opacity 200ms ease-out;
   pointer-events: none;
 }
+
+/* light theme: on an off-white stage a wide red bloom reads as pink haze, so keep the glow tight and saturated */
+html:not(.dark) .f1-lamp {
+  box-shadow:
+    0 0 0 1px rgba(140, 0, 0, 0.45),
+    0 0 6px 1px rgba(255, 40, 20, 0.85),
+    0 0 18px 4px rgba(225, 6, 0, 0.45),
+    0 0 40px 10px rgba(225, 6, 0, 0.14);
+}
+html:not(.dark) .f1-bloom {
+  inset: -90% -10%;
+  background: radial-gradient(ellipse at center, rgba(225, 6, 0, 0.18), rgba(225, 6, 0, 0) 60%);
+}

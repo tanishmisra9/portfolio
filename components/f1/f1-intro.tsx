@@ -130,6 +130,10 @@ export function F1Intro() {
     let T0 = -1; // lights-out, ms since landing; decided once the car is ready
     let lit = -1;
     let curtainDown = false;
+    // stage colour = the theme's page background (#000 dark, off-white light), for the letterbox feather
+    const stage = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#000";
+    const rgb = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})/i.exec(stage);
+    const stageClear = rgb ? `rgba(${parseInt(rgb[1], 16)},${parseInt(rgb[2], 16)},${parseInt(rgb[3], 16)},0)` : "rgba(0,0,0,0)";
 
     const fit = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -186,20 +190,20 @@ export function F1Intro() {
       ctx.globalAlpha = alpha;
       ctx.drawImage(im, x, y, w, h);
       ctx.globalAlpha = 1;
-      // phones before the dolly finishes: melt the letterbox edges into the black (not during the pan / exit)
+      // phones before the dolly finishes: melt the letterbox edges into the stage colour (not during the pan / exit)
       if (noFeather) return;
       const fh = h * 0.18;
       if (y > 0) {
         const g = ctx.createLinearGradient(0, y, 0, y + fh);
-        g.addColorStop(0, "#000");
-        g.addColorStop(1, "rgba(0,0,0,0)");
+        g.addColorStop(0, stage);
+        g.addColorStop(1, stageClear);
         ctx.fillStyle = g;
         ctx.fillRect(x, y - 1, w, fh + 1);
       }
       if (y + h < ch) {
         const g = ctx.createLinearGradient(0, y + h, 0, y + h - fh);
-        g.addColorStop(0, "#000");
-        g.addColorStop(1, "rgba(0,0,0,0)");
+        g.addColorStop(0, stage);
+        g.addColorStop(1, stageClear);
         ctx.fillStyle = g;
         ctx.fillRect(x, y + h - fh, w, fh + 1);
       }
@@ -326,15 +330,15 @@ export function F1Intro() {
         <h1 className="heading-bleed-mobile select-none cursor-default text-center font-display text-[clamp(2.75rem,10.5vw,6.5rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(3rem,11.5vw,7rem)] md:max-w-full md:text-[min(8.2vw,6.75rem)] heading-ghost">
           F1
         </h1>
-        <p className="mt-6 text-center text-sm uppercase tracking-[0.2em] text-dim md:mt-8">
+        <p className="mt-6 select-none text-center text-[1.375rem] leading-snug text-muted md:mt-8">
           Coming soon
         </p>
       </div>
 
-      {/* black stage, lights and canvas, only while the intro is live */}
+      {/* stage (page background), lights and canvas, only while the intro is live */}
       {phase !== "done" && (
         <>
-          <div ref={curtainRef} aria-hidden className="absolute inset-0 bg-black" />
+          <div ref={curtainRef} aria-hidden className="absolute inset-0 bg-bg" />
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -358,7 +362,7 @@ export function F1Intro() {
             type="button"
             onClick={finish}
             onMouseDown={(e) => e.preventDefault()}
-            className="absolute bottom-6 right-6 font-mono text-[11px] uppercase tracking-[0.25em] text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            className="absolute bottom-6 right-6 font-mono text-[11px] uppercase tracking-[0.25em] text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
           >
             Skip
           </button>
