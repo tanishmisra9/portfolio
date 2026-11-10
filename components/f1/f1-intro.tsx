@@ -15,6 +15,7 @@ import {
   F1_LIGHTS_RAISE,
   F1_PAN_END_RATE,
   F1_SFX_ROAR_PEAK_AT,
+  F1_LOAD_GRACE,
   F1_ZOOM,
 } from "@/lib/f1-motion";
 
@@ -110,6 +111,7 @@ export function F1Intro() {
           }
         };
         await Promise.all([worker(), worker(), worker(), worker()]);
+        if (alive && !fimgs[0]) assets.current.footageFailed = true; // no handover frame: the car runs, then it ends
       } catch {
         // car missing: nothing can run, jump to the end state. Footage missing: the car still runs, then it ends.
         if (!assets.current.car) assets.current.failed = true;
@@ -134,7 +136,7 @@ export function F1Intro() {
 
   const finish = useCallback(() => setPhase("done"), []);
   const sound = useRef<F1Sound | null>(null);
-  // used when the intro can't run (assets failed): cut the sound and go to the end state.
+  // Skip button / Esc (and the asset-failure paths): cut the sound and go to the end state.
   // A natural finish uses finish(), which lets the roar's tail ring out
   const skip = useCallback(() => {
     sound.current?.stop();
@@ -178,14 +180,15 @@ export function F1Intro() {
     const ro = new ResizeObserver(fit);
     ro.observe(c);
 
-    // scene (1920x1080, centred on the stage). Desktop: cover throughout. Phones: the car starts width-led so it's
-    // whole, then the camera pushes in over the last F1_ZOOM ms of its rush, so the footage always arrives full-screen
-    // (no letterbox band). u = ms since lights-out.
+    // scene (1920x1080, centred on the stage). The car starts at whichever is smaller, width-led (so it's whole on
+    // portrait phones) or cover (desktop, landscape: already whole), then the camera pushes in over the last F1_ZOOM
+    // ms of its rush, so the footage always arrives at cover (no letterbox band). Equal on desktop -> no change there.
+    // u = ms since lights-out. F1_ZOOM may exceed F1_CAR_RUN; cover is still reached exactly at the handover.
     const kAt = (u: number) => {
       const cover = Math.max(cw / 1920, ch / 1080);
-      if (cw >= 700) return cover;
+      const start = Math.min(cw / 1100, cover);
       const z = easeInOut(clamp01((u - (F1_CAR_RUN - F1_ZOOM)) / F1_ZOOM));
-      return cw / 1100 + (cover - cw / 1100) * z;
+      return start + (cover - start) * z;
     };
 
     const drawCar = (p: Pose, alpha: number, k: number, ox = 0, oy = 0) => {
@@ -240,6 +243,11 @@ export function F1Intro() {
       // lights: on one by one, all out together once the hold is over and the car + handover frame are ready
       // (on a slow connection the lights just hold longer, like a real start)
       const lightsDone = F1_LIGHT_START + 4 * F1_LIGHT_STEP;
+      if (T0 < 0 && t >= lightsDone + hold + F1_LOAD_GRACE) {
+        // a load that hangs can't hold the lights (and the scroll lock) forever
+        if (!a.car) return skip();
+        if (!a.footage?.imgs[0]) a.footageFailed = true;
+      }
       const ready = a.car && (a.footage?.imgs[0] || a.footageFailed);
       if (T0 < 0 && ready && t >= lightsDone + hold) {
         T0 = t;
@@ -260,6 +268,7 @@ export function F1Intro() {
         const u = t - T0;
         const last = a.car!.m.frames.length - 1;
         const fu = u - F1_CAR_RUN; // footage clock
+        const k = kAt(u); // scene scale this frame (cover once the footage is up)
 
         // the continuous take, from clip frame 72 (= the last car sprite) onward
         const foot = a.footage;
@@ -267,7 +276,6 @@ export function F1Intro() {
         if (foot && fu >= 0) {
           const { first, frames, shifts, panFrom } = foot.m;
           const { msPerSrc, panMs, v0, panLen, acc } = tilt(foot.m); // panMs: footage clock when the closing tilt starts
-          const k = kAt(u); // always cover by now
           if (fu < panMs) {
             // hand-drawn section: keep its on-2s steps
             drawFootage(footageIndex(first + fu / msPerSrc), clamp01(fu / F1_HANDOVER), k);
@@ -310,16 +318,16 @@ export function F1Intro() {
           const pose: Pose = { f: last * Math.pow(clamp01(u / F1_CAR_RUN), 1.8), sc: 0.86 + 0.14 * e, a: e };
           for (const [lag, ga] of GHOSTS) {
             const g = history[history.length - lag];
-            if (g) drawCar(g, ga * carAlpha, kAt(u));
+            if (g) drawCar(g, ga * carAlpha, k);
           }
           const spread = (1 - e) * 14;
           if (spread > 0.5) {
             for (let j = 0; j < 6; j++) {
               const ang = (j / 6) * Math.PI * 2;
-              drawCar(pose, 0.22 * (1 - e) * carAlpha, kAt(u), Math.cos(ang) * spread, Math.sin(ang) * spread);
+              drawCar(pose, 0.22 * (1 - e) * carAlpha, k, Math.cos(ang) * spread, Math.sin(ang) * spread);
             }
           }
-          drawCar(pose, carAlpha, kAt(u));
+          drawCar(pose, carAlpha, k);
           history.push(pose);
           if (history.length > 14) history.shift();
         }
@@ -333,6 +341,14 @@ export function F1Intro() {
       ro.disconnect();
     };
   }, [phase, reduce, finish, skip]);
+
+  // Esc skips
+  useEffect(() => {
+    if (phase !== "run") return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && skip();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [phase, skip]);
 
   return (
     <div className="relative h-[calc(100svh-5rem)] w-full overflow-hidden">
@@ -368,6 +384,14 @@ export function F1Intro() {
             </div>
           </div>
           <canvas ref={canvasRef} aria-hidden className="absolute inset-0 h-full w-full" />
+          <button
+            type="button"
+            onClick={skip}
+            onMouseDown={(e) => e.preventDefault()}
+            className="absolute bottom-6 right-6 font-mono text-[11px] uppercase tracking-[0.25em] text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+          >
+            Skip
+          </button>
         </>
       )}
     </div>

@@ -6,6 +6,8 @@ export const F1_HOLD_MIN = 600;
 export const F1_HOLD_MAX = 2200;
 /** Gantry sits this % of the stage height above centre. */
 export const F1_LIGHTS_RAISE = 23;
+/** If assets still haven't loaded this long after the lights would normally go out, stop waiting (never hang). */
+export const F1_LOAD_GRACE = 5000;
 
 /** Car cut-out (clip 49..72): resolves out of the dark, then rushes the camera. */
 export const F1_CAR_EMERGE = 700;
