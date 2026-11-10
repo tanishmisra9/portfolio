@@ -1,8 +1,9 @@
 """Build the /f1 intro assets from the source clip.
 
   public/f1/car/NN.webp + manifest.json   car cut out of frames 49..72 (rembg matte)
-  public/f1/footage/{lg,sm}/NN.webp + manifest.json   frames 72..152 as-is (one continuous take), held
-      duplicates dropped, with source frame numbers and the clip's end velocity
+  public/f1/footage/{lg,sm}/NN.webp + manifest.json   frames 72..152 (one continuous take), held
+      duplicates dropped, 'ASTON MARTIN' removed from the helmet visor strip, with source frame numbers and the
+      clip's measured shifts / end velocity
 
 Not part of the app build. Needs a throwaway venv:
   python3 -m venv /tmp/f1venv && /tmp/f1venv/bin/pip install "rembg[cpu]" pillow numpy scipy
@@ -63,6 +64,67 @@ def build_car():
     (OUT / "manifest.json").write_text(json.dumps(manifest))
 
 
+NAVY = np.array([5, 29, 59], np.float32)  # the helmet visor strip
+
+
+def remove_visor_text(a, min_letters=5):
+    """Remove the white 'ASTON MARTIN' lettering from the helmet's navy visor strip (a: HxWx3 float32).
+    Letters = bright blobs that are letter-sized, mostly ringed by navy, and clustered into a line of text.
+    Each letter + a 5px rim (anti-aliasing / compression ringing) is repainted with the strip's navy; the strip's
+    white outline, rain streaks and the yellow/red ribbon art are protected. Returns (image, letters found)."""
+    navy = np.linalg.norm(a - NAVY, axis=2) < 40
+    core = a.min(2) > 150
+    # rain streaks (thin vertical lines) can cross letters and weld them into one long shape: find them first.
+    # Long ones by a tall opening; shorter segments as runs <= 3px wide (letter strokes are wider) that stand 20px+
+    tall = ndimage.binary_opening(core, structure=np.ones((61, 1), bool))
+    thin = core & ~ndimage.binary_opening(core, structure=np.ones((1, 4), bool))
+    tl, tk = ndimage.label(thin)
+    if tk:
+        th = np.array([o[0].stop - o[0].start for o in ndimage.find_objects(tl)])
+        tall |= np.isin(tl, np.nonzero(th >= 20)[0] + 1)
+    lab, k = ndimage.label(core & ~ndimage.binary_dilation(tall, iterations=1))
+    if not k:
+        return a, 0
+    objs = ndimage.find_objects(lab)
+    sizes = ndimage.sum(core, lab, range(1, k + 1))
+    glyphs, cents, small = [], [], []
+    for i in range(k):
+        sl = objs[i]
+        h, w = sl[0].stop - sl[0].start, sl[1].stop - sl[1].start
+        if not (12 <= sizes[i] <= 2500) or h > 90 or w > 90:
+            continue
+        cc = ((sl[0].start + sl[0].stop) / 2, (sl[1].start + sl[1].stop) / 2)
+        small.append((i + 1, cc))
+        y0, y1, x0, x1 = max(sl[0].start - 5, 0), sl[0].stop + 5, max(sl[1].start - 5, 0), sl[1].stop + 5
+        blob = lab[y0:y1, x0:x1] == i + 1
+        ring = ndimage.binary_dilation(blob, iterations=4) & ~ndimage.binary_dilation(blob, iterations=1)
+        if ring.any() and navy[y0:y1, x0:x1][ring].mean() >= 0.45:
+            glyphs.append(i + 1)
+            cents.append(cc)
+    if len(glyphs) < min_letters:
+        return a, 0
+    c = np.array(cents)
+    dist = np.linalg.norm(c[:, None] - c[None], axis=2)
+    need = 3 if min_letters >= 5 else 2
+    keep = [g for g, row in zip(glyphs, dist) if (row < 140).sum() >= need]  # clustered into a line of text
+    if len(keep) < min_letters:
+        return a, 0
+    kc = np.array([cc for g, cc in zip(glyphs, cents) if g in keep])
+    for g, cc in small:  # pieces of a letter a streak runs along: letter-sized and in the text line
+        if g not in keep and np.linalg.norm(kc - np.array(cc), axis=1).min() < 70:
+            keep.append(g)
+    letters = np.isin(lab, keep)
+    others = core & ~ndimage.binary_dilation(letters, iterations=6)  # outline, streaks, helmet white: protected
+    ribbon = (a[..., 0] > 140) & (a[..., 2] < 110)
+    area = ndimage.binary_dilation(letters, iterations=5) & ~ndimage.binary_dilation(others, iterations=1) & ~ribbon
+    ring = ndimage.binary_dilation(letters, iterations=16) & ~ndimage.binary_dilation(letters, iterations=8)
+    ys, xs = np.nonzero(ring & navy)  # strip colour from clear of the darker ringing next to the letters
+    col = np.median(a[ys, xs], axis=0) if len(ys) else NAVY
+    soft = np.clip(ndimage.gaussian_filter(area.astype(np.float32), 0.7) * 1.4, 0, 1)[..., None]
+    soft = np.where(area[..., None], 1.0, soft)
+    return a * (1 - soft) + col * soft, len(keep)
+
+
 def build_footage():
     """Clip frames 72..152: one continuous camera move (over the car, cockpit, helmet, livery morph, up over the
     yellow helmet top). Kept untouched. Held duplicates are dropped, but each kept frame records its source frame
@@ -74,14 +136,17 @@ def build_footage():
         (out / d).mkdir(parents=True, exist_ok=True)
         for f in (out / d).glob("*.webp"):
             f.unlink()
-    kept, prev = [], None
+    kept, prev, had_text = [], None, 0
     for n in range(first, last + 1):  # inclusive
         a = np.asarray(frame(n)).astype(np.float32)
         if prev is not None and np.abs(a - prev).mean() <= 1.2:  # held drawing (animated on 2s)
             continue
         prev = a
         kept.append(n)
-        im = Image.fromarray(a.astype(np.uint8))
+        # once the lettering has been seen, a smaller cluster still counts (strip leaving frame), so no letter flashes
+        a, had_text = remove_visor_text(a, 2 if had_text else 5)
+        print(f"  frame {n}: visor letters removed {had_text}")
+        im = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
         im.save(out / "lg" / f"{len(kept):02d}.webp", quality=80, method=6)
         im.resize((1080, 608), Image.LANCZOS).save(out / "sm" / f"{len(kept):02d}.webp", quality=78, method=6)
 

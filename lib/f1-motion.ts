@@ -20,7 +20,7 @@ export const F1_DOLLY = 900;
 export const F1_PAN_END_RATE = 0.8;
 
 /** Sound: gains balanced from measured mean levels (rumble -13.5dB, light -16dB, roar -14dB). */
-export const F1_SFX_RUMBLE_GAIN = 0.65;
+export const F1_SFX_RUMBLE_GAIN = 0.8;
 export const F1_SFX_LIGHT_GAIN = 0.5;
 export const F1_SFX_ROAR_GAIN = 0.56;
 /** Seconds: soften the roar's attack and ease out its tail (it sounded harsh at both ends). */
