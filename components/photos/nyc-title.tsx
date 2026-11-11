@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NYCExplosion } from "@/components/photos/nyc-explosion";
-
-type Phase = "idle" | "swap" | "hold";
+import { move, NYC_PHASE, type NycPhase } from "@/lib/state-machines";
 
 type Props = {
   baseClasses: string;
@@ -14,7 +13,7 @@ const NYC_BURST_MS = 900;
 const NYC_EXPLOSION_COOLDOWN_MS = 1000;
 
 export function NYCTitle({ baseClasses }: Props) {
-  const [phase, setPhase] = useState<Phase>("idle");
+  const [phase, setPhase] = useState<NycPhase>("idle");
   const [exploding, setExploding] = useState(false);
   const [explosionKey, setExplosionKey] = useState(0);
   const [hasPlayed, setHasPlayed] = useState(false);
@@ -90,11 +89,11 @@ export function NYCTitle({ baseClasses }: Props) {
     timeoutsRef.current.forEach(clearTimeout);
     timeoutsRef.current = [];
 
-    setPhase("swap");
+    setPhase((from) => move(NYC_PHASE, from, "swap"));
     setHasPlayed(true);
 
     sched(() => {
-      setPhase("hold");
+      setPhase((from) => move(NYC_PHASE, from, "hold"));
     }, NYC_SWAP_MS);
 
     sched(() => {

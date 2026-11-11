@@ -9,13 +9,12 @@ import {
   SnowfallCanvas,
   type SnowfallCanvasHandle,
 } from "@/components/photos/snowfall-canvas";
+import { ANIM_PHASE, move, type AnimPhase } from "@/lib/state-machines";
 
 type Props = {
   title: string;
   slug: string;
 };
-
-type AnimPhase = "idle" | "wipe" | "flyout" | "flyin" | "settle";
 
 export function AlbumTitle({ title, slug }: Props) {
   const reduceMotion = useReducedMotion();
@@ -97,11 +96,12 @@ export function AlbumTitle({ title, slug }: Props) {
 
     playPassby();
 
-    setPhase("wipe");
-    schedule(() => setPhase("flyout"), 800);
-    schedule(() => setPhase("flyin"), 1400);
-    schedule(() => setPhase("settle"), 2200);
-    schedule(() => setPhase("idle"), 2800);
+    const go = (to: AnimPhase) => setPhase((from) => move(ANIM_PHASE, from, to));
+    go("wipe");
+    schedule(() => go("flyout"), 800);
+    schedule(() => go("flyin"), 1400);
+    schedule(() => go("settle"), 2200);
+    schedule(() => go("idle"), 2800);
   }, [interactiveSuperMax, phase, playPassby, schedule]);
 
   const isLongSingleWordTitle = !title.includes(" ") && title.length >= 10;

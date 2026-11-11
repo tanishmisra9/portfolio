@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, RotateCcw, Sparkles } from "lucide-react";
 import { suggestAltText, uploadPhoto } from "@/lib/admin/actions";
 import { toAltPreviewDataUrl, uploadImageToBlob } from "@/lib/admin/client-upload";
+import { AI_STATUS, move, UPLOAD_STATUS, type AiStatus, type UploadStatus } from "@/lib/state-machines";
 
 interface PendingPhoto {
   key: string;
@@ -13,9 +14,9 @@ interface PendingPhoto {
   caption: string;
   /** First AI suggestion, kept so Reset can restore it without another API call. */
   aiAlt: string | null;
-  aiStatus: "generating" | "ready" | "failed";
+  aiStatus: AiStatus;
   aiError?: string;
-  status: "idle" | "uploading" | "saving";
+  status: UploadStatus;
   progress: number;
   /** Null until the user picks one (only possible when several collections are offered). */
   collectionId: number | null;
@@ -38,7 +39,13 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
   const inputRef = useRef<HTMLInputElement>(null);
 
   function patchPending(key: string, patch: Partial<PendingPhoto>) {
-    setPending((prev) => prev.map((p) => (p.key === key ? { ...p, ...patch } : p)));
+    setPending((prev) =>
+      prev.map((p) => {
+        if (p.key !== key) return p;
+        const status = patch.status ? move(UPLOAD_STATUS, p.status, patch.status) : p.status;
+        return { ...p, ...patch, status };
+      }),
+    );
   }
 
   const pendingRef = useRef(pending);
@@ -71,9 +78,9 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
     setPending((prev) =>
       prev.map((p) => {
         if (p.key !== key) return p;
-        if (!suggestion) return { ...p, aiStatus: "failed", aiError: reason };
+        if (!suggestion) return { ...p, aiStatus: move(AI_STATUS, p.aiStatus, "failed"), aiError: reason };
         // Never overwrite something the user already typed while this was loading.
-        return { ...p, aiAlt: suggestion, aiStatus: "ready", alt: p.alt === "" ? suggestion : p.alt };
+        return { ...p, aiAlt: suggestion, aiStatus: move(AI_STATUS, p.aiStatus, "ready"), alt: p.alt === "" ? suggestion : p.alt };
       }),
     );
   }
