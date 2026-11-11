@@ -32,6 +32,12 @@ export function Hero({ subtitle }: HeroProps) {
   const reduceHeroMotion = useReducedMotion();
   const [topLine = "", bottomLine = ""] = subtitle.split("\n");
   const [scatterTrigger, setScatterTrigger] = useState(0);
+  /**
+   * Busy clears only once both name lines call onLineScatterComplete. That holds because every dependency of the
+   * scatter effect in scatter-name.tsx is stable, so it re-runs only on a new scatterTrigger. Keep
+   * onLineScatterComplete and queueGlobalReturnGap memoized (and don't add unstable deps there): a re-run cancels
+   * the in-flight run without calling its completion callback and leaves clicks dead until reload.
+   */
   const scatterBusyRef = useRef(false);
   const scatterDoneRef = useRef(0);
   /** Serializes return starts across both name lines so two letters never fire together */
