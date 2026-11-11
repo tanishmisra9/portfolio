@@ -14,6 +14,7 @@ import {
   F1_LIGHT_STEP,
   F1_LIGHTS_RAISE,
   F1_PAN_END_RATE,
+  F1_SFX_GROWL_LEAD,
   F1_SFX_ROAR_PEAK_AT,
   F1_LOAD_GRACE,
   F1_ZOOM,
@@ -249,6 +250,9 @@ export function F1Intro() {
         if (!a.footage?.imgs[0]) a.footageFailed = true;
       }
       const ready = a.car && (a.footage?.imgs[0] || a.footageFailed);
+      // the engine growl leads lights-out slightly. Readiness only ever turns on, so ready now means lights-out lands
+      // exactly F1_SFX_GROWL_LEAD later; when the load-grace fallback forces lights-out it fires on the same frame
+      if (T0 < 0 && ready && t >= lightsDone + hold - F1_SFX_GROWL_LEAD) sound.current?.growl();
       if (T0 < 0 && ready && t >= lightsDone + hold) {
         T0 = t;
         sound.current?.lightsOut(F1_SFX_ROAR_PEAK_AT);

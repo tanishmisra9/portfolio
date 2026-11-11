@@ -1,4 +1,7 @@
 import {
+  F1_SFX_GROWL_FADE_IN,
+  F1_SFX_GROWL_FADE_OUT,
+  F1_SFX_GROWL_GAIN,
   F1_SFX_LIGHT_GAIN,
   F1_SFX_ROAR_FADE_IN,
   F1_SFX_ROAR_FADE_OUT,
@@ -10,15 +13,24 @@ import {
 } from "@/lib/f1-motion";
 
 /**
- * Intro sound: engine rumble from landing, a beep per start light, the roar at lights-out.
+ * Intro sound: engine rumble from landing, a beep per start light, an engine growl/rev that surges on lights-out and
+ * crossfades into the drive-off roar.
  * Web Audio rather than <audio>: iOS ignores HTMLMediaElement.volume, so the rumble couldn't be balanced or ducked.
  * Browsers block audio until the visitor interacts; if blocked, the first click/tap/key unlocks it and the sound
  * joins at the right point (rumble at its elapsed offset, or the roar part-way through). Never catches up beeps.
  */
 /** lightsOut(peakInMs): the roar is scheduled so its loudest moment lands peakInMs after lights-out. */
-export type F1Sound = { landing(): void; light(): void; lightsOut(peakInMs: number): void; stop(): void; dispose(): void };
+/** growl(): call once, just before lights-out (F1_SFX_GROWL_LEAD); it fades out under the roar once the roar comes in. */
+export type F1Sound = {
+  landing(): void;
+  light(): void;
+  growl(): void;
+  lightsOut(peakInMs: number): void;
+  stop(): void;
+  dispose(): void;
+};
 
-const NOOP: F1Sound = { landing() {}, light() {}, lightsOut() {}, stop() {}, dispose() {} };
+const NOOP: F1Sound = { landing() {}, light() {}, growl() {}, lightsOut() {}, stop() {}, dispose() {} };
 const UNLOCK_EVENTS = ["pointerdown", "keydown", "touchend"] as const;
 
 export function createF1Sound(): F1Sound {
@@ -26,13 +38,26 @@ export function createF1Sound(): F1Sound {
     window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AC) return NOOP;
   const ctx = new AC();
-  const bufs: { rumble?: AudioBuffer; light?: AudioBuffer; roar?: AudioBuffer } = {};
+  // brick-wall limiter in front of the speakers: the rumble, growl and roar overlap around lights-out and their peaks
+  // can sum past 1.0 (hard clipping / crackle), more so as gains are raised. Only touches peaks.
+  const out = ctx.createDynamicsCompressor();
+  out.threshold.value = -4;
+  out.knee.value = 0;
+  out.ratio.value = 20;
+  out.attack.value = 0.002;
+  out.release.value = 0.12;
+  out.connect(ctx.destination);
+  const bufs: { rumble?: AudioBuffer; light?: AudioBuffer; roar?: AudioBuffer; growl?: AudioBuffer } = {};
   const active = new Set<{ src: AudioBufferSourceNode; g: GainNode }>();
   let landedAt = -1; // performance.now() timestamps; ctx.currentTime doesn't advance while suspended
   let outAt = -1;
   let roarAt = -1; // when the roar file (from F1_SFX_ROAR_OFFSET) should start; the rumble carries on until then
   let rumble: { src: AudioBufferSourceNode; g: GainNode } | null = null;
   let roarDone = false;
+  let growlAt = -1; // when the growl (from offset 0) was due to start
+  let growl: { src: AudioBufferSourceNode; g: GainNode; fadeInEnd: number } | null = null;
+  let growlDone = false;
+  let growlFaded = false;
   let stopped = false;
 
   const running = () => ctx.state === "running" && !stopped;
@@ -41,7 +66,7 @@ export function createF1Sound(): F1Sound {
     const src = ctx.createBufferSource();
     const g = ctx.createGain();
     src.buffer = buf;
-    src.connect(g).connect(ctx.destination);
+    src.connect(g).connect(out);
     const t = ctx.currentTime + delay;
     g.gain.setValueAtTime(fadeIn ? 0 : gain, t);
     if (fadeIn) g.gain.linearRampToValueAtTime(gain, t + fadeIn); // soften the attack / joining mid-file
@@ -82,9 +107,32 @@ export function createF1Sound(): F1Sound {
     }
   };
 
+  // the growl fades out under the roar, starting when the roar comes in. Scheduled after its own fade-in instead of
+  // via fadeOut(), which cancels pending automation: growl() and lightsOut() can land in the same frame
+  const fadeGrowl = (now: number) => {
+    if (!growl || growlFaded || roarAt < 0) return;
+    growlFaded = true;
+    const t0 = Math.max(ctx.currentTime + Math.max(0, (roarAt - now) / 1000), growl.fadeInEnd);
+    growl.g.gain.setValueAtTime(F1_SFX_GROWL_GAIN, t0);
+    growl.g.gain.linearRampToValueAtTime(0, t0 + F1_SFX_GROWL_FADE_OUT);
+    growl.src.stop(t0 + F1_SFX_GROWL_FADE_OUT + 0.05);
+  };
+
+  const startGrowl = (now: number) => {
+    if (growlDone || growlAt < 0 || !bufs.growl || !running()) return;
+    growlDone = true;
+    const off = (now - growlAt) / 1000;
+    const until = roarAt >= 0 ? roarAt + F1_SFX_GROWL_FADE_OUT * 1000 : Infinity; // its fade under the roar ends here
+    if (off >= bufs.growl.duration - 0.3 || now >= until - 100) return; // joining too late: it would already be gone
+    const fadeIn = off > 0.05 ? 0.1 : F1_SFX_GROWL_FADE_IN;
+    growl = { ...play(bufs.growl, F1_SFX_GROWL_GAIN, off, fadeIn), fadeInEnd: ctx.currentTime + fadeIn };
+    fadeGrowl(now);
+  };
+
   const join = () => {
     const now = performance.now();
     startRumble(now);
+    startGrowl(now);
     startRoar(now);
   };
 
@@ -101,11 +149,12 @@ export function createF1Sound(): F1Sound {
     fetch(url)
       .then((r) => r.arrayBuffer())
       .then((b) => ctx.decodeAudioData(b));
-  Promise.all([load("/sfx/f1-rumble.mp3"), load("/sfx/f1-light.mp3"), load("/sfx/passby.mp3")]).then(
-    ([rumbleBuf, lightBuf, roarBuf]) => {
+  Promise.all([load("/sfx/f1-rumble.mp3"), load("/sfx/f1-light.mp3"), load("/sfx/passby.mp3"), load("/sfx/f1-growl.mp3")]).then(
+    ([rumbleBuf, lightBuf, roarBuf, growlBuf]) => {
       bufs.rumble = rumbleBuf;
       bufs.light = lightBuf;
       bufs.roar = roarBuf;
+      bufs.growl = growlBuf;
       join(); // buffers may land after the beat they belong to
     },
     () => {}, // no sound; the visuals don't depend on it
@@ -138,10 +187,16 @@ export function createF1Sound(): F1Sound {
     light() {
       if (running() && bufs.light) play(bufs.light, F1_SFX_LIGHT_GAIN);
     },
+    growl() {
+      if (growlAt >= 0) return;
+      growlAt = performance.now();
+      startGrowl(growlAt);
+    },
     lightsOut(peakInMs: number) {
       outAt = performance.now();
       roarAt = outAt + Math.max(0, peakInMs - (F1_SFX_ROAR_PEAK - F1_SFX_ROAR_OFFSET) * 1000);
       duckRumble(outAt);
+      fadeGrowl(outAt);
       startRoar(outAt);
     },
     stop,
