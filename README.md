@@ -1,5 +1,7 @@
 # Tanish Misra's Portfolio
 
+![License: MIT](https://img.shields.io/badge/license-MIT-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white) [![Live](https://img.shields.io/badge/live-tanishmisra.com-2ea44f)](https://www.tanishmisra.com)
+
 Personal portfolio, photography site and blog at [tanishmisra.com](https://tanishmisra.com), built with Next.js, TypeScript and Tailwind CSS. The home page is a motion-heavy resume-style experience; `/photos` is a gallery with curated collections, per-album interactions and light sound design; `/blog` is a markdown blog; `/quotes` is a generative typographic quote cloud that arranges itself differently on every visit.
 
 All content lives in a database and is edited through a built-in, password-protected admin panel (`/admin`) — there is no content to edit in the code.
