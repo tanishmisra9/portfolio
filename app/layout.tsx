@@ -52,8 +52,11 @@ export default async function RootLayout({
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
-          disableTransitionOnChange
         >
+          {/* The theme fade happens on this wrapper, not <body>: Safari 26 tints its toolbar from the body's
+              background, and a body that fades makes the toolbar stutter. The body snaps (globals.css
+              `.theme-fade body`) and Safari animates its own toolbar tint smoothly. */}
+          <div className="min-h-screen bg-bg">
           <div id="top" tabIndex={-1} aria-hidden="true" />
           <a
             href="#main-content"
@@ -63,6 +66,7 @@ export default async function RootLayout({
           </a>
           <SiteChrome radioSamples={radioSamples} radioTriggers={radioTriggers} />
           {children}
+          </div>
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

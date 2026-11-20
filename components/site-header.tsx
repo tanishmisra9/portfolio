@@ -209,7 +209,7 @@ export function SiteHeader() {
   return (
     <>
       <motion.header
-        className={`relative sticky top-0 border-b border-border bg-surface backdrop-blur-md ${
+        className={`relative sticky top-0 border-b border-border ${
           menuOpen ? "z-[10001]" : "z-50"
         }`}
         initial={{ opacity: 0 }}
@@ -220,6 +220,10 @@ export function SiteHeader() {
           ease: "easeOut",
         }}
       >
+        {/* Glass lives on an inner layer so the sticky <header> has no background-color: Safari 26 tints its
+            toolbar from a top sticky/fixed element's background-color, and this one fades on theme switch.
+            With none, Safari uses <body>, which snaps (app/layout.tsx), and Safari animates its tint itself. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-surface backdrop-blur-md" />
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 pl-6 pr-3 sm:pr-4">
           <Link href={logoHref} className={`shrink-0 ${logoClassName}`}>
             TM

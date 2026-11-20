@@ -18,7 +18,7 @@ export function ExperienceSection({ entries }: Props) {
     <section
       id="experience"
       aria-labelledby="experience-heading"
-      className="scroll-mt-20 px-6 pb-8 pt-5 md:pb-24 md:pt-20"
+      className="scroll-mt-20 px-6 pb-8 pt-5 md:pb-16 md:pt-20"
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade" homeIntroComplete={homeIntroDone}>
@@ -30,7 +30,7 @@ export function ExperienceSection({ entries }: Props) {
             EXPERIENCE
           </h2>
         </ScrollReveal>
-        <div className="mt-8 flex flex-col gap-10 md:gap-16">
+        <div className="mt-8 flex flex-col gap-10 md:gap-12">
           {entries.map((entry) => (
             <ScrollReveal key={entry.id} homeIntroComplete={homeIntroDone}>
               <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">

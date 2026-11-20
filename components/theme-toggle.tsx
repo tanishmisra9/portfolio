@@ -3,24 +3,53 @@
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "@/components/ui/tooltip";
+
+/** Must outlast the 300ms `html.theme-fade` transition in globals.css. */
+const THEME_FADE_MS = 350;
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const fadeTimerRef = useRef<number | undefined>(undefined);
+  const prevThemeRef = useRef(resolvedTheme);
   useEffect(() => setMounted(true), []);
+
+  // The theme swap fades via a short-lived `theme-fade` class on <html>
+  // (globals.css), so hover transitions are untouched the rest of the time;
+  // under reduced motion the same class turns every transition off instead.
+  // Keyed off resolvedTheme (not the click) so a change synced from another
+  // tab is covered too. This child effect runs before ThemeProvider's effect
+  // swaps the theme class, so the class is in place for the colour change.
+  // Known tradeoff: text and bg both pass through mid-grey at the midpoint.
+  // Not a View Transition: it snapshots the header and Safari drops its
+  // backdrop-filter for the duration.
+  useEffect(() => {
+    const prev = prevThemeRef.current;
+    prevThemeRef.current = resolvedTheme;
+    if (!prev || prev === resolvedTheme) return;
+    const root = document.documentElement;
+    root.classList.add("theme-fade");
+    // Restart, so a quick double toggle can't strip the class mid-fade.
+    window.clearTimeout(fadeTimerRef.current);
+    fadeTimerRef.current = window.setTimeout(
+      () => root.classList.remove("theme-fade"),
+      THEME_FADE_MS,
+    );
+  }, [resolvedTheme]);
+  // Unmounting mid-fade must not leave the class stuck (it overrides every transition).
+  useEffect(
+    () => () => {
+      window.clearTimeout(fadeTimerRef.current);
+      document.documentElement.classList.remove("theme-fade");
+    },
+    [],
+  );
 
   const isDark = mounted ? resolvedTheme === "dark" : true;
   const label = isDark ? "Switch to light mode" : "Switch to dark mode";
-
-  // The theme swap is deliberately instant. Anything that animates it has to
-  // put the page in an intermediate state, and every such state broke
-  // something in Safari: a colour cross-fade drives all text through a
-  // mid-grey where contrast hits ~zero, and a View Transition replaces the
-  // header with a snapshot that loses backdrop-filter, so the frosted glass
-  // visibly drops out for the duration. With no intermediate state there is
-  // nothing to render wrong.
+  const toggle = () => setTheme(isDark ? "light" : "dark");
 
   return (
     <Tooltip label={label} align="end" className={className}>
@@ -28,7 +57,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         type="button"
         className="flex shrink-0 items-center justify-center rounded-md p-2 text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
         aria-label={label}
-        onClick={() => setTheme(isDark ? "light" : "dark")}
+        onClick={toggle}
       >
         <span className="relative grid h-6 w-6 shrink-0 -translate-y-px place-items-center">
           {/* Icon shows the action a click performs, not the current theme: moon (go dark) while light, sun (go light) while dark. */}

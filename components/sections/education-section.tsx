@@ -29,7 +29,7 @@ function CoursePill({ label }: { label: string }) {
 
 export function EducationSection({ entries }: Props) {
   return (
-    <section id="education" aria-labelledby="education-heading" className="scroll-mt-20 px-6 pb-8 pt-6 md:py-24">
+    <section id="education" aria-labelledby="education-heading" className="scroll-mt-20 px-6 pb-8 pt-6 md:py-16">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
           <h2
@@ -40,7 +40,7 @@ export function EducationSection({ entries }: Props) {
             EDUCATION
           </h2>
         </ScrollReveal>
-        <div className="mt-8 flex flex-col gap-10 md:gap-16">
+        <div className="mt-8 flex flex-col gap-10 md:gap-12">
           {entries.map((edu) => (
             <ScrollReveal key={edu.id}>
               <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">

@@ -81,6 +81,42 @@
   --border-strong: rgba(255, 255, 255, 0.32);
 }
 
+/* Theme-switch fade: ThemeToggle adds .theme-fade to <html> for ~350ms on every theme change. Stroke/fill-color
+   are listed so the ghost-heading outlines fade with everything else. Under reduced motion the class kills all
+   transitions instead, so elements with their own transition-colors can't half-fade the swap. */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-fade,
+  html.theme-fade *,
+  html.theme-fade *::before,
+  html.theme-fade *::after {
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease,
+      border-color 0.3s ease,
+      outline-color 0.3s ease,
+      text-decoration-color 0.3s ease,
+      box-shadow 0.3s ease,
+      fill 0.3s ease,
+      stroke 0.3s ease,
+      -webkit-text-stroke-color 0.3s ease,
+      -webkit-text-fill-color 0.3s ease !important;
+  }
+
+  /* Body background snaps on purpose (Safari toolbar tint, see app/layout.tsx); only its text colour fades. */
+  html.theme-fade body {
+    transition: color 0.3s ease !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-fade,
+  html.theme-fade *,
+  html.theme-fade *::before,
+  html.theme-fade *::after {
+    transition: none !important;
+  }
+}
+
 .heading-ghost {
   -webkit-text-stroke: 5px var(--heading-ghost);
   paint-order: stroke fill;
