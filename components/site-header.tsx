@@ -202,8 +202,8 @@ export function SiteHeader() {
 
   const closeMenu = () => setMenuOpen(false);
 
-  const logoClassName =
-    "font-display text-xl font-bold tracking-tight text-fg transition-colors hover:text-muted";
+  // -ml-3 + px-3: the fill box extends past the letter without moving the letter itself.
+  const logoClassName = `${HOVER_FILL_LINK} -ml-3.5 inline-flex items-center justify-center px-3.5 py-2 font-display text-2xl font-bold tracking-tight text-fg`;
 
   return (
     <>
@@ -224,8 +224,13 @@ export function SiteHeader() {
             With none, Safari uses <body>, which snaps (app/layout.tsx), and Safari animates its tint itself. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-surface backdrop-blur-md" />
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 pl-6 pr-3 sm:pr-4">
-          <Link href={logoHref} className={`shrink-0 ${logoClassName}`}>
-            TM
+          <Link
+            href={logoHref}
+            onMouseDown={(e) => e.preventDefault()}
+            aria-label="Tanish Misra, back to top"
+            className={`shrink-0 ${logoClassName}`}
+          >
+            <HoverFill>T</HoverFill>
           </Link>
 
           <div className="flex min-w-0 flex-1 items-center justify-end">
