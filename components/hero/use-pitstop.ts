@@ -12,19 +12,23 @@ import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
 
 /*
  * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (3.46s) is: guns-off burst
- * 0.03-0.71s (plays while the tires launch), guns-on whine 0.79-1.96s, car drives off from 1.99s. The whine is ONE
- * continuous sound, not 4 hits, so the 4 snaps are spread across it. If the clip is re-cut, re-measure these.
+ * 0.03-0.71s, guns-on whine 0.79-1.96s (ramps up to ~1.1s, loudest 1.1-1.45s, fades out), then the engine rev
+ * peaking at ~2.9s. The whine is ONE continuous sound, not 4 hits. If the clip is re-cut, re-measure these.
  */
-/** Snap-back time of each tire, in TIRES order. */
-export const BOLT_MS = [860, 1160, 1460, 1760] as const;
-/** The whole name starts sliding off. */
-export const DRIVE_MS = 2150;
+/** Each tire pops off (starts flying out) during the guns-off burst, one after another. */
+export const LAUNCH_MS = [40, 200, 360, 520] as const;
+/** Each tire starts snapping back, in TIRES order: they land (~120ms later) on the loud part of the whine. */
+export const BOLT_MS = [880, 1030, 1180, 1330] as const;
+/** The whole name starts sliding off; its easeIn is fastest right as the engine rev peaks. */
+export const DRIVE_MS = 2700;
 
 const PITSTOP_VOLUME = 0.45;
 const LAUNCH_S = 0.2;
 const DRIVE_S = 0.25;
-const FADE_IN_S = 0.4;
-const FADE_BLUR_PX = 12;
+/** Name is gone for this long after the slide before it fades back in. */
+const FADE_PAUSE_MS = 600;
+const FADE_IN_S = 1.1;
+const FADE_BLUR_PX = 8;
 /** If the sound hasn't started this long after the click, run the timeline from the click instead. */
 const SOUND_START_CAP_MS = 500;
 
@@ -108,10 +112,14 @@ export function usePitstop(reduceMotion: boolean | null) {
       go("launch");
       resetMagnets();
 
-      const flights = TIRES.flatMap(({ key, dx, dy }) => [
-        tween(mv.tires[key].x, dx * LAUNCH_X, { duration: LAUNCH_S, ease: "easeIn" }),
-        tween(mv.tires[key].y, dy * LAUNCH_Y, { duration: LAUNCH_S, ease: "easeIn" }),
-      ]);
+      const flights = TIRES.map(async ({ key, dx, dy }, i) => {
+        await wait(LAUNCH_MS[i]);
+        if (!aliveRef.current) return;
+        await Promise.all([
+          tween(mv.tires[key].x, dx * LAUNCH_X, { duration: LAUNCH_S, ease: "easeIn" }),
+          tween(mv.tires[key].y, dy * LAUNCH_Y, { duration: LAUNCH_S, ease: "easeIn" }),
+        ]);
+      });
 
       // Anchor the timeline to when the sound really starts, so a slow first load can't desync the snaps.
       // play() runs inside the click gesture (iOS blocks it otherwise); if it's rejected we run silently from the click.
@@ -152,6 +160,9 @@ export function usePitstop(reduceMotion: boolean | null) {
 
       go("drive");
       await tween(mv.driveX, window.innerWidth, { duration: DRIVE_S, ease: "easeIn" });
+      if (!aliveRef.current) return;
+
+      await wait(FADE_PAUSE_MS);
       if (!aliveRef.current) return;
 
       go("fadein");
