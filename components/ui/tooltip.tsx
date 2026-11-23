@@ -155,7 +155,7 @@ export function Tooltip({
                   top: pos?.top ?? 0,
                   visibility: pos ? "visible" : "hidden",
                 }}
-                className="pointer-events-none absolute z-[10003] w-max max-w-[calc(100vw-1rem)] border-[1.5px] border-fg bg-bg px-2.5 py-1.5 font-display text-[11px] font-medium tracking-wide text-fg shadow-[3px_3px_0_rgb(var(--fg-rgb)/0.25)]"
+                className="pointer-events-none absolute z-[10003] w-max max-w-[calc(100vw-1rem)] border-[1.5px] border-fg bg-bg px-2.5 py-1.5 [font-family:system-ui,-apple-system,sans-serif] text-xs font-normal text-fg shadow-[3px_3px_0_rgb(var(--fg-rgb)/0.25)]"
               >
                 {label}
               </motion.span>

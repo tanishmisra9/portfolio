@@ -822,7 +822,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
       <div
         ref={tooltipRef}
         aria-hidden="true"
-        className={`pointer-events-none fixed left-0 top-0 z-[100] border-[1.5px] border-fg bg-bg px-2.5 py-1.5 font-display text-[11px] font-medium tracking-wide text-fg shadow-[3px_3px_0_rgb(var(--fg-rgb)/0.25)] transition-opacity duration-150 ${
+        className={`pointer-events-none fixed left-0 top-0 z-[100] border-[1.5px] border-fg bg-bg px-2.5 py-1.5 [font-family:system-ui,-apple-system,sans-serif] text-xs font-normal text-fg shadow-[3px_3px_0_rgb(var(--fg-rgb)/0.25)] transition-opacity duration-150 ${
           tip.visible ? "opacity-100" : "opacity-0"
         }`}
       >
