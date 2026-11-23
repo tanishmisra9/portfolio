@@ -9,6 +9,11 @@ import { Tooltip } from "@/components/ui/tooltip";
 import type { SocialLink } from "@/types/content";
 
 const SOCIAL_ORDER = ["LinkedIn", "GitHub", "Resume", "Email"];
+const SOCIAL_TIPS: Record<string, string> = {
+  LinkedIn: "My LinkedIn",
+  GitHub: "My code",
+  Resume: "Download PDF",
+};
 
 const linkClass = `${HOVER_FILL_LINK} inline-block px-3 py-1.5`;
 
@@ -32,7 +37,7 @@ function CopyEmail({ email }: { email: string }) {
     }
   };
   return (
-    <Tooltip label={copied ? "Copied" : "Copy email"}>
+    <Tooltip label={copied ? "Copied!" : "Copy email"}>
       <button type="button" onClick={copy} {...noMouseFocus} className={linkClass}>
         <HoverFill>{email}</HoverFill>
       </button>
@@ -46,7 +51,7 @@ function SocialItem({ link }: { link: SocialLink }) {
   }
   const resumeFilename =
     link.label === "Resume" ? link.href.split("?")[0].split("/").pop() : undefined;
-  return (
+  const anchor = (
     <a
       href={link.href}
       {...noMouseFocus}
@@ -57,6 +62,8 @@ function SocialItem({ link }: { link: SocialLink }) {
       <HoverFill>{link.label}</HoverFill>
     </a>
   );
+  const tip = SOCIAL_TIPS[link.label];
+  return tip ? <Tooltip label={tip}>{anchor}</Tooltip> : anchor;
 }
 
 const rank = (l: SocialLink) => {
@@ -97,22 +104,28 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
               aria-label="Back to top"
               className="-m-3 flex items-center justify-center p-3 text-muted transition-colors hover:bg-fg/10 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 active:bg-fg/20"
             >
-              <ChevronUp className="size-8" strokeWidth={2} aria-hidden />
+              <ChevronUp className="size-8" strokeWidth={1.25} aria-hidden />
             </button>
           </Tooltip>
         </div>
 
         <div className="md:text-right">
-          <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:mt-12 md:justify-end md:text-lg">
+          {/* Invisible twin of the "Stay in touch" heading so both link rows share one baseline at any heading size. */}
+          <p aria-hidden className="invisible hidden font-display text-3xl font-extrabold tracking-tighter md:block md:text-4xl">&nbsp;</p>
+          <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:mt-3 md:justify-end md:text-lg">
             <li>
-              <Link href="/legal" {...noMouseFocus} className={linkClass}>
-                <HoverFill>Legal Notice</HoverFill>
-              </Link>
+              <Tooltip label="Site owner and copyright">
+                <Link href="/legal" {...noMouseFocus} className={linkClass}>
+                  <HoverFill>Legal Notice</HoverFill>
+                </Link>
+              </Tooltip>
             </li>
             <li>
-              <Link href="/privacy" {...noMouseFocus} className={linkClass}>
-                <HoverFill>Privacy Policy</HoverFill>
-              </Link>
+              <Tooltip label="How this site handles data">
+                <Link href="/privacy" {...noMouseFocus} className={linkClass}>
+                  <HoverFill>Privacy Policy</HoverFill>
+                </Link>
+              </Tooltip>
             </li>
           </ul>
         </div>
