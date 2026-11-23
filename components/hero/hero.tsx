@@ -104,7 +104,7 @@ export function Hero({ subtitle }: HeroProps) {
             <>
               <h1 className="sr-only">TANISH MISRA</h1>
               {/* Drive-off wrapper: slides off right, then re-enters from the left. */}
-              <motion.div style={{ x: mv.driveX }}>
+              <motion.div style={{ x: mv.driveX, y: mv.driveY }}>
               <div
                 role="button"
                 tabIndex={0}

@@ -56,6 +56,20 @@ const SOUND_START_CAP_MS = 500;
 const SNAP_S = 0.16;
 const snapTween = { duration: SNAP_S, ease: [0.45, 0, 0.8, 0.6] as [number, number, number, number] };
 
+/**
+ * Vertical "sauce", all on moments that already have a sound or an exact instant (no continuous bobbing):
+ * - each tire is kicked DOWN LAND_KICK_PX at its landing and wobbles back (a jolt that sells the hit);
+ * - the name squats DRIVE_SQUAT_PX as it starts to drive off, then lifts DRIVE_LIFT_PX as it accelerates away (negative = up);
+ * - the name is kicked ENTER_KICK_PX when it lands from the left, then wobbles back.
+ * The wobble is an underdamped spring (damping ratio ~0.35: a couple of shrinking wiggles over ~0.45s). Set a kick to 0 to drop it.
+ */
+const LAND_KICK_PX = 7;
+const DRIVE_SQUAT_PX = 6;
+const DRIVE_LIFT_PX = -4;
+const ENTER_KICK_PX = 10;
+/** velocity: 0 matters: set() doesn't reset a MotionValue's velocity, so without it the wobble inherits the slam's speed. */
+const wobbleSpring = { type: "spring" as const, stiffness: 420, damping: 11, mass: 0.6, velocity: 0 };
+
 export type TireMv = { x: MotionValue<number>; y: MotionValue<number> };
 
 /** The four tires: top-left TAN, top-right ISH, bottom-left MIS, bottom-right RA. Each flies off toward its own corner. */
@@ -81,6 +95,7 @@ export function usePitstop(reduceMotion: boolean | null) {
       } satisfies Record<(typeof TIRES)[number]["key"], TireMv>,
       /** Whole-name wrapper: slides off right, then re-enters from the left. */
       driveX: motionValue(0),
+      driveY: motionValue(0),
     }),
     [],
   );
@@ -170,28 +185,45 @@ export function usePitstop(reduceMotion: boolean | null) {
       const at = (ms: number) => wait(Math.max(0, anchor + ms + latency - performance.now()));
 
       go("bolt");
-      const snaps: ReturnType<typeof tween>[] = [];
+      const settled: Promise<unknown>[] = [];
       for (let i = 0; i < TIRES.length; i++) {
         await at(BOLT_MS[i]);
         if (!aliveRef.current) return;
         const t = mv.tires[TIRES[i].key];
-        snaps.push(tween(t.x, 0, snapTween), tween(t.y, 0, snapTween));
+        // Slam home, then (at the landing instant) kick down and wobble back.
+        settled.push(
+          (async () => {
+            await Promise.all([tween(t.x, 0, snapTween), tween(t.y, 0, snapTween)]);
+            if (!aliveRef.current) return;
+            t.y.set(LAND_KICK_PX);
+            await tween(t.y, 0, wobbleSpring);
+          })(),
+        );
       }
-      await Promise.all(snaps);
+      await Promise.all(settled);
       await at(DRIVE_MS);
       if (!aliveRef.current) return;
 
       go("drive");
-      await tween(mv.driveX, window.innerWidth, { duration: DRIVE_S, ease: [...DRIVE_EASE] });
+      // Squat as it starts to pull out, lift as it accelerates away (runs alongside the slide).
+      const pitch = (async () => {
+        await tween(mv.driveY, DRIVE_SQUAT_PX, { duration: 0.18, ease: "easeOut" });
+        await tween(mv.driveY, DRIVE_LIFT_PX, { duration: DRIVE_S - 0.18, ease: "easeInOut" });
+      })();
+      await Promise.all([tween(mv.driveX, window.innerWidth, { duration: DRIVE_S, ease: [...DRIVE_EASE] }), pitch]);
       if (!aliveRef.current) return;
+      mv.driveY.set(0); // off-screen, so the reset is invisible
 
       await wait(ENTER_PAUSE_MS);
       if (!aliveRef.current) return;
 
-      // Same slide as the exit, mirrored: jump to just past the left edge, then ease in to rest.
+      // Same slide as the exit, mirrored: jump to just past the left edge, ease in, then land with a kick and a wobble.
       go("enter");
       mv.driveX.set(-window.innerWidth * 1.15);
       await tween(mv.driveX, 0, { duration: ENTER_S, ease: "easeOut" });
+      if (!aliveRef.current) return;
+      mv.driveY.set(ENTER_KICK_PX);
+      await tween(mv.driveY, 0, wobbleSpring);
       if (!aliveRef.current) return;
       go("idle");
     },
