@@ -11,11 +11,12 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
 
 /*
- * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (5.36s) is, baked into one file
+ * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (5.79s) is, baked into one file
  * so it starts inside the click gesture: a "whoosh 8" per tire at LAUNCH_MS + 60 (0.1/0.26/0.42/0.58s) as the chunks
- * split, silence, the wheel-gun burst 0.9-1.61s (one continuous burst, not 4 hits) as the tires rejoin, a short gap,
- * the car's engine growl 1.76-2.96s, the drive-off from 2.96s (engine rev peaks ~3.85s), and a "whoosh 9" that starts
- * at 3.31s and peaks at 4.47s as the name re-enters (re-entry starts at DRIVE_MS + DRIVE_S + ENTER_PAUSE_MS = 4.35s).
+ * split, then ONE CONTINUOUS stretch of the original Short (no cuts, one filter chain, so there are no seams to hear):
+ * the wheel-gun burst 0.92-1.57s as the tires rejoin (one continuous burst, not 4 hits), natural pit-lane ambience,
+ * the car's engine growl 2.23-3.37s, the drive-off from ~3.7s (engine rev peaks ~4.30s), and a "whoosh 9" that starts
+ * at 3.74s and peaks at 4.90s as the name re-enters (re-entry starts at DRIVE_MS + DRIVE_S + ENTER_PAUSE_MS = 4.80s).
  * The whooshes are mixed in at fixed times: if LAUNCH_MS, DRIVE_MS, DRIVE_S or ENTER_PAUSE_MS change, re-mix the clip.
  */
 /** Each tire pops off (starts flying out), one after another; each gets a whoosh 8 in the clip. */
@@ -23,7 +24,7 @@ export const LAUNCH_MS = [40, 200, 360, 520] as const;
 /** Each tire starts snapping back, in TIRES order: they land (~120ms later) at 0.96/1.14/1.32/1.50s, inside the gun burst. */
 export const BOLT_MS = [840, 1020, 1200, 1380] as const;
 /** The whole name starts sliding off (slowly, then accelerating); it is fastest right around the engine rev peak. */
-export const DRIVE_MS = 3450;
+export const DRIVE_MS = 3900;
 
 /**
  * Every visual is delayed by this much after the audio's `playing` event: that event fires before the sound reaches the
