@@ -71,9 +71,8 @@ export default async function RootLayout({
           defaultTheme="dark"
           enableSystem={false}
         >
-          {/* The theme fade happens on this wrapper, not <body>: Safari 26 tints its toolbar from the body's
-              background, and a body that fades makes the toolbar stutter. The body snaps (globals.css
-              `.theme-fade body`) and Safari animates its own toolbar tint smoothly. */}
+          {/* The theme switch is a cover-dip (ThemeToggle), so nothing fades colour-by-colour: the body and this
+              wrapper both snap while covered, and Safari animates its own toolbar tint smoothly. */}
           <div className="min-h-screen bg-bg">
           <div id="top" tabIndex={-1} aria-hidden="true" />
           <a

@@ -6,8 +6,43 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "@/components/ui/tooltip";
 
-/** Must outlast the 300ms `html.theme-fade` transition in globals.css. */
-const THEME_FADE_MS = 350;
+const DIP_IN_MS = 120;
+const DIP_OUT_MS = 220;
+
+/**
+ * Theme switch as a "dip": a full-screen cover in the OLD background colour fades in, the theme swaps underneath
+ * it, then the cover fades out to reveal the new theme. Fading every element's colour instead (the old
+ * `theme-fade` approach) made text and background cross through the same grey mid-way, and WebKit repainted the
+ * huge hero letters ~160ms after everything else, so they vanished and then darkened late. Under the cover no
+ * element is ever mid-transition. Only opacity animates, on a constant background colour.
+ */
+function dipTo(next: string, setTheme: (t: string) => void, done: () => void) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    setTheme(next);
+    done();
+    return;
+  }
+  const cover = document.createElement("div");
+  cover.setAttribute("aria-hidden", "true");
+  cover.style.cssText = `position:fixed;inset:0;z-index:10010;pointer-events:none;opacity:0;background:${getComputedStyle(document.body).backgroundColor};transition:opacity ${DIP_IN_MS}ms ease-out`;
+  document.body.appendChild(cover);
+  const frame = (fn: () => void) => requestAnimationFrame(() => requestAnimationFrame(fn));
+  frame(() => {
+    cover.style.opacity = "1";
+  });
+  window.setTimeout(() => {
+    setTheme(next);
+    // Two frames so the class swap is painted under the cover before it lifts.
+    frame(() => {
+      cover.style.transition = `opacity ${DIP_OUT_MS}ms ease-in`;
+      cover.style.opacity = "0";
+      window.setTimeout(() => {
+        cover.remove();
+        done();
+      }, DIP_OUT_MS + 30);
+    });
+  }, DIP_IN_MS + 50);
+}
 
 /** Icon swap without overlap: the outgoing icon fades out first, then the incoming one fades in. A plain
  *  crossfade shows sun and moon superimposed at 50% midway, which reads as a glitch. */
@@ -20,44 +55,18 @@ const swap = (incoming: boolean) => ({
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const fadeTimerRef = useRef<number | undefined>(undefined);
-  const prevThemeRef = useRef(resolvedTheme);
+  const dippingRef = useRef(false);
   useEffect(() => setMounted(true), []);
-
-  // The theme swap fades via a short-lived `theme-fade` class on <html>
-  // (globals.css), so hover transitions are untouched the rest of the time;
-  // under reduced motion the same class turns every transition off instead.
-  // Keyed off resolvedTheme (not the click) so a change synced from another
-  // tab is covered too. This child effect runs before ThemeProvider's effect
-  // swaps the theme class, so the class is in place for the colour change.
-  // Known tradeoff: text and bg both pass through mid-grey at the midpoint.
-  // Not a View Transition: it snapshots the header and Safari drops its
-  // backdrop-filter for the duration.
-  useEffect(() => {
-    const prev = prevThemeRef.current;
-    prevThemeRef.current = resolvedTheme;
-    if (!prev || prev === resolvedTheme) return;
-    const root = document.documentElement;
-    root.classList.add("theme-fade");
-    // Restart, so a quick double toggle can't strip the class mid-fade.
-    window.clearTimeout(fadeTimerRef.current);
-    fadeTimerRef.current = window.setTimeout(
-      () => root.classList.remove("theme-fade"),
-      THEME_FADE_MS,
-    );
-  }, [resolvedTheme]);
-  // Unmounting mid-fade must not leave the class stuck (it overrides every transition).
-  useEffect(
-    () => () => {
-      window.clearTimeout(fadeTimerRef.current);
-      document.documentElement.classList.remove("theme-fade");
-    },
-    [],
-  );
 
   const isDark = mounted ? resolvedTheme === "dark" : true;
   const label = isDark ? "Switch to light mode" : "Switch to dark mode";
-  const toggle = () => setTheme(isDark ? "light" : "dark");
+  const toggle = () => {
+    if (dippingRef.current) return;
+    dippingRef.current = true;
+    dipTo(isDark ? "light" : "dark", setTheme, () => {
+      dippingRef.current = false;
+    });
+  };
 
   return (
     <Tooltip label={isDark ? "Light mode" : "Dark mode"} align="end" className={className}>
