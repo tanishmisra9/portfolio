@@ -21,12 +21,15 @@ import {
   F1_SQUEAL_ALPHA,
   F1_SQUEAL_ANCHOR_X,
   F1_SQUEAL_ANCHOR_Y,
-  F1_SQUEAL_ANGLE,
+  F1_SQUEAL_AIM_SCATTER,
+  F1_SQUEAL_BEND,
   F1_SQUEAL_FADE,
   F1_SQUEAL_LEN,
   F1_SQUEAL_PER_TIRE,
   F1_SQUEAL_SPEED,
   F1_SQUEAL_SPREAD,
+  F1_SQUEAL_SPREAD_X,
+  F1_SQUEAL_VP_Y,
   F1_SQUEAL_WIDTH,
   F1_LOAD_GRACE,
   F1_ZOOM,
@@ -218,17 +221,22 @@ export function F1Intro() {
       ctx.restore();
     };
 
-    // tire-squeal ink: a fresh random set every run (side -1 = left tire, 1 = right), drawn behind the car as flat tapered
-    // strokes like the clip's own ink lines. Re-rolled a little whenever the car's drawing changes, so they boil with it.
+    // tire-squeal ink: a fresh random set every run (side -1 = left tire, 1 = right), drawn behind the car. Each stroke
+    // runs along a ray from a vanishing point above the car (so they fan out in perspective, like the clip's own ink
+    // lines), as a thin-rooted leaf that is widest 70% along and ends in a point. Re-rolled a little whenever the car's
+    // drawing changes, so they boil with it.
     const ink = getComputedStyle(document.documentElement).getPropertyValue("--fg").trim() || "#000";
     const streaks = [-1, 1].flatMap((side) =>
       Array.from({ length: Math.round(rand(F1_SQUEAL_PER_TIRE)) }, () => ({
         side,
-        drop: rand(F1_SQUEAL_ANGLE),
-        sp: rand(F1_SQUEAL_SPEED),
+        ax: (Math.random() - 0.5) * 2 * F1_SQUEAL_SPREAD_X,
         ay: (Math.random() - 0.5) * 2 * F1_SQUEAL_SPREAD,
+        da: (Math.random() - 0.5) * 2 * F1_SQUEAL_AIM_SCATTER,
+        sp: rand(F1_SQUEAL_SPEED),
         len: rand(F1_SQUEAL_LEN),
         w: rand(F1_SQUEAL_WIDTH),
+        al: rand(F1_SQUEAL_ALPHA),
+        bend: (Math.random() - 0.5) * 2 * F1_SQUEAL_BEND,
         jd: 0,
         jl: 1,
       })),
@@ -236,38 +244,37 @@ export function F1Intro() {
     let squealF = -1;
     const drawSqueal = (p: Pose, alpha: number, k: number) => {
       const fade = 1 - clamp01((p.f - F1_SQUEAL_FADE[0]) / (F1_SQUEAL_FADE[1] - F1_SQUEAL_FADE[0]));
-      const a = alpha * p.a * fade * F1_SQUEAL_ALPHA;
+      const a = alpha * p.a * fade;
       if (a <= 0) return;
       const f = Math.round(p.f);
       const fr = assets.current.car!.m.frames[f];
       if (f !== squealF) {
         squealF = f;
         for (const s of streaks) {
-          s.jd = (Math.random() - 0.5) * 0.14;
+          s.jd = (Math.random() - 0.5) * 0.1;
           s.jl = 0.75 + Math.random() * 0.5;
         }
       }
       const grow = p.f / (assets.current.car!.m.frames.length - 1);
       const m = k * p.sc;
+      const vx = fr.x - 960 + 0.5 * fr.w, vy = fr.y - 540 + F1_SQUEAL_VP_Y * fr.h; // vanishing point, scene coords
       ctx.save();
-      ctx.globalAlpha = a;
       ctx.fillStyle = ink;
       ctx.translate(cw / 2, ch / 2);
       ctx.scale(m, m);
       for (const s of streaks) {
-        const x0 = fr.x - 960 + (s.side < 0 ? F1_SQUEAL_ANCHOR_X : 1 - F1_SQUEAL_ANCHOR_X) * fr.w;
+        const x0 = fr.x - 960 + ((s.side < 0 ? F1_SQUEAL_ANCHOR_X : 1 - F1_SQUEAL_ANCHOR_X) + s.ax) * fr.w;
         const y0 = fr.y - 540 + (F1_SQUEAL_ANCHOR_Y + s.ay) * fr.h;
-        const ang = s.drop + s.jd;
+        const ang = Math.atan2(y0 - vy, x0 - vx) + s.da + s.jd; // outward along the ray from the vanishing point
+        const dx = Math.cos(ang), dy = Math.sin(ang);
         const L = s.len * s.jl * clamp01(grow * s.sp);
-        const tx = x0 + s.side * Math.cos(ang) * L;
-        const ty = y0 + Math.sin(ang) * L;
-        // perpendicular to the stroke: root is thick, tip is a point
-        const nx = -Math.sin(ang) * s.w, ny = s.side * Math.cos(ang) * s.w;
+        const tx = x0 + dx * L, ty = y0 + dy * L;
+        const mx = x0 + dx * L * 0.7 + -dy * s.bend * L, my = y0 + dy * L * 0.7 + dx * s.bend * L; // widest point, bent a little
+        ctx.globalAlpha = a * s.al;
         ctx.beginPath();
-        ctx.moveTo(x0 + nx, y0 + ny);
-        ctx.lineTo(tx, ty);
-        ctx.lineTo(x0 - nx, y0 - ny);
-        ctx.closePath();
+        ctx.moveTo(x0, y0);
+        ctx.quadraticCurveTo(mx - dy * s.w, my + dx * s.w, tx, ty);
+        ctx.quadraticCurveTo(mx + dy * s.w, my - dx * s.w, x0, y0);
         ctx.fill();
       }
       ctx.restore();

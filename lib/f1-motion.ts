@@ -18,14 +18,18 @@ export const F1_CAR_RUN = 1500;
  * They fade out between these car-sprite indices: from sprite ~20 the camera rises over the car and the tires leave
  * the frame, so a fixed tire anchor stops being true.
  */
-export const F1_SQUEAL_PER_TIRE: [number, number] = [10, 16];
-export const F1_SQUEAL_LEN: [number, number] = [160, 1100]; // full length
-export const F1_SQUEAL_WIDTH: [number, number] = [1.2, 5]; // root half-width
-export const F1_SQUEAL_ANGLE: [number, number] = [-0.7, 0.12]; // radians below horizontal; negative = pointing up
+export const F1_SQUEAL_PER_TIRE: [number, number] = [26, 38];
+export const F1_SQUEAL_LEN: [number, number] = [160, 1400]; // full length
+export const F1_SQUEAL_WIDTH: [number, number] = [0.8, 4.5]; // half-width at the widest point
+export const F1_SQUEAL_ALPHA: [number, number] = [0.35, 1]; // per-stroke opacity
 export const F1_SQUEAL_SPEED: [number, number] = [0.55, 1.4]; // per-stroke growth rate, so they don't extend in lockstep
-export const F1_SQUEAL_SPREAD = 0.16; // anchor height scatter, fraction of the car rect
-export const F1_SQUEAL_FADE: [number, number] = [18, 20];
-export const F1_SQUEAL_ALPHA = 0.9;
+export const F1_SQUEAL_SPREAD = 0.3; // anchor height scatter, fraction of the car rect
+export const F1_SQUEAL_SPREAD_X = 0.05; // anchor sideways scatter
+/** Strokes run along rays from a vanishing point at this height of the car rect (0 = top); below the tires, so they fan up and out. */
+export const F1_SQUEAL_VP_Y = 0.8;
+export const F1_SQUEAL_AIM_SCATTER = 0.12; // radians off the ray
+export const F1_SQUEAL_BEND = 0.04; // sideways bow, fraction of length
+export const F1_SQUEAL_FADE: [number, number] = [19, 22];
 /** Tire anchor inside the car sprite rect (fractions); the root sits under the tire so it's hidden by it. */
 export const F1_SQUEAL_ANCHOR_X = 0.22;
 export const F1_SQUEAL_ANCHOR_Y = 0.45;
