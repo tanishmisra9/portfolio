@@ -7,7 +7,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { move, ANIM_PHASE, NYC_PHASE, UPLOAD_STATUS, AI_STATUS } from "../lib/state-machines.ts";
+import { move, ANIM_PHASE, HERO_PHASE, NYC_PHASE, UPLOAD_STATUS, AI_STATUS } from "../lib/state-machines.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (path) => readFileSync(join(ROOT, path), "utf8");
@@ -26,6 +26,7 @@ console.warn = () => {};
 
 const MACHINES = {
   ANIM_PHASE: { edges: ANIM_PHASE, allowed: ["idle>wipe", "wipe>flyout", "flyout>flyin", "flyin>settle", "settle>idle"], terminal: [] },
+  HERO_PHASE: { edges: HERO_PHASE, allowed: ["idle>launch", "launch>bolt", "bolt>drive", "drive>enter", "enter>idle"], terminal: [] },
   NYC_PHASE: { edges: NYC_PHASE, allowed: ["idle>swap", "swap>hold"], terminal: ["hold"] },
   UPLOAD_STATUS: { edges: UPLOAD_STATUS, allowed: ["idle>uploading", "uploading>saving", "uploading>idle", "saving>idle"], terminal: [] },
   AI_STATUS: { edges: AI_STATUS, allowed: ["generating>ready", "generating>failed"], terminal: ["ready", "failed"] },
@@ -49,6 +50,7 @@ for (const [name, { edges, allowed, terminal }] of Object.entries(MACHINES)) {
 // Every writer goes through move(): no raw phase/status writes in the components.
 const noRaw = (file, re, what) => check(`${file}: ${what}`, !re.test(read(file)));
 noRaw("components/photos/album-title.tsx", /setPhase\(\s*"/, 'no raw setPhase("...")');
+noRaw("components/hero/use-pitstop.ts", /phaseRef\.current\s*=(?!=)(?!\s*move\()/, "phase only written via move()");
 noRaw("components/photos/nyc-title.tsx", /setPhase\(\s*"/, 'no raw setPhase("...")');
 noRaw("app/admin/(protected)/photos/photo-uploader.tsx", /aiStatus: "(ready|failed)"/, "no raw aiStatus ready/failed write");
 noRaw("app/admin/(protected)/photos/photo-uploader.tsx", /setPending\([^)]*status:/, "no raw status write via setPending");
