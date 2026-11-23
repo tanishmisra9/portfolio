@@ -14,11 +14,14 @@ import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
  * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (5.24s) is, baked into one file
  * so it starts inside the click gesture: a "whoosh 8" per tire at LAUNCH_MS - 40 (0/0.16/0.32/0.48s; +60 felt late) as
  * the chunks split, then the original Short through ONE filter chain with no gaps: the wheel-gun burst 0.92-1.57s as
- * the tires rejoin (one continuous burst, not 4 hits), which is CROSSFADED (0.35s, equal power, 1.40-1.75s) into the
- * car's engine growl (rising from 1.68s to 2.82s) so the two weave together over the same ambience instead of
- * leaving a lull, the drive-off from ~3.15s (engine rev peaks ~3.75s), and a "whoosh 9" that starts at 3.19s and
- * peaks at 4.35s as the name re-enters (re-entry starts at DRIVE_MS + DRIVE_S + ENTER_PAUSE_MS = 4.25s).
- * The whooshes are mixed in at fixed times: if LAUNCH_MS, DRIVE_MS, DRIVE_S or ENTER_PAUSE_MS change, re-mix the clip.
+ * the tires rejoin, CROSSFADED (0.35s, equal power, 1.40-1.75s) into the car's engine growl (rising from 1.68s to
+ * 2.82s) so the two weave together over the same ambience instead of leaving a lull, the drive-off from ~3.15s
+ * (engine rev peaks ~3.75s), and a "whoosh 9" that starts at 3.19s and peaks at 4.35s as the name re-enters
+ * (re-entry starts at DRIVE_MS + DRIVE_S + ENTER_PAUSE_MS = 4.25s). The burst is one continuous sound, so on top of
+ * it sit FOUR synthetic-plus-source impact hits (thump + crack + a slice of the real gun rattle), one per tire at
+ * BOLT_MS + SNAP_S (1.00/1.18/1.36/1.54s) = the instant each tire lands, with the burst ducked under each one so
+ * they pop. The sounds are mixed in at fixed times: if LAUNCH_MS, BOLT_MS, SNAP_S, DRIVE_MS, DRIVE_S or
+ * ENTER_PAUSE_MS change, re-mix the clip.
  */
 /** Each tire pops off (starts flying out), one after another; each gets a whoosh 8 in the clip. */
 export const LAUNCH_MS = [40, 200, 360, 520] as const;
@@ -45,7 +48,12 @@ const ENTER_S = 0.3;
 /** If the sound hasn't started this long after the click, run the timeline from the click instead. */
 const SOUND_START_CAP_MS = 500;
 
-const snapSpring = { type: "spring" as const, stiffness: 400, damping: 24, mass: 0.52 };
+/**
+ * A tire slams home: it arrives at speed and stops dead, so every landing is one exact instant (start + SNAP_S) a sound can
+ * hit. (The old spring took 150-300ms to settle onto home, which read as mushy and gave the sound nothing to land on.)
+ */
+const SNAP_S = 0.16;
+const snapTween = { duration: SNAP_S, ease: [0.45, 0, 0.8, 0.5] as [number, number, number, number] };
 
 export type TireMv = { x: MotionValue<number>; y: MotionValue<number> };
 
@@ -166,7 +174,7 @@ export function usePitstop(reduceMotion: boolean | null) {
         await at(BOLT_MS[i]);
         if (!aliveRef.current) return;
         const t = mv.tires[TIRES[i].key];
-        snaps.push(tween(t.x, 0, snapSpring), tween(t.y, 0, snapSpring));
+        snaps.push(tween(t.x, 0, snapTween), tween(t.y, 0, snapTween));
       }
       await Promise.all(snaps);
       await at(DRIVE_MS);
