@@ -29,6 +29,14 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
         },
       };
 
+  // The title is heavy Poppins: a 10px blur turns it into a solid-looking block before it sharpens, so it gets a light one.
+  const titleItem: Variants = reduceMotion
+    ? item
+    : {
+        hidden: { opacity: 0, x: -32, filter: "blur(3px)" },
+        show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: EASE } },
+      };
+
   return (
     <motion.div
       className="mx-auto max-w-3xl"
@@ -37,7 +45,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
       animate="show"
     >
       <motion.h1
-        variants={item}
+        variants={titleItem}
         className={PAGE_TITLE_CLASSES}
       >
         Blog
