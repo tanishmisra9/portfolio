@@ -11,11 +11,12 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
 
 /*
- * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (3.46s) is: guns-off burst
- * 0.03-0.71s, guns-on whine 0.79-1.96s (ramps up to ~1.1s, loudest 1.1-1.45s, fades out), then the engine rev
+ * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (3.46s) is: silence 0-0.79s
+ * (the name splitting apart is deliberately silent; the silence also keeps play() inside the click gesture),
+ * gun whine 0.79-1.96s (ramps up to ~1.1s, loudest 1.1-1.45s, fades out) as the tires rejoin, then the engine rev
  * peaking at ~2.9s. The whine is ONE continuous sound, not 4 hits. If the clip is re-cut, re-measure these.
  */
-/** Each tire pops off (starts flying out) during the guns-off burst, one after another. */
+/** Each tire pops off (starts flying out), one after another, in silence. */
 export const LAUNCH_MS = [40, 200, 360, 520] as const;
 /** Each tire starts snapping back, in TIRES order: they land (~120ms later) on the loud part of the whine. */
 export const BOLT_MS = [880, 1030, 1180, 1330] as const;
