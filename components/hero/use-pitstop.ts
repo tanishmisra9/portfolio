@@ -67,6 +67,14 @@ const LAND_KICK_PX = 4;
 const DRIVE_SQUAT_PX = 3;
 const DRIVE_LIFT_PX = -2;
 const ENTER_KICK_PX = 5;
+/**
+ * Engine rumble: while the clip's growl swells (it peaks at RUMBLE_PEAK_MS audio time) the parked name trembles
+ * vertically, RUMBLE_PX at most, RUMBLE_HZ times a second, until the drive squat. Vertical only (an idling engine
+ * shakes the chassis up and down; x jitter read as a glitch). Set RUMBLE_PX to 0 to drop it.
+ */
+const RUMBLE_PX = 2.4; // 1.2 was "not noticeable enough"; keep it under DRIVE_SQUAT_PX so the pull-out still reads bigger
+const RUMBLE_HZ = 15; // 30 direction changes a second: ~2 frames each at 60fps, so it can't alias into a wobble
+const RUMBLE_PEAK_MS = 2820;
 /** velocity: 0 matters: set() doesn't reset a MotionValue's velocity, so without it the wobble inherits the slam's speed. */
 const wobbleSpring = { type: "spring" as const, stiffness: 420, damping: 13, mass: 0.6, velocity: 0 };
 
@@ -206,6 +214,26 @@ export function usePitstop(reduceMotion: boolean | null) {
         );
       }
       await Promise.all(settled);
+      if (!aliveRef.current) return;
+
+      // Engine rumble while the growl swells: a fine vertical tremble of the whole name, from the tires settling until
+      // the drive squat (which takes over driveY and stops it). Alternates sign RUMBLE_HZ times a second each way, with
+      // a little per-beat jitter so it isn't metronomic, under an envelope that swells to full at the growl's peak.
+      const from = performance.now() - anchor - latency; // audio time now
+      const span = DRIVE_MS - from;
+      if (RUMBLE_PX > 0 && span > 150) {
+        const n = Math.max(2, Math.round((span / 1000) * RUMBLE_HZ * 2));
+        const ys = Array.from({ length: n + 1 }, (_, i) => {
+          if (i === 0 || i === n) return 0; // from rest, and back to rest for the squat
+          const p = Math.min(1, ((span * i) / n) / Math.max(1, RUMBLE_PEAK_MS - from));
+          const env = p * p * (3 - 2 * p); // smoothstep swell
+          return (i % 2 ? 1 : -1) * RUMBLE_PX * env * (0.7 + 0.3 * Math.random());
+        });
+        // each swing eases in and out (slows into its peak, like a vibration) instead of linear: linear made a triangle
+        // wave with instant reversals that read as a mechanical buzz. One ease per segment, explicitly.
+        const ease = Array.from({ length: n }, () => "easeInOut" as const);
+        animsRef.current.push(animate(mv.driveY, ys, { duration: span / 1000, ease }));
+      }
       await at(DRIVE_MS);
       if (!aliveRef.current) return;
 
