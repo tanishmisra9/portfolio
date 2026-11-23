@@ -25,10 +25,10 @@ function dipTo(next: string, setTheme: (t: string) => void, done: () => void) {
   cover.setAttribute("aria-hidden", "true");
   cover.style.cssText = `position:fixed;inset:0;z-index:10010;pointer-events:none;opacity:0;background:${getComputedStyle(document.body).backgroundColor};transition:opacity ${DIP_IN_MS}ms ease-out`;
   document.body.appendChild(cover);
-  const frame = (fn: () => void) => requestAnimationFrame(() => requestAnimationFrame(fn));
-  frame(() => {
-    cover.style.opacity = "1";
-  });
+  // Timers only, never requestAnimationFrame: rAF doesn't fire in a hidden tab, which would strand the cover on
+  // screen and leave `done()` uncalled (the toggle would ignore every later click).
+  cover.getBoundingClientRect(); // commit opacity:0 so the next style change transitions
+  cover.style.opacity = "1";
   window.setTimeout(() => {
     try {
       setTheme(next);
@@ -37,15 +37,15 @@ function dipTo(next: string, setTheme: (t: string) => void, done: () => void) {
       done();
       return;
     }
-    // Two frames so the class swap is painted under the cover before it lifts.
-    frame(() => {
+    // Let the class swap paint under the cover before it lifts.
+    window.setTimeout(() => {
       cover.style.transition = `opacity ${DIP_OUT_MS}ms ease-in`;
       cover.style.opacity = "0";
       window.setTimeout(() => {
         cover.remove();
         done();
       }, DIP_OUT_MS + 30);
-    });
+    }, 50);
   }, DIP_IN_MS + 50);
 }
 

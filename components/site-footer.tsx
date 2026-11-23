@@ -25,6 +25,14 @@ function backToTop() {
   window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
 }
 
+function safeDecode(s: string) {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+}
+
 function CopyEmail({ email, label, href }: { email: string; label: string; href: string }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
@@ -47,9 +55,9 @@ function CopyEmail({ email, label, href }: { email: string; label: string; href:
 }
 
 function SocialItem({ link }: { link: SocialLink }) {
-  if (link.href.startsWith("mailto:")) {
+  if (/^mailto:/i.test(link.href)) {
     // Always copy the real address from the mailto: href; `display` is free text (e.g. "Email me") and only the label.
-    const email = link.href.slice("mailto:".length).split("?")[0];
+    const email = safeDecode(link.href.slice("mailto:".length).split("?")[0]);
     return <CopyEmail email={email} label={link.display || email} href={link.href} />;
   }
   const resumeFilename =
