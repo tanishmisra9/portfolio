@@ -11,13 +11,14 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
 
 /*
- * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (4.46s) is: silence 0-0.9s
- * (the name splitting apart is deliberately silent; the silence also keeps play() inside the click gesture),
- * the wheel-gun burst 0.9-1.61s (the "pit stop" sound, one continuous burst, not 4 hits) as the tires rejoin, a
- * short gap, the car's engine growl 1.76-2.96s, then the drive-off from 2.96s with the engine rev peaking at ~3.85s.
- * If the clip is re-cut, re-measure these.
+ * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (5.36s) is, baked into one file
+ * so it starts inside the click gesture: a "whoosh 8" per tire at LAUNCH_MS + 60 (0.1/0.26/0.42/0.58s) as the chunks
+ * split, silence, the wheel-gun burst 0.9-1.61s (one continuous burst, not 4 hits) as the tires rejoin, a short gap,
+ * the car's engine growl 1.76-2.96s, the drive-off from 2.96s (engine rev peaks ~3.85s), and a "whoosh 9" that starts
+ * at 3.31s and peaks at 4.47s as the name re-enters (re-entry starts at DRIVE_MS + DRIVE_S + ENTER_PAUSE_MS = 4.35s).
+ * The whooshes are mixed in at fixed times: if LAUNCH_MS, DRIVE_MS, DRIVE_S or ENTER_PAUSE_MS change, re-mix the clip.
  */
-/** Each tire pops off (starts flying out), one after another, in silence. */
+/** Each tire pops off (starts flying out), one after another; each gets a whoosh 8 in the clip. */
 export const LAUNCH_MS = [40, 200, 360, 520] as const;
 /** Each tire starts snapping back, in TIRES order: they land (~120ms later) at 0.96/1.14/1.32/1.50s, inside the gun burst. */
 export const BOLT_MS = [840, 1020, 1200, 1380] as const;
