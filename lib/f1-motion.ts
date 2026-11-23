@@ -18,10 +18,12 @@ export const F1_CAR_RUN = 1500;
  * They fade out between these car-sprite indices: from sprite ~20 the camera rises over the car and the tires leave
  * the frame, so a fixed tire anchor stops being true.
  */
-export const F1_SQUEAL_PER_TIRE: [number, number] = [4, 7];
-export const F1_SQUEAL_LEN: [number, number] = [380, 900]; // full length
-export const F1_SQUEAL_WIDTH: [number, number] = [5, 15]; // root half-width
-export const F1_SQUEAL_DROP: [number, number] = [0.04, 0.5]; // angle below horizontal, radians
+export const F1_SQUEAL_PER_TIRE: [number, number] = [10, 16];
+export const F1_SQUEAL_LEN: [number, number] = [160, 1100]; // full length
+export const F1_SQUEAL_WIDTH: [number, number] = [1.2, 5]; // root half-width
+export const F1_SQUEAL_ANGLE: [number, number] = [-0.7, 0.12]; // radians below horizontal; negative = pointing up
+export const F1_SQUEAL_SPEED: [number, number] = [0.55, 1.4]; // per-stroke growth rate, so they don't extend in lockstep
+export const F1_SQUEAL_SPREAD = 0.16; // anchor height scatter, fraction of the car rect
 export const F1_SQUEAL_FADE: [number, number] = [18, 20];
 export const F1_SQUEAL_ALPHA = 0.9;
 /** Tire anchor inside the car sprite rect (fractions); the root sits under the tire so it's hidden by it. */

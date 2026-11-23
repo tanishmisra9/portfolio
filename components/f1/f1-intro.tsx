@@ -21,10 +21,12 @@ import {
   F1_SQUEAL_ALPHA,
   F1_SQUEAL_ANCHOR_X,
   F1_SQUEAL_ANCHOR_Y,
-  F1_SQUEAL_DROP,
+  F1_SQUEAL_ANGLE,
   F1_SQUEAL_FADE,
   F1_SQUEAL_LEN,
   F1_SQUEAL_PER_TIRE,
+  F1_SQUEAL_SPEED,
+  F1_SQUEAL_SPREAD,
   F1_SQUEAL_WIDTH,
   F1_LOAD_GRACE,
   F1_ZOOM,
@@ -222,7 +224,9 @@ export function F1Intro() {
     const streaks = [-1, 1].flatMap((side) =>
       Array.from({ length: Math.round(rand(F1_SQUEAL_PER_TIRE)) }, () => ({
         side,
-        drop: rand(F1_SQUEAL_DROP),
+        drop: rand(F1_SQUEAL_ANGLE),
+        sp: rand(F1_SQUEAL_SPEED),
+        ay: (Math.random() - 0.5) * 2 * F1_SQUEAL_SPREAD,
         len: rand(F1_SQUEAL_LEN),
         w: rand(F1_SQUEAL_WIDTH),
         jd: 0,
@@ -239,8 +243,8 @@ export function F1Intro() {
       if (f !== squealF) {
         squealF = f;
         for (const s of streaks) {
-          s.jd = (Math.random() - 0.5) * 0.08;
-          s.jl = 0.85 + Math.random() * 0.3;
+          s.jd = (Math.random() - 0.5) * 0.14;
+          s.jl = 0.75 + Math.random() * 0.5;
         }
       }
       const grow = p.f / (assets.current.car!.m.frames.length - 1);
@@ -252,9 +256,9 @@ export function F1Intro() {
       ctx.scale(m, m);
       for (const s of streaks) {
         const x0 = fr.x - 960 + (s.side < 0 ? F1_SQUEAL_ANCHOR_X : 1 - F1_SQUEAL_ANCHOR_X) * fr.w;
-        const y0 = fr.y - 540 + F1_SQUEAL_ANCHOR_Y * fr.h;
+        const y0 = fr.y - 540 + (F1_SQUEAL_ANCHOR_Y + s.ay) * fr.h;
         const ang = s.drop + s.jd;
-        const L = s.len * s.jl * grow;
+        const L = s.len * s.jl * clamp01(grow * s.sp);
         const tx = x0 + s.side * Math.cos(ang) * L;
         const ty = y0 + Math.sin(ang) * L;
         // perpendicular to the stroke: root is thick, tip is a point
