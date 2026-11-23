@@ -4,14 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUp } from "lucide-react";
+import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { SocialLink } from "@/types/content";
 
 const LOCATION = "Plano, Texas";
 const SOCIAL_ORDER = ["LinkedIn", "GitHub", "Resume", "Email"];
 
-const linkClass =
-  "rounded-sm transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+const linkClass = `${HOVER_FILL_LINK} inline-block px-3 py-1.5`;
 
 // Safari paints a focus ring on a mouse-clicked <a>/<button>; keep focus off on click (Tab still works).
 const noMouseFocus = { onMouseDown: (e: React.MouseEvent) => e.preventDefault() };
@@ -35,7 +35,7 @@ function CopyEmail({ email }: { email: string }) {
   return (
     <Tooltip label={copied ? "Copied" : "Copy email"}>
       <button type="button" onClick={copy} {...noMouseFocus} className={linkClass}>
-        {email}
+        <HoverFill>{email}</HoverFill>
       </button>
     </Tooltip>
   );
@@ -55,7 +55,7 @@ function SocialItem({ link }: { link: SocialLink }) {
       {...(resumeFilename ? { download: resumeFilename } : {})}
       {...(link.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
-      {link.label}
+      <HoverFill>{link.label}</HoverFill>
     </a>
   );
 }
@@ -76,7 +76,7 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
       <div className="grid gap-y-10 md:grid-cols-[1fr_auto_1fr] md:items-start md:gap-x-8">
         <div>
           <p className="font-display text-2xl font-semibold text-fg md:text-3xl">Stay in touch</p>
-          <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-base text-muted md:text-lg">
+          <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:text-lg">
             {[...social].sort((a, b) => rank(a) - rank(b)).map((link) => (
               <li key={link.id}>
                 <SocialItem link={link} />
@@ -101,15 +101,15 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
 
         <div className="md:text-right">
           <p className="font-display text-2xl font-semibold text-fg md:text-3xl">{LOCATION}</p>
-          <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-base text-muted md:justify-end md:text-lg">
+          <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:justify-end md:text-lg">
             <li>
               <Link href="/legal" {...noMouseFocus} className={linkClass}>
-                Legal Notice
+                <HoverFill>Legal Notice</HoverFill>
               </Link>
             </li>
             <li>
               <Link href="/privacy" {...noMouseFocus} className={linkClass}>
-                Privacy Policy
+                <HoverFill>Privacy Policy</HoverFill>
               </Link>
             </li>
           </ul>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { SITE_HEADER_FADE_DURATION_S } from "@/lib/site-motion";
+import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu, X } from "lucide-react";
@@ -230,7 +231,7 @@ export function SiteHeader() {
           <div className="flex min-w-0 flex-1 items-center justify-end">
             <nav
               ref={navRef}
-              className="relative hidden items-center gap-x-1 md:flex md:-mr-1"
+              className="relative hidden items-center gap-x-2 md:flex md:-mr-1"
               aria-label="Primary"
             >
               {pill && (
@@ -261,13 +262,13 @@ export function SiteHeader() {
                         }
                         onMouseDown={(e) => e.preventDefault()}
                         className={[
-                          "relative inline-flex items-center justify-center rounded-none px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors hover:ring-1 hover:ring-inset hover:ring-hover-outline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70",
+                          `${HOVER_FILL_LINK} inline-flex items-center justify-center px-5 py-3 text-sm font-normal uppercase tracking-wide`,
                           active
                             ? "text-fg"
-                            : "text-muted hover:text-fg",
+                            : "text-muted",
                         ].join(" ")}
                       >
-                        <span className="relative z-10">{item.label}</span>
+                        <HoverFill>{item.label}</HoverFill>
                       </Link>
                   </Tooltip>
                 );
