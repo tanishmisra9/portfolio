@@ -109,15 +109,20 @@ export function Tooltip({
     if (!open) return;
     const sx = window.scrollX;
     const sy = window.scrollY;
+    const w0 = window.innerWidth;
+    // Mobile URL-bar collapse and the on-screen keyboard fire resize without changing the width: ignore those.
+    const onResize = () => {
+      if (window.innerWidth !== w0) hide();
+    };
     const onScroll = () => {
       if (Math.abs(window.scrollX - sx) <= 2 && Math.abs(window.scrollY - sy) <= 2) return;
       hide();
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", hide);
+    window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", hide);
+      window.removeEventListener("resize", onResize);
     };
   }, [open]);
 

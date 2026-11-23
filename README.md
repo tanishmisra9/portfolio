@@ -241,11 +241,11 @@ Clips are uploaded to Vercel Blob and go live on Publish (read from the publishe
 - **Hero** — Click or activate the name for a scatter/reassemble animation; desktop pointer “magnet” on letters
 - **Home intro** — Sections reveal after the hero tagline animation (`HomeIntroGateProvider`)
 - **Scrolling** — Native browser scrolling; sections reveal on scroll via `ScrollReveal`
-- **Ghost headings** — Large section titles use stroke outlines (`.heading-ghost`) for contrast; mobile sizes are clamped so long titles don't overflow the viewport
+- **Headings** — Section titles are solid, Title-case Inter extra-bold (`SECTION_HEADING_CLASSES`); page titles use `PAGE_TITLE_CLASSES`, clamped so long titles don't overflow the viewport
 - **Skip link** — “Skip to content” in the root layout targets `#main-content`
 - **Focus** — Visible focus rings on interactive controls; section headings on the home page are keyboard-focusable where needed
 - **Reduced motion** — `prefers-reduced-motion` disables or simplifies animations (hero, album titles, photos header flash, quote cloud)
-- **Photos header** — `TANISHTAKESPICS` camera-flash effect on click
+- **Photos header** — `TanishTakesPics` camera-flash effect on click
 - **Quotes** — Each quote carries an `aria-label` of its text and author (the visual text is `aria-hidden`); the cloud fades/scales in with a tiered stagger
 - **Modals** — The Surprise overlay and mobile nav use `inert` on the rest of the page while open
 - **Logo** — Scrolls to the top via a `#top` anchor at the start of `<body>`

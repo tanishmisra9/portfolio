@@ -25,7 +25,7 @@ function backToTop() {
   window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
 }
 
-function CopyEmail({ email }: { email: string }) {
+function CopyEmail({ email, href }: { email: string; href: string }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -33,7 +33,8 @@ function CopyEmail({ email }: { email: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // Clipboard blocked: the address is still plain, selectable text.
+      // Clipboard blocked (permission, insecure context): fall back to opening the mail client.
+      window.location.href = href;
     }
   };
   return (
@@ -47,7 +48,7 @@ function CopyEmail({ email }: { email: string }) {
 
 function SocialItem({ link }: { link: SocialLink }) {
   if (link.href.startsWith("mailto:")) {
-    return <CopyEmail email={link.display || link.href.slice(7)} />;
+    return <CopyEmail email={link.display || link.href.slice(7).split("?")[0]} href={link.href} />;
   }
   const resumeFilename =
     link.label === "Resume" ? link.href.split("?")[0].split("/").pop() : undefined;
@@ -62,7 +63,7 @@ function SocialItem({ link }: { link: SocialLink }) {
       <HoverFill>{link.label}</HoverFill>
     </a>
   );
-  const tip = SOCIAL_TIPS[link.label];
+  const tip = link.tooltip || SOCIAL_TIPS[link.label];
   return tip ? <Tooltip label={tip}>{anchor}</Tooltip> : anchor;
 }
 

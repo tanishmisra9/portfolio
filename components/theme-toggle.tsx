@@ -30,7 +30,13 @@ function dipTo(next: string, setTheme: (t: string) => void, done: () => void) {
     cover.style.opacity = "1";
   });
   window.setTimeout(() => {
-    setTheme(next);
+    try {
+      setTheme(next);
+    } catch {
+      cover.remove();
+      done();
+      return;
+    }
     // Two frames so the class swap is painted under the cover before it lifts.
     frame(() => {
       cover.style.transition = `opacity ${DIP_OUT_MS}ms ease-in`;
