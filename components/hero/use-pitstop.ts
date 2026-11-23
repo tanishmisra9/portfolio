@@ -20,8 +20,8 @@ import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
 export const LAUNCH_MS = [40, 200, 360, 520] as const;
 /** Each tire starts snapping back, in TIRES order: they land (~120ms later) on the loud part of the whine. */
 export const BOLT_MS = [880, 1030, 1180, 1330] as const;
-/** The whole name starts sliding off; its easeIn is fastest right as the engine rev peaks. */
-export const DRIVE_MS = 2700;
+/** The whole name starts sliding off (slowly, then accelerating); it is fastest right around the engine rev peak. */
+export const DRIVE_MS = 2500;
 
 /**
  * Every visual is delayed by this much after the audio's `playing` event: that event fires before the sound reaches the
@@ -32,7 +32,9 @@ const SOUND_LATENCY_MS = 200;
 
 const PITSTOP_VOLUME = 0.45;
 const LAUNCH_S = 0.2;
-const DRIVE_S = 0.25;
+/** Drive-off is a gentle ease-in (easeInCubic): a soft start that accelerates away, like a car pulling out. */
+const DRIVE_S = 0.55;
+const DRIVE_EASE = [0.32, 0, 0.67, 0] as const;
 /** Name is off-screen this long after the slide, then re-enters from the left (like the page wraps around). */
 const ENTER_PAUSE_MS = 350;
 const ENTER_S = 0.3;
@@ -167,7 +169,7 @@ export function usePitstop(reduceMotion: boolean | null) {
       if (!aliveRef.current) return;
 
       go("drive");
-      await tween(mv.driveX, window.innerWidth, { duration: DRIVE_S, ease: "easeIn" });
+      await tween(mv.driveX, window.innerWidth, { duration: DRIVE_S, ease: [...DRIVE_EASE] });
       if (!aliveRef.current) return;
 
       await wait(ENTER_PAUSE_MS);
