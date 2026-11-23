@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Instagram, X } from "lucide-react";
+import { Instagram, X, Shuffle } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -256,7 +256,10 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
               className={GLASS_BUTTON_SHEEN_CLASSES}
               style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }}
             />
-            <span className="relative">Surprise!</span>
+            <span className="relative flex items-center gap-2.5">
+              <Shuffle className="size-4" strokeWidth={1.75} aria-hidden />
+              Surprise!
+            </span>
           </button>
         </motion.div>
         <motion.div
