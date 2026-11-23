@@ -11,12 +11,13 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
 
 /*
- * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (5.79s) is, baked into one file
- * so it starts inside the click gesture: a "whoosh 8" per tire at LAUNCH_MS - 40 (0/0.16/0.32/0.48s; +60 felt late) as the chunks
- * split, then ONE CONTINUOUS stretch of the original Short (no cuts, one filter chain, so there are no seams to hear):
- * the wheel-gun burst 0.92-1.57s as the tires rejoin (one continuous burst, not 4 hits), natural pit-lane ambience,
- * the car's engine growl 2.23-3.37s, the drive-off from ~3.7s (engine rev peaks ~4.30s), and a "whoosh 9" that starts
- * at 3.74s and peaks at 4.90s as the name re-enters (re-entry starts at DRIVE_MS + DRIVE_S + ENTER_PAUSE_MS = 4.80s).
+ * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (5.24s) is, baked into one file
+ * so it starts inside the click gesture: a "whoosh 8" per tire at LAUNCH_MS - 40 (0/0.16/0.32/0.48s; +60 felt late) as
+ * the chunks split, then the original Short through ONE filter chain with no gaps: the wheel-gun burst 0.92-1.57s as
+ * the tires rejoin (one continuous burst, not 4 hits), which is CROSSFADED (0.35s, equal power, 1.40-1.75s) into the
+ * car's engine growl (rising from 1.68s to 2.82s) so the two weave together over the same ambience instead of
+ * leaving a lull, the drive-off from ~3.15s (engine rev peaks ~3.75s), and a "whoosh 9" that starts at 3.19s and
+ * peaks at 4.35s as the name re-enters (re-entry starts at DRIVE_MS + DRIVE_S + ENTER_PAUSE_MS = 4.25s).
  * The whooshes are mixed in at fixed times: if LAUNCH_MS, DRIVE_MS, DRIVE_S or ENTER_PAUSE_MS change, re-mix the clip.
  */
 /** Each tire pops off (starts flying out), one after another; each gets a whoosh 8 in the clip. */
@@ -24,7 +25,7 @@ export const LAUNCH_MS = [40, 200, 360, 520] as const;
 /** Each tire starts snapping back, in TIRES order: they land (~120ms later) at 0.96/1.14/1.32/1.50s, inside the gun burst. */
 export const BOLT_MS = [840, 1020, 1200, 1380] as const;
 /** The whole name starts sliding off (slowly, then accelerating); it is fastest right around the engine rev peak. */
-export const DRIVE_MS = 3900;
+export const DRIVE_MS = 3350;
 
 /**
  * Every visual is delayed by this much after the audio's `playing` event: that event fires before the sound reaches the
