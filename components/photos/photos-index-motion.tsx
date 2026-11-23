@@ -245,22 +245,22 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
           </Tooltip>
         </motion.div>
         <motion.div variants={item} className="mt-5 flex justify-center md:mt-6">
-          <button
-            ref={surpriseTriggerRef}
-            type="button"
-            onClick={handleSurpriseMe}
-            className={GLASS_BUTTON_CLASSES}
-          >
-            <span
-              aria-hidden
-              className={GLASS_BUTTON_SHEEN_CLASSES}
-              style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }}
-            />
-            <span className="relative flex items-center gap-2.5">
-              <Shuffle className="size-4" strokeWidth={1.75} aria-hidden />
-              Surprise!
-            </span>
-          </button>
+          <Tooltip label="Surprise me">
+            <button
+              ref={surpriseTriggerRef}
+              type="button"
+              onClick={handleSurpriseMe}
+              aria-label="Surprise me"
+              className={`${GLASS_BUTTON_CLASSES} !p-3`}
+            >
+              <span
+                aria-hidden
+                className={GLASS_BUTTON_SHEEN_CLASSES}
+                style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }}
+              />
+              <Shuffle className="relative size-[1.375rem]" strokeWidth={1.75} aria-hidden />
+            </button>
+          </Tooltip>
         </motion.div>
         <motion.div
           variants={gridSection}
