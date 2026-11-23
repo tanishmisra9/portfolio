@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { SiteChrome } from "@/components/site-chrome";
+import { SiteFooter } from "@/components/site-footer";
 import { getRadioSampleUrls } from "@/lib/radio-samples";
 import { getRadioTriggers } from "@/lib/radio-triggers";
 import { Analytics } from "@vercel/analytics/next";
@@ -66,6 +67,7 @@ export default async function RootLayout({
           </a>
           <SiteChrome radioSamples={radioSamples} radioTriggers={radioTriggers} />
           {children}
+          <SiteFooter />
           </div>
         </ThemeProvider>
         <Analytics />

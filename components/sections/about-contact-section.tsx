@@ -68,11 +68,6 @@ export function AboutContactSection({ bio, social }: Props) {
             })}
           </div>
         </ScrollReveal>
-        <ScrollReveal variant="fade">
-          <p className="mt-14 text-center text-[0.805rem] text-muted md:mt-[4.6rem]">
-            © {new Date().getFullYear()} Tanish Misra
-          </p>
-        </ScrollReveal>
       </div>
     </section>
   );
