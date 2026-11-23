@@ -27,8 +27,14 @@ export const F1_SQUEAL_PER_TIRE: [number, number] = [2, 4];
 export const F1_SQUEAL_LEN: [number, number] = [70, 220];
 export const F1_SQUEAL_WIDTH: [number, number] = [1.5, 4]; // root half-width
 export const F1_SQUEAL_SPREAD_Y = 14;
-/** Smoke. Puffs per side are scaled by that side's intensity (uneven launches). */
-export const F1_SMOKE_PUFFS: [number, number] = [14, 24];
+/**
+ * Smoke: open ink arcs (brush crescents), not outlined blobs. Full outlined circles read as a vector cartoon; the clip
+ * is hand-inked, tapered strokes that don't close. Puffs per side are scaled by that side's intensity (uneven launches).
+ * The timings below are at 1x; F1_SMOKE_SPEED divides every duration and multiplies every rate (2 = twice as fast).
+ */
+export const F1_SMOKE_SPEED = 2;
+export const F1_SMOKE_SWEEP: [number, number] = [0.62, 0.85]; // each lobe's arc, fraction of a full circle
+export const F1_SMOKE_PUFFS: [number, number] = [26, 40];
 export const F1_SMOKE_INTENSITY: [number, number] = [0.5, 1];
 export const F1_SMOKE_EMIT = 900; // ms after lights-out during which puffs are born
 export const F1_SMOKE_LIFE: [number, number] = [700, 1500]; // ms
@@ -37,7 +43,7 @@ export const F1_SMOKE_GROW = 1.6; // radius grows by this x per second of age
 export const F1_SMOKE_OUT: [number, number] = [80, 260]; // sideways, away from the car
 export const F1_SMOKE_RISE: [number, number] = [40, 170];
 export const F1_SMOKE_EASE = 0.7; // s: travel slows like real smoke (time constant)
-export const F1_SMOKE_LINE: [number, number] = [1.6, 3.2]; // outline width
+export const F1_SMOKE_LINE: [number, number] = [2.4, 4.4]; // brush half-thickness w: ink is 2w thick at its fullest
 /** One wind per mount pushes the whole plume: left/right, and a little up or down. */
 export const F1_SMOKE_WIND_X: [number, number] = [-140, 140];
 export const F1_SMOKE_WIND_Y: [number, number] = [-60, 15];

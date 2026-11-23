@@ -30,6 +30,8 @@ import {
   F1_SMOKE_PUFFS,
   F1_SMOKE_RADIUS,
   F1_SMOKE_RISE,
+  F1_SMOKE_SPEED,
+  F1_SMOKE_SWEEP,
   F1_SMOKE_WIND_X,
   F1_SMOKE_WIND_Y,
   F1_SQUEAL_CONTACT_X,
@@ -246,13 +248,15 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
     // Launch: ink tire smoke + short squeal streaks at each front tire's contact patch, all drawn behind the car.
     // Smoke puffs are born at the contact point (mapped through the car's transform at that moment) and then live in
     // screen space, so the car rushing the camera leaves them behind instead of dragging them along. Each puff is a
-    // cluster of circles: a thick ink stroke, then a page-coloured fill on top, so only the outer edge of the outline
-    // shows (comic smoke, the car's own black-shape + line language). Everything is rolled once per mount (reload or
-    // Replay): wind, per-side intensity, every puff and streak.
+    // cluster of open ink arcs (~75% of a circle, gap facing into the cloud) drawn as tapered brush crescents, the
+    // clip's hand-inked language. Everything is rolled once per mount (reload or Replay): wind, per-side intensity,
+    // every puff, lobe and streak. All smoke durations are / F1_SMOKE_SPEED and all its rates x F1_SMOKE_SPEED.
     const css = getComputedStyle(document.documentElement);
     const ink = css.getPropertyValue("--fg").trim() || "#000";
     const paper = css.getPropertyValue("--bg").trim() || "#fff";
-    const wind = { x: rand(F1_SMOKE_WIND_X), y: rand(F1_SMOKE_WIND_Y) };
+    const S = F1_SMOKE_SPEED;
+    const wind = { x: rand(F1_SMOKE_WIND_X) * S, y: rand(F1_SMOKE_WIND_Y) * S };
+    type Lobe = { dx: number; dy: number; rf: number; sweep: number; gap: number; th: number };
     type Puff = {
       side: number;
       birth: number; // ms after lights-out
@@ -260,27 +264,45 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
       r: number; // scene px at birth
       vx: number; // scene px/s, eased out (smoke slows)
       vy: number;
-      lobes: [number, number, number][]; // dx, dy (fractions of r), radius factor
-      line: number;
+      lobes: Lobe[];
+      line: number; // max brush thickness, scene px
       at?: { x: number; y: number; m: number }; // screen position and scale, fixed at birth
+    };
+    const lobe = (): Lobe => {
+      const dx = (Math.random() - 0.5) * 1.3, dy = (Math.random() - 0.5) * 1;
+      const central = Math.hypot(dx, dy) < 0.08;
+      return {
+        dx,
+        dy,
+        rf: 0.5 + Math.random() * 0.55,
+        sweep: rand(F1_SMOKE_SWEEP) * Math.PI * 2,
+        // gap jitter around "back toward the tire the smoke came from" (resolved per puff below); a central lobe opens
+        // anywhere
+        gap: central ? NaN : (Math.random() - 0.5) * 2.4,
+        th: 0.6 + Math.random() * 0.4,
+      };
     };
     const puffs: Puff[] = [-1, 1]
       .flatMap((side) => {
         const power = rand(F1_SMOKE_INTENSITY); // uneven launches: one tire can smoke more than the other
         return Array.from({ length: Math.round(rand(F1_SMOKE_PUFFS) * power) }, () => ({
           side,
-          birth: F1_SMOKE_EMIT * Math.pow(Math.random(), 1.6), // front-loaded: most smoke right at launch
-          life: rand(F1_SMOKE_LIFE),
+          birth: (F1_SMOKE_EMIT / S) * Math.pow(Math.random(), 1.6), // front-loaded: most smoke right at launch
+          life: rand(F1_SMOKE_LIFE) / S,
           r: rand(F1_SMOKE_RADIUS) * (0.6 + 0.4 * power),
-          vx: side * rand(F1_SMOKE_OUT) + wind.x,
-          vy: -rand(F1_SMOKE_RISE) + wind.y,
-          lobes: Array.from({ length: 3 + Math.floor(Math.random() * 3) }, (): [number, number, number] => [
-            (Math.random() - 0.5) * 1.2,
-            (Math.random() - 0.5) * 0.9,
-            0.55 + Math.random() * 0.5,
-          ]),
+          vx: (side * rand(F1_SMOKE_OUT)) * S + wind.x,
+          vy: -rand(F1_SMOKE_RISE) * S + wind.y,
+          lobes: Array.from({ length: 4 + Math.floor(Math.random() * 4) }, lobe),
           line: rand(F1_SMOKE_LINE),
         }));
+      })
+      .map((q) => {
+        // open ends face back toward the tire (against the puff's travel), so the C-shapes show on the cloud's edge
+        const back = Math.atan2(-q.vy, -q.vx);
+        q.lobes = q.lobes
+          .map((l) => ({ ...l, gap: Number.isNaN(l.gap) ? Math.random() * Math.PI * 2 : back + l.gap }))
+          .sort((a, b) => a.rf - b.rf); // big lobes behind, small in front
+        return q;
       })
       .sort((p, q) => p.birth - q.birth); // oldest drawn first, so fresh smoke overlaps it
     const streaks = [-1, 1].flatMap((side) =>
@@ -331,9 +353,7 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
 
       // smoke
       ctx.save();
-      ctx.strokeStyle = ink;
-      ctx.fillStyle = paper;
-      ctx.lineJoin = "round";
+      ctx.globalAlpha = alpha; // < 1 only during the footage handover; flat ink otherwise
       for (const q of puffs) {
         if (q.birth > u) break; // sorted by birth
         if (!q.at) {
@@ -344,21 +364,33 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
         const age = (u - q.birth) / 1000;
         const t = age / (q.life / 1000);
         if (t >= 1) continue;
-        const travel = F1_SMOKE_EASE * (1 - Math.exp(-age / F1_SMOKE_EASE)); // seconds of travel, slowing down
+        const ease = F1_SMOKE_EASE / S;
+        const travel = ease * (1 - Math.exp(-age / ease)); // seconds of travel, slowing down
         const x = q.at.x + q.vx * travel * k, y = q.at.y + q.vy * travel * k;
-        const r = q.r * q.at.m * (1 + F1_SMOKE_GROW * age);
-        // flat ink, no transparency: the fill stays opaque (invisible on the stage, it hides older puffs' outlines like
-        // real overlapping smoke) and the puff dissipates by its outline thinning away. A fading fill showed every
-        // older outline through it as stacked rings. alpha < 1 only during the footage handover.
-        ctx.globalAlpha = alpha;
-        ctx.beginPath();
-        for (const [dx, dy, rf] of q.lobes) {
-          ctx.moveTo(x + dx * r + rf * r, y + dy * r);
-          ctx.arc(x + dx * r, y + dy * r, rf * r, 0, Math.PI * 2);
+        const r = q.r * q.at.m * (1 + F1_SMOKE_GROW * S * age);
+        const thin = 1 - t * t; // the puff dissipates by its ink thinning away (no transparency)
+        // Each lobe, back to front: an opaque page-coloured disc (invisible on the stage; it hides the lobes behind it,
+        // so the cloud never turns into a tangle of rings), then its brush crescent. The crescent's outer arc of radius
+        // R sweeps around, then back along an inner circle of radius R - w whose centre is shifted w toward the gap, so
+        // the ink is 2w thick opposite the gap and tapers to ~0.3w at the open ends. (Shifting a same-radius inner
+        // circle instead crosses over the outer edge past +-90 degrees, which a 270-degree sweep reaches.)
+        for (const l of q.lobes) {
+          const cx = x + l.dx * r, cy = y + l.dy * r, R = l.rf * r;
+          const w = Math.min(q.line * k * l.th * thin, R * 0.4);
+          if (w < 0.15) continue;
+          ctx.fillStyle = paper;
+          ctx.beginPath();
+          ctx.arc(cx, cy, R, 0, Math.PI * 2);
+          ctx.fill();
+          const a0 = l.gap + (Math.PI * 2 - l.sweep) / 2, a1 = a0 + l.sweep;
+          const ix = cx + Math.cos(l.gap) * w, iy = cy + Math.sin(l.gap) * w;
+          ctx.fillStyle = ink;
+          ctx.beginPath();
+          ctx.arc(cx, cy, R, a0, a1);
+          ctx.arc(ix, iy, R - w, a1, a0, true);
+          ctx.closePath();
+          ctx.fill();
         }
-        ctx.lineWidth = 2 * q.line * k * (1 - t * t);
-        ctx.stroke();
-        ctx.fill(); // covers the inner half of the stroke and every interior arc: only the silhouette stays outlined
       }
       ctx.restore();
     };
