@@ -262,7 +262,7 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
       const power = rand(F1_INK_SIDE_POWER); // uneven launches: one tire can throw more than the other
       return Array.from({ length: Math.round(rand(F1_INK_MASSES) * power) }, () => ({
         side,
-        birth: F1_INK_EMIT * Math.pow(Math.random(), 1.5),
+        birth: F1_INK_EMIT * Math.pow(Math.random(), 1.15), // a little front-loaded, but still full late in the rush
         life: rand(F1_INK_MASS_LIFE),
         ang: rand(F1_INK_MASS_ANGLE), // radians above horizontal, mirrored per side
         v: rand(F1_INK_MASS_SPEED),
@@ -321,7 +321,7 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
         for (let i = 0; i < b.n; i++) {
           const off = (i / (b.n - 1) - 0.5) * W * 2.2;
           const lf = 0.45 + 0.55 * hash(b.seed + i * 7.1 + step * 31.7); // re-rolled every drawing: the bristles boil
-          const th = 0.4 + 1.6 * hash(b.seed + i * 3.3); // hairline thickness, px at scale 1
+          const th = 1 + 3 * hash(b.seed + i * 3.3); // bristle half-thickness, scene px
           const a0 = L * tail * lf, a1 = L * head * lf;
           if (a1 - a0 < 1) continue;
           const bx = s0.x + nx * off, by = s0.y + ny * off;

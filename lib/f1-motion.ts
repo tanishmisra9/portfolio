@@ -27,17 +27,17 @@ export const F1_SQUEAL_CONTACT_X = 0.1;
 export const F1_SQUEAL_CONTACT_Y = 0.6;
 /** One drawing is held this long (the clip is on 2s at 50fps, played at 0.6x: 40ms / 0.6 = 67ms). */
 export const F1_INK_HOLD = 67;
-export const F1_INK_EMIT = 260; // ink is born within this long after lights-out
+export const F1_INK_EMIT = 900; // ink is born within this long after lights-out (front-loaded), so it lasts the rush
 export const F1_INK_SIDE_POWER: [number, number] = [0.6, 1];
 /** Smoke masses per side; each flies out, grows and tears apart. */
-export const F1_INK_MASSES: [number, number] = [5, 9];
-export const F1_INK_MASS_LIFE: [number, number] = [200, 420];
+export const F1_INK_MASSES: [number, number] = [14, 22];
+export const F1_INK_MASS_LIFE: [number, number] = [320, 650];
 export const F1_INK_MASS_SIZE: [number, number] = [70, 150]; // half-length along the throw at birth
 export const F1_INK_MASS_SPEED: [number, number] = [900, 1900];
 export const F1_INK_MASS_ANGLE: [number, number] = [-0.15, 0.6]; // above horizontal
 /** Dry-brush squeal bundles per tire. */
-export const F1_INK_BRUSHES: [number, number] = [2, 4];
-export const F1_INK_BRUSH_LIFE: [number, number] = [170, 330];
+export const F1_INK_BRUSHES: [number, number] = [6, 10];
+export const F1_INK_BRUSH_LIFE: [number, number] = [260, 480];
 export const F1_INK_BRUSH_LEN: [number, number] = [260, 620];
 export const F1_INK_BRUSH_WIDTH: [number, number] = [8, 18]; // half-width of the bundle
 export const F1_INK_BRUSH_ANGLE: [number, number] = [0.02, 0.22]; // below horizontal
