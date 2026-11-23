@@ -33,6 +33,12 @@ import {
   F1_INK_MASS_SPEED,
   F1_INK_MASSES,
   F1_INK_SIDE_POWER,
+  F1_INK_UP_ANGLE,
+  F1_INK_UP_SHARE,
+  F1_INK_VLINE_LEN,
+  F1_INK_VLINE_LIFE,
+  F1_INK_VLINE_WIDTH,
+  F1_INK_VLINES,
   F1_SQUEAL_CONTACT_X,
   F1_SQUEAL_CONTACT_Y,
   F1_SQUEAL_FADE,
@@ -264,7 +270,8 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
         side,
         birth: F1_INK_EMIT * Math.pow(Math.random(), 1.15), // a little front-loaded, but still full late in the rush
         life: rand(F1_INK_MASS_LIFE),
-        ang: rand(F1_INK_MASS_ANGLE), // radians above horizontal, mirrored per side
+        // radians above horizontal, mirrored per side; a share are thrown steeply up as rising plumes
+        ang: Math.random() < F1_INK_UP_SHARE ? rand(F1_INK_UP_ANGLE) : rand(F1_INK_MASS_ANGLE),
         v: rand(F1_INK_MASS_SPEED),
         rx: rand(F1_INK_MASS_SIZE) * (0.7 + 0.3 * power),
         ry: 0,
@@ -283,6 +290,18 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
         seed: Math.random() * 1000,
       })),
     );
+    const vlines = Array.from({ length: Math.round(rand(F1_INK_VLINES)) }, () => {
+      const left = Math.random() < 0.5;
+      return {
+        birth: F1_INK_EMIT * Math.random(),
+        life: rand(F1_INK_VLINE_LIFE),
+        x: left ? rand([0.02, 0.3]) : rand([0.7, 0.98]), // the side bands, clear of the car
+        len: rand(F1_INK_VLINE_LEN), // fraction of the stage height
+        w: rand(F1_INK_VLINE_WIDTH),
+        lean: (left ? -1 : 1) * rand([0, 0.06]), // splays out a touch, like the clip's
+        dir: Math.random() < 0.5 ? 1 : -1, // streaks down or up
+      };
+    });
     const contact = (fr: Frame, side: number) => ({
       x: fr.x - 960 + (side < 0 ? F1_SQUEAL_CONTACT_X : 1 - F1_SQUEAL_CONTACT_X) * fr.w,
       y: fr.y - 540 + F1_SQUEAL_CONTACT_Y * fr.h,
@@ -303,6 +322,27 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
       ctx.save();
       ctx.globalAlpha = alpha; // < 1 only during the footage handover; flat ink otherwise
       ctx.fillStyle = ink;
+
+      // vertical speed lines (the clip's long thin lines streaking past): screen-space needles in the side bands, each
+      // shooting up or down past the stage, moving on 2s
+      ctx.beginPath();
+      for (const v of vlines) {
+        if (v.birth > u) continue;
+        const step = Math.floor((u - v.birth) / F1_INK_HOLD);
+        const t = (step * F1_INK_HOLD) / v.life;
+        if (t >= 1) continue;
+        const L = v.len * ch, W = v.w * k * (1 - 0.5 * t);
+        const span = ch + L;
+        const head = v.dir > 0 ? -L + span * t : ch + L - span * t; // top of the needle travels the whole stage
+        const x = v.x * cw, x2 = x + v.lean * L;
+        const y0 = v.dir > 0 ? head : head - L;
+        ctx.moveTo(x, y0);
+        ctx.lineTo((x + x2) / 2 + W, y0 + L / 2);
+        ctx.lineTo(x2, y0 + L);
+        ctx.lineTo((x + x2) / 2 - W, y0 + L / 2);
+        ctx.closePath();
+      }
+      ctx.fill();
 
       // dry-brush squeal: a bundle of parallel hairlines from the contact patch, each its own length (the feathered end).
       // The head shoots out over the first 35% of its life, then the tail pulls away after it.

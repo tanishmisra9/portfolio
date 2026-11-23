@@ -35,6 +35,14 @@ export const F1_INK_MASS_LIFE: [number, number] = [320, 650];
 export const F1_INK_MASS_SIZE: [number, number] = [70, 150]; // half-length along the throw at birth
 export const F1_INK_MASS_SPEED: [number, number] = [900, 1900];
 export const F1_INK_MASS_ANGLE: [number, number] = [-0.15, 0.6]; // above horizontal
+/** Share of masses thrown steeply upward as rising plumes, and their angle above horizontal. */
+export const F1_INK_UP_SHARE = 0.4;
+export const F1_INK_UP_ANGLE: [number, number] = [0.95, 1.45];
+/** Vertical speed lines (the clip's long thin streaks): screen-space needles in the side bands, up or down. */
+export const F1_INK_VLINES: [number, number] = [14, 22];
+export const F1_INK_VLINE_LIFE: [number, number] = [180, 380];
+export const F1_INK_VLINE_LEN: [number, number] = [0.25, 0.7]; // fraction of the stage height
+export const F1_INK_VLINE_WIDTH: [number, number] = [1.5, 5]; // half-width at the middle, scene px
 /** Dry-brush squeal bundles per tire. */
 export const F1_INK_BRUSHES: [number, number] = [6, 10];
 export const F1_INK_BRUSH_LIFE: [number, number] = [260, 480];
