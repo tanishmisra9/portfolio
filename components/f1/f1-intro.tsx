@@ -4,6 +4,8 @@ import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
+import { RotateCcw } from "lucide-react";
+import { Tooltip } from "@/components/ui/tooltip";
 import { createF1Sound, type F1Sound } from "@/components/f1/f1-sound";
 import {
   F1_CAR_EMERGE,
@@ -455,14 +457,17 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
         </p>
         {phase === "done" && !reduce && (
           <div className="mt-6 flex justify-center">
-            <button
-              type="button"
-              onClick={onReplay}
-              onMouseDown={(e) => e.preventDefault()}
-              className="font-mono text-[11px] uppercase tracking-[0.25em] text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-            >
-              Replay
-            </button>
+            <Tooltip label="Replay">
+              <button
+                type="button"
+                onClick={onReplay}
+                onMouseDown={(e) => e.preventDefault()}
+                aria-label="Replay the intro"
+                className="-m-3 flex items-center justify-center p-3 text-muted transition-colors hover:bg-fg/10 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 active:bg-fg/20"
+              >
+                <RotateCcw className="size-7" strokeWidth={1.25} aria-hidden />
+              </button>
+            </Tooltip>
           </div>
         )}
       </div>
