@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useHomeIntroMarkDone } from "@/components/home-intro-gate";
 import {
@@ -36,7 +36,11 @@ export function Hero({ subtitle }: HeroProps) {
   >(null);
   const misraResetRef = useRef<(() => void) | null>(null);
 
+  /* Reduced motion: there is no pit stop, so the name is plain text (not a dead "Play" button). Set from an effect, not
+   * read during render, so the first client render matches the server's markup (no hydration mismatch). */
+  const [plainName, setPlainName] = useState(false);
   useEffect(() => {
+    setPlainName(!!reduceHeroMotion);
     if (reduceHeroMotion) {
       markHomeIntroDone();
     }
@@ -106,17 +110,21 @@ export function Hero({ subtitle }: HeroProps) {
               {/* Drive-off wrapper: slides off right, then re-enters from the left. */}
               <motion.div style={{ x: mv.driveX, y: mv.driveY }}>
               <div
-                role="button"
-                tabIndex={0}
-                aria-label="Play name pit-stop animation"
-                className="heading-bleed-mobile flex flex-col items-center cursor-pointer select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:items-start md:text-[clamp(2.256rem,12vw,11.6rem)] md:leading-[0.85]"
-                onClick={onNameClick}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onNameClick();
-                  }
-                }}
+                {...(plainName
+                  ? {}
+                  : {
+                      role: "button",
+                      tabIndex: 0,
+                      "aria-label": "Play name pit-stop animation",
+                      onClick: onNameClick,
+                      onKeyDown: (e: React.KeyboardEvent) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onNameClick();
+                        }
+                      },
+                    })}
+                className={`heading-bleed-mobile flex flex-col items-center ${plainName ? "" : "cursor-pointer "}select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:items-start md:text-[clamp(2.256rem,12vw,11.6rem)] md:leading-[0.85]`}
               >
                 <div className="text-fg">
                   <ScatterName
