@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUp } from "lucide-react";
+import { ChevronUp } from "lucide-react";
 import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { SocialLink } from "@/types/content";
@@ -94,7 +94,7 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
               aria-label="Back to top"
               className="-m-3 flex items-center justify-center p-3 text-muted transition-colors hover:bg-fg/10 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 active:bg-fg/20"
             >
-              <ArrowUp className="size-8" strokeWidth={2} aria-hidden />
+              <ChevronUp className="size-8" strokeWidth={2} aria-hidden />
             </button>
           </Tooltip>
         </div>
