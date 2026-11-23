@@ -229,7 +229,10 @@ export function usePitstop(reduceMotion: boolean | null) {
           const env = p * p * (3 - 2 * p); // smoothstep swell
           return (i % 2 ? 1 : -1) * RUMBLE_PX * env * (0.7 + 0.3 * Math.random());
         });
-        animsRef.current.push(animate(mv.driveY, ys, { duration: span / 1000, ease: "linear" }));
+        // each swing eases in and out (slows into its peak, like a vibration) instead of linear: linear made a triangle
+        // wave with instant reversals that read as a mechanical buzz. One ease per segment, explicitly.
+        const ease = Array.from({ length: n }, () => "easeInOut" as const);
+        animsRef.current.push(animate(mv.driveY, ys, { duration: span / 1000, ease }));
       }
       await at(DRIVE_MS);
       if (!aliveRef.current) return;
