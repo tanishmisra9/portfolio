@@ -49,7 +49,7 @@ export function PhotosHeader() {
         flashing ? "camera-flash-text" : ""
       }`}
     >
-      TanishTakesPics
+      tanishtakespics
     </h1>
   );
 }

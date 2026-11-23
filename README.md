@@ -245,7 +245,7 @@ Clips are uploaded to Vercel Blob and go live on Publish (read from the publishe
 - **Skip link** — “Skip to content” in the root layout targets `#main-content`
 - **Focus** — Visible focus rings on interactive controls; section headings on the home page are keyboard-focusable where needed
 - **Reduced motion** — `prefers-reduced-motion` disables or simplifies animations (hero, album titles, photos header flash, quote cloud)
-- **Photos header** — `TanishTakesPics` camera-flash effect on click
+- **Photos header** — `tanishtakespics` camera-flash effect on click
 - **Quotes** — Each quote carries an `aria-label` of its text and author (the visual text is `aria-hidden`); the cloud fades/scales in with a tiered stagger
 - **Modals** — The Surprise overlay and mobile nav use `inert` on the rest of the page while open
 - **Logo** — Scrolls to the top via a `#top` anchor at the start of `<body>`
