@@ -231,7 +231,7 @@ export function SiteHeader() {
           <div className="flex min-w-0 flex-1 items-center justify-end">
             <nav
               ref={navRef}
-              className="relative hidden items-center gap-x-2 md:flex md:-mr-1"
+              className="relative hidden items-center gap-x-0.5 md:flex md:-mr-1"
               aria-label="Primary"
             >
               {pill && (
@@ -262,7 +262,7 @@ export function SiteHeader() {
                         }
                         onMouseDown={(e) => e.preventDefault()}
                         className={[
-                          `${HOVER_FILL_LINK} inline-flex items-center justify-center px-5 py-3 text-sm font-normal uppercase tracking-wide`,
+                          `${HOVER_FILL_LINK} inline-flex items-center justify-center px-4 py-3 text-sm font-normal uppercase tracking-wide`,
                           active
                             ? "text-fg"
                             : "text-muted",
@@ -275,7 +275,7 @@ export function SiteHeader() {
               })}
             </nav>
 
-            <ThemeToggle className="md:ml-3.5" />
+            <ThemeToggle className="md:ml-2" />
 
             <button
               ref={menuTriggerRef}
