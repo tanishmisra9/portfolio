@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { SITE_HEADER_FADE_DURATION_S } from "@/lib/site-motion";
+import { Tooltip } from "@/components/ui/tooltip";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -15,14 +16,14 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-type NavItem = { href: string; label: string };
+type NavItem = { href: string; label: string; tip: string };
 
 const NAV: NavItem[] = [
-  { href: "#about", label: "ABOUT" },
-  { href: "/photos", label: "PHOTOS" },
-  { href: "/blog", label: "BLOG" },
-  { href: "/quotes", label: "QUOTES" },
-  { href: "/f1", label: "F1" },
+  { href: "#about", label: "ABOUT", tip: "About me" },
+  { href: "/photos", label: "PHOTOS", tip: "Photography" },
+  { href: "/blog", label: "BLOG", tip: "Writing" },
+  { href: "/quotes", label: "QUOTES", tip: "Lines worth keeping" },
+  { href: "/f1", label: "F1", tip: "Formula 1" },
 ];
 
 /** DOM order — must match home page sections for scroll-spy. */
@@ -248,26 +249,27 @@ export function SiteHeader() {
                   pathname,
                 );
                 return (
-                  <Link
-                    key={item.label}
-                    href={resolveNavHref(item.href, pathname)}
-                    aria-current={
-                      active
-                        ? item.href.startsWith("#")
-                          ? "true"
-                          : "page"
-                        : undefined
-                    }
-                    onMouseDown={(e) => e.preventDefault()}
-                    className={[
-                      "relative inline-flex items-center justify-center rounded-none px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors hover:ring-1 hover:ring-inset hover:ring-hover-outline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70",
-                      active
-                        ? "text-fg"
-                        : "text-muted hover:text-fg",
-                    ].join(" ")}
-                  >
-                    <span className="relative z-10">{item.label}</span>
-                  </Link>
+                  <Tooltip key={item.label} label={item.tip} className="!static">
+                      <Link
+                        href={resolveNavHref(item.href, pathname)}
+                        aria-current={
+                          active
+                            ? item.href.startsWith("#")
+                              ? "true"
+                              : "page"
+                            : undefined
+                        }
+                        onMouseDown={(e) => e.preventDefault()}
+                        className={[
+                          "relative inline-flex items-center justify-center rounded-none px-4 py-3 text-sm font-normal uppercase tracking-wide transition-colors hover:ring-1 hover:ring-inset hover:ring-hover-outline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70",
+                          active
+                            ? "text-fg"
+                            : "text-muted hover:text-fg",
+                        ].join(" ")}
+                      >
+                        <span className="relative z-10">{item.label}</span>
+                      </Link>
+                  </Tooltip>
                 );
               })}
             </nav>
