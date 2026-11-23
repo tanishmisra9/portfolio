@@ -63,12 +63,12 @@ const snapTween = { duration: SNAP_S, ease: [0.45, 0, 0.8, 0.6] as [number, numb
  * - the name is kicked ENTER_KICK_PX when it lands from the left, then wobbles back.
  * The wobble is an underdamped spring (damping ratio ~0.35: a couple of shrinking wiggles over ~0.45s). Set a kick to 0 to drop it.
  */
-const LAND_KICK_PX = 7;
-const DRIVE_SQUAT_PX = 6;
-const DRIVE_LIFT_PX = -4;
-const ENTER_KICK_PX = 10;
+const LAND_KICK_PX = 4;
+const DRIVE_SQUAT_PX = 3;
+const DRIVE_LIFT_PX = -2;
+const ENTER_KICK_PX = 5;
 /** velocity: 0 matters: set() doesn't reset a MotionValue's velocity, so without it the wobble inherits the slam's speed. */
-const wobbleSpring = { type: "spring" as const, stiffness: 420, damping: 11, mass: 0.6, velocity: 0 };
+const wobbleSpring = { type: "spring" as const, stiffness: 420, damping: 13, mass: 0.6, velocity: 0 };
 
 export type TireMv = { x: MotionValue<number>; y: MotionValue<number> };
 
