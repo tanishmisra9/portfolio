@@ -91,7 +91,21 @@ async function loadImage(src: string) {
   return im;
 }
 
+/** Replay = a fresh mount (new key): the sound object is single-use, and this also re-rolls the hold and the squeal strokes. */
 export function F1Intro() {
+  const [run, setRun] = useState(0);
+  return (
+    <F1IntroRun
+      key={run}
+      onReplay={() => {
+        window.scrollTo(0, 0);
+        setRun((n) => n + 1);
+      }}
+    />
+  );
+}
+
+function F1IntroRun({ onReplay }: { onReplay: () => void }) {
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<"run" | "done">("run");
 
@@ -439,6 +453,18 @@ export function F1Intro() {
         <p className="mt-6 select-none text-center text-[1.375rem] leading-snug text-muted md:mt-8">
           Coming soon
         </p>
+        {phase === "done" && !reduce && (
+          <div className="mt-6 flex justify-center">
+            <button
+              type="button"
+              onClick={onReplay}
+              onMouseDown={(e) => e.preventDefault()}
+              className="font-mono text-[11px] uppercase tracking-[0.25em] text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+            >
+              Replay
+            </button>
+          </div>
+        )}
       </div>
 
       {/* stage (page background), lights and canvas, only while the intro is live */}
