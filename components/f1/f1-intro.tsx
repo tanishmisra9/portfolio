@@ -20,27 +20,22 @@ import {
   F1_PAN_END_RATE,
   F1_SFX_GROWL_LEAD,
   F1_SFX_ROAR_PEAK_AT,
-  F1_SMOKE_EASE,
-  F1_SMOKE_EMIT,
-  F1_SMOKE_GROW,
-  F1_SMOKE_INTENSITY,
-  F1_SMOKE_LIFE,
-  F1_SMOKE_LINE,
-  F1_SMOKE_OUT,
-  F1_SMOKE_PUFFS,
-  F1_SMOKE_RADIUS,
-  F1_SMOKE_RISE,
-  F1_SMOKE_SPEED,
-  F1_SMOKE_SWEEP,
-  F1_SMOKE_WIND_X,
-  F1_SMOKE_WIND_Y,
+  F1_INK_BRUSH_ANGLE,
+  F1_INK_BRUSH_LEN,
+  F1_INK_BRUSH_LIFE,
+  F1_INK_BRUSH_WIDTH,
+  F1_INK_BRUSHES,
+  F1_INK_EMIT,
+  F1_INK_HOLD,
+  F1_INK_MASS_ANGLE,
+  F1_INK_MASS_LIFE,
+  F1_INK_MASS_SIZE,
+  F1_INK_MASS_SPEED,
+  F1_INK_MASSES,
+  F1_INK_SIDE_POWER,
   F1_SQUEAL_CONTACT_X,
   F1_SQUEAL_CONTACT_Y,
   F1_SQUEAL_FADE,
-  F1_SQUEAL_LEN,
-  F1_SQUEAL_PER_TIRE,
-  F1_SQUEAL_SPREAD_Y,
-  F1_SQUEAL_WIDTH,
   F1_LOAD_GRACE,
   F1_ZOOM,
 } from "@/lib/f1-motion";
@@ -245,152 +240,132 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
       ctx.restore();
     };
 
-    // Launch: ink tire smoke + short squeal streaks at each front tire's contact patch, all drawn behind the car.
-    // Smoke puffs are born at the contact point (mapped through the car's transform at that moment) and then live in
-    // screen space, so the car rushing the camera leaves them behind instead of dragging them along. Each puff is a
-    // cluster of open ink arcs (~75% of a circle, gap facing into the cloud) drawn as tapered brush crescents, the
-    // clip's hand-inked language. Everything is rolled once per mount (reload or Replay): wind, per-side intensity,
-    // every puff, lobe and streak. All smoke durations are / F1_SMOKE_SPEED and all its rates x F1_SMOKE_SPEED.
-    const css = getComputedStyle(document.documentElement);
-    const ink = css.getPropertyValue("--fg").trim() || "#000";
-    const paper = css.getPropertyValue("--bg").trim() || "#fff";
-    const S = F1_SMOKE_SPEED;
-    const wind = { x: rand(F1_SMOKE_WIND_X) * S, y: rand(F1_SMOKE_WIND_Y) * S };
-    type Lobe = { dx: number; dy: number; rf: number; sweep: number; gap: number; th: number };
-    type Puff = {
-      side: number;
-      birth: number; // ms after lights-out
-      life: number; // ms
-      r: number; // scene px at birth
-      vx: number; // scene px/s, eased out (smoke slows)
-      vy: number;
-      lobes: Lobe[];
-      line: number; // max brush thickness, scene px
-      at?: { x: number; y: number; m: number }; // screen position and scale, fixed at birth
+    // Launch, in the clip's own motion vocabulary (see the footage: no outlined shapes anywhere, only solid flat ink
+    // masses with torn edges, and dry-brush streaks that feather into hairlines). Two things per front tire, both born
+    // at the contact patch and then left in screen space (the car rushes away from them), both drawn behind the car:
+    //   - smoke: torn solid masses that shoot outward, grow, and tear apart;
+    //   - squeal: dry-brush bundles (parallel hairlines of uneven length) that whip out along the ground and pull away.
+    // Everything moves ON 2s like the clip: position and shape only change every F1_INK_HOLD ms, and each new drawing
+    // re-rolls the jagged edges / hairline lengths, so it boils like hand animation instead of gliding. One flat ink
+    // colour (--fg: white masses on the dark stage like the clip's white wind shapes, black on the light stage like its
+    // road streaks). Every count, size, angle, delay and edge is random per mount (reload or Replay).
+    const ink = getComputedStyle(document.documentElement).getPropertyValue("--fg").trim() || "#000";
+    const hash = (n: number) => {
+      const x = Math.sin(n * 12.9898) * 43758.5453;
+      return x - Math.floor(x);
     };
-    const lobe = (): Lobe => {
-      const dx = (Math.random() - 0.5) * 1.3, dy = (Math.random() - 0.5) * 1;
-      const central = Math.hypot(dx, dy) < 0.08;
-      return {
-        dx,
-        dy,
-        rf: 0.5 + Math.random() * 0.55,
-        sweep: rand(F1_SMOKE_SWEEP) * Math.PI * 2,
-        // gap jitter around "back toward the tire the smoke came from" (resolved per puff below); a central lobe opens
-        // anywhere
-        gap: central ? NaN : (Math.random() - 0.5) * 2.4,
-        th: 0.6 + Math.random() * 0.4,
-      };
-    };
-    const puffs: Puff[] = [-1, 1]
-      .flatMap((side) => {
-        const power = rand(F1_SMOKE_INTENSITY); // uneven launches: one tire can smoke more than the other
-        return Array.from({ length: Math.round(rand(F1_SMOKE_PUFFS) * power) }, () => ({
-          side,
-          birth: (F1_SMOKE_EMIT / S) * Math.pow(Math.random(), 1.6), // front-loaded: most smoke right at launch
-          life: rand(F1_SMOKE_LIFE) / S,
-          r: rand(F1_SMOKE_RADIUS) * (0.6 + 0.4 * power),
-          vx: (side * rand(F1_SMOKE_OUT)) * S + wind.x,
-          vy: -rand(F1_SMOKE_RISE) * S + wind.y,
-          lobes: Array.from({ length: 4 + Math.floor(Math.random() * 4) }, lobe),
-          line: rand(F1_SMOKE_LINE),
-        }));
-      })
-      .map((q) => {
-        // open ends face back toward the tire (against the puff's travel), so the C-shapes show on the cloud's edge
-        const back = Math.atan2(-q.vy, -q.vx);
-        q.lobes = q.lobes
-          .map((l) => ({ ...l, gap: Number.isNaN(l.gap) ? Math.random() * Math.PI * 2 : back + l.gap }))
-          .sort((a, b) => a.rf - b.rf); // big lobes behind, small in front
-        return q;
-      })
-      .sort((p, q) => p.birth - q.birth); // oldest drawn first, so fresh smoke overlaps it
-    const streaks = [-1, 1].flatMap((side) =>
-      Array.from({ length: Math.round(rand(F1_SQUEAL_PER_TIRE)) }, () => ({
+    type Mass = { side: number; birth: number; life: number; ang: number; v: number; rx: number; ry: number; seed: number };
+    type Brush = { side: number; birth: number; life: number; ang: number; len: number; w: number; n: number; seed: number };
+    type Spot = { x: number; y: number; m: number }; // contact point (screen px) and scale when the ink was born
+    const born = new Map<Mass | Brush, Spot>();
+    const masses: Mass[] = [-1, 1].flatMap((side) => {
+      const power = rand(F1_INK_SIDE_POWER); // uneven launches: one tire can throw more than the other
+      return Array.from({ length: Math.round(rand(F1_INK_MASSES) * power) }, () => ({
         side,
-        dy: rand([-1, 1]) * F1_SQUEAL_SPREAD_Y,
-        len: rand(F1_SQUEAL_LEN),
-        w: rand(F1_SQUEAL_WIDTH),
-        jl: 1,
+        birth: F1_INK_EMIT * Math.pow(Math.random(), 1.5),
+        life: rand(F1_INK_MASS_LIFE),
+        ang: rand(F1_INK_MASS_ANGLE), // radians above horizontal, mirrored per side
+        v: rand(F1_INK_MASS_SPEED),
+        rx: rand(F1_INK_MASS_SIZE) * (0.7 + 0.3 * power),
+        ry: 0,
+        seed: Math.random() * 1000,
+      })).map((q) => ({ ...q, ry: q.rx * rand([0.35, 0.6]) }));
+    });
+    const brushes: Brush[] = [-1, 1].flatMap((side) =>
+      Array.from({ length: Math.round(rand(F1_INK_BRUSHES)) }, () => ({
+        side,
+        birth: F1_INK_EMIT * Math.random(),
+        life: rand(F1_INK_BRUSH_LIFE),
+        ang: rand(F1_INK_BRUSH_ANGLE), // radians below horizontal: along the ground, toward the camera
+        len: rand(F1_INK_BRUSH_LEN),
+        w: rand(F1_INK_BRUSH_WIDTH),
+        n: 5 + Math.floor(Math.random() * 8),
+        seed: Math.random() * 1000,
       })),
     );
-    let squealF = -1;
     const contact = (fr: Frame, side: number) => ({
       x: fr.x - 960 + (side < 0 ? F1_SQUEAL_CONTACT_X : 1 - F1_SQUEAL_CONTACT_X) * fr.w,
       y: fr.y - 540 + F1_SQUEAL_CONTACT_Y * fr.h,
     });
     const drawSqueal = (p: Pose, alpha: number, k: number, u: number) => {
-      const f = Math.round(p.f);
-      const fr = assets.current.car!.m.frames[f];
+      const fr = assets.current.car!.m.frames[Math.round(p.f)];
       const m = k * p.sc;
-      const tireFade = 1 - clamp01((p.f - F1_SQUEAL_FADE[0]) / (F1_SQUEAL_FADE[1] - F1_SQUEAL_FADE[0]));
-
-      // squeal streaks: short, tight, horizontal, right at the contact patch. They are the contact, so they ride with
-      // the car, and boil whenever the car's drawing changes
-      const sa = alpha * p.a * tireFade;
-      if (sa > 0) {
-        if (f !== squealF) {
-          squealF = f;
-          for (const s of streaks) s.jl = 0.7 + Math.random() * 0.6;
+      const live = p.f < F1_SQUEAL_FADE[1]; // after this the tires have left the frame: nothing new is born
+      const spot = (q: Mass | Brush) => {
+        let s0 = born.get(q);
+        if (!s0 && live) {
+          const c = contact(fr, q.side);
+          s0 = { x: cw / 2 + c.x * m, y: ch / 2 + c.y * m, m };
+          born.set(q, s0);
         }
-        ctx.save();
-        ctx.globalAlpha = sa;
-        ctx.fillStyle = ink;
-        ctx.translate(cw / 2, ch / 2);
-        ctx.scale(m, m);
-        for (const s of streaks) {
-          const c = contact(fr, s.side);
-          const y = c.y + s.dy, L = s.len * s.jl;
-          ctx.beginPath();
-          ctx.moveTo(c.x, y - s.w);
-          ctx.lineTo(c.x + s.side * L, y + L * 0.04); // a hair of downward perspective
-          ctx.lineTo(c.x, y + s.w);
-          ctx.closePath();
-          ctx.fill();
-        }
-        ctx.restore();
-      }
-
-      // smoke
+        return s0;
+      };
       ctx.save();
       ctx.globalAlpha = alpha; // < 1 only during the footage handover; flat ink otherwise
-      for (const q of puffs) {
-        if (q.birth > u) break; // sorted by birth
-        if (!q.at) {
-          if (tireFade <= 0) continue; // tires have left the frame: no new smoke
-          const c = contact(fr, q.side);
-          q.at = { x: cw / 2 + c.x * m, y: ch / 2 + c.y * m, m };
-        }
-        const age = (u - q.birth) / 1000;
-        const t = age / (q.life / 1000);
+      ctx.fillStyle = ink;
+
+      // dry-brush squeal: a bundle of parallel hairlines from the contact patch, each its own length (the feathered end).
+      // The head shoots out over the first 35% of its life, then the tail pulls away after it.
+      for (const b of brushes) {
+        if (b.birth > u) continue;
+        const step = Math.floor((u - b.birth) / F1_INK_HOLD);
+        const t = (step * F1_INK_HOLD) / b.life;
         if (t >= 1) continue;
-        const ease = F1_SMOKE_EASE / S;
-        const travel = ease * (1 - Math.exp(-age / ease)); // seconds of travel, slowing down
-        const x = q.at.x + q.vx * travel * k, y = q.at.y + q.vy * travel * k;
-        const r = q.r * q.at.m * (1 + F1_SMOKE_GROW * S * age);
-        const thin = 1 - t * t; // the puff dissipates by its ink thinning away (no transparency)
-        // Each lobe, back to front: an opaque page-coloured disc (invisible on the stage; it hides the lobes behind it,
-        // so the cloud never turns into a tangle of rings), then its brush crescent. The crescent's outer arc of radius
-        // R sweeps around, then back along an inner circle of radius R - w whose centre is shifted w toward the gap, so
-        // the ink is 2w thick opposite the gap and tapers to ~0.3w at the open ends. (Shifting a same-radius inner
-        // circle instead crosses over the outer edge past +-90 degrees, which a 270-degree sweep reaches.)
-        for (const l of q.lobes) {
-          const cx = x + l.dx * r, cy = y + l.dy * r, R = l.rf * r;
-          const w = Math.min(q.line * k * l.th * thin, R * 0.4);
-          if (w < 0.15) continue;
-          ctx.fillStyle = paper;
-          ctx.beginPath();
-          ctx.arc(cx, cy, R, 0, Math.PI * 2);
-          ctx.fill();
-          const a0 = l.gap + (Math.PI * 2 - l.sweep) / 2, a1 = a0 + l.sweep;
-          const ix = cx + Math.cos(l.gap) * w, iy = cy + Math.sin(l.gap) * w;
-          ctx.fillStyle = ink;
-          ctx.beginPath();
-          ctx.arc(cx, cy, R, a0, a1);
-          ctx.arc(ix, iy, R - w, a1, a0, true);
+        const s0 = spot(b);
+        if (!s0) continue;
+        const dx = b.side * Math.cos(b.ang), dy = Math.sin(b.ang);
+        const nx = -dy, ny = dx; // across the bundle
+        const L = b.len * s0.m, W = b.w * s0.m;
+        const head = Math.min(1, t / 0.35), tail = Math.max(0, (t - 0.45) / 0.55);
+        ctx.beginPath();
+        for (let i = 0; i < b.n; i++) {
+          const off = (i / (b.n - 1) - 0.5) * W * 2.2;
+          const lf = 0.45 + 0.55 * hash(b.seed + i * 7.1 + step * 31.7); // re-rolled every drawing: the bristles boil
+          const th = 0.4 + 1.6 * hash(b.seed + i * 3.3); // hairline thickness, px at scale 1
+          const a0 = L * tail * lf, a1 = L * head * lf;
+          if (a1 - a0 < 1) continue;
+          const bx = s0.x + nx * off, by = s0.y + ny * off;
+          const hw = th * s0.m * (1 - t * 0.6);
+          ctx.moveTo(bx + dx * a0 + nx * hw, by + dy * a0 + ny * hw);
+          ctx.lineTo(bx + dx * a1, by + dy * a1); // tapers to a point at the far end
+          ctx.lineTo(bx + dx * a0 - nx * hw, by + dy * a0 - ny * hw);
           ctx.closePath();
-          ctx.fill();
         }
+        ctx.fill();
+      }
+
+      // smoke: torn solid masses. Ellipse along the throw direction, radius broken by deep jagged notches that are
+      // re-drawn every hold; the notches deepen as it ages so the mass tears apart instead of fading
+      for (const q of masses) {
+        if (q.birth > u) continue;
+        const step = Math.floor((u - q.birth) / F1_INK_HOLD);
+        const age = step * F1_INK_HOLD;
+        const t = age / q.life;
+        if (t >= 1) continue;
+        const s0 = spot(q);
+        if (!s0) continue;
+        const dx = q.side * Math.cos(q.ang), dy = -Math.sin(q.ang);
+        const travel = q.v * (age / 1000) * (1 - 0.35 * t) * s0.m; // fast out, easing a little
+        const cx = s0.x + dx * travel, cy = s0.y + dy * travel;
+        const grow = 0.45 + 1.4 * Math.sqrt(t);
+        const rx = q.rx * grow * s0.m, ry = q.ry * grow * (1 - 0.5 * t) * s0.m;
+        const rot = Math.atan2(dy, dx);
+        const cr = Math.cos(rot), sr = Math.sin(rot);
+        const N = 22;
+        ctx.beginPath();
+        for (let i = 0; i < N; i++) {
+          const th = (i / N) * Math.PI * 2;
+          const h = hash(q.seed + i * 5.7 + step * 19.3);
+          // mostly full, with deep torn notches (more and deeper as it ages); trailing edge streaks back, like the clip
+          const notch = h < 0.18 + 0.45 * t ? 0.35 + 0.4 * hash(q.seed + i * 9.1 + step) : 0.85 + 0.3 * h;
+          const back = Math.cos(th) < -0.3 ? 1 + 0.9 * hash(q.seed + i * 2.9 + step * 7.7) : 1; // ragged tail
+          const ex = Math.cos(th) * rx * notch * back, ey = Math.sin(th) * ry * notch;
+          const x = cx + ex * cr - ey * sr, y = cy + ex * sr + ey * cr;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fill();
       }
       ctx.restore();
     };

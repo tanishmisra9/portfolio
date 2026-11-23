@@ -14,39 +14,33 @@ export const F1_CAR_EMERGE = 700;
 export const F1_CAR_RUN = 1500;
 
 /**
- * Launch smoke + squeal streaks at each front tire's contact patch (drawn behind the car, random per mount).
- * Sizes in 1920x1080 scene px; speeds in scene px/s. Streaks and new smoke stop between these car-sprite indices:
- * from sprite ~20 the camera rises over the car and the tires leave the frame, so the contact point stops being true.
- * Don't go back to long screen-wide rays from a vanishing point: they read as a zoom-burst video transition.
+ * Launch ink at each front tire's contact patch, drawn behind the car, random per mount. Matches the clip's own motion
+ * vocabulary: solid flat masses with torn edges (smoke) and dry-brush hairline bundles (squeal), held ON 2s.
+ * Tried and rejected by the user: long screen-wide rays from a vanishing point ("a mistaken video transition"); outlined
+ * comic smoke circles and open ink arcs (vector line art; "completely out of place" next to the clip, and too slow).
+ * Sizes in 1920x1080 scene px, speeds in scene px/s, times in ms after lights-out.
  */
+/** Nothing new is born past this car-sprite index: from sprite ~20 the camera rises and the tires leave the frame. */
 export const F1_SQUEAL_FADE: [number, number] = [18, 20];
 /** Contact point inside the car sprite rect (fractions): the outer bottom of each front tire, just above the wing. */
 export const F1_SQUEAL_CONTACT_X = 0.1;
 export const F1_SQUEAL_CONTACT_Y = 0.6;
-export const F1_SQUEAL_PER_TIRE: [number, number] = [2, 4];
-export const F1_SQUEAL_LEN: [number, number] = [70, 220];
-export const F1_SQUEAL_WIDTH: [number, number] = [1.5, 4]; // root half-width
-export const F1_SQUEAL_SPREAD_Y = 14;
-/**
- * Smoke: open ink arcs (brush crescents), not outlined blobs. Full outlined circles read as a vector cartoon; the clip
- * is hand-inked, tapered strokes that don't close. Puffs per side are scaled by that side's intensity (uneven launches).
- * The timings below are at 1x; F1_SMOKE_SPEED divides every duration and multiplies every rate (2 = twice as fast).
- */
-export const F1_SMOKE_SPEED = 2;
-export const F1_SMOKE_SWEEP: [number, number] = [0.62, 0.85]; // each lobe's arc, fraction of a full circle
-export const F1_SMOKE_PUFFS: [number, number] = [26, 40];
-export const F1_SMOKE_INTENSITY: [number, number] = [0.5, 1];
-export const F1_SMOKE_EMIT = 900; // ms after lights-out during which puffs are born
-export const F1_SMOKE_LIFE: [number, number] = [700, 1500]; // ms
-export const F1_SMOKE_RADIUS: [number, number] = [28, 70];
-export const F1_SMOKE_GROW = 1.6; // radius grows by this x per second of age
-export const F1_SMOKE_OUT: [number, number] = [80, 260]; // sideways, away from the car
-export const F1_SMOKE_RISE: [number, number] = [40, 170];
-export const F1_SMOKE_EASE = 0.7; // s: travel slows like real smoke (time constant)
-export const F1_SMOKE_LINE: [number, number] = [2.4, 4.4]; // brush half-thickness w: ink is 2w thick at its fullest
-/** One wind per mount pushes the whole plume: left/right, and a little up or down. */
-export const F1_SMOKE_WIND_X: [number, number] = [-140, 140];
-export const F1_SMOKE_WIND_Y: [number, number] = [-60, 15];
+/** One drawing is held this long (the clip is on 2s at 50fps, played at 0.6x: 40ms / 0.6 = 67ms). */
+export const F1_INK_HOLD = 67;
+export const F1_INK_EMIT = 260; // ink is born within this long after lights-out
+export const F1_INK_SIDE_POWER: [number, number] = [0.6, 1];
+/** Smoke masses per side; each flies out, grows and tears apart. */
+export const F1_INK_MASSES: [number, number] = [5, 9];
+export const F1_INK_MASS_LIFE: [number, number] = [200, 420];
+export const F1_INK_MASS_SIZE: [number, number] = [70, 150]; // half-length along the throw at birth
+export const F1_INK_MASS_SPEED: [number, number] = [900, 1900];
+export const F1_INK_MASS_ANGLE: [number, number] = [-0.15, 0.6]; // above horizontal
+/** Dry-brush squeal bundles per tire. */
+export const F1_INK_BRUSHES: [number, number] = [2, 4];
+export const F1_INK_BRUSH_LIFE: [number, number] = [170, 330];
+export const F1_INK_BRUSH_LEN: [number, number] = [260, 620];
+export const F1_INK_BRUSH_WIDTH: [number, number] = [8, 18]; // half-width of the bundle
+export const F1_INK_BRUSH_ANGLE: [number, number] = [0.02, 0.22]; // below horizontal
 
 /** Clip 72..152 as one continuous take. Source is 50fps; RATE < 1 slows it for weight. */
 export const F1_HANDOVER = 160;
