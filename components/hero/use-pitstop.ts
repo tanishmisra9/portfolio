@@ -49,11 +49,12 @@ const ENTER_S = 0.3;
 const SOUND_START_CAP_MS = 500;
 
 /**
- * A tire slams home: it arrives at speed and stops dead, so every landing is one exact instant (start + SNAP_S) a sound can
+ * A tire slams home: it arrives at speed and stops almost dead (end control point 0.6, was 0.5: ~5% less snappy, so it
+ * doesn't hard-cut; raise it toward 1 to soften more), so every landing is still one exact instant (start + SNAP_S) a sound can
  * hit. (The old spring took 150-300ms to settle onto home, which read as mushy and gave the sound nothing to land on.)
  */
 const SNAP_S = 0.16;
-const snapTween = { duration: SNAP_S, ease: [0.45, 0, 0.8, 0.5] as [number, number, number, number] };
+const snapTween = { duration: SNAP_S, ease: [0.45, 0, 0.8, 0.6] as [number, number, number, number] };
 
 export type TireMv = { x: MotionValue<number>; y: MotionValue<number> };
 
