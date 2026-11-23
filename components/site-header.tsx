@@ -203,7 +203,7 @@ export function SiteHeader() {
   const closeMenu = () => setMenuOpen(false);
 
   // -ml-3 + px-3: the fill box extends past the letter without moving the letter itself.
-  const logoClassName = `${HOVER_FILL_LINK} -ml-3.5 inline-flex items-center justify-center px-3.5 py-2 font-display text-2xl font-bold tracking-tight text-fg`;
+  const logoClassName = `${HOVER_FILL_LINK} -ml-3 inline-flex items-center justify-center px-3 py-2 font-display text-xl font-bold tracking-tight text-fg`;
 
   return (
     <>
@@ -230,7 +230,7 @@ export function SiteHeader() {
             aria-label="Tanish Misra, back to top"
             className={`shrink-0 ${logoClassName}`}
           >
-            <HoverFill>T</HoverFill>
+            <HoverFill>TM</HoverFill>
           </Link>
 
           <div className="flex min-w-0 flex-1 items-center justify-end">
