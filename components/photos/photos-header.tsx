@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 
 export function PhotosHeader() {
   const [flashing, setFlashing] = useState(false);
@@ -44,11 +45,11 @@ export function PhotosHeader() {
   return (
     <h1
       onClick={handleClick}
-      className={`heading-bleed-mobile select-none cursor-default text-center font-display text-[clamp(2.75rem,10.5vw,6.5rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(3rem,11.5vw,7rem)] md:text-[min(8.2vw,6.75rem)] md:max-w-full motion-reduce:animate-none heading-ghost heading-ghost-photos ${
+      className={`${PAGE_TITLE_CLASSES} cursor-default motion-reduce:animate-none ${
         flashing ? "camera-flash-text" : ""
       }`}
     >
-      TANISHTAKESPICS
+      TanishTakesPics
     </h1>
   );
 }

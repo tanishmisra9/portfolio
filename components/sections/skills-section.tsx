@@ -8,8 +8,7 @@ import {
   GLASS_BUTTON_SHEEN_BACKGROUND,
   GLASS_BUTTON_SHEEN_CLASSES,
   PILL_CLASSES,
-  CERTIFICATIONS_GHOST_HEADING_CLASSES,
-  SECTION_GHOST_HEADING_CLASSES,
+  SECTION_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
 import { Tooltip } from '@/components/ui/tooltip';
 import type { CertificationEntry, SkillCategory } from '@/types/content';
@@ -72,7 +71,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
             ) : (
               <span />
             )}
-            <Tooltip label={`${coursesOpen ? 'Hide' : 'Show'} courses`} align="end">
+            <Tooltip label={`${coursesOpen ? 'Hide' : 'Show'} courses`}>
               <span className="text-dim transition-colors group-hover:text-fg">
                 <ChevronDown
                   className={`h-5 w-5 transition-transform duration-300 ${coursesOpen ? 'rotate-180' : ''}`}
@@ -103,7 +102,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
             ) : (
               <span />
             )}
-            <Tooltip label="View credential" align="end">
+            <Tooltip label="View credential">
               <a
                 href={cert.credentialUrl}
                 target="_blank"
@@ -154,7 +153,7 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
                       className="group flex items-center justify-between gap-3 rounded px-2 py-1.5 -mx-2 text-base text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
                     >
                       <span>{course.title}</span>
-                      <Tooltip label="View credential" side="left">
+                      <Tooltip label="View credential">
                         <ExternalLink
                           className="h-4 w-4 shrink-0 text-dim transition-colors group-hover:text-fg"
                           strokeWidth={1.8}
@@ -192,9 +191,9 @@ export function SkillsSection({ skills, certifications }: Props) {
           <h2
             id="skills-heading"
             tabIndex={0}
-            className={SECTION_GHOST_HEADING_CLASSES}
+            className={SECTION_HEADING_CLASSES}
           >
-            SKILLS
+            Skills
           </h2>
         </ScrollReveal>
         <div className="mt-8 grid gap-8 md:grid-cols-2">
@@ -227,7 +226,7 @@ export function SkillsSection({ skills, certifications }: Props) {
               <h3
                 id="certifications-heading"
                 tabIndex={0}
-                className={CERTIFICATIONS_GHOST_HEADING_CLASSES}
+                className={SECTION_HEADING_CLASSES}
               >
                 Certifications
               </h3>

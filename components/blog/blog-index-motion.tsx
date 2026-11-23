@@ -1,5 +1,6 @@
 "use client";
 
+import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import type { BlogPostMeta } from "@/types/content";
@@ -37,7 +38,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
     >
       <motion.h1
         variants={item}
-        className="heading-bleed-mobile select-none text-center font-display text-[clamp(2.75rem,10.5vw,6.5rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(3rem,11.5vw,7rem)] md:max-w-full md:text-[min(8.2vw,6.75rem)] heading-ghost heading-ghost-photos"
+        className={PAGE_TITLE_CLASSES}
       >
         Blog
       </motion.h1>

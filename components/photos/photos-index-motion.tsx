@@ -233,7 +233,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
               href="https://www.instagram.com/tanishtakespics/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-full border border-border p-[0.6875rem] text-muted transition-colors hover:border-border-strong hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+              className="inline-flex items-center justify-center rounded-none border border-border p-[0.6875rem] text-muted transition-colors hover:border-border-strong hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
               aria-label="Instagram"
             >
               <Instagram
@@ -320,7 +320,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                       ref={closeButtonRef}
                       type="button"
                       onClick={closeOverlay}
-                      className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                      className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-none border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                       aria-label="Close surprise photo"
                     >
                       <X className="h-4 w-4" strokeWidth={1.9} aria-hidden />

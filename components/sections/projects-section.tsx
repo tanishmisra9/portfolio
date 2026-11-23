@@ -8,7 +8,7 @@ import {
   GLASS_BUTTON_SHEEN_BACKGROUND,
   GLASS_BUTTON_SHEEN_CLASSES,
   PILL_CLASSES,
-  SECTION_GHOST_HEADING_CLASSES,
+  SECTION_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
 import { Tooltip } from '@/components/ui/tooltip';
 import type { ProjectEntry } from '@/types/content';
@@ -44,7 +44,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
           {project.links?.map(({ label, url, icon }) => {
             const Icon = LINK_ICONS[icon ?? 'external'];
             return (
-              <Tooltip key={url} label={label} align="end">
+              <Tooltip key={url} label={label}>
                 <a
                   href={url}
                   target="_blank"
@@ -57,7 +57,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
               </Tooltip>
             );
           })}
-          <Tooltip label="GitHub repository" align="end">
+          <Tooltip label="GitHub">
             <a
               href={project.githubUrl}
               target="_blank"
@@ -102,8 +102,8 @@ export function ProjectsSection({ projects }: Props) {
     <section id="projects" className="scroll-mt-20 px-6 pb-8 pt-6 md:pb-16 md:pt-11">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal variant="fade">
-          <h2 className={SECTION_GHOST_HEADING_CLASSES}>
-            PROJECTS
+          <h2 className={SECTION_HEADING_CLASSES}>
+            Projects
           </h2>
         </ScrollReveal>
 

@@ -36,7 +36,6 @@ const DARK_TOKEN_BASELINE = {
   "--border": "rgba(255, 255, 255, 0.12)",
   "--border-strong": "rgba(255, 255, 255, 0.2)",
   "--hover-outline": "rgba(255, 255, 255, 0.4)",
-  "--heading-ghost": "#a6a6a6ee",
   "--quote-strong": "#ffffffd5",
   "--quote-muted": "#8c8c93bf",
 };

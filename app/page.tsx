@@ -36,7 +36,7 @@ export default async function HomePage() {
           certifications={portfolio.certifications}
         />
         <ProjectsSection projects={portfolio.projects} />
-        <AboutContactSection bio={portfolio.aboutBio} social={portfolio.social} />
+        <AboutContactSection bio={portfolio.aboutBio} />
       </main>
     </HomeIntroGateProvider>
   );

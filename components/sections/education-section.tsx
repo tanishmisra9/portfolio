@@ -1,7 +1,7 @@
 import { ScrollReveal } from '@/components/scroll-reveal';
 import {
   PILL_CLASSES,
-  SECTION_GHOST_HEADING_CLASSES,
+  SECTION_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
 import { formatDateRange } from '@/lib/format-date-range';
 import type { EducationEntry } from '@/types/content';
@@ -13,10 +13,10 @@ const orgPillClassName =
 
 function CoursePill({ label }: { label: string }) {
   return (
-    <li className="group relative inline-flex rounded-full border border-border-strong bg-fg/[0.06] backdrop-blur-xl px-3 py-1 font-sans text-[10px] uppercase tracking-widest text-fg select-none cursor-default transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1]">
+    <li className="group relative inline-flex rounded-none border border-border-strong bg-fg/[0.06] backdrop-blur-xl px-3 py-1 font-sans text-[10px] uppercase tracking-widest text-fg select-none cursor-default transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1]">
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 rounded-none opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
           background:
             'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.13) 0%, transparent 70%)',
@@ -35,9 +35,9 @@ export function EducationSection({ entries }: Props) {
           <h2
             id="education-heading"
             tabIndex={0}
-            className={SECTION_GHOST_HEADING_CLASSES}
+            className={SECTION_HEADING_CLASSES}
           >
-            EDUCATION
+            Education
           </h2>
         </ScrollReveal>
         <div className="mt-8 flex flex-col gap-10 md:gap-12">

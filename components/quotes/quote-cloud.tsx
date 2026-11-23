@@ -1,5 +1,6 @@
 "use client";
 
+import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 import { motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -643,7 +644,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="mb-16 text-center md:mb-24"
         >
-          <h1 className="heading-bleed-mobile select-none text-center font-display text-[clamp(2.75rem,10.5vw,6.5rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(3rem,11.5vw,7rem)] md:max-w-full md:text-[min(8.2vw,6.75rem)] heading-ghost heading-ghost-photos">
+          <h1 className={PAGE_TITLE_CLASSES}>
             Quotes
           </h1>
           {subtitle && (
@@ -821,7 +822,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
       <div
         ref={tooltipRef}
         aria-hidden="true"
-        className={`pointer-events-none fixed left-0 top-0 z-[100] rounded-full border border-border-strong bg-fg/[0.08] px-3.5 py-1.5 font-sans text-[0.6rem] uppercase tracking-[0.18em] text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-opacity duration-150 ${
+        className={`pointer-events-none fixed left-0 top-0 z-[100] border-[1.5px] border-fg bg-bg px-2.5 py-1.5 font-sans text-[11px] font-medium tracking-wide text-fg shadow-[3px_3px_0_rgb(var(--fg-rgb)/0.25)] transition-opacity duration-150 ${
           tip.visible ? "opacity-100" : "opacity-0"
         }`}
       >

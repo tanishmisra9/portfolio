@@ -1,5 +1,7 @@
 "use client";
 
+import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { createF1Sound, type F1Sound } from "@/components/f1/f1-sound";
@@ -357,7 +359,7 @@ export function F1Intro() {
   return (
     <div className="relative h-[calc(100svh-5rem)] w-full overflow-hidden">
       <div className="mx-auto max-w-6xl px-6 pt-10 md:pt-14">
-        <h1 className="heading-bleed-mobile select-none cursor-default text-center font-display text-[clamp(2.75rem,10.5vw,6.5rem)] font-extrabold uppercase leading-none tracking-tighter sm:text-[clamp(3rem,11.5vw,7rem)] md:max-w-full md:text-[min(8.2vw,6.75rem)] heading-ghost">
+        <h1 className={PAGE_TITLE_CLASSES}>
           F1
         </h1>
         <p className="mt-6 select-none text-center text-[1.375rem] leading-snug text-muted md:mt-8">

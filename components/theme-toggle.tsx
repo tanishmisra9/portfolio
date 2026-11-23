@@ -52,7 +52,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   const toggle = () => setTheme(isDark ? "light" : "dark");
 
   return (
-    <Tooltip label={label} align="end" className={className}>
+    <Tooltip label={isDark ? "Light mode" : "Dark mode"} align="end" className={className}>
       <button
         type="button"
         className="flex shrink-0 items-center justify-center rounded-md p-2 text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"

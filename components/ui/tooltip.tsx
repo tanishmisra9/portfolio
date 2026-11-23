@@ -1,41 +1,73 @@
 "use client";
 
-import { cloneElement, useId, useRef, useState, type ReactElement } from "react";
+import {
+  cloneElement,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactElement,
+} from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-// ponytail: magic numbers kept local, not worth a shared constants file for 3 numbers used once
-const SHOW_DELAY_MS = 200;
+// ponytail: magic numbers kept local, not worth a shared constants file for a few numbers used once
+const SHOW_DELAY_MS = 500;
 const TAP_AUTO_HIDE_MS = 1500;
+const GAP = 8;
+const MARGIN = 8;
 
 type Align = "start" | "center" | "end";
-type Side = "bottom" | "left";
 
-const ALIGN_CLASSES: Record<Align, string> = {
-  start: "left-0",
-  center: "left-1/2 -translate-x-1/2",
-  end: "right-0",
-};
+/**
+ * Where the bubble goes, in document coordinates: below the trigger, flipped above when there's no room
+ * below, clamped MARGIN px inside the viewport horizontally. Ported from Telogify's placeBubble.
+ */
+function place(
+  a: DOMRect,
+  b: DOMRect,
+  align: Align,
+): { left: number; top: number } {
+  const sx = window.scrollX;
+  const sy = window.scrollY;
+  const vw = document.documentElement.clientWidth;
+  const pref =
+    align === "start" ? a.left : align === "end" ? a.right - b.width : (a.left + a.right) / 2 - b.width / 2;
+  const min = MARGIN;
+  const max = vw - MARGIN - b.width;
+  const left = sx + (max < min ? min : Math.min(Math.max(pref, min), max));
+  const fitsBelow = a.bottom + GAP + b.height <= window.innerHeight - MARGIN;
+  const fitsAbove = a.top - GAP - b.height >= MARGIN;
+  const above = !fitsBelow && fitsAbove;
+  return { left, top: sy + (above ? a.top - GAP - b.height : a.bottom + GAP) };
+}
 
 export function Tooltip({
   label,
   children,
   align = "center",
-  side = "bottom",
   className,
 }: {
   label: string;
   children: ReactElement;
+  /** Preferred horizontal anchor (before the viewport clamp). */
   align?: Align;
-  /** "left" opens the bubble beside the trigger instead of below it — needed in tightly-packed lists where a below-anchored bubble would overlap the next row. */
-  side?: Side;
   /** Extra classes appended to the wrapper (always `relative inline-flex`). To position the wrapper itself absolutely, use `!absolute` (Tailwind's important-prefix) so it reliably overrides the default `relative`. */
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const id = useId();
   const reducedMotion = useReducedMotion();
   const showTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const autoHideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const wrapperRef = useRef<HTMLSpanElement>(null);
+  const bubbleRef = useRef<HTMLSpanElement>(null);
+
+  // The bubble lives in a portal on <body>, so it needs the document: render it only after mount.
+  useEffect(() => setMounted(true), []);
 
   const show = (delay: number) => {
     clearTimeout(showTimer.current);
@@ -53,6 +85,34 @@ export function Tooltip({
     autoHideTimer.current = setTimeout(() => setOpen(false), TAP_AUTO_HIDE_MS);
   };
 
+  // Measure trigger + bubble before paint so it never flashes in the wrong spot. On close the last
+  // position is kept so the exit fade plays where the bubble was.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const wrapper = wrapperRef.current;
+    const bubble = bubbleRef.current;
+    if (!wrapper || !bubble) return;
+    setPos(place(wrapper.getBoundingClientRect(), bubble.getBoundingClientRect(), align));
+  }, [open, label, align]);
+
+  // The portal is anchored to document coordinates, so a trigger in a sticky element (the header)
+  // would leave it behind on scroll: close instead.
+  useEffect(() => {
+    if (!open) return;
+    const sx = window.scrollX;
+    const sy = window.scrollY;
+    const onScroll = () => {
+      if (Math.abs(window.scrollX - sx) <= 2 && Math.abs(window.scrollY - sy) <= 2) return;
+      hide();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", hide);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", hide);
+    };
+  }, [open]);
+
   const trigger = open
     ? cloneElement(children as ReactElement<{ "aria-describedby"?: string }>, {
         "aria-describedby": id,
@@ -61,6 +121,7 @@ export function Tooltip({
 
   return (
     <span
+      ref={wrapperRef}
       className={`relative inline-flex${className ? ` ${className}` : ""}`}
       onMouseEnter={() => show(SHOW_DELAY_MS)}
       onMouseLeave={hide}
@@ -69,31 +130,31 @@ export function Tooltip({
       onClick={tap}
     >
       {trigger}
-      <AnimatePresence>
-        {open && (
-          <motion.span
-            role="tooltip"
-            id={id}
-            initial={
-              reducedMotion
-                ? { opacity: 0 }
-                : side === "left"
-                  ? { opacity: 0, x: 4 }
-                  : { opacity: 0, y: -4 }
-            }
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className={`pointer-events-none absolute z-[60] whitespace-nowrap rounded-full border border-border-strong bg-fg/[0.08] px-3.5 py-1.5 font-sans text-[0.6rem] uppercase tracking-[0.18em] text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl ${
-              side === "left"
-                ? "right-full top-1/2 mr-2 -translate-y-1/2"
-                : `top-full mt-2 ${ALIGN_CLASSES[align]}`
-            }`}
-          >
-            {label}
-          </motion.span>
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {open && (
+              <motion.span
+                ref={bubbleRef}
+                role="tooltip"
+                id={id}
+                initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.14 }}
+                style={{
+                  left: pos?.left ?? 0,
+                  top: pos?.top ?? 0,
+                  visibility: pos ? "visible" : "hidden",
+                }}
+                className="pointer-events-none absolute z-[10003] w-max max-w-[calc(100vw-1rem)] border-[1.5px] border-fg bg-bg px-2.5 py-1.5 font-sans text-[11px] font-medium tracking-wide text-fg shadow-[3px_3px_0_rgb(var(--fg-rgb)/0.25)]"
+              >
+                {label}
+              </motion.span>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </span>
   );
 }

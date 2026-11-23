@@ -4,7 +4,7 @@ import { useHomeIntroDone } from "@/components/home-intro-gate";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import {
   PILL_CLASSES,
-  SECTION_GHOST_HEADING_CLASSES,
+  SECTION_HEADING_CLASSES,
 } from "@/components/ui/class-constants";
 import { formatDateRange } from "@/lib/format-date-range";
 import type { ExperienceEntry } from "@/types/content";
@@ -25,9 +25,9 @@ export function ExperienceSection({ entries }: Props) {
           <h2
             id="experience-heading"
             tabIndex={0}
-            className={SECTION_GHOST_HEADING_CLASSES}
+            className={SECTION_HEADING_CLASSES}
           >
-            EXPERIENCE
+            Experience
           </h2>
         </ScrollReveal>
         <div className="mt-8 flex flex-col gap-10 md:gap-12">

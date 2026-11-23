@@ -3,6 +3,7 @@ import { Inter, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { SiteChrome } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
+import { getPublishedData } from "@/lib/site-content";
 import { getRadioSampleUrls } from "@/lib/radio-samples";
 import { getRadioTriggers } from "@/lib/radio-triggers";
 import { Analytics } from "@vercel/analytics/next";
@@ -41,6 +42,9 @@ export default async function RootLayout({
 }>) {
   const radioSamples = await getRadioSampleUrls();
   const radioTriggers = await getRadioTriggers();
+  // The footer's links come from the published snapshot. This layout also wraps /admin, where the first snapshot
+  // is created, so a missing snapshot must not throw here.
+  const social = await getPublishedData().then((d) => d.portfolio.social).catch(() => []);
 
   return (
     <html
@@ -61,13 +65,13 @@ export default async function RootLayout({
           <div id="top" tabIndex={-1} aria-hidden="true" />
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[10002] focus:rounded-full focus:border focus:border-border-strong focus:bg-bg focus:px-5 focus:py-3 focus:font-sans focus:text-xs focus:uppercase focus:tracking-[0.2em] focus:text-fg focus:outline-none focus:ring-2 focus:ring-fg/70"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[10002] focus:rounded-none focus:border focus:border-border-strong focus:bg-bg focus:px-5 focus:py-3 focus:font-sans focus:text-xs focus:uppercase focus:tracking-[0.2em] focus:text-fg focus:outline-none focus:ring-2 focus:ring-fg/70"
           >
             Skip to content
           </a>
           <SiteChrome radioSamples={radioSamples} radioTriggers={radioTriggers} />
           {children}
-          <SiteFooter />
+          <SiteFooter social={social} />
           </div>
         </ThemeProvider>
         <Analytics />
