@@ -72,7 +72,7 @@ const ENTER_KICK_PX = 5;
  * vertically, RUMBLE_PX at most, RUMBLE_HZ times a second, until the drive squat. Vertical only (an idling engine
  * shakes the chassis up and down; x jitter read as a glitch). Set RUMBLE_PX to 0 to drop it.
  */
-const RUMBLE_PX = 1.2;
+const RUMBLE_PX = 2.4; // 1.2 was "not noticeable enough"; keep it under DRIVE_SQUAT_PX so the pull-out still reads bigger
 const RUMBLE_HZ = 15; // 30 direction changes a second: ~2 frames each at 60fps, so it can't alias into a wobble
 const RUMBLE_PEAK_MS = 2820;
 /** velocity: 0 matters: set() doesn't reset a MotionValue's velocity, so without it the wobble inherits the slam's speed. */
