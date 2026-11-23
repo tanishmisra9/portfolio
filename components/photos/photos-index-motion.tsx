@@ -19,6 +19,7 @@ import {
   GLASS_BUTTON_SHEEN_CLASSES,
 } from "@/components/ui/class-constants";
 import { Tooltip } from "@/components/ui/tooltip";
+import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 import type { RandomPhotoCandidate } from "@/types/content";
 
@@ -225,24 +226,26 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
           variants={item}
           className="mt-6 flex flex-wrap items-center justify-center gap-4 md:mt-8"
         >
-          <p className="select-none text-[1.375rem] leading-snug text-muted">
-            #ShotOniPhone17Pro
-          </p>
           <Tooltip label="Instagram">
             <a
               href="https://www.instagram.com/tanishtakespics/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-none border border-border p-[0.6875rem] text-muted transition-colors hover:border-border-strong hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+              className={`${HOVER_FILL_LINK} inline-flex items-center justify-center border border-border p-[0.6875rem] text-muted transition-colors`}
               aria-label="Instagram"
             >
-              <Instagram
-                className="h-[1.375rem] w-[1.375rem]"
-                strokeWidth={1.75}
-                aria-hidden
-              />
+              <HoverFill>
+                <Instagram
+                  className="h-[1.375rem] w-[1.375rem]"
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+              </HoverFill>
             </a>
           </Tooltip>
+          <p className="select-none text-[1.375rem] leading-snug text-muted">
+            #ShotOniPhone17Pro
+          </p>
         </motion.div>
         <motion.div variants={item} className="mt-5 flex justify-center md:mt-6">
           <Tooltip label="Surprise me">
@@ -251,14 +254,11 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
               type="button"
               onClick={handleSurpriseMe}
               aria-label="Surprise me"
-              className={`${GLASS_BUTTON_CLASSES} !p-3`}
+              className={`${HOVER_FILL_LINK} inline-flex items-center justify-center border border-border p-[0.6875rem] text-muted transition-colors`}
             >
-              <span
-                aria-hidden
-                className={GLASS_BUTTON_SHEEN_CLASSES}
-                style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }}
-              />
-              <Shuffle className="relative size-[1.375rem]" strokeWidth={1.75} aria-hidden />
+              <HoverFill>
+                <Shuffle className="size-[1.375rem]" strokeWidth={1.75} aria-hidden />
+              </HoverFill>
             </button>
           </Tooltip>
         </motion.div>
