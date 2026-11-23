@@ -17,12 +17,11 @@ export const SECTION_HEADING_CLASSES = `${SECTION_HEADING_BASE} mb-8 md:mb-12`;
 
 /** Top-of-page titles (Photos, Blog, Quotes, F1): same solid style as the section headings, one step larger and centered. */
 export const PAGE_TITLE_CLASSES =
-  "select-none text-center font-display font-extrabold leading-none tracking-tighter text-fg text-[clamp(2.25rem,9vw,6rem)]";
+  "select-none text-center font-display font-extrabold leading-none tracking-tighter text-fg text-[clamp(1.75rem,9vw,6rem)]";
 
 /**
- * Admin-only: same type system as the public ghost headings (font-display, extrabold,
- * uppercase) but at working scale with a solid fill — the public site's outline-stroke
- * treatment is built for showcase content, not dense forms you're editing quickly.
+ * Admin-only: same type system as the public headings (font-display, extrabold) but at working
+ * scale and uppercase, for dense forms you're editing quickly.
  */
 export const ADMIN_SECTION_HEADING_CLASSES =
   "font-display text-2xl font-extrabold uppercase tracking-tight text-fg md:text-3xl";

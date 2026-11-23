@@ -75,6 +75,8 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
       <div className="mx-auto max-w-6xl">
       <div className="grid gap-y-10 md:grid-cols-[1fr_auto_1fr] md:items-start md:gap-x-8">
         <div>
+          {social.length > 0 && (
+            <>
           <p className="font-display text-2xl font-semibold text-fg md:text-3xl">Stay in touch</p>
           <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:text-lg">
             {[...social].sort((a, b) => rank(a) - rank(b)).map((link) => (
@@ -83,6 +85,8 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
               </li>
             ))}
           </ul>
+            </>
+          )}
         </div>
 
         <div className="md:justify-self-center">

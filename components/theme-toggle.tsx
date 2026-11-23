@@ -9,6 +9,14 @@ import { Tooltip } from "@/components/ui/tooltip";
 /** Must outlast the 300ms `html.theme-fade` transition in globals.css. */
 const THEME_FADE_MS = 350;
 
+/** Icon swap without overlap: the outgoing icon fades out first, then the incoming one fades in. A plain
+ *  crossfade shows sun and moon superimposed at 50% midway, which reads as a glitch. */
+const swap = (incoming: boolean) => ({
+  duration: 0.1,
+  ease: "easeOut" as const,
+  delay: incoming ? 0.1 : 0,
+});
+
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -67,7 +75,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
             className="flex items-center justify-center"
             initial={false}
             animate={{ opacity: isDark ? 0 : 1 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={swap(!isDark)}
           >
             <Moon className="h-5 w-5" />
           </motion.span>
@@ -77,7 +85,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
             className="flex items-center justify-center"
             initial={false}
             animate={{ opacity: isDark ? 1 : 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={swap(isDark)}
           >
             <Sun className="h-5 w-5" />
           </motion.span>

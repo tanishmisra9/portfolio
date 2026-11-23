@@ -69,6 +69,14 @@ export function Tooltip({
   // The bubble lives in a portal on <body>, so it needs the document: render it only after mount.
   useEffect(() => setMounted(true), []);
 
+  useEffect(
+    () => () => {
+      clearTimeout(showTimer.current);
+      clearTimeout(autoHideTimer.current);
+    },
+    [],
+  );
+
   const show = (delay: number) => {
     clearTimeout(showTimer.current);
     showTimer.current = setTimeout(() => setOpen(true), delay);

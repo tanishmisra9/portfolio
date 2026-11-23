@@ -44,7 +44,10 @@ export default async function RootLayout({
   const radioTriggers = await getRadioTriggers();
   // The footer's links come from the published snapshot. This layout also wraps /admin, where the first snapshot
   // is created, so a missing snapshot must not throw here.
-  const social = await getPublishedData().then((d) => d.portfolio.social).catch(() => []);
+  const social = await getPublishedData().then((d) => d.portfolio.social).catch((e) => {
+    console.error("[layout] footer social links unavailable:", e);
+    return [];
+  });
 
   return (
     <html
