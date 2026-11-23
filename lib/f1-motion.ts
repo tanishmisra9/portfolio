@@ -13,6 +13,21 @@ export const F1_LOAD_GRACE = 5000;
 export const F1_CAR_EMERGE = 700;
 export const F1_CAR_RUN = 1500;
 
+/**
+ * Tire-squeal ink strokes behind the car (random per run, drawn before the car). Sizes are in 1920x1080 scene px.
+ * They fade out between these car-sprite indices: from sprite ~20 the camera rises over the car and the tires leave
+ * the frame, so a fixed tire anchor stops being true.
+ */
+export const F1_SQUEAL_PER_TIRE: [number, number] = [4, 7];
+export const F1_SQUEAL_LEN: [number, number] = [380, 900]; // full length
+export const F1_SQUEAL_WIDTH: [number, number] = [5, 15]; // root half-width
+export const F1_SQUEAL_DROP: [number, number] = [0.04, 0.5]; // angle below horizontal, radians
+export const F1_SQUEAL_FADE: [number, number] = [18, 20];
+export const F1_SQUEAL_ALPHA = 0.9;
+/** Tire anchor inside the car sprite rect (fractions); the root sits under the tire so it's hidden by it. */
+export const F1_SQUEAL_ANCHOR_X = 0.22;
+export const F1_SQUEAL_ANCHOR_Y = 0.45;
+
 /** Clip 72..152 as one continuous take. Source is 50fps; RATE < 1 slows it for weight. */
 export const F1_HANDOVER = 160;
 export const F1_FOOTAGE_RATE = 0.6;

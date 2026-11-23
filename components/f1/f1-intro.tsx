@@ -18,6 +18,14 @@ import {
   F1_PAN_END_RATE,
   F1_SFX_GROWL_LEAD,
   F1_SFX_ROAR_PEAK_AT,
+  F1_SQUEAL_ALPHA,
+  F1_SQUEAL_ANCHOR_X,
+  F1_SQUEAL_ANCHOR_Y,
+  F1_SQUEAL_DROP,
+  F1_SQUEAL_FADE,
+  F1_SQUEAL_LEN,
+  F1_SQUEAL_PER_TIRE,
+  F1_SQUEAL_WIDTH,
   F1_LOAD_GRACE,
   F1_ZOOM,
 } from "@/lib/f1-motion";
@@ -49,6 +57,7 @@ const GHOSTS: [number, number][] = [
   [9, 0.09],
   [12, 0.05],
 ];
+const rand = ([a, b]: [number, number]) => a + Math.random() * (b - a);
 const pad = (i: number) => String(i + 1).padStart(2, "0");
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
 const easeOut = (p: number) => 1 - Math.pow(1 - p, 3);
@@ -207,6 +216,59 @@ export function F1Intro() {
       ctx.restore();
     };
 
+    // tire-squeal ink: a fresh random set every run (side -1 = left tire, 1 = right), drawn behind the car as flat tapered
+    // strokes like the clip's own ink lines. Re-rolled a little whenever the car's drawing changes, so they boil with it.
+    const ink = getComputedStyle(document.documentElement).getPropertyValue("--fg").trim() || "#000";
+    const streaks = [-1, 1].flatMap((side) =>
+      Array.from({ length: Math.round(rand(F1_SQUEAL_PER_TIRE)) }, () => ({
+        side,
+        drop: rand(F1_SQUEAL_DROP),
+        len: rand(F1_SQUEAL_LEN),
+        w: rand(F1_SQUEAL_WIDTH),
+        jd: 0,
+        jl: 1,
+      })),
+    );
+    let squealF = -1;
+    const drawSqueal = (p: Pose, alpha: number, k: number) => {
+      const fade = 1 - clamp01((p.f - F1_SQUEAL_FADE[0]) / (F1_SQUEAL_FADE[1] - F1_SQUEAL_FADE[0]));
+      const a = alpha * p.a * fade * F1_SQUEAL_ALPHA;
+      if (a <= 0) return;
+      const f = Math.round(p.f);
+      const fr = assets.current.car!.m.frames[f];
+      if (f !== squealF) {
+        squealF = f;
+        for (const s of streaks) {
+          s.jd = (Math.random() - 0.5) * 0.08;
+          s.jl = 0.85 + Math.random() * 0.3;
+        }
+      }
+      const grow = p.f / (assets.current.car!.m.frames.length - 1);
+      const m = k * p.sc;
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.fillStyle = ink;
+      ctx.translate(cw / 2, ch / 2);
+      ctx.scale(m, m);
+      for (const s of streaks) {
+        const x0 = fr.x - 960 + (s.side < 0 ? F1_SQUEAL_ANCHOR_X : 1 - F1_SQUEAL_ANCHOR_X) * fr.w;
+        const y0 = fr.y - 540 + F1_SQUEAL_ANCHOR_Y * fr.h;
+        const ang = s.drop + s.jd;
+        const L = s.len * s.jl * grow;
+        const tx = x0 + s.side * Math.cos(ang) * L;
+        const ty = y0 + Math.sin(ang) * L;
+        // perpendicular to the stroke: root is thick, tip is a point
+        const nx = -Math.sin(ang) * s.w, ny = s.side * Math.cos(ang) * s.w;
+        ctx.beginPath();
+        ctx.moveTo(x0 + nx, y0 + ny);
+        ctx.lineTo(tx, ty);
+        ctx.lineTo(x0 - nx, y0 - ny);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    };
+
     // latest kept footage frame at or before a source frame number (held drawings were dropped in the build)
     const footageIndex = (srcN: number) => {
       const kept = assets.current.footage!.m.frames;
@@ -322,6 +384,7 @@ export function F1Intro() {
         if (carAlpha > 0) {
           const e = easeOut(clamp01(u / F1_CAR_EMERGE));
           const pose: Pose = { f: last * Math.pow(clamp01(u / F1_CAR_RUN), 1.8), sc: 0.86 + 0.14 * e, a: e };
+          drawSqueal(pose, carAlpha, k); // behind the car and its ghosts
           for (const [lag, ga] of GHOSTS) {
             const g = history[history.length - lag];
             if (g) drawCar(g, ga * carAlpha, k);
