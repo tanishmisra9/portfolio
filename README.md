@@ -238,7 +238,7 @@ Clips are uploaded to Vercel Blob and go live on Publish (read from the publishe
 
 ## Key UX and accessibility
 
-- **Hero** — Click or activate the name for a scatter/reassemble animation; desktop pointer “magnet” on letters
+- **Hero** — Click or activate the name for a pit stop: the name splits into four "tires" (TAN / ISH / MIS / RA) that fly off and bolt back on to one baked sound, then it drives off the right edge and re-enters from the left (`components/hero/PITSTOP.md`); desktop pointer “magnet” on letters
 - **Home intro** — Sections reveal after the hero tagline animation (`HomeIntroGateProvider`)
 - **Scrolling** — Native browser scrolling; sections reveal on scroll via `ScrollReveal`
 - **Headings** — Section titles are solid, Title-case Inter extra-bold (`SECTION_HEADING_CLASSES`); page titles use `PAGE_TITLE_CLASSES`, clamped so long titles don't overflow the viewport

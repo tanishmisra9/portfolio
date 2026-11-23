@@ -25,7 +25,7 @@ function backToTop() {
   window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
 }
 
-function CopyEmail({ email, href }: { email: string; href: string }) {
+function CopyEmail({ email, label, href }: { email: string; label: string; href: string }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -40,7 +40,7 @@ function CopyEmail({ email, href }: { email: string; href: string }) {
   return (
     <Tooltip label={copied ? "Copied!" : "Copy email"}>
       <button type="button" onClick={copy} {...noMouseFocus} className={linkClass}>
-        <HoverFill>{email}</HoverFill>
+        <HoverFill>{label}</HoverFill>
       </button>
     </Tooltip>
   );
@@ -48,7 +48,9 @@ function CopyEmail({ email, href }: { email: string; href: string }) {
 
 function SocialItem({ link }: { link: SocialLink }) {
   if (link.href.startsWith("mailto:")) {
-    return <CopyEmail email={link.display || link.href.slice(7).split("?")[0]} href={link.href} />;
+    // Always copy the real address from the mailto: href; `display` is free text (e.g. "Email me") and only the label.
+    const email = link.href.slice("mailto:".length).split("?")[0];
+    return <CopyEmail email={email} label={link.display || email} href={link.href} />;
   }
   const resumeFilename =
     link.label === "Resume" ? link.href.split("?")[0].split("/").pop() : undefined;

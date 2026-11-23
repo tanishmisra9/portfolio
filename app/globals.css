@@ -9,8 +9,9 @@
   font-weight: 400;
   font-style: normal;
   font-display: swap;
-  /* Everything except Latin punctuation: YD Gothic's . , : ; ! ? - – — ' " ( ) / … are heavy, wide blocks next to its light
-     letters. Those characters fall through to Inter (next in the font-sans stack) instead. */
+  /* Everything except Latin punctuation: YD Gothic's ! " ' ( ) , - . / : ; ? [ \ ] – — ‘ ’ “ ” … are heavy, wide blocks
+     next to its light letters. Those characters fall through to Inter Tight (var(--font-inter-punct), next in the
+     font-sans stack). It must be Inter Tight, not a second Inter: see "Typography" in CLAUDE.md. */
   unicode-range: U+0000-0020, U+0023-0026, U+002A-002B, U+0030-0039, U+003C-003E, U+0040-005A, U+005E-007E,
     U+00A0-2012, U+2015-2017, U+201E-2025, U+2027-10FFFF;
 }
@@ -21,8 +22,9 @@
   font-weight: 700;
   font-style: normal;
   font-display: swap;
-  /* Everything except Latin punctuation: YD Gothic's . , : ; ! ? - – — ' " ( ) / … are heavy, wide blocks next to its light
-     letters. Those characters fall through to Inter (next in the font-sans stack) instead. */
+  /* Everything except Latin punctuation: YD Gothic's ! " ' ( ) , - . / : ; ? [ \ ] – — ‘ ’ “ ” … are heavy, wide blocks
+     next to its light letters. Those characters fall through to Inter Tight (var(--font-inter-punct), next in the
+     font-sans stack). It must be Inter Tight, not a second Inter: see "Typography" in CLAUDE.md. */
   unicode-range: U+0000-0020, U+0023-0026, U+002A-002B, U+0030-0039, U+003C-003E, U+0040-005A, U+005E-007E,
     U+00A0-2012, U+2015-2017, U+201E-2025, U+2027-10FFFF;
 }

@@ -24,6 +24,9 @@ const interPunct = Inter_Tight({
   weight: "400",
   variable: "--font-inter-punct",
   display: "swap",
+  // No generated "Inter Tight Fallback" (size-adjusted local Arial, no unicode-range): inside --font-inter-punct it would
+  // catch every character Inter Tight lacks before var(--font-inter) got the chance.
+  adjustFontFallback: false,
 });
 
 const spaceMono = Space_Mono({

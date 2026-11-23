@@ -25,7 +25,7 @@ import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
  */
 /** Each tire pops off (starts flying out), one after another; each gets a whoosh 8 in the clip. */
 export const LAUNCH_MS = [40, 200, 360, 520] as const;
-/** Each tire starts snapping back, in TIRES order: they land (~120ms later) at 0.96/1.14/1.32/1.50s, inside the gun burst. */
+/** Each tire starts snapping back, in TIRES order: they land SNAP_S (160ms) later at 1.00/1.18/1.36/1.54s, inside the gun burst. */
 export const BOLT_MS = [840, 1020, 1200, 1380] as const;
 /** The whole name starts sliding off (slowly, then accelerating); it is fastest right around the engine rev peak. */
 export const DRIVE_MS = 3350;
@@ -129,10 +129,9 @@ export function usePitstop(reduceMotion: boolean | null) {
         audio.pause();
         audio.currentTime = 0;
       }
-      if (reduceMotion) {
-        void audio?.play().catch(() => {});
-        return;
-      }
+      // Reduced motion: no pit stop at all. The 5s clip (whooshes, wheel guns, engine) with nothing moving read as
+      // unexplained noise, and every click restarted it.
+      if (reduceMotion) return;
 
       const go = (to: HeroPhase) => {
         phaseRef.current = move(HERO_PHASE, phaseRef.current, to);
@@ -164,7 +163,9 @@ export function usePitstop(reduceMotion: boolean | null) {
       let anchor = performance.now();
       const started = new Promise<void>((resolve) => {
         if (!audio) return resolve();
+        let playing = false;
         const onPlaying = () => {
+          playing = true;
           anchor = performance.now();
           resolve();
         };
@@ -174,7 +175,11 @@ export function usePitstop(reduceMotion: boolean | null) {
           resolve();
         });
         setTimeout(() => {
+          if (playing) return;
+          // Too slow to start (cold cache, slow network): run silently from the click. Pause it too, or it would still
+          // start late and play ~a second out of sync with every snap.
           audio.removeEventListener("playing", onPlaying);
+          audio.pause();
           resolve();
         }, SOUND_START_CAP_MS);
       });

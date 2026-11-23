@@ -105,20 +105,32 @@ async function loadImage(src: string) {
 /** Replay = a fresh mount (new key): the sound object is single-use, and this also re-rolls the hold and the squeal strokes. */
 export function F1Intro() {
   const [run, setRun] = useState(0);
+  const [refocus, setRefocus] = useState(false);
   return (
     <F1IntroRun
       key={run}
-      onReplay={() => {
+      refocus={refocus}
+      onReplay={(byKeyboard) => {
         window.scrollTo(0, 0);
+        setRefocus(byKeyboard);
         setRun((n) => n + 1);
       }}
     />
   );
 }
 
-function F1IntroRun({ onReplay }: { onReplay: () => void }) {
+/**
+ * refocus: the previous run was replayed from the keyboard. The remount destroyed that focused button and the new one
+ * is inert until the intro ends, so focus fell to <body>; hand it back to Replay once this run is done.
+ */
+function F1IntroRun({ onReplay, refocus }: { onReplay: (byKeyboard: boolean) => void; refocus: boolean }) {
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<"run" | "done">("run");
+  const replayWrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (phase === "done" && refocus) replayWrapRef.current?.querySelector("button")?.focus();
+  }, [phase, refocus]);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const curtainRef = useRef<HTMLDivElement>(null);
@@ -255,7 +267,8 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
     // re-rolls the jagged edges / hairline lengths, so it boils like hand animation instead of gliding. One flat ink
     // colour (--fg: white masses on the dark stage like the clip's white wind shapes, black on the light stage like its
     // road streaks). Every count, size, angle, delay and edge is random per mount (reload or Replay).
-    const ink = getComputedStyle(document.documentElement).getPropertyValue("--fg").trim() || "#000";
+    // read every frame (only during the ~1.5s rush), so switching theme mid-intro recolours the ink with the stage
+    const ink = () => getComputedStyle(document.documentElement).getPropertyValue("--fg").trim() || "#000";
     const hash = (n: number) => {
       const x = Math.sin(n * 12.9898) * 43758.5453;
       return x - Math.floor(x);
@@ -321,7 +334,7 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
       };
       ctx.save();
       ctx.globalAlpha = alpha; // < 1 only during the footage handover; flat ink otherwise
-      ctx.fillStyle = ink;
+      ctx.fillStyle = ink();
 
       // vertical speed lines (the clip's long thin lines streaking past): screen-space needles in the side bands, each
       // shooting up or down past the stage, moving on 2s
@@ -571,11 +584,11 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
         </p>
         {/* always in the page (under the stage) so the exit tilt reveals it with the heading; inert until the intro ends */}
         {!reduce && (
-          <div className="mt-6 flex justify-center" inert={phase === "run"}>
+          <div ref={replayWrapRef} className="mt-6 flex justify-center" inert={phase === "run"}>
             <Tooltip label="Replay">
               <button
                 type="button"
-                onClick={onReplay}
+                onClick={(e) => onReplay(e.detail === 0)} // detail 0 = keyboard (Enter/Space) activation
                 onMouseDown={(e) => e.preventDefault()}
                 aria-label="Replay the intro"
                 className="-m-3 flex items-center justify-center p-3 text-muted transition-colors hover:bg-fg/10 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 active:bg-fg/20"
