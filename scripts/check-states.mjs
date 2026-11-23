@@ -26,7 +26,7 @@ console.warn = () => {};
 
 const MACHINES = {
   ANIM_PHASE: { edges: ANIM_PHASE, allowed: ["idle>wipe", "wipe>flyout", "flyout>flyin", "flyin>settle", "settle>idle"], terminal: [] },
-  HERO_PHASE: { edges: HERO_PHASE, allowed: ["idle>launch", "launch>bolt", "bolt>drive", "drive>fadein", "fadein>idle"], terminal: [] },
+  HERO_PHASE: { edges: HERO_PHASE, allowed: ["idle>launch", "launch>bolt", "bolt>drive", "drive>enter", "enter>idle"], terminal: [] },
   NYC_PHASE: { edges: NYC_PHASE, allowed: ["idle>swap", "swap>hold"], terminal: ["hold"] },
   UPLOAD_STATUS: { edges: UPLOAD_STATUS, allowed: ["idle>uploading", "uploading>saving", "uploading>idle", "saving>idle"], terminal: [] },
   AI_STATUS: { edges: AI_STATUS, allowed: ["generating>ready", "generating>failed"], terminal: ["ready", "failed"] },

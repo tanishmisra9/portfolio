@@ -36,8 +36,8 @@ export const HERO_PHASE = {
   idle: ["launch"],
   launch: ["bolt"],
   bolt: ["drive"],
-  drive: ["fadein"],
-  fadein: ["idle"],
+  drive: ["enter"],
+  enter: ["idle"],
 } as const satisfies Edges<string>;
 export type HeroPhase = keyof typeof HERO_PHASE;
 

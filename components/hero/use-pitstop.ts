@@ -32,10 +32,9 @@ const SOUND_LATENCY_MS = 200;
 const PITSTOP_VOLUME = 0.45;
 const LAUNCH_S = 0.2;
 const DRIVE_S = 0.25;
-/** Name is gone for this long after the slide before it fades back in. */
-const FADE_PAUSE_MS = 600;
-const FADE_IN_S = 1.1;
-const FADE_BLUR_PX = 8;
+/** Name is off-screen this long after the slide, then re-enters from the left (like the page wraps around). */
+const ENTER_PAUSE_MS = 350;
+const ENTER_S = 0.3;
 /** If the sound hasn't started this long after the click, run the timeline from the click instead. */
 const SOUND_START_CAP_MS = 500;
 
@@ -64,10 +63,8 @@ export function usePitstop(reduceMotion: boolean | null) {
         bl: { x: motionValue(0), y: motionValue(0) },
         br: { x: motionValue(0), y: motionValue(0) },
       } satisfies Record<(typeof TIRES)[number]["key"], TireMv>,
-      /** Whole-name wrapper: slide off (x), then blur-fade back in. */
+      /** Whole-name wrapper: slides off right, then re-enters from the left. */
       driveX: motionValue(0),
-      fade: motionValue(1),
-      blur: motionValue(0),
     }),
     [],
   );
@@ -172,17 +169,13 @@ export function usePitstop(reduceMotion: boolean | null) {
       await tween(mv.driveX, window.innerWidth, { duration: DRIVE_S, ease: "easeIn" });
       if (!aliveRef.current) return;
 
-      await wait(FADE_PAUSE_MS);
+      await wait(ENTER_PAUSE_MS);
       if (!aliveRef.current) return;
 
-      go("fadein");
-      mv.driveX.set(0);
-      mv.fade.set(0);
-      mv.blur.set(FADE_BLUR_PX);
-      await Promise.all([
-        tween(mv.fade, 1, { duration: FADE_IN_S, ease: "easeOut" }),
-        tween(mv.blur, 0, { duration: FADE_IN_S, ease: "easeOut" }),
-      ]);
+      // Same slide as the exit, mirrored: jump to just past the left edge, then ease in to rest.
+      go("enter");
+      mv.driveX.set(-window.innerWidth * 1.15);
+      await tween(mv.driveX, 0, { duration: ENTER_S, ease: "easeOut" });
       if (!aliveRef.current) return;
       go("idle");
     },

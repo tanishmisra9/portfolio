@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, useReducedMotion, useTransform } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useHomeIntroMarkDone } from "@/components/home-intro-gate";
 import {
   HERO_TAGLINE_ENTER_DELAY_S,
@@ -25,7 +25,6 @@ export function Hero({ subtitle }: HeroProps) {
   const [topLine = "", bottomLine = ""] = subtitle.split("\n");
   /** The pit stop (4 tires, one sound, drive off). Its effect has stable deps: a re-run mid-stop would strand the phase. */
   const { mv, run, isIdle } = usePitstop(reduceHeroMotion);
-  const nameFilter = useTransform(mv.blur, (b) => (b > 0.05 ? `blur(${b}px)` : "none"));
   const isDesktopRef = useRef(false);
 
   const tanishMagnetRef = useRef<
@@ -104,8 +103,8 @@ export function Hero({ subtitle }: HeroProps) {
           <HeroNameMotion>
             <>
               <h1 className="sr-only">TANISH MISRA</h1>
-              {/* Drive-off wrapper: slides off, then blur-fades back in (the only blur in the pit stop). */}
-              <motion.div style={{ x: mv.driveX, opacity: mv.fade, filter: nameFilter }}>
+              {/* Drive-off wrapper: slides off right, then re-enters from the left. */}
+              <motion.div style={{ x: mv.driveX }}>
               <div
                 role="button"
                 tabIndex={0}
