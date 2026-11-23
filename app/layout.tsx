@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Mono } from "next/font/google";
+import { Inter, Inter_Tight, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { SiteChrome } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
@@ -13,6 +13,16 @@ import "./globals.css";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+// Static-weight face used only for the punctuation YD Gothic is excluded from (see the @font-face unicode-range in
+// globals.css). The body is font-weight 120, which variable Inter renders ultra-thin (near-invisible periods). It must be
+// a different family from Inter: next/font names both "Inter", so the variable face would still win the weight match.
+const interPunct = Inter_Tight({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-inter-punct",
   display: "swap",
 });
 
@@ -52,7 +62,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${spaceMono.variable}`}
+      className={`${inter.variable} ${interPunct.variable} ${spaceMono.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-bg text-fg text-base font-sans font-[120] antialiased md:text-lg">

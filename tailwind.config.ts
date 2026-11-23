@@ -23,6 +23,7 @@ const config: Config = {
       fontFamily: {
         sans: [
           '"YD Gothic"',
+          "var(--font-inter-punct)",
           "var(--font-inter)",
           "system-ui",
           "sans-serif",
