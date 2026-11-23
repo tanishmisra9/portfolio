@@ -8,7 +8,6 @@ import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { SocialLink } from "@/types/content";
 
-const LOCATION = "Plano, Texas";
 const SOCIAL_ORDER = ["LinkedIn", "GitHub", "Resume", "Email"];
 
 const linkClass = `${HOVER_FILL_LINK} inline-block px-3 py-1.5`;
@@ -104,8 +103,7 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
         </div>
 
         <div className="md:text-right">
-          <p className="font-display text-2xl font-semibold text-fg md:text-3xl">{LOCATION}</p>
-          <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:justify-end md:text-lg">
+          <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:mt-12 md:justify-end md:text-lg">
             <li>
               <Link href="/legal" {...noMouseFocus} className={linkClass}>
                 <HoverFill>Legal Notice</HoverFill>
