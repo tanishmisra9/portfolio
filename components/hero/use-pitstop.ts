@@ -12,7 +12,7 @@ import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
 
 /*
  * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (5.79s) is, baked into one file
- * so it starts inside the click gesture: a "whoosh 8" per tire at LAUNCH_MS + 60 (0.1/0.26/0.42/0.58s) as the chunks
+ * so it starts inside the click gesture: a "whoosh 8" per tire at LAUNCH_MS - 40 (0/0.16/0.32/0.48s; +60 felt late) as the chunks
  * split, then ONE CONTINUOUS stretch of the original Short (no cuts, one filter chain, so there are no seams to hear):
  * the wheel-gun burst 0.92-1.57s as the tires rejoin (one continuous burst, not 4 hits), natural pit-lane ambience,
  * the car's engine growl 2.23-3.37s, the drive-off from ~3.7s (engine rev peaks ~4.30s), and a "whoosh 9" that starts
