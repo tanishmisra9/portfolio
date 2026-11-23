@@ -22,6 +22,13 @@ export const BOLT_MS = [880, 1030, 1180, 1330] as const;
 /** The whole name starts sliding off; its easeIn is fastest right as the engine rev peaks. */
 export const DRIVE_MS = 2700;
 
+/**
+ * Every visual is delayed by this much after the audio's `playing` event: that event fires before the sound reaches the
+ * speakers (output + mp3 start-up latency, more over Bluetooth), so without it the picture runs early. Override per
+ * device with ?pitstopOffset=<ms> in the URL to find the right value.
+ */
+const SOUND_LATENCY_MS = 200;
+
 const PITSTOP_VOLUME = 0.45;
 const LAUNCH_S = 0.2;
 const DRIVE_S = 0.25;
@@ -112,8 +119,11 @@ export function usePitstop(reduceMotion: boolean | null) {
       go("launch");
       resetMagnets();
 
+      const override = Number(new URLSearchParams(window.location.search).get("pitstopOffset"));
+      const latency = Number.isFinite(override) && override > 0 ? override : SOUND_LATENCY_MS;
+
       const flights = TIRES.map(async ({ key, dx, dy }, i) => {
-        await wait(LAUNCH_MS[i]);
+        await wait(LAUNCH_MS[i] + latency);
         if (!aliveRef.current) return;
         await Promise.all([
           tween(mv.tires[key].x, dx * LAUNCH_X, { duration: LAUNCH_S, ease: "easeIn" }),
@@ -144,7 +154,7 @@ export function usePitstop(reduceMotion: boolean | null) {
       await Promise.all([...flights, started]);
       if (!aliveRef.current) return;
 
-      const at = (ms: number) => wait(Math.max(0, anchor + ms - performance.now()));
+      const at = (ms: number) => wait(Math.max(0, anchor + ms + latency - performance.now()));
 
       go("bolt");
       const snaps: ReturnType<typeof tween>[] = [];
