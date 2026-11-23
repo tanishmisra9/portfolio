@@ -1,7 +1,6 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -44,14 +43,6 @@ function dipTo(next: string, setTheme: (t: string) => void, done: () => void) {
   }, DIP_IN_MS + 50);
 }
 
-/** Icon swap without overlap: the outgoing icon fades out first, then the incoming one fades in. A plain
- *  crossfade shows sun and moon superimposed at 50% midway, which reads as a glitch. */
-const swap = (incoming: boolean) => ({
-  duration: 0.1,
-  ease: "easeOut" as const,
-  delay: incoming ? 0.1 : 0,
-});
-
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -76,28 +67,11 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         aria-label={label}
         onClick={toggle}
       >
-        <span className="relative grid h-6 w-6 shrink-0 -translate-y-px place-items-center">
-          {/* Icon shows the action a click performs, not the current theme: moon (go dark) while light, sun (go light) while dark. */}
-          <motion.span
-            aria-hidden
-            style={{ gridArea: "1 / 1" }}
-            className="flex items-center justify-center"
-            initial={false}
-            animate={{ opacity: isDark ? 0 : 1 }}
-            transition={swap(!isDark)}
-          >
-            <Moon className="h-5 w-5" />
-          </motion.span>
-          <motion.span
-            aria-hidden
-            style={{ gridArea: "1 / 1" }}
-            className="flex items-center justify-center"
-            initial={false}
-            animate={{ opacity: isDark ? 1 : 0 }}
-            transition={swap(isDark)}
-          >
-            <Sun className="h-5 w-5" />
-          </motion.span>
+        {/* Icon shows the action a click performs, not the current theme: moon (go dark) while light, sun (go light) while dark.
+            It swaps instantly: the dip cover hides the change, and animating it only made it visible mid-swap. Rendered
+            only after mount so a light-theme visitor never sees a flash of the wrong icon. */}
+        <span className="grid h-6 w-6 shrink-0 -translate-y-px place-items-center">
+          {mounted ? isDark ? <Sun className="h-5 w-5" aria-hidden /> : <Moon className="h-5 w-5" aria-hidden /> : null}
         </span>
       </button>
     </Tooltip>
