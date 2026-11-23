@@ -10,8 +10,8 @@ import type { SocialLink } from "@/types/content";
 
 const SOCIAL_ORDER = ["LinkedIn", "GitHub", "Resume", "Email"];
 const SOCIAL_TIPS: Record<string, string> = {
-  LinkedIn: "My LinkedIn",
-  GitHub: "My code",
+  LinkedIn: "Connect on LinkedIn",
+  GitHub: "My projects on GitHub",
   Resume: "Download PDF",
 };
 
