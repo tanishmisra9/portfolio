@@ -14,25 +14,33 @@ export const F1_CAR_EMERGE = 700;
 export const F1_CAR_RUN = 1500;
 
 /**
- * Tire-squeal ink strokes behind the car (random per run, drawn before the car). Sizes are in 1920x1080 scene px.
- * They fade out between these car-sprite indices: from sprite ~20 the camera rises over the car and the tires leave
- * the frame, so a fixed tire anchor stops being true.
+ * Launch smoke + squeal streaks at each front tire's contact patch (drawn behind the car, random per mount).
+ * Sizes in 1920x1080 scene px; speeds in scene px/s. Streaks and new smoke stop between these car-sprite indices:
+ * from sprite ~20 the camera rises over the car and the tires leave the frame, so the contact point stops being true.
+ * Don't go back to long screen-wide rays from a vanishing point: they read as a zoom-burst video transition.
  */
-export const F1_SQUEAL_PER_TIRE: [number, number] = [26, 38];
-export const F1_SQUEAL_LEN: [number, number] = [160, 1400]; // full length
-export const F1_SQUEAL_WIDTH: [number, number] = [0.8, 4.5]; // half-width at the widest point
-export const F1_SQUEAL_ALPHA: [number, number] = [0.35, 1]; // per-stroke opacity
-export const F1_SQUEAL_SPEED: [number, number] = [0.55, 1.4]; // per-stroke growth rate, so they don't extend in lockstep
-export const F1_SQUEAL_SPREAD = 0.3; // anchor height scatter, fraction of the car rect
-export const F1_SQUEAL_SPREAD_X = 0.05; // anchor sideways scatter
-/** Strokes run along rays from a vanishing point at this height of the car rect (0 = top); below the tires, so they fan up and out. */
-export const F1_SQUEAL_VP_Y = 0.8;
-export const F1_SQUEAL_AIM_SCATTER = 0.12; // radians off the ray
-export const F1_SQUEAL_BEND = 0.04; // sideways bow, fraction of length
-export const F1_SQUEAL_FADE: [number, number] = [19, 22];
-/** Tire anchor inside the car sprite rect (fractions); the root sits under the tire so it's hidden by it. */
-export const F1_SQUEAL_ANCHOR_X = 0.22;
-export const F1_SQUEAL_ANCHOR_Y = 0.45;
+export const F1_SQUEAL_FADE: [number, number] = [18, 20];
+/** Contact point inside the car sprite rect (fractions): the outer bottom of each front tire, just above the wing. */
+export const F1_SQUEAL_CONTACT_X = 0.1;
+export const F1_SQUEAL_CONTACT_Y = 0.6;
+export const F1_SQUEAL_PER_TIRE: [number, number] = [2, 4];
+export const F1_SQUEAL_LEN: [number, number] = [70, 220];
+export const F1_SQUEAL_WIDTH: [number, number] = [1.5, 4]; // root half-width
+export const F1_SQUEAL_SPREAD_Y = 14;
+/** Smoke. Puffs per side are scaled by that side's intensity (uneven launches). */
+export const F1_SMOKE_PUFFS: [number, number] = [14, 24];
+export const F1_SMOKE_INTENSITY: [number, number] = [0.5, 1];
+export const F1_SMOKE_EMIT = 900; // ms after lights-out during which puffs are born
+export const F1_SMOKE_LIFE: [number, number] = [700, 1500]; // ms
+export const F1_SMOKE_RADIUS: [number, number] = [28, 70];
+export const F1_SMOKE_GROW = 1.6; // radius grows by this x per second of age
+export const F1_SMOKE_OUT: [number, number] = [80, 260]; // sideways, away from the car
+export const F1_SMOKE_RISE: [number, number] = [40, 170];
+export const F1_SMOKE_EASE = 0.7; // s: travel slows like real smoke (time constant)
+export const F1_SMOKE_LINE: [number, number] = [1.6, 3.2]; // outline width
+/** One wind per mount pushes the whole plume: left/right, and a little up or down. */
+export const F1_SMOKE_WIND_X: [number, number] = [-140, 140];
+export const F1_SMOKE_WIND_Y: [number, number] = [-60, 15];
 
 /** Clip 72..152 as one continuous take. Source is 50fps; RATE < 1 slows it for weight. */
 export const F1_HANDOVER = 160;

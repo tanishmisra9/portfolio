@@ -20,18 +20,24 @@ import {
   F1_PAN_END_RATE,
   F1_SFX_GROWL_LEAD,
   F1_SFX_ROAR_PEAK_AT,
-  F1_SQUEAL_ALPHA,
-  F1_SQUEAL_ANCHOR_X,
-  F1_SQUEAL_ANCHOR_Y,
-  F1_SQUEAL_AIM_SCATTER,
-  F1_SQUEAL_BEND,
+  F1_SMOKE_EASE,
+  F1_SMOKE_EMIT,
+  F1_SMOKE_GROW,
+  F1_SMOKE_INTENSITY,
+  F1_SMOKE_LIFE,
+  F1_SMOKE_LINE,
+  F1_SMOKE_OUT,
+  F1_SMOKE_PUFFS,
+  F1_SMOKE_RADIUS,
+  F1_SMOKE_RISE,
+  F1_SMOKE_WIND_X,
+  F1_SMOKE_WIND_Y,
+  F1_SQUEAL_CONTACT_X,
+  F1_SQUEAL_CONTACT_Y,
   F1_SQUEAL_FADE,
   F1_SQUEAL_LEN,
   F1_SQUEAL_PER_TIRE,
-  F1_SQUEAL_SPEED,
-  F1_SQUEAL_SPREAD,
-  F1_SQUEAL_SPREAD_X,
-  F1_SQUEAL_VP_Y,
+  F1_SQUEAL_SPREAD_Y,
   F1_SQUEAL_WIDTH,
   F1_LOAD_GRACE,
   F1_ZOOM,
@@ -237,61 +243,122 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
       ctx.restore();
     };
 
-    // tire-squeal ink: a fresh random set every run (side -1 = left tire, 1 = right), drawn behind the car. Each stroke
-    // runs along a ray from a vanishing point above the car (so they fan out in perspective, like the clip's own ink
-    // lines), as a thin-rooted leaf that is widest 70% along and ends in a point. Re-rolled a little whenever the car's
-    // drawing changes, so they boil with it.
-    const ink = getComputedStyle(document.documentElement).getPropertyValue("--fg").trim() || "#000";
+    // Launch: ink tire smoke + short squeal streaks at each front tire's contact patch, all drawn behind the car.
+    // Smoke puffs are born at the contact point (mapped through the car's transform at that moment) and then live in
+    // screen space, so the car rushing the camera leaves them behind instead of dragging them along. Each puff is a
+    // cluster of circles: a thick ink stroke, then a page-coloured fill on top, so only the outer edge of the outline
+    // shows (comic smoke, the car's own black-shape + line language). Everything is rolled once per mount (reload or
+    // Replay): wind, per-side intensity, every puff and streak.
+    const css = getComputedStyle(document.documentElement);
+    const ink = css.getPropertyValue("--fg").trim() || "#000";
+    const paper = css.getPropertyValue("--bg").trim() || "#fff";
+    const wind = { x: rand(F1_SMOKE_WIND_X), y: rand(F1_SMOKE_WIND_Y) };
+    type Puff = {
+      side: number;
+      birth: number; // ms after lights-out
+      life: number; // ms
+      r: number; // scene px at birth
+      vx: number; // scene px/s, eased out (smoke slows)
+      vy: number;
+      lobes: [number, number, number][]; // dx, dy (fractions of r), radius factor
+      line: number;
+      at?: { x: number; y: number; m: number }; // screen position and scale, fixed at birth
+    };
+    const puffs: Puff[] = [-1, 1]
+      .flatMap((side) => {
+        const power = rand(F1_SMOKE_INTENSITY); // uneven launches: one tire can smoke more than the other
+        return Array.from({ length: Math.round(rand(F1_SMOKE_PUFFS) * power) }, () => ({
+          side,
+          birth: F1_SMOKE_EMIT * Math.pow(Math.random(), 1.6), // front-loaded: most smoke right at launch
+          life: rand(F1_SMOKE_LIFE),
+          r: rand(F1_SMOKE_RADIUS) * (0.6 + 0.4 * power),
+          vx: side * rand(F1_SMOKE_OUT) + wind.x,
+          vy: -rand(F1_SMOKE_RISE) + wind.y,
+          lobes: Array.from({ length: 3 + Math.floor(Math.random() * 3) }, (): [number, number, number] => [
+            (Math.random() - 0.5) * 1.2,
+            (Math.random() - 0.5) * 0.9,
+            0.55 + Math.random() * 0.5,
+          ]),
+          line: rand(F1_SMOKE_LINE),
+        }));
+      })
+      .sort((p, q) => p.birth - q.birth); // oldest drawn first, so fresh smoke overlaps it
     const streaks = [-1, 1].flatMap((side) =>
       Array.from({ length: Math.round(rand(F1_SQUEAL_PER_TIRE)) }, () => ({
         side,
-        ax: (Math.random() - 0.5) * 2 * F1_SQUEAL_SPREAD_X,
-        ay: (Math.random() - 0.5) * 2 * F1_SQUEAL_SPREAD,
-        da: (Math.random() - 0.5) * 2 * F1_SQUEAL_AIM_SCATTER,
-        sp: rand(F1_SQUEAL_SPEED),
+        dy: rand([-1, 1]) * F1_SQUEAL_SPREAD_Y,
         len: rand(F1_SQUEAL_LEN),
         w: rand(F1_SQUEAL_WIDTH),
-        al: rand(F1_SQUEAL_ALPHA),
-        bend: (Math.random() - 0.5) * 2 * F1_SQUEAL_BEND,
-        jd: 0,
         jl: 1,
       })),
     );
     let squealF = -1;
-    const drawSqueal = (p: Pose, alpha: number, k: number) => {
-      const fade = 1 - clamp01((p.f - F1_SQUEAL_FADE[0]) / (F1_SQUEAL_FADE[1] - F1_SQUEAL_FADE[0]));
-      const a = alpha * p.a * fade;
-      if (a <= 0) return;
+    const contact = (fr: Frame, side: number) => ({
+      x: fr.x - 960 + (side < 0 ? F1_SQUEAL_CONTACT_X : 1 - F1_SQUEAL_CONTACT_X) * fr.w,
+      y: fr.y - 540 + F1_SQUEAL_CONTACT_Y * fr.h,
+    });
+    const drawSqueal = (p: Pose, alpha: number, k: number, u: number) => {
       const f = Math.round(p.f);
       const fr = assets.current.car!.m.frames[f];
-      if (f !== squealF) {
-        squealF = f;
-        for (const s of streaks) {
-          s.jd = (Math.random() - 0.5) * 0.1;
-          s.jl = 0.75 + Math.random() * 0.5;
-        }
-      }
-      const grow = p.f / (assets.current.car!.m.frames.length - 1);
       const m = k * p.sc;
-      const vx = fr.x - 960 + 0.5 * fr.w, vy = fr.y - 540 + F1_SQUEAL_VP_Y * fr.h; // vanishing point, scene coords
+      const tireFade = 1 - clamp01((p.f - F1_SQUEAL_FADE[0]) / (F1_SQUEAL_FADE[1] - F1_SQUEAL_FADE[0]));
+
+      // squeal streaks: short, tight, horizontal, right at the contact patch. They are the contact, so they ride with
+      // the car, and boil whenever the car's drawing changes
+      const sa = alpha * p.a * tireFade;
+      if (sa > 0) {
+        if (f !== squealF) {
+          squealF = f;
+          for (const s of streaks) s.jl = 0.7 + Math.random() * 0.6;
+        }
+        ctx.save();
+        ctx.globalAlpha = sa;
+        ctx.fillStyle = ink;
+        ctx.translate(cw / 2, ch / 2);
+        ctx.scale(m, m);
+        for (const s of streaks) {
+          const c = contact(fr, s.side);
+          const y = c.y + s.dy, L = s.len * s.jl;
+          ctx.beginPath();
+          ctx.moveTo(c.x, y - s.w);
+          ctx.lineTo(c.x + s.side * L, y + L * 0.04); // a hair of downward perspective
+          ctx.lineTo(c.x, y + s.w);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // smoke
       ctx.save();
-      ctx.fillStyle = ink;
-      ctx.translate(cw / 2, ch / 2);
-      ctx.scale(m, m);
-      for (const s of streaks) {
-        const x0 = fr.x - 960 + ((s.side < 0 ? F1_SQUEAL_ANCHOR_X : 1 - F1_SQUEAL_ANCHOR_X) + s.ax) * fr.w;
-        const y0 = fr.y - 540 + (F1_SQUEAL_ANCHOR_Y + s.ay) * fr.h;
-        const ang = Math.atan2(y0 - vy, x0 - vx) + s.da + s.jd; // outward along the ray from the vanishing point
-        const dx = Math.cos(ang), dy = Math.sin(ang);
-        const L = s.len * s.jl * clamp01(grow * s.sp);
-        const tx = x0 + dx * L, ty = y0 + dy * L;
-        const mx = x0 + dx * L * 0.7 + -dy * s.bend * L, my = y0 + dy * L * 0.7 + dx * s.bend * L; // widest point, bent a little
-        ctx.globalAlpha = a * s.al;
+      ctx.strokeStyle = ink;
+      ctx.fillStyle = paper;
+      ctx.lineJoin = "round";
+      for (const q of puffs) {
+        if (q.birth > u) break; // sorted by birth
+        if (!q.at) {
+          if (tireFade <= 0) continue; // tires have left the frame: no new smoke
+          const c = contact(fr, q.side);
+          q.at = { x: cw / 2 + c.x * m, y: ch / 2 + c.y * m, m };
+        }
+        const age = (u - q.birth) / 1000;
+        const t = age / (q.life / 1000);
+        if (t >= 1) continue;
+        const travel = F1_SMOKE_EASE * (1 - Math.exp(-age / F1_SMOKE_EASE)); // seconds of travel, slowing down
+        const x = q.at.x + q.vx * travel * k, y = q.at.y + q.vy * travel * k;
+        const r = q.r * q.at.m * (1 + F1_SMOKE_GROW * age);
+        // flat ink, no transparency: the fill stays opaque (invisible on the stage, it hides older puffs' outlines like
+        // real overlapping smoke) and the puff dissipates by its outline thinning away. A fading fill showed every
+        // older outline through it as stacked rings. alpha < 1 only during the footage handover.
+        ctx.globalAlpha = alpha;
         ctx.beginPath();
-        ctx.moveTo(x0, y0);
-        ctx.quadraticCurveTo(mx - dy * s.w, my + dx * s.w, tx, ty);
-        ctx.quadraticCurveTo(mx + dy * s.w, my - dx * s.w, x0, y0);
-        ctx.fill();
+        for (const [dx, dy, rf] of q.lobes) {
+          ctx.moveTo(x + dx * r + rf * r, y + dy * r);
+          ctx.arc(x + dx * r, y + dy * r, rf * r, 0, Math.PI * 2);
+        }
+        ctx.lineWidth = 2 * q.line * k * (1 - t * t);
+        ctx.stroke();
+        ctx.fill(); // covers the inner half of the stroke and every interior arc: only the silhouette stays outlined
       }
       ctx.restore();
     };
@@ -411,7 +478,7 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
         if (carAlpha > 0) {
           const e = easeOut(clamp01(u / F1_CAR_EMERGE));
           const pose: Pose = { f: last * Math.pow(clamp01(u / F1_CAR_RUN), 1.8), sc: 0.86 + 0.14 * e, a: e };
-          drawSqueal(pose, carAlpha, k); // behind the car and its ghosts
+          drawSqueal(pose, carAlpha, k, u); // behind the car and its ghosts
           for (const [lag, ga] of GHOSTS) {
             const g = history[history.length - lag];
             if (g) drawCar(g, ga * carAlpha, k);
@@ -455,8 +522,9 @@ function F1IntroRun({ onReplay }: { onReplay: () => void }) {
         <p className="mt-6 select-none text-center text-[1.375rem] leading-snug text-muted md:mt-8">
           Coming soon
         </p>
-        {phase === "done" && !reduce && (
-          <div className="mt-6 flex justify-center">
+        {/* always in the page (under the stage) so the exit tilt reveals it with the heading; inert until the intro ends */}
+        {!reduce && (
+          <div className="mt-6 flex justify-center" inert={phase === "run"}>
             <Tooltip label="Replay">
               <button
                 type="button"
