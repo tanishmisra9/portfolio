@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Inter_Tight, Space_Mono } from "next/font/google";
+import { Inter, Inter_Tight, Poppins, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { SiteChrome } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
@@ -27,6 +27,14 @@ const interPunct = Inter_Tight({
   // No generated "Inter Tight Fallback" (size-adjusted local Arial, no unicode-range): inside --font-inter-punct it would
   // catch every character Inter Tight lacks before var(--font-inter) got the chance.
   adjustFontFallback: false,
+});
+
+// Default site font. Inter / YD Gothic / system-ui stay in the Tailwind stacks as fallbacks.
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600", "700", "800"],
+  subsets: ["latin"],
+  variable: "--font-poppins",
+  display: "swap",
 });
 
 const spaceMono = Space_Mono({
@@ -65,10 +73,10 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${interPunct.variable} ${spaceMono.variable}`}
+      className={`${poppins.variable} ${inter.variable} ${interPunct.variable} ${spaceMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-bg text-fg text-base font-sans font-[120] antialiased md:text-lg">
+      <body className="min-h-screen bg-bg text-fg text-base font-sans font-[300] antialiased md:text-lg">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

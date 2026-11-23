@@ -11,13 +11,13 @@ export const GLASS_BUTTON_SHEEN_BACKGROUND =
   "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.13) 0%, transparent 70%)";
 
 export const SECTION_HEADING_BASE =
-  "select-none font-display font-extrabold leading-none tracking-tighter text-fg text-5xl md:text-6xl lg:text-7xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+  "select-none font-display font-extrabold leading-none tracking-tight text-fg text-5xl md:text-6xl lg:text-7xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 export const SECTION_HEADING_CLASSES = `${SECTION_HEADING_BASE} mb-8 md:mb-12`;
 
 /** Top-of-page titles (Photos, Blog, Quotes, F1): same solid style as the section headings, one step larger and centered. */
 export const PAGE_TITLE_CLASSES =
-  "select-none text-center font-display font-extrabold leading-none tracking-tighter text-fg text-[clamp(1.75rem,9vw,6rem)]";
+  "select-none text-center font-display font-extrabold leading-none tracking-tight text-fg text-[clamp(1.75rem,9vw,6rem)]";
 
 /**
  * Admin-only: same type system as the public headings (font-display, extrabold) but at working

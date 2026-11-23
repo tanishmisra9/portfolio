@@ -22,13 +22,14 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          "var(--font-poppins)",
           '"YD Gothic"',
           "var(--font-inter-punct)",
           "var(--font-inter)",
           "system-ui",
           "sans-serif",
         ],
-        display: ["var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-poppins)", "var(--font-inter)", "system-ui", "sans-serif"],
         mono: ["var(--font-space-mono)", "ui-monospace", "monospace"],
       },
     },

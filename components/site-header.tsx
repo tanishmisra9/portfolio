@@ -359,7 +359,7 @@ export function SiteHeader() {
                             }
                             onMouseDown={(e) => e.preventDefault()}
                             className={[
-                              "block py-1 text-center font-display text-4xl font-extrabold uppercase tracking-tighter transition-colors",
+                              "block py-1 text-center font-display text-4xl font-extrabold uppercase tracking-tight transition-colors",
                               active
                                 ? "text-fg underline decoration-fg/30 decoration-1 underline-offset-[0.4em]"
                                 : "text-dim hover:text-fg",

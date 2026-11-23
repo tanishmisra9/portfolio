@@ -120,7 +120,7 @@ function CollectionTile({ collection, index }: CollectionTileProps) {
       />
       <span className="collection-tile-spotlight" aria-hidden />
       <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 p-6 text-center backdrop-blur-sm transition-colors duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:bg-black/50">
-        <span className="select-none text-center font-display text-[clamp(2.1rem,7vw,3.1rem)] font-bold uppercase leading-none tracking-tighter text-[#e8e8e7]">
+        <span className="select-none text-center font-display text-[clamp(2.1rem,7vw,3.1rem)] font-bold uppercase leading-none tracking-tight text-[#e8e8e7]">
           {collection.title}
         </span>
       </div>
@@ -351,7 +351,7 @@ export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
                         <div className="min-w-0">
                           <h2
                             id="surprise-photo-title"
-                            className="font-display text-[clamp(1.6rem,4.4vw,2.6rem)] font-bold uppercase leading-[0.95] tracking-tighter text-white break-words [overflow-wrap:anywhere] [hyphens:auto]"
+                            className="font-display text-[clamp(1.6rem,4.4vw,2.6rem)] font-bold uppercase leading-[0.95] tracking-tight text-white break-words [overflow-wrap:anywhere] [hyphens:auto]"
                           >
                             {selectedPhoto.collectionTitle}
                           </h2>

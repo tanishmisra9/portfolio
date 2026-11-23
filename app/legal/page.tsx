@@ -13,7 +13,7 @@ export default async function LegalPage() {
       tabIndex={-1}
       className="relative z-0 isolate mx-auto max-w-2xl px-6 pb-12 pt-12 md:py-24"
     >
-      <h1 className="font-display text-4xl font-extrabold tracking-tighter text-fg md:text-5xl">
+      <h1 className="font-display text-4xl font-extrabold tracking-tight text-fg md:text-5xl">
         Legal Notice
       </h1>
       <div className="mt-10 space-y-8 text-base text-muted">

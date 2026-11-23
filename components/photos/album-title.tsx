@@ -112,7 +112,7 @@ export function AlbumTitle({ title, slug }: Props) {
       ? "text-[clamp(3.55rem,13vw,5.75rem)] sm:text-[clamp(4.2rem,13vw,6.25rem)]"
       : "text-[clamp(4.85rem,16.5vw,6.35rem)]";
   const baseClasses =
-    `heading-bleed-mobile select-none font-display ${titleSizeClasses} font-extrabold uppercase tracking-tighter leading-[1.08] md:text-8xl`;
+    `heading-bleed-mobile select-none font-display ${titleSizeClasses} font-extrabold uppercase tracking-tight leading-[1.08] md:text-8xl`;
 
   if (!isSuperMax || reduceMotion) {
     if (isNYC && !reduceMotion) {

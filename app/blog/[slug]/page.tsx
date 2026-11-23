@@ -179,7 +179,7 @@ export default async function BlogPostPage({ params }: Props) {
             })}
           </time>
           <h1
-            className={`heading-bleed-mobile mx-auto max-w-full select-none py-2 font-display ${titleSizeClasses} font-extrabold uppercase leading-[1.08] tracking-tighter text-fg md:text-8xl`}
+            className={`heading-bleed-mobile mx-auto max-w-full select-none py-2 font-display ${titleSizeClasses} font-extrabold uppercase leading-[1.08] tracking-tight text-fg md:text-8xl`}
           >
             {post.title}
           </h1>

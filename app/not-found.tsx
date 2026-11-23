@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <main id="main-content" tabIndex={-1} className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
-      <h1 className="font-display text-7xl font-extrabold tracking-tighter text-fg md:text-9xl">
+      <h1 className="font-display text-7xl font-extrabold tracking-tight text-fg md:text-9xl">
         404
       </h1>
       <p className="mt-4 text-lg text-muted">

@@ -109,7 +109,7 @@ export function Hero({ subtitle }: HeroProps) {
                 role="button"
                 tabIndex={0}
                 aria-label="Play name pit-stop animation"
-                className="heading-bleed-mobile flex flex-col items-center cursor-pointer select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:items-start md:text-[clamp(2.256rem,12vw,11.6rem)] md:leading-[0.85]"
+                className="heading-bleed-mobile flex flex-col items-center cursor-pointer select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:items-start md:text-[clamp(2.256rem,12vw,11.6rem)] md:leading-[0.85]"
                 onClick={onNameClick}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {

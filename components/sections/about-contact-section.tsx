@@ -9,7 +9,7 @@ type Props = {
 
 /** Shared typography for both bio blocks; color applied per paragraph. (~8% smaller than 2xl/3xl scale.) */
 const bioBodyClass =
-  "text-[1.38rem] font-[200] subpixel-antialiased leading-[1.486] md:text-[1.725rem] md:leading-[1.53]";
+  "text-[1.38rem] font-[300] subpixel-antialiased leading-[1.486] md:text-[1.725rem] md:leading-[1.53]";
 
 export function AboutContactSection({ bio }: Props) {
   const [paragraphOne = '', paragraphTwo = ''] = bio.split('\n\n');

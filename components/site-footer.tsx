@@ -86,7 +86,7 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
         <div>
           {social.length > 0 && (
             <>
-          <p className="font-display text-3xl font-extrabold tracking-tighter text-fg md:text-4xl">Stay in touch</p>
+          <p className="font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">Stay in touch</p>
           <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:text-lg">
             {[...social].sort((a, b) => rank(a) - rank(b)).map((link) => (
               <li key={link.id}>
@@ -114,7 +114,7 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
 
         <div className="md:text-right">
           {/* Invisible twin of the "Stay in touch" heading so both link rows share one baseline at any heading size. */}
-          <p aria-hidden className="invisible hidden font-display text-3xl font-extrabold tracking-tighter md:block md:text-4xl">&nbsp;</p>
+          <p aria-hidden className="invisible hidden font-display text-3xl font-extrabold tracking-tight md:block md:text-4xl">&nbsp;</p>
           <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:mt-3 md:justify-end md:text-lg">
             <li>
               <Tooltip label="Site owner and copyright">
