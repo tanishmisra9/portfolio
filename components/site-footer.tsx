@@ -7,7 +7,7 @@ import { ArrowUp } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { SocialLink } from "@/types/content";
 
-const LOCATION = "West Lafayette, Indiana";
+const LOCATION = "Plano, Texas";
 const SOCIAL_ORDER = ["LinkedIn", "GitHub", "Resume", "Email"];
 
 const linkClass =
