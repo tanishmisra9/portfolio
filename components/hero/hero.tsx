@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { motion, useReducedMotion, useTransform } from "framer-motion";
 import { useHomeIntroMarkDone } from "@/components/home-intro-gate";
 import {
   HERO_TAGLINE_ENTER_DELAY_S,
@@ -18,30 +13,19 @@ import {
   SCATTER_NAME_ENTRANCE_STAGGER_MS,
 } from "./scatter-name";
 import { HeroNameMotion } from "./hero-name-motion";
+import { usePitstop } from "./use-pitstop";
 
 type HeroProps = {
   subtitle: string;
 };
 
-function sleep(ms: number) {
-  return new Promise<void>((resolve) => setTimeout(resolve, ms));
-}
-
 export function Hero({ subtitle }: HeroProps) {
   const markHomeIntroDone = useHomeIntroMarkDone();
   const reduceHeroMotion = useReducedMotion();
   const [topLine = "", bottomLine = ""] = subtitle.split("\n");
-  const [scatterTrigger, setScatterTrigger] = useState(0);
-  /**
-   * Busy clears only once both name lines call onLineScatterComplete. That holds because every dependency of the
-   * scatter effect in scatter-name.tsx is stable, so it re-runs only on a new scatterTrigger. Keep
-   * onLineScatterComplete and queueGlobalReturnGap memoized (and don't add unstable deps there): a re-run cancels
-   * the in-flight run without calling its completion callback and leaves clicks dead until reload.
-   */
-  const scatterBusyRef = useRef(false);
-  const scatterDoneRef = useRef(0);
-  /** Serializes return starts across both name lines so two letters never fire together */
-  const returnGapChainRef = useRef(Promise.resolve());
+  /** The pit stop (4 tires, one sound, drive off). Its effect has stable deps: a re-run mid-stop would strand the phase. */
+  const { mv, run, isIdle } = usePitstop(reduceHeroMotion);
+  const nameFilter = useTransform(mv.blur, (b) => (b > 0.05 ? `blur(${b}px)` : "none"));
   const isDesktopRef = useRef(false);
 
   const tanishMagnetRef = useRef<
@@ -73,35 +57,30 @@ export function Hero({ subtitle }: HeroProps) {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  const queueGlobalReturnGap = useCallback(() => {
-    const gapMs = 38 + Math.random() * 92;
-    const next = returnGapChainRef.current.then(() => sleep(gapMs));
-    returnGapChainRef.current = next.catch(() => {});
-    return next;
-  }, []);
-
-  const onLineScatterComplete = useCallback(() => {
-    scatterDoneRef.current += 1;
-    if (scatterDoneRef.current >= 2) {
-      scatterDoneRef.current = 0;
-      scatterBusyRef.current = false;
-    }
-  }, []);
-
   const onNameClick = () => {
-    if (scatterBusyRef.current) return;
-    scatterBusyRef.current = true;
-    scatterDoneRef.current = 0;
-    returnGapChainRef.current = Promise.resolve();
-    setScatterTrigger((t) => t + 1);
+    void run(() => {
+      tanishResetRef.current?.();
+      misraResetRef.current?.();
+    });
   };
 
-  /* Window-level so the pull starts as the cursor approaches, not only once it is over the name box. */
+  /* Window-level so the pull starts as the cursor approaches, not only once it is over the name box.
+   * One pass per frame (each pass reads every letter's rect), and none while the pit stop runs. */
   useEffect(() => {
+    let frame = 0;
+    let lastX = 0;
+    let lastY = 0;
     const move = (e: globalThis.PointerEvent) => {
       if (!isDesktopRef.current) return;
-      tanishMagnetRef.current?.(e.clientX, e.clientY);
-      misraMagnetRef.current?.(e.clientX, e.clientY);
+      lastX = e.clientX;
+      lastY = e.clientY;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        if (!isIdle()) return;
+        tanishMagnetRef.current?.(lastX, lastY);
+        misraMagnetRef.current?.(lastX, lastY);
+      });
     };
     const reset = () => {
       tanishResetRef.current?.();
@@ -111,11 +90,12 @@ export function Hero({ subtitle }: HeroProps) {
     document.documentElement.addEventListener("pointerleave", reset);
     window.addEventListener("pointercancel", reset);
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener("pointermove", move);
       document.documentElement.removeEventListener("pointerleave", reset);
       window.removeEventListener("pointercancel", reset);
     };
-  }, []);
+  }, [isIdle]);
 
   return (
     <section className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[85vh] md:items-center md:py-24">
@@ -124,6 +104,8 @@ export function Hero({ subtitle }: HeroProps) {
           <HeroNameMotion>
             <>
               <h1 className="sr-only">TANISH MISRA</h1>
+              {/* Drive-off wrapper: slides off, then blur-fades back in (the only blur in the pit stop). */}
+              <motion.div style={{ x: mv.driveX, opacity: mv.fade, filter: nameFilter }}>
               <div
                 role="button"
                 tabIndex={0}
@@ -142,11 +124,11 @@ export function Hero({ subtitle }: HeroProps) {
                     text="TANISH"
                     lineId="tanish"
                     entranceDelay={SCATTER_NAME_ENTRANCE_BASE_MS}
-                    scatterTrigger={scatterTrigger}
-                    queueGlobalReturnGap={queueGlobalReturnGap}
+                    splitAt={3}
+                    left={mv.tires.tl}
+                    right={mv.tires.tr}
                     magnetPullRef={tanishMagnetRef}
                     magnetResetRef={tanishResetRef}
-                    onScatterComplete={onLineScatterComplete}
                   />
                 </div>
                 <div className="-mt-3 translate-x-[0.14em] text-dim md:mt-4 md:translate-x-0">
@@ -157,14 +139,15 @@ export function Hero({ subtitle }: HeroProps) {
                       SCATTER_NAME_ENTRANCE_BASE_MS +
                       6 * SCATTER_NAME_ENTRANCE_STAGGER_MS
                     }
-                    scatterTrigger={scatterTrigger}
-                    queueGlobalReturnGap={queueGlobalReturnGap}
+                    splitAt={3}
+                    left={mv.tires.bl}
+                    right={mv.tires.br}
                     magnetPullRef={misraMagnetRef}
                     magnetResetRef={misraResetRef}
-                    onScatterComplete={onLineScatterComplete}
                   />
                 </div>
               </div>
+              </motion.div>
             </>
           </HeroNameMotion>
           <motion.div

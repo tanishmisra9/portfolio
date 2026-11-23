@@ -31,6 +31,16 @@ export const NYC_PHASE = {
 } as const satisfies Edges<string>;
 export type NycPhase = keyof typeof NYC_PHASE;
 
+/** Hero name pit stop (components/hero/use-pitstop.ts). Clicks are ignored unless the phase is idle. */
+export const HERO_PHASE = {
+  idle: ["launch"],
+  launch: ["bolt"],
+  bolt: ["drive"],
+  drive: ["fadein"],
+  fadein: ["idle"],
+} as const satisfies Edges<string>;
+export type HeroPhase = keyof typeof HERO_PHASE;
+
 /** Per-photo upload progress in /admin/photos. Both uploading and saving fall back to idle on error. */
 export const UPLOAD_STATUS = {
   idle: ["uploading"],
