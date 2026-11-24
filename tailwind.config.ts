@@ -1,6 +1,8 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  // hover: (and group-hover:) only on devices that can hover. Without it iOS keeps a tapped link in :hover until you tap elsewhere, so fills like HoverFill stay up.
+  future: { hoverOnlyWhenSupported: true },
   darkMode: "class",
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",

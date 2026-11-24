@@ -11,9 +11,10 @@ export function HoverFill({ children }: { children: React.ReactNode }) {
     <>
       <span
         aria-hidden
-        className="absolute inset-0 origin-bottom scale-y-0 bg-fg transition-transform duration-200 ease-out group-hover:scale-y-100 group-focus-visible:scale-y-100 motion-reduce:transition-none"
+        data-fill
+        className="absolute inset-0 origin-bottom scale-y-0 bg-fg transition-transform duration-200 ease-out group-hover:scale-y-100 group-focus-visible:scale-y-100 group-data-[tapped]:scale-y-100 motion-reduce:transition-none"
       />
-      <span className="relative z-10 transition-colors duration-200 group-hover:text-bg group-focus-visible:text-bg">
+      <span className="relative z-10 transition-colors duration-200 group-hover:text-bg group-focus-visible:text-bg group-data-[tapped]:text-bg">
         {children}
       </span>
     </>

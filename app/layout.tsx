@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { MotionConfig } from "framer-motion";
 import { SiteChrome } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
+import { TapFill } from "@/components/ui/tap-fill";
 import { getPublishedData } from "@/lib/site-content";
 import { getRadioSampleUrls } from "@/lib/radio-samples";
 import { getRadioTriggers } from "@/lib/radio-triggers";
@@ -97,6 +98,7 @@ export default async function RootLayout({
           <SiteChrome radioSamples={radioSamples} radioTriggers={radioTriggers} />
           {children}
           <SiteFooter social={social} />
+          <TapFill />
           </MotionConfig>
           </div>
         </ThemeProvider>

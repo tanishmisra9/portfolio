@@ -16,7 +16,10 @@ const components: Components = {
   h2: ({ node, ...rest }) => <h3 className="mt-8 font-display text-2xl font-bold text-fg" {...rest} />,
   h3: ({ node, ...rest }) => <h4 className="mt-6 font-display text-xl font-bold text-fg" {...rest} />,
   p: ({ node, children, ...rest }) => {
-    const hasImage = node?.children?.some((child) => child.type === "element" && child.tagName === "img");
+    // Any img below the paragraph (a linked image nests it inside <a>); same check as the public page.
+    const hasImg = (n: { type: string; tagName?: string; children?: unknown[] }): boolean =>
+      (n.type === "element" && n.tagName === "img") || (n.children ?? []).some((c) => hasImg(c as typeof n));
+    const hasImage = node ? hasImg(node) : false;
     return hasImage ? (
       <div className="leading-relaxed">{children}</div>
     ) : (
