@@ -3,7 +3,6 @@
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { HoverFill } from "@/components/ui/hover-fill";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import type { BlogPostMeta } from "@/types/content";
 
@@ -76,9 +75,20 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
                     { year: "numeric", month: "long", day: "numeric" },
                   )}
                 </time>
-                {/* The card is the hover/focus target (group); HoverFill gives the title the site's fill-up effect. */}
-                <h2 className="relative -ml-2 mt-1 w-fit overflow-hidden px-2 py-1 font-display text-2xl font-bold text-fg">
-                  <HoverFill>{post.title}</HoverFill>
+                {/* The card is the hover/focus target (group): a rectangle traces itself around the title. */}
+                <h2 className="relative -ml-3 mt-1 w-fit px-3 py-1.5 font-display text-2xl font-bold text-fg">
+                  {post.title}
+                  <svg aria-hidden className="pointer-events-none absolute inset-0 size-full overflow-visible">
+                    <rect
+                      width="100%"
+                      height="100%"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      pathLength={1}
+                      className="[stroke-dasharray:1] [stroke-dashoffset:1] transition-[stroke-dashoffset] duration-500 ease-out group-hover:[stroke-dashoffset:0] group-focus-visible:[stroke-dashoffset:0] motion-reduce:transition-none"
+                    />
+                  </svg>
                 </h2>
                 <p className="mt-2 text-muted transition-colors duration-200 group-hover:text-fg group-focus-visible:text-fg">{post.description}</p>
               </Link>
