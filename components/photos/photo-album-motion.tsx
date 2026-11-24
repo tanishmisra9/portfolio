@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useCallback, useRef, useState } from "react";
 import { AlbumTitle } from "@/components/photos/album-title";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { CONTENT_SUBTITLE_CLASSES } from "@/components/ui/class-constants";
+import { BackButton } from "@/components/ui/back-button";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 import type { Photo } from "@/types/content";
 
@@ -36,27 +36,22 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
 
   return (
     <motion.div
-      className="mx-auto max-w-4xl"
+      // Same container as the header and the blog post page: back button, title and photos share the "TM" logo's left edge.
+      className="relative left-1/2 w-screen max-w-6xl -translate-x-1/2 px-6"
       variants={root}
       initial="hidden"
       animate="show"
     >
       <motion.div variants={item}>
-        <Link
-          href="/photos"
-          className="mb-10 inline-flex items-center gap-2 text-[0.9625rem] text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:mb-12"
-        >
-          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
-          Back to photos
-        </Link>
+        <BackButton href="/photos" label="Back to photos" />
       </motion.div>
       <motion.div
         variants={item}
         onAnimationComplete={onTitleBlockAnimationComplete}
-        className="text-center"
+        className="max-w-5xl"
       >
         <AlbumTitle title={title} slug={slug} />
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted md:text-xl">
+        <p className={CONTENT_SUBTITLE_CLASSES}>
           {description}
         </p>
       </motion.div>
@@ -64,7 +59,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
         variants={albumGridSlot}
         initial="hidden"
         animate="show"
-        className="mt-12 flex flex-col gap-10 md:mt-16 md:gap-10"
+        className="mt-12 flex max-w-5xl flex-col gap-10 md:mt-16 md:gap-10"
       >
         {photos.map((photo, index) =>
           photo.duetWith ? (

@@ -22,7 +22,7 @@ type NavItem = { href: string; label: string; tip: string };
 const NAV: NavItem[] = [
   { href: "#about", label: "ABOUT", tip: "About me" },
   { href: "/photos", label: "PHOTOS", tip: "Photography" },
-  { href: "/blog", label: "BLOG", tip: "Writing" },
+  { href: "/blog", label: "THOUGHTS", tip: "Writing" },
   { href: "/quotes", label: "QUOTES", tip: "Lines worth keeping" },
   { href: "/f1", label: "F1", tip: "Formula 1" },
 ];
@@ -202,8 +202,8 @@ export function SiteHeader() {
 
   const closeMenu = () => setMenuOpen(false);
 
-  const logoClassName =
-    "font-display text-xl font-bold tracking-tight text-fg transition-colors hover:text-muted";
+  // -ml-3 + px-3: the fill box extends past the letter without moving the letter itself.
+  const logoClassName = `${HOVER_FILL_LINK} -ml-3 inline-flex items-center justify-center px-3 py-2 font-display text-xl font-bold tracking-tight text-fg`;
 
   return (
     <>
@@ -224,8 +224,13 @@ export function SiteHeader() {
             With none, Safari uses <body>, which snaps (app/layout.tsx), and Safari animates its tint itself. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-surface backdrop-blur-md" />
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 pl-6 pr-3 sm:pr-4">
-          <Link href={logoHref} className={`shrink-0 ${logoClassName}`}>
-            TM
+          <Link
+            href={logoHref}
+            onMouseDown={(e) => e.preventDefault()}
+            aria-label="Tanish Misra, back to top"
+            className={`shrink-0 ${logoClassName}`}
+          >
+            <HoverFill>TM</HoverFill>
           </Link>
 
           <div className="flex min-w-0 flex-1 items-center justify-end">

@@ -3,6 +3,7 @@
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { Tooltip } from "@/components/ui/tooltip";
 
 const DIP_IN_MS = 120;
@@ -69,16 +70,19 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     <Tooltip label={isDark ? "Light mode" : "Dark mode"} align="end" className={className}>
       <button
         type="button"
-        className="flex shrink-0 items-center justify-center rounded-md p-2 text-muted transition-colors hover:bg-surface hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+        className={`${HOVER_FILL_LINK} flex shrink-0 items-center justify-center p-2 text-muted`}
+        onMouseDown={(e) => e.preventDefault()}
         aria-label={label}
         onClick={toggle}
       >
         {/* Icon shows the action a click performs, not the current theme: moon (go dark) while light, sun (go light) while dark.
             It swaps instantly: the dip cover hides the change, and animating it only made it visible mid-swap. Rendered
             only after mount so a light-theme visitor never sees a flash of the wrong icon. */}
-        <span className="grid h-6 w-6 shrink-0 -translate-y-px place-items-center">
-          {mounted ? isDark ? <Sun className="h-5 w-5" aria-hidden /> : <Moon className="h-5 w-5" aria-hidden /> : null}
-        </span>
+        <HoverFill>
+          <span className="grid h-6 w-6 shrink-0 -translate-y-px place-items-center">
+            {mounted ? isDark ? <Sun className="h-5 w-5" aria-hidden /> : <Moon className="h-5 w-5" aria-hidden /> : null}
+          </span>
+        </HoverFill>
       </button>
     </Tooltip>
   );

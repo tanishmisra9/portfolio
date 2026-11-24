@@ -2,60 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { createPortal } from "react-dom";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Instagram, X, Shuffle } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type PointerEvent,
-} from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Instagram } from "lucide-react";
+import { useCallback, type PointerEvent } from "react";
 import { PhotosHeader } from "@/components/photos/photos-header";
-import {
-  GLASS_BUTTON_CLASSES,
-  GLASS_BUTTON_SHEEN_BACKGROUND,
-  GLASS_BUTTON_SHEEN_CLASSES,
-} from "@/components/ui/class-constants";
-import { Tooltip } from "@/components/ui/tooltip";
-import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
+import { IconButton } from "@/components/ui/icon-button";
 import { photosEntranceVariants } from "@/lib/photos-motion";
-import type { RandomPhotoCandidate } from "@/types/content";
-
-const OVERLAY_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-const SURPRISE_BOKEH_ORBS = [
-  {
-    className:
-      "-left-10 top-[9%] h-40 w-40 md:-left-16 md:top-[10%] md:h-56 md:w-56",
-    background:
-      "radial-gradient(circle, rgba(255, 216, 168, 0.12) 0%, rgba(255, 216, 168, 0.06) 30%, transparent 72%)",
-  },
-  {
-    className:
-      "right-[-2.25rem] top-[16%] h-44 w-44 md:right-[6%] md:top-[13%] md:h-64 md:w-64",
-    background:
-      "radial-gradient(circle, rgba(176, 220, 255, 0.11) 0%, rgba(176, 220, 255, 0.05) 30%, transparent 74%)",
-  },
-  {
-    className:
-      "left-[14%] top-[58%] h-32 w-32 md:left-[16%] md:top-[68%] md:h-48 md:w-48",
-    background:
-      "radial-gradient(circle, rgba(255, 178, 200, 0.08) 0%, rgba(255, 178, 200, 0.04) 28%, transparent 74%)",
-  },
-  {
-    className:
-      "right-[8%] top-[70%] h-36 w-36 md:right-[12%] md:top-[74%] md:h-52 md:w-52",
-    background:
-      "radial-gradient(circle, rgba(255, 246, 197, 0.08) 0%, rgba(255, 246, 197, 0.04) 28%, transparent 74%)",
-  },
-  {
-    className:
-      "left-1/2 top-[33%] hidden h-24 w-24 -translate-x-1/2 md:block md:h-32 md:w-32",
-    background:
-      "radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.025) 30%, transparent 70%)",
-  },
-];
 
 export type PhotosIndexCollection = {
   slug: string;
@@ -131,258 +83,41 @@ function CollectionTile({ collection, index }: CollectionTileProps) {
 
 type Props = {
   collections: PhotosIndexCollection[];
-  randomPhotos: RandomPhotoCandidate[];
 };
 
-export function PhotosIndexMotion({ collections, randomPhotos }: Props) {
+export function PhotosIndexMotion({ collections }: Props) {
   const reduceMotion = useReducedMotion();
   const { root, item, gridSection } = photosEntranceVariants(reduceMotion);
-  const [selectedPhoto, setSelectedPhoto] = useState<RandomPhotoCandidate | null>(
-    null,
-  );
-  const [mounted, setMounted] = useState(false);
-  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-  const surpriseTriggerRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const closeOverlay = useCallback(() => {
-    setSelectedPhoto(null);
-    surpriseTriggerRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedPhoto) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
-    document.querySelector("main")?.setAttribute("inert", "");
-    document.querySelector("header")?.setAttribute("inert", "");
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.querySelector("main")?.removeAttribute("inert");
-      document.querySelector("header")?.removeAttribute("inert");
-    };
-  }, [selectedPhoto]);
-
-  useEffect(() => {
-    if (!selectedPhoto) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeOverlay();
-        return;
-      }
-      if (event.key !== "Tab") return;
-      const dialog = document.getElementById("surprise-photo-dialog");
-      if (!dialog) return;
-      const focusable = dialog.querySelectorAll<HTMLElement>(
-        'a[href], button, [tabindex]:not([tabindex="-1"])',
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedPhoto, closeOverlay]);
-
-  const handleSurpriseMe = useCallback(() => {
-    if (randomPhotos.length === 0) return;
-
-    const nextPhoto =
-      randomPhotos[Math.floor(Math.random() * randomPhotos.length)];
-    setSelectedPhoto(nextPhoto);
-  }, [randomPhotos]);
-
-  const overlayTransition = reduceMotion
-    ? { duration: 0 }
-    : { duration: 0.28, ease: OVERLAY_EASE };
 
   return (
-    <>
-      <motion.div
-        className="mx-auto max-w-6xl"
-        variants={root}
-        initial="hidden"
-        animate="show"
-      >
-        <motion.div variants={item}>
-          <PhotosHeader />
-        </motion.div>
-        <motion.div
-          variants={item}
-          className="mt-6 flex flex-wrap items-center justify-center gap-4 md:mt-8"
-        >
-          <Tooltip label="Instagram">
-            <a
-              href="https://www.instagram.com/tanishtakespics/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${HOVER_FILL_LINK} inline-flex items-center justify-center border border-border p-[0.6875rem] text-muted transition-colors`}
-              aria-label="Instagram"
-            >
-              <HoverFill>
-                <Instagram
-                  className="h-[1.375rem] w-[1.375rem]"
-                  strokeWidth={1.75}
-                  aria-hidden
-                />
-              </HoverFill>
-            </a>
-          </Tooltip>
-          <p className="select-none text-[1.375rem] leading-snug text-muted">
-            #ShotOniPhone17Pro
-          </p>
-        </motion.div>
-        <motion.div variants={item} className="mt-5 flex justify-center md:mt-6">
-          <Tooltip label="Surprise me">
-            <button
-              ref={surpriseTriggerRef}
-              type="button"
-              onClick={handleSurpriseMe}
-              aria-label="Surprise me"
-              className={`${HOVER_FILL_LINK} inline-flex items-center justify-center border border-border p-[0.6875rem] text-muted transition-colors`}
-            >
-              <HoverFill>
-                <Shuffle className="size-[1.375rem]" strokeWidth={1.75} aria-hidden />
-              </HoverFill>
-            </button>
-          </Tooltip>
-        </motion.div>
-        <motion.div
-          variants={gridSection}
-          className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 md:mt-16 md:gap-6"
-        >
-          {collections.map((collection, index) => (
-            <motion.div key={collection.slug} variants={item}>
-              <CollectionTile collection={collection} index={index} />
-            </motion.div>
-          ))}
-        </motion.div>
+    <motion.div
+      className="mx-auto max-w-6xl"
+      variants={root}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div variants={item}>
+        <PhotosHeader />
       </motion.div>
-
-      {mounted
-        ? createPortal(
-            <AnimatePresence>
-              {selectedPhoto ? (
-                <motion.div
-                  key={selectedPhoto.src}
-                  className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/55 p-5 backdrop-blur-sm md:p-8"
-                  onClick={closeOverlay}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={overlayTransition}
-                >
-                  <motion.div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 overflow-hidden"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={overlayTransition}
-                  >
-                    {SURPRISE_BOKEH_ORBS.map((orb, index) => (
-                      <div
-                        key={index}
-                        className={`absolute rounded-full opacity-70 md:opacity-80 ${orb.className}`}
-                        style={{ background: orb.background }}
-                      />
-                    ))}
-                  </motion.div>
-                  <motion.div
-                    id="surprise-photo-dialog"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="surprise-photo-title"
-                    onClick={(event) => event.stopPropagation()}
-                    className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/15 bg-neutral-950/95 shadow-[0_24px_90px_-28px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.16)]"
-                    initial={
-                      reduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }
-                    }
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={
-                      reduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }
-                    }
-                    transition={overlayTransition}
-                  >
-                    <button
-                      ref={closeButtonRef}
-                      type="button"
-                      onClick={closeOverlay}
-                      className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-none border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                      aria-label="Close surprise photo"
-                    >
-                      <X className="h-4 w-4" strokeWidth={1.9} aria-hidden />
-                    </button>
-
-                    <div
-                      className="grid gap-0 md:grid-cols-[minmax(0,1fr)_22rem]"
-                    >
-                      <div className="relative aspect-[3/2] max-h-[min(80vh,44rem)] overflow-hidden bg-neutral-950 md:max-h-[min(80vh,44rem)]">
-                        <span
-                          aria-hidden
-                          className="pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 select-none font-mono text-[0.6rem] uppercase tracking-[0.32em] text-neutral-700"
-                        >
-                          Loading…
-                        </span>
-                        <div className="relative z-10 h-full w-full">
-                          <Image
-                            src={selectedPhoto.src}
-                            alt={selectedPhoto.alt}
-                            fill
-                            className="object-contain"
-                            quality={72}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex min-w-0 flex-col justify-center gap-8 border-t border-white/10 p-6 md:border-l md:border-t-0 md:p-7">
-                        <div className="min-w-0">
-                          <h2
-                            id="surprise-photo-title"
-                            className="font-display text-[clamp(1.6rem,4.4vw,2.6rem)] font-bold uppercase leading-[0.95] tracking-tight text-white break-words [overflow-wrap:anywhere] [hyphens:auto]"
-                          >
-                            {selectedPhoto.collectionTitle}
-                          </h2>
-                          <p className="mt-4 text-sm leading-relaxed text-neutral-300 md:text-[0.98rem]">
-                            {selectedPhoto.caption ?? selectedPhoto.alt}
-                          </p>
-                        </div>
-
-                        <Link
-                          href={`/photos/${selectedPhoto.collectionSlug}`}
-                          className={GLASS_BUTTON_CLASSES}
-                        >
-                          <span
-                            aria-hidden
-                            className={GLASS_BUTTON_SHEEN_CLASSES}
-                            style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }}
-                          />
-                          <span className="relative">Go to collection</span>
-                        </Link>
-                      </div>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>,
-            document.body,
-          )
-        : null}
-    </>
+      <motion.div
+        variants={item}
+        className="mt-6 flex flex-wrap items-center justify-center gap-4 md:mt-8"
+      >
+        <IconButton href="https://www.instagram.com/tanishtakespics/" icon={<Instagram />} label="Instagram" />
+        <p className="select-none text-[1.375rem] leading-snug text-muted">
+          #ShotOniPhone17Pro
+        </p>
+      </motion.div>
+      <motion.div
+        variants={gridSection}
+        className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 md:mt-16 md:gap-6"
+      >
+        {collections.map((collection, index) => (
+          <motion.div key={collection.slug} variants={item}>
+            <CollectionTile collection={collection} index={index} />
+          </motion.div>
+        ))}
+      </motion.div>
+    </motion.div>
   );
 }

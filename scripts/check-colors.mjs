@@ -62,9 +62,9 @@ if (!darkBlockMatch) {
 // if it goes missing, either the line moved/changed (update this snippet) or the
 // regression came back (fix the component).
 const DIM_TOKEN_SITES = [
-  ["app/blog/[slug]/page.tsx", 'text-xs uppercase tracking-wide text-dim">'],
+  ["app/blog/[slug]/page.tsx", 'mt-3 block text-sm text-dim">'],
   ["components/blog/blog-index-motion.tsx", 'className="mt-8 text-dim">'],
-  ["components/blog/blog-index-motion.tsx", 'text-xs uppercase tracking-wide text-dim">'],
+  ["components/blog/blog-index-motion.tsx", 'className="flex items-center gap-3 text-sm text-dim">'],
   ["components/hero/hero.tsx", 'translate-x-[0.14em] text-dim md:mt-4 md:translate-x-0"'],
   ["components/hero/scatter-name.tsx", '"text-fg" : "text-dim";'],
   ["components/quotes/quote-cloud.tsx", 'tracking-[0.2em] text-dim"'],
