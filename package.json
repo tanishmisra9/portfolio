@@ -11,6 +11,7 @@
     "lint": "next lint",
     "check:colors": "node scripts/check-colors.mjs",
     "check:states": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-states.mjs",
+    "check:botch": "node scripts/check-botch.mjs",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "admin:hash-password": "node scripts/hash-password.mjs"
