@@ -280,7 +280,7 @@ export function SiteHeader() {
               })}
             </nav>
 
-            <ThemeToggle className="md:ml-2" />
+            <ThemeToggle className="md:ml-10" />
 
             <button
               ref={menuTriggerRef}
