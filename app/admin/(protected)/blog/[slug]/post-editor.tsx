@@ -56,6 +56,8 @@ function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMo
   );
 }
 
+const RENAMING_MSG = "Wait for the slug rename or import to finish, then try again.";
+
 export function PostEditor({
   initial,
   isNew,
@@ -80,6 +82,9 @@ export function PostEditor({
   const [slugError, setSlugError] = useState<string | null>(null);
   // Save draft upserts by slug, so it must not run while a rename is in flight (it would re-create the post under the old slug).
   const [renaming, setRenaming] = useState(false);
+  // Rename and import both write the post under fields.slug, so they must never overlap (either order re-creates the old post).
+  // A ref, not state: an import's FileReader callback runs after render and would otherwise read a stale value.
+  const writing = useRef(false);
   const [pendingMd, setPendingMd] = useState<File | null>(null);
   const [imageChecks, setImageChecks] = useState<ImageCheckResult[] | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -109,9 +114,15 @@ export function PostEditor({
       setSlugError(null);
       return;
     }
+    if (writing.current) {
+      input.value = fields.slug;
+      return setSlugError("Wait for the import to finish, then rename.");
+    }
+    writing.current = true;
     setRenaming(true);
     void (async () => {
       const result = await status.run(() => renamePost(fields.slug, input.value));
+      writing.current = false;
       setRenaming(false);
       if (!result.ok) {
         setSlugError(result.error);
@@ -128,18 +139,27 @@ export function PostEditor({
   }
 
   function importMdFile(file: File) {
+    if (writing.current) return setUploadError(RENAMING_MSG);
+    writing.current = true;
     const reader = new FileReader();
+    reader.onerror = () => {
+      writing.current = false;
+    };
     reader.onload = () => {
       const raw = String(reader.result);
       void (async () => {
-        // importMarkdownPost already persists the post inside the action, so the
-        // imported result is itself the new saved baseline, not a pending edit.
-        const result = await status.run(() => importMarkdownPost(raw, fields.slug));
-        if (!result.ok) return;
-        const { post, imageChecks } = result.value as Exclude<typeof result.value, { error: string }>;
-        setFields(post);
-        setBaseline(post);
-        setImageChecks(imageChecks);
+        try {
+          // importMarkdownPost already persists the post inside the action, so the
+          // imported result is itself the new saved baseline, not a pending edit.
+          const result = await status.run(() => importMarkdownPost(raw, fields.slug));
+          if (!result.ok) return;
+          const { post, imageChecks } = result.value as Exclude<typeof result.value, { error: string }>;
+          setFields(post);
+          setBaseline(post);
+          setImageChecks(imageChecks);
+        } finally {
+          writing.current = false;
+        }
       })();
     };
     reader.readAsText(file);
@@ -147,6 +167,8 @@ export function PostEditor({
 
   /** A .md file replaces the whole post (and saves it at once), so ask first when there is something to lose. */
   function handleFile(file: File) {
+    // A rename is in flight: fields.slug is stale, so an import (upsert by slug) or an upload (blob prefix) would target the old post.
+    if (renaming) return setUploadError(RENAMING_MSG);
     if (!file.name.endsWith(".md")) return uploadImage(file);
     if (fields.body.trim() || fields.title.trim()) setPendingMd(file);
     else importMdFile(file);

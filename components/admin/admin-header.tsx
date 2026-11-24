@@ -7,7 +7,7 @@ import { ExternalLink } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { IconButton } from "@/components/ui/icon-button";
 import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
-import { Button } from "@/components/admin/ui/button";
+import { Button, noMouseFocus } from "@/components/admin/ui/button";
 import { SaveStatus } from "@/components/admin/ui/save-status";
 import { useSaveStatus } from "@/components/admin/ui/use-save-status";
 import { ADMIN_SECTIONS } from "@/components/admin/sections";
@@ -16,7 +16,6 @@ import { publishAll } from "@/lib/admin/actions";
 import { useAdminDirty } from "@/components/admin/dirty-context";
 
 const NAV_LINK = `${HOVER_FILL_LINK} px-4 py-2 text-sm tracking-wide text-muted aria-[current=page]:text-fg aria-[current=page]:ring-fg`;
-const noMouseFocus = (e: React.MouseEvent) => e.preventDefault();
 
 type Ask = { message: string; confirm: string; onConfirm: () => void };
 

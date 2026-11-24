@@ -27,8 +27,6 @@ interface PendingPhoto {
 // Alt/caption are single logical lines; the textareas exist only for room to read and edit.
 export const oneLine = (v: string) => v.replace(/\s*\n+\s*/g, " ").trim();
 
-export { fieldClass } from "@/components/admin/ui/field";
-
 type UploadTarget = { id: number; slug: string; title: string };
 
 /** Dropzone + pending-upload cards. With one collection the destination is fixed; with several, each card asks for one. */
@@ -106,10 +104,14 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
 
   // Tracked per item (not one shared transition) so concurrent uploads each show their own
   // progress, and removal is by key so out-of-order completion can't drop or duplicate a row.
+  // Claimed synchronously (state updates are async), so a second click or batch can't start the same photo twice.
+  const inFlight = useRef(new Set<string>());
   async function uploadPending(key: string) {
-    const item = pending.find((p) => p.key === key);
+    // Read the live list, not this render's `pending`: a batch loop keeps calling the closure it started with.
+    const item = pendingRef.current.find((p) => p.key === key);
     const target = collections.find((c) => c.id === item?.collectionId);
-    if (!item || !target) return;
+    if (!item || !target || item.status !== "idle" || inFlight.current.has(key)) return;
+    inFlight.current.add(key);
     setErrors((prev) => ({ ...prev, [key]: "" }));
     patchPending(key, { status: "uploading", progress: 0 });
     try {
@@ -128,12 +130,29 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
     } catch (err) {
       patchPending(key, { status: "idle", progress: 0 });
       setErrors((prev) => ({ ...prev, [key]: err instanceof Error ? err.message : "Upload failed." }));
+    } finally {
+      inFlight.current.delete(key);
     }
   }
 
-  const ready = pending.filter((p) => p.status === "idle" && p.alt.trim() && p.collectionId !== null);
+  const isReady = (p: PendingPhoto) => p.status === "idle" && p.alt.trim() && p.collectionId !== null;
+  const ready = pending.filter(isReady);
+  const [batching, setBatching] = useState(false);
+  const batchLock = useRef(false);
   async function uploadAll() {
-    for (const item of ready) await uploadPending(item.key);
+    if (batchLock.current) return;
+    batchLock.current = true;
+    setBatching(true);
+    try {
+      // Re-check each photo when its turn comes: it may have been edited, removed or uploaded meanwhile.
+      for (const { key } of ready) {
+        const live = pendingRef.current.find((p) => p.key === key);
+        if (live && isReady(live)) await uploadPending(key);
+      }
+    } finally {
+      batchLock.current = false;
+      setBatching(false);
+    }
   }
 
   return (
@@ -169,7 +188,7 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
       </div>
 
       {ready.length > 1 && (
-        <Button variant="primary" onClick={() => void uploadAll()}>
+        <Button variant="primary" disabled={batching} onClick={() => void uploadAll()}>
           Upload all ({ready.length})
         </Button>
       )}

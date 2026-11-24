@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { ComponentProps } from "react";
 import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 
@@ -23,8 +22,14 @@ export function buttonClass(variant: Variant = "secondary", size: Size = "md", e
 
 type Common = { variant?: Variant; size?: Size; pending?: boolean };
 
-/** Safari paints a focus ring on a mouse-clicked button; keep focus off on click (Tab still works). */
-const noMouseFocus = (e: React.MouseEvent) => e.preventDefault();
+/** Safari paints a focus ring on a mouse-clicked button; keep focus off on click (Tab still works). Cancelling mousedown also
+ *  means the focused field never blurs, and several admin fields commit on blur — so blur it ourselves first (React flushes
+ *  that update before the click handler runs), otherwise Save would send the field's previous value. */
+export const noMouseFocus = (e: React.MouseEvent) => {
+  const a = document.activeElement;
+  if (a instanceof HTMLInputElement || a instanceof HTMLTextAreaElement || a instanceof HTMLSelectElement) a.blur();
+  e.preventDefault();
+};
 
 export function Button({ variant = "secondary", size = "md", pending, className = "", children, disabled, ...rest }: Common & ComponentProps<"button">) {
   return (
@@ -38,13 +43,5 @@ export function Button({ variant = "secondary", size = "md", pending, className 
     >
       {variant === "secondary" ? <HoverFill>{children}</HoverFill> : children}
     </button>
-  );
-}
-
-export function ButtonLink({ variant = "secondary", size = "md", className = "", children, href, ...rest }: Common & Omit<ComponentProps<typeof Link>, "href"> & { href: string }) {
-  return (
-    <Link href={href} onMouseDown={noMouseFocus} className={buttonClass(variant, size, className)} {...rest}>
-      {variant === "secondary" ? <HoverFill>{children}</HoverFill> : children}
-    </Link>
   );
 }
