@@ -7,6 +7,8 @@ import remarkGfm from "remark-gfm";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { CONTENT_SUBTITLE_CLASSES, CONTENT_TITLE_CLASSES } from "@/components/ui/class-constants";
 import { BackButton } from "@/components/ui/back-button";
+import { PostToc } from "@/components/blog/post-toc";
+import { extractHeadings, remarkHeadingIds } from "@/lib/post-headings";
 import { getImageDimensions } from "@/lib/image-dimensions";
 import { getPublishedData } from "@/lib/site-content";
 
@@ -22,17 +24,17 @@ const DEFAULT_IMG_H = 900;
 const components: Components = {
   h1: ({ node, ...rest }) => (
     <ScrollReveal variant="slide" className="mt-10">
-      <h2 className="font-display text-3xl font-bold text-fg" {...rest} />
+      <h2 className="scroll-mt-28 font-display text-3xl font-bold text-fg" {...rest} />
     </ScrollReveal>
   ),
   h2: ({ node, ...rest }) => (
     <ScrollReveal variant="slide" className="mt-8">
-      <h3 className="font-display text-2xl font-bold text-fg" {...rest} />
+      <h3 className="scroll-mt-28 font-display text-2xl font-bold text-fg" {...rest} />
     </ScrollReveal>
   ),
   h3: ({ node, ...rest }) => (
     <ScrollReveal variant="slide" className="mt-6">
-      <h4 className="font-display text-xl font-bold text-fg" {...rest} />
+      <h4 className="scroll-mt-28 font-display text-xl font-bold text-fg" {...rest} />
     </ScrollReveal>
   ),
   p: ({ node, children, ...rest }) => {
@@ -147,6 +149,8 @@ export default async function BlogPostPage({ params }: Props) {
   const post = data.posts.find((p) => p.slug === slug);
   if (!post) notFound();
 
+  const headings = extractHeadings(post.content);
+
   return (
     <main
       id="main-content"
@@ -172,10 +176,13 @@ export default async function BlogPostPage({ params }: Props) {
             </time>
           </header>
 
-          <div className="mt-12 space-y-6 text-fg">
-            <Markdown remarkPlugins={[remarkGfm]} components={components}>
-              {post.content}
-            </Markdown>
+          <div className="mt-12 xl:grid xl:grid-cols-[13rem_minmax(0,1fr)] xl:gap-12">
+            {headings.length >= 2 && <PostToc headings={headings} />}
+            <div className="space-y-6 text-fg xl:col-start-2">
+              <Markdown remarkPlugins={[remarkGfm, remarkHeadingIds]} components={components}>
+                {post.content}
+              </Markdown>
+            </div>
           </div>
         </div>
       </article>
