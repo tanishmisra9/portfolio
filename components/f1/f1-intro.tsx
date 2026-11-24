@@ -145,6 +145,7 @@ function F1IntroRun({ onReplay, refocus }: { onReplay: (byKeyboard: boolean) => 
   // load in the background; the lights never wait for this. Car first, then the footage frames.
   useEffect(() => {
     // Skip / finish flips phase to "done", which re-runs this effect: the cleanup stops the loaders mid-flight.
+    if (phase === "done") assets.current = {}; // the run is over (nothing draws any more): let ~70 decoded frames be collected
     if (reduce || phase === "done") return;
     let alive = true;
     (async () => {
@@ -628,7 +629,7 @@ function F1IntroRun({ onReplay, refocus }: { onReplay: (byKeyboard: boolean) => 
             type="button"
             onClick={skip}
             onMouseDown={(e) => e.preventDefault()}
-            className="absolute bottom-6 right-6 font-mono text-[11px] uppercase tracking-[0.25em] text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+            className="absolute bottom-6 right-6 font-sans text-sm font-normal uppercase tracking-wide text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
           >
             Skip
           </button>
