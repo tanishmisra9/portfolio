@@ -48,7 +48,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
       <motion.div
         variants={item}
         onAnimationComplete={onTitleBlockAnimationComplete}
-        className="max-w-5xl"
+        className="max-w-5xl pl-5"
       >
         <AlbumTitle title={title} slug={slug} />
         <p className={CONTENT_SUBTITLE_CLASSES}>
@@ -59,7 +59,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
         variants={albumGridSlot}
         initial="hidden"
         animate="show"
-        className="mt-12 flex max-w-5xl flex-col gap-10 md:mt-16 md:gap-10"
+        className="mt-12 flex max-w-5xl flex-col gap-10 pl-5 md:mt-16 md:gap-10"
       >
         {photos.map((photo, index) =>
           photo.duetWith ? (

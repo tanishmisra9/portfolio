@@ -158,7 +158,8 @@ export default async function BlogPostPage({ params }: Props) {
       <article className="relative left-1/2 w-screen max-w-6xl -translate-x-1/2 px-6">
         <BackButton href="/blog" label="Back to thoughts" />
 
-        <div className="max-w-5xl">
+        {/* pl-5 (1.25rem) lines the text up with the back button's chevron, the visible start of the button, rather than its faint border box. */}
+        <div className="max-w-5xl pl-5">
           <header>
             <h1 className={`${CONTENT_TITLE_CLASSES} text-balance text-fg`}>{post.title}</h1>
             <p className={CONTENT_SUBTITLE_CLASSES}>{post.description}</p>
