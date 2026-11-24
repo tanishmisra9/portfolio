@@ -125,6 +125,24 @@ const BOTCH_TRACK = [
 ] as const;
 /** Which tire can botch (picked at random each stop). Narrow it, e.g. ["bl", "br"] for only the bottom row. */
 const BOTCH_TIRES = ["tl", "tr", "bl", "br"] as const;
+/**
+ * Random, but never the tire that botched last time: the last one is kept in sessionStorage (this tab only, so it also
+ * holds across reloads; it's mentioned on /privacy). Storage can throw (Safari private mode, blocked): then it's plain random.
+ */
+const LAST_BOTCH_KEY = "pitstop-last-botch";
+function pickBotchTire(): (typeof BOTCH_TIRES)[number] {
+  let last: string | null = null;
+  try {
+    last = sessionStorage.getItem(LAST_BOTCH_KEY);
+  } catch {}
+  const pool = BOTCH_TIRES.filter((k) => k !== last);
+  const from = pool.length ? pool : BOTCH_TIRES;
+  const pick = from[Math.floor(Math.random() * from.length)];
+  try {
+    sessionStorage.setItem(LAST_BOTCH_KEY, pick);
+  } catch {}
+  return pick;
+}
 /** Approach angle from horizontal, random per stop (the old fixed slope was ~33deg). The tire is also launched along it. */
 const BOTCH_ANGLE_DEG = [20, 60] as const;
 /** Every point of the track nudges the angle by up to this, so the crew hunts around the nut instead of repeating one line. */
@@ -191,7 +209,7 @@ export function usePitstop(reduceMotion: boolean | null) {
       const P = profileRef.current;
       const botched = P === BOTCH;
       // Per-stop constants (not states): which tire botches, and its approach angle.
-      const botchKey = botched ? BOTCH_TIRES[Math.floor(Math.random() * BOTCH_TIRES.length)] : null;
+      const botchKey = botched ? pickBotchTire() : null;
       const theta = ((BOTCH_ANGLE_DEG[0] + Math.random() * (BOTCH_ANGLE_DEG[1] - BOTCH_ANGLE_DEG[0])) * Math.PI) / 180;
       const launchOf = (key: string) =>
         key === botchKey ? [BOTCH_LAUNCH_PX * Math.cos(theta), BOTCH_LAUNCH_PX * Math.sin(theta)] : [LAUNCH_X, LAUNCH_Y];
