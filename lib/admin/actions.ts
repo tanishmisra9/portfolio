@@ -25,18 +25,9 @@ function draftChanged() {
 
 // ---- Portfolio ----
 
-export async function updatePortfolio(data: PortfolioContent) {
-  await requireAdmin();
-  await db
-    .insert(portfolio)
-    .values({ id: 1, ...data })
-    .onConflictDoUpdate({ target: portfolio.id, set: data });
-  draftChanged();
-}
-
 /**
  * Saves ONE portfolio block (see lib/admin/portfolio-sections.ts). Only that block's columns are written, so a page
- * opened before another block was saved can't overwrite it with stale data (updatePortfolio writes every column).
+ * opened before another block was saved can't overwrite it with stale data.
  */
 export async function updatePortfolioSection(section: string, patch: Partial<PortfolioContent>) {
   await requireAdmin();

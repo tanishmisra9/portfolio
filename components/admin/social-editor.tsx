@@ -6,7 +6,7 @@ import { Field, Input } from "@/components/admin/ui/field";
 import { ResumeUploader } from "./resume-uploader";
 import type { SocialLink } from "@/types/content";
 
-/** These four are load-bearing: iconFor/email/resume special-casing all key off the label text, so renaming or deleting one would silently break the site. */
+/** These four are load-bearing: email/resume special-casing all key off the label text, so renaming or deleting one would silently break the site. */
 const LOCKED_IDS = new Set(["social-github", "social-linkedin", "social-email", "social-resume"]);
 
 export function SocialEditor({
