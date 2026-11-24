@@ -34,12 +34,30 @@ export async function getRemoteImageDimensions(
   if (!isBlobImageUrl(url)) return null;
   try {
     const res = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(5000) });
-    if (!res.ok) return null;
+    if (!res.ok || !res.body) return null;
     if (Number(res.headers.get("content-length") ?? 0) > MAX_REMOTE_IMAGE_BYTES) return null;
-    const buffer = Buffer.from(await res.arrayBuffer());
-    if (buffer.length > MAX_REMOTE_IMAGE_BYTES) return null;
-    const { width, height } = imageSize(buffer);
-    return { width, height };
+    // Stream: the size is in the first bytes of nearly every image, so stop reading as soon as it parses, and never
+    // buffer past the cap even when the server sent no (or a wrong) Content-Length.
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) return null; // ended without a parseable header
+        chunks.push(value);
+        total += value.length;
+        if (total > MAX_REMOTE_IMAGE_BYTES) return null;
+        try {
+          const { width, height } = imageSize(Buffer.concat(chunks));
+          if (width > 0 && height > 0) return { width, height }; // some detectors report 0x0 for bytes that aren't an image
+        } catch {
+          // header not complete yet: read more
+        }
+      }
+    } finally {
+      void reader.cancel().catch(() => {});
+    }
   } catch {
     return null;
   }
