@@ -3,6 +3,7 @@
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { HoverFill } from "@/components/ui/hover-fill";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import type { BlogPostMeta } from "@/types/content";
 
@@ -75,8 +76,9 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
                     { year: "numeric", month: "long", day: "numeric" },
                   )}
                 </time>
-                <h2 className="mt-2 w-fit bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-[position:0_100%] bg-no-repeat pb-1 font-display text-2xl font-bold text-fg transition-[background-size] duration-300 ease-out group-hover:bg-[length:100%_1px] group-focus-visible:bg-[length:100%_1px] motion-reduce:transition-none">
-                  {post.title}
+                {/* The card is the hover/focus target (group); HoverFill gives the title the site's fill-up effect. */}
+                <h2 className="relative -ml-2 mt-1 w-fit overflow-hidden px-2 py-1 font-display text-2xl font-bold text-fg">
+                  <HoverFill>{post.title}</HoverFill>
                 </h2>
                 <p className="mt-2 text-muted transition-colors duration-200 group-hover:text-fg group-focus-visible:text-fg">{post.description}</p>
               </Link>
