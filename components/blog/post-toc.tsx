@@ -3,22 +3,36 @@
 import { useEffect, useState } from "react";
 import type { PostHeading } from "@/lib/post-headings";
 
-/* "On this page" nav, xl+ only. The active entry is the last heading that has scrolled above ~35% of the viewport.
-   The 7rem top margin matches the sticky 5rem header plus the headings' scroll-mt-28. */
+/* "On this page" nav, xl+ only. A section is current once its heading is well inside the viewport (top above
+   LINE_FRACTION of the height), not when it is about to scroll off under the sticky header. A clicked entry lands at
+   7rem (scroll-mt-28), which is above this line, so it is active on arrival. */
+const LINE_FRACTION = 0.55;
+
 export function PostToc({ headings }: { headings: PostHeading[] }) {
-  const [active, setActive] = useState(headings[0]?.id);
+  const [active, setActive] = useState<string>();
 
   useEffect(() => {
     const els = headings.map((h) => document.getElementById(h.id)).filter((el): el is HTMLElement => !!el);
-    const io = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.find((e) => e.isIntersecting);
-        if (hit) setActive(hit.target.id);
-      },
-      { rootMargin: "-112px 0px -65% 0px" },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      // Active = last heading whose top has crossed the line (derived from scroll position,
+      // so it is right in both scroll directions, unlike an IntersectionObserver that only fires on band crossings).
+      let id: string | undefined; // none until the first heading is reached
+      for (const el of els) if (el.getBoundingClientRect().top <= window.innerHeight * LINE_FRACTION) id = el.id;
+      setActive(id);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [headings]);
 
   return (

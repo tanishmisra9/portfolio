@@ -6,24 +6,28 @@ import { unified } from "unified";
 
 export type PostHeading = { id: string; text: string; depth: 0 | 1 | 2 };
 
+// Prefixed so a heading titled "Top" or "Main content" can't duplicate the page's own #top / #main-content ids.
 const slugify = (s: string) =>
-  s
+  "sec-" +
+  (s
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s-]/gu, "")
     .trim()
-    .replace(/\s+/g, "-") || "section";
+    .replace(/\s+/g, "-") || "section");
 
-/** Unique ids in document order (intro, intro-1, …). The ONE place ids are made: the TOC and the rendered headings both go through it. */
+/** Unique ids in document order (intro, intro-1, …). The ONE place ids are made: the TOC and the rendered headings both go through it.
+ *  Uniqueness is checked against every id already emitted, so a literal "Intro-1" heading can't collide with a generated suffix. */
 function collect(tree: Root) {
-  const seen = new Map<string, number>();
+  const used = new Set<string>();
   const out: { node: Heading; id: string; text: string }[] = [];
   for (const node of tree.children) {
     if (node.type !== "heading") continue;
     const text = toString(node);
     const base = slugify(text);
-    const n = seen.get(base) ?? 0;
-    seen.set(base, n + 1);
-    out.push({ node, id: n ? `${base}-${n}` : base, text });
+    let id = base;
+    for (let n = 1; used.has(id); n++) id = `${base}-${n}`;
+    used.add(id);
+    out.push({ node, id, text });
   }
   return out;
 }

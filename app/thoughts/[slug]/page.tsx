@@ -38,9 +38,10 @@ const components: Components = {
     </ScrollReveal>
   ),
   p: ({ node, children, ...rest }) => {
-    const hasImage = node?.children?.some(
-      (child) => child.type === "element" && child.tagName === "img",
-    );
+    // Any img below the paragraph (a linked image nests it inside <a>) renders a block wrapper, which can't sit in a <p>.
+    const hasImg = (n: { type: string; tagName?: string; children?: unknown[] }): boolean =>
+      (n.type === "element" && n.tagName === "img") || (n.children ?? []).some((c) => hasImg(c as typeof n));
+    const hasImage = node ? hasImg(node) : false;
     if (hasImage) {
       return <div className="leading-relaxed">{children}</div>;
     }
