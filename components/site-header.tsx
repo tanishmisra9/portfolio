@@ -18,6 +18,9 @@ import { createPortal } from "react-dom";
 type NavItem = { href: string; label: string };
 
 const NAV: NavItem[] = [
+  { href: "#experience", label: "EXPERIENCE" },
+  { href: "#skills", label: "SKILLS" },
+  { href: "#projects", label: "PROJECTS" },
   { href: "#about", label: "ABOUT" },
   { href: "/photos", label: "PHOTOS" },
   { href: "/blog", label: "BLOG" },
