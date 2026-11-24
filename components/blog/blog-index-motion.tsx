@@ -62,11 +62,11 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
             <motion.li key={post.slug} variants={item}>
               <Link
                 href={`/blog/${post.slug}`}
-                className="group relative block rounded-md border border-border bg-surface p-8 backdrop-blur-md transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-x-0.5 hover:-translate-y-0.5 hover:border-fg hover:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] focus-visible:-translate-x-0.5 focus-visible:-translate-y-0.5 focus-visible:border-fg focus-visible:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 motion-reduce:focus-visible:translate-x-0 motion-reduce:focus-visible:translate-y-0"
+                className="group relative block rounded-md border border-border bg-surface p-8 backdrop-blur-md hover:-translate-x-0.5 hover:-translate-y-0.5 hover:border-fg hover:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] focus-visible:-translate-x-0.5 focus-visible:-translate-y-0.5 focus-visible:border-fg focus-visible:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 motion-reduce:focus-visible:translate-x-0 motion-reduce:focus-visible:translate-y-0"
               >
                 <ChevronRight
                   aria-hidden
-                  className="absolute right-6 top-6 size-6 -translate-x-1 text-fg opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 motion-reduce:transition-none"
+                  className="absolute right-6 top-6 size-6 -translate-x-1 text-fg opacity-0 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
                   strokeWidth={1.75}
                 />
                 {/* Flush with the title and description (one left axis), body face, tabular figures. */}
@@ -92,7 +92,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
                     />
                   </svg>
                 </h2>
-                <p className="mt-2 text-muted transition-colors duration-200 group-hover:text-fg group-focus-visible:text-fg">{post.description}</p>
+                <p className="mt-2 text-muted group-hover:text-fg group-focus-visible:text-fg">{post.description}</p>
               </Link>
             </motion.li>
           ))}
