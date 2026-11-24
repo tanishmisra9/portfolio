@@ -91,13 +91,13 @@ const LAUNCH_X = 1600;
 const LAUNCH_Y = 1000;
 
 /**
- * Botched stop: chance (0..1) that a stop is the botched one. About 3 stops in 10 (30% for now; lower it once the novelty wears off). `?botch=1` (or any 0..1) in the URL forces it for testing, like ?pitstopOffset. One tire (random each stop, see BOTCH_TIRES) is
+ * Botched stop: chance (0..1) that a stop is the botched one. About 4 stops in 10 (40% for now; lower it once the novelty wears off). `?botch=1` (or any 0..1) in the URL forces it for testing, like ?pitstopOffset. One tire (random each stop, see BOTCH_TIRES) is
  * cross-threaded: the crew jabs at it again and again, frantically, each failing poke a clack, then finally seats it, and the car takes off. That takes
  * BOTCH_SHIFT_MS longer than a clean stop, and every sound after the gun burst is baked at fixed times, so a botched stop
  * has its own clip (`pitstop-botch.mp3`, built by scripts/pitstop-sfx/build_botch.py): the same audio with BOTCH_SHIFT_MS
  * of frantic gun inserted into the burst, so the growl, drive-off and whoosh 9 all land that much later.
  */
-const BOTCH_CHANCE = 0.3;
+const BOTCH_CHANCE = 0.4;
 const BOTCH_SHIFT_MS = 770; // = SHIFT in build_botch.py (0.77)
 
 /** A stop = a clip + the times baked into it. */
