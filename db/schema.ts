@@ -93,3 +93,10 @@ export const publishedSnapshot = pgTable("published_snapshot", {
   data: jsonb("data").notNull(),
   publishedAt: timestamp("published_at").notNull().defaultNow(),
 });
+
+/** Failed admin-login attempts, for the per-IP throttle in lib/auth/actions.ts. Rows older than a day are pruned on login. */
+export const loginAttempts = pgTable("login_attempts", {
+  id: serial("id").primaryKey(),
+  ip: text("ip").notNull(),
+  at: timestamp("at").notNull().defaultNow(),
+});

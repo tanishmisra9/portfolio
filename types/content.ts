@@ -140,6 +140,3 @@ export type BlogPostMeta = {
   description: string;
 };
 
-export type BlogPost = BlogPostMeta & {
-  content: string;
-};

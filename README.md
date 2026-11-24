@@ -44,7 +44,7 @@ All content lives in a database and is edited through a built-in, password-prote
 ```
 
 - **Drafts and Publish.** Edits in the admin are saved as drafts. Nothing reaches the public site until you click **Publish**, which assembles all drafts into a single snapshot (`lib/admin/publish.ts`) that the public pages read (`lib/site-content.ts`). The header button reads **Up to date** when drafts match what's live and is disabled until you change something.
-- **Where things are stored.** Text and structure live in Postgres (Neon, via Drizzle — `db/schema.ts`). Files — photos, blog images, radio clips, the resume — live in Vercel Blob; the database only stores their URLs. Small fixed design assets (fonts, favicons, three UI sounds) stay in `public/`.
+- **Where things are stored.** Text and structure live in Postgres (Neon, via Drizzle — `db/schema.ts`). Files — photos, blog images, radio clips, the resume — live in Vercel Blob; the database only stores their URLs. Small fixed design assets (fonts, favicons, UI/F1 sound effects, F1 intro frames) stay in `public/`.
 - **Radio follows the same rule.** Radio clips and trigger words are drafts too; the radio page outlines anything not yet live with a "New" tag.
 - **Uploads go straight to Blob** from the browser (`app/api/admin/blob-upload`, `lib/admin/client-upload.ts`) so large photos aren't limited by Vercel's 4.5MB request-body cap.
 
@@ -122,7 +122,7 @@ Portfolio/
 
 ### Prerequisites
 
-- Node.js 18.18 or newer
+- Node.js 22.18 or newer (iron-session needs 22.13+, and `check:states` runs TypeScript natively)
 - npm
 - A Postgres database (Neon) and a Vercel Blob store
 
@@ -168,6 +168,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). On a fresh database, sign in at `/admin/login`, add some content and click **Publish** — the public pages read the published snapshot and show an error until the first publish.
 
+**First production deploy:** the production build pre-renders photo and blog pages from the published snapshot, so it fails against an empty database. Run `npm run dev` pointed at the target database (`DATABASE_URL`), sign in, publish once, then deploy.
+
 To test on other devices on the same network:
 
 ```bash
@@ -189,6 +191,9 @@ npm run start
 | `npm run build` / `start` | Production build / server |
 | `npm run lint` | ESLint |
 | `npm run check:colors` | Regression check for the light/dark color tokens — run before commits that touch colors |
+| `npm run check:states` | Forbidden-edge check for the UI state machines (needs Node 22.18+) |
+| `npm run check:botch` | Ties the hero's botched pit-stop visuals to the baked sound clip |
+| `npm run check:admin` | Boundary checks: markdown import (no executable frontmatter), Blob-only image fetch, locked album slugs |
 | `npm run db:push` | Apply `db/schema.ts` to the database |
 | `npm run db:studio` | Open Drizzle Studio |
 | `npm run admin:hash-password` | Generate an admin password hash |
@@ -214,7 +219,7 @@ Sign in at `/admin/login`. Sessions last 12 hours and are enforced both by middl
 
 Each quote is `{ text, attribution?, size }` — size (1–3) biases the layout tier: Featured quotes can take the single hero spot, Standard ones skew smaller. Everything else is generated client-side in [`components/quotes/quote-cloud.tsx`](components/quotes/quote-cloud.tsx) on each load, so the same data renders a fresh layout every visit:
 
-- **Desktop** — A greedy skyline bin-packer lays quotes into an interlocking, overlap-free mosaic with sizes intermixed top-to-bottom. Typography is a two-face system (Playfair Display serif, leading; Inter sans, lighter accent) and a two-value colour scheme (bright white / dark grey) spread so neighbours alternate. Quotes by the same author are pushed apart. Hovering a quote shows its author in a cursor-following, liquid-glass tooltip.
+- **Desktop** — A greedy skyline bin-packer lays quotes into an interlocking, overlap-free mosaic with sizes intermixed top-to-bottom. Typography mixes five families (Playfair Display, Instrument Serif, Bricolage Grotesque, Familjen Grotesk and Inter, assigned per quote) and a two-value colour scheme (bright white / dark grey) spread so neighbours alternate. Quotes by the same author are pushed apart. Hovering a quote shows its author in a cursor-following, liquid-glass tooltip.
 - **Mobile** — A single vertical stack with the author beneath each quote, revealed on scroll.
 
 Size tiers, colours, gutter and reveal timing are tunable constants at the top of `quote-cloud.tsx` and in [`lib/quotes-motion.ts`](lib/quotes-motion.ts). The route-scoped serif loads via [`app/quotes/fonts.ts`](app/quotes/fonts.ts).
@@ -239,13 +244,13 @@ Clips are uploaded to Vercel Blob and go live on Publish (read from the publishe
 - **Hero** — Click or activate the name for a pit stop: the name splits into four "tires" (TAN / ISH / MIS / RA) that fly off and bolt back on to one baked sound, then it drives off the right edge and re-enters from the left (`components/hero/PITSTOP.md`); desktop pointer “magnet” on letters
 - **Home intro** — Sections reveal after the hero tagline animation (`HomeIntroGateProvider`)
 - **Scrolling** — Native browser scrolling; sections reveal on scroll via `ScrollReveal`
-- **Headings** — Section titles are solid, Title-case Inter extra-bold (`SECTION_HEADING_CLASSES`); page titles use `PAGE_TITLE_CLASSES`, clamped so long titles don't overflow the viewport
+- **Headings** — Section titles are solid, Title-case Poppins extra-bold (`SECTION_HEADING_CLASSES`); page titles use `PAGE_TITLE_CLASSES`, clamped so long titles don't overflow the viewport
 - **Skip link** — “Skip to content” in the root layout targets `#main-content`
 - **Focus** — Visible focus rings on interactive controls; section headings on the home page are keyboard-focusable where needed
 - **Reduced motion** — `prefers-reduced-motion` disables or simplifies animations (hero, album titles, photos header flash, quote cloud)
 - **Photos header** — `tanishtakespics` camera-flash effect on click
 - **Quotes** — Each quote carries an `aria-label` of its text and author (the visual text is `aria-hidden`); the cloud fades/scales in with a tiered stagger
-- **Modals** — The mobile nav uses `inert` on the rest of the page while open
+- **Modals** — The mobile nav makes the page `<main>` `inert` and locks scroll while open (header and footer stay reachable)
 - **Logo** — Scrolls to the top via a `#top` anchor at the start of `<body>`
 
 ## Deployment

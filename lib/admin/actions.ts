@@ -1,7 +1,6 @@
 "use server";
 
 import { and, eq, asc, ne, sql } from "drizzle-orm";
-import matter from "gray-matter";
 import { db } from "@/db/client";
 import { portfolio, collections, photos, quotes, posts, radioSamples, radioTriggers } from "@/db/schema";
 import {
@@ -10,6 +9,7 @@ import {
   uploadRadioSample as uploadRadioBlob,
 } from "./blob";
 import { findClosestMatch } from "./image-match";
+import { imageRefs, parseFrontmatter, rewriteImageDestinations } from "./markdown-import";
 import { publish as publishSnapshot } from "./publish";
 import { isAllowedAudioFile } from "@/lib/radio-samples";
 import type { PortfolioContent } from "@/types/content";
@@ -424,16 +424,6 @@ export async function deleteQuote(id: number) {
   draftChanged();
 }
 
-export async function reorderQuotes(orderedIds: number[]) {
-  await requireAdmin();
-  await Promise.all(
-    orderedIds.map((id, index) =>
-      db.update(quotes).set({ sortOrder: index }).where(eq(quotes.id, id)),
-    ),
-  );
-  draftChanged();
-}
-
 // ---- Blog posts ----
 
 export async function listDraftPosts() {
@@ -462,8 +452,6 @@ export async function deletePost(slug: string) {
   draftChanged();
 }
 
-const MARKDOWN_IMAGE_RE = /!\[[^\]]*\]\(([^)\s]+)\)/g;
-
 export interface ImageCheckResult {
   referencedPath: string;
   status: "ok" | "missing" | "suggested";
@@ -485,21 +473,20 @@ function normalizeFrontmatterDate(value: unknown): string {
 
 export async function importMarkdownPost(rawMarkdown: string, slug: string) {
   await requireAdmin();
-  const { data, content } = matter(rawMarkdown);
+  const { data, content } = parseFrontmatter(rawMarkdown);
   const uploaded = await listAssetFilenames(`blog/${slug}`);
   const uploadedNames = uploaded.map((u) => u.name);
 
-  let body = content;
+  const urlFor = new Map<string, string>();
   const imageChecks: ImageCheckResult[] = [];
-  for (const m of [...content.matchAll(MARKDOWN_IMAGE_RE)]) {
-    const refPath = m[1];
+  for (const refPath of imageRefs(content)) {
     const filename = refPath.split("/").pop() ?? refPath;
     const exact = uploaded.find((u) => u.name === filename);
     if (exact) {
       // The referenced path is usually a local /blog/<slug>/... path from the markdown's
       // original home — rewrite it to the uploaded image's real Blob URL, since no such
       // local path exists on the site.
-      body = body.split(refPath).join(exact.url);
+      urlFor.set(refPath, exact.url);
       imageChecks.push({ referencedPath: refPath, status: "ok" });
       continue;
     }
@@ -510,6 +497,7 @@ export async function importMarkdownPost(rawMarkdown: string, slug: string) {
         : { referencedPath: refPath, status: "missing" },
     );
   }
+  const body = rewriteImageDestinations(content, urlFor);
 
   const post = {
     slug,

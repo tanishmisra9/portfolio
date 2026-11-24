@@ -46,6 +46,11 @@ export function CollectionDetails({
           defaultValue={title}
           onBlur={(e) => e.target.value.trim() && e.target.value !== title && save({ title: e.target.value })}
         />
+        {slug === "new-york" && (
+          <span className="mt-1 block text-base text-dim">
+            The heading on this album&apos;s page is fixed artwork (New York / I ♥ NY); this title only changes the index card and page metadata.
+          </span>
+        )}
       </label>
       <label className="block">
         <span className="mb-1 block text-base text-dim">Description</span>

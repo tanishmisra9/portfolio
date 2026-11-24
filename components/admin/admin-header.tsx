@@ -36,6 +36,8 @@ export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
   const [showChanges, setShowChanges] = useState(false);
   const { dirty, changes } = useAdminDirty();
 
+  const leaveOk = () => !dirty || confirm("You have unsaved changes on this page. Leave without saving?");
+
   function handlePublish() {
     if (
       dirty &&
@@ -58,6 +60,9 @@ export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
         {!isDashboard && (
           <Link
             href={parent.href}
+            onClick={(e) => {
+              if (!leaveOk()) e.preventDefault();
+            }}
             aria-label={`Back to ${parent.label}`}
             onMouseDown={(e) => e.preventDefault()}
             className="-my-2 ml-2 flex h-11 w-11 items-center justify-center rounded-full text-muted transition-colors hover:bg-fg/10 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
@@ -103,7 +108,7 @@ export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
           {pending ? "Publishing..." : justPublished ? "Published ✓" : hasChanges === false ? "Up to date" : "Publish"}
         </button>
         <ThemeToggle />
-        <form action={logout}>
+        <form action={logout} onSubmit={(e) => { if (!leaveOk()) e.preventDefault(); }}>
           <button type="submit" className="text-sm text-dim transition-colors hover:text-fg">
             Log out
           </button>

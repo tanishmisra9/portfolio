@@ -144,7 +144,8 @@ function F1IntroRun({ onReplay, refocus }: { onReplay: (byKeyboard: boolean) => 
 
   // load in the background; the lights never wait for this. Car first, then the footage frames.
   useEffect(() => {
-    if (reduce) return;
+    // Skip / finish flips phase to "done", which re-runs this effect: the cleanup stops the loaders mid-flight.
+    if (reduce || phase === "done") return;
     let alive = true;
     (async () => {
       try {
@@ -175,7 +176,7 @@ function F1IntroRun({ onReplay, refocus }: { onReplay: (byKeyboard: boolean) => 
     return () => {
       alive = false;
     };
-  }, [reduce]);
+  }, [reduce, phase === "done"]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // no scrolling until the intro has finished
   useEffect(() => {

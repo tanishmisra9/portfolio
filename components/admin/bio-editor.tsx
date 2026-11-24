@@ -64,7 +64,7 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
     setLinkPrompt(null);
   }
 
-  const [previewOne = "", previewTwo = ""] = value.split("\n\n");
+  const [previewOne = "", ...previewRest] = value.split("\n\n").filter((p) => p.trim());
 
   return (
     <div className="space-y-2">
@@ -120,11 +120,11 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
         <p>
           <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{previewOne}</Markdown>
         </p>
-        {previewTwo && (
-          <p>
-            <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{previewTwo}</Markdown>
+        {previewRest.map((para, i) => (
+          <p key={i}>
+            <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{para}</Markdown>
           </p>
-        )}
+        ))}
       </div>
     </div>
   );

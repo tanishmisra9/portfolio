@@ -181,6 +181,7 @@ export function RadioKeystrokeListener({ samples, triggers }: Props) {
   const poolRef = useRef(samples);
   const remainingPoolRef = useRef<string[]>(shuffleCopy(samples));
   const lastPlayedRef = useRef<string | null>(null);
+  const gainBuiltRef = useRef(false);
   const gainBySampleRef = useRef<Map<string, number>>(new Map<string, number>(samples.map((url) => [url, 1])));
   const triggersRef = useRef(triggers);
   const bufferMaxRef = useRef(computeBufferMax(triggers));
@@ -192,15 +193,8 @@ export function RadioKeystrokeListener({ samples, triggers }: Props) {
     poolRef.current = samples;
     remainingPoolRef.current = samples.length > 0 ? shuffleCopy(samples) : [];
     gainBySampleRef.current = new Map<string, number>(samples.map((url) => [url, 1]));
-
-    let cancelled = false;
-    void buildGainMap(samples).then((map) => {
-      if (!cancelled) gainBySampleRef.current = map;
-    });
-
-    return () => {
-      cancelled = true;
-    };
+    // Loudness analysis (downloads + decodes every clip) waits for the first actual play: most visitors never trigger the egg.
+    gainBuiltRef.current = false;
   }, [samples]);
 
   useEffect(() => {
@@ -216,6 +210,13 @@ export function RadioKeystrokeListener({ samples, triggers }: Props) {
       if (playingRef.current) return false;
 
       const pool = poolRef.current;
+      if (!gainBuiltRef.current) {
+        // First play uses unity gain; later plays are level-matched once the analysis lands.
+        gainBuiltRef.current = true;
+        void buildGainMap(pool).then((map) => {
+          if (poolRef.current === pool) gainBySampleRef.current = map;
+        });
+      }
       const { src, remaining } = pickNextSampleFromCycle(
         pool,
         remainingPoolRef.current,

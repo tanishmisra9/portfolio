@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   deletePost,
@@ -36,6 +36,12 @@ export function PostEditor({
   const [baseline, setBaseline] = useState(initial);
   const dirty = useMemo(() => JSON.stringify(fields) !== JSON.stringify(baseline), [fields, baseline]);
   useRegisterDirty(dirty);
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
   const [pending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [imageChecks, setImageChecks] = useState<ImageCheckResult[] | null>(null);

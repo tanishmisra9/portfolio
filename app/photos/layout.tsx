@@ -12,14 +12,6 @@ export default function PhotosLayout({
 }) {
   return (
     <>
-      <link
-        rel="preload"
-        href="/fonts/itc-american-typewriter-medium.woff2"
-        as="font"
-        type="font/woff2"
-        crossOrigin="anonymous"
-      />
-      <link rel="preload" href="/heart.png" as="image" />
       {children}
     </>
   );

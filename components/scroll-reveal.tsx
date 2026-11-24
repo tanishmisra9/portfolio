@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { PHOTOS_ENTRANCE_STAGGER_S } from "@/lib/photos-motion";
 
@@ -36,11 +36,14 @@ export function ScrollReveal({
   children,
   className,
   variant = "slide",
-  reducedMotion = false,
+  reducedMotion: reducedMotionProp = false,
   photoAlbumStaggerIndex,
   photoAlbumIntroComplete,
   homeIntroComplete,
 }: Props) {
+  // The OS preference applies everywhere; the prop stays for callers that force it on.
+  const osReduced = useReducedMotion();
+  const reducedMotion = reducedMotionProp || !!osReduced;
   const slideEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
   /** Album rows: softer deceleration + a touch longer opacity for a silkier entrance. */
   const albumSlideEase: [number, number, number, number] = [0.2, 0.88, 0.34, 1];

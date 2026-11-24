@@ -136,6 +136,14 @@ export function SiteHeader() {
     setMounted(true);
   }, []);
 
+  // The overlay and its toggle are md:hidden; resizing past the breakpoint would leave the lock and inert on with nothing to close them.
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const close = (e: MediaQueryListEvent) => e.matches && setMenuOpen(false);
+    mq.addEventListener("change", close);
+    return () => mq.removeEventListener("change", close);
+  }, []);
+
   useEffect(() => {
     if (!menuOpen) return;
     const prev = document.documentElement.style.overflow;

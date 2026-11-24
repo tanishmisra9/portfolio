@@ -32,12 +32,12 @@ const DARK_TOKEN_BASELINE = {
   "--fg": "#e5e5e5",
   "--fg-rgb": "229 229 229",
   "--muted": "#b4b4b8",
-  "--dim": "#737373",
+  "--dim": "#7a7a7a",
   "--border": "rgba(255, 255, 255, 0.12)",
   "--border-strong": "rgba(255, 255, 255, 0.2)",
   "--hover-outline": "rgba(255, 255, 255, 0.4)",
   "--quote-strong": "#ffffffd5",
-  "--quote-muted": "#8c8c93bf",
+  "--quote-muted": "#8c8c93d9",
 };
 
 console.log("Dark-mode token values (app/globals.css):");
@@ -101,6 +101,25 @@ check(
   'colors.fg -> rgb(var(--fg-rgb) / <alpha-value>)',
   /fg:\s*"rgb\(var\(--fg-rgb\)\s*\/\s*<alpha-value>\)"/.test(twConfig),
 );
+
+// 3. Numeric WCAG contrast: dim text (small) >= 4.5:1, muted quote text (large) >= 3:1, in both themes.
+console.log("Contrast ratios:");
+const lin = (c) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const lum = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const lightBlock = css.match(/:root\s*{([^}]*)}/s)?.[1] ?? "";
+const tok = (block, name) => block.match(new RegExp(`${name}:\\s*([^;]+);`))?.[1]?.trim() ?? "";
+const mix = (fg, a, bg) => fg.map((c, i) => c * a + bg[i] * (1 - a));
+for (const [theme, block] of [["light", lightBlock], ["dark", darkBlock]]) {
+  const bg = hex(tok(block, "--bg"));
+  check(`${theme} --dim >= 4.5:1`, ratio(hex(tok(block, "--dim")), bg) >= 4.5);
+  const q = tok(block, "--quote-muted");
+  const rgba = q.startsWith("#")
+    ? [hex(q), parseInt(q.slice(7, 9), 16) / 255]
+    : [q.match(/[\d.]+/g).slice(0, 3).map(Number), Number(q.match(/[\d.]+/g)[3])];
+  check(`${theme} --quote-muted >= 3:1`, ratio(mix(rgba[0], rgba[1], bg), bg) >= 3);
+}
 
 console.log(
   failures === 0

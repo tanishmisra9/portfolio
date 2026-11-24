@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Inter_Tight, Poppins, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { MotionConfig } from "framer-motion";
 import { SiteChrome } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
 import { getPublishedData } from "@/lib/site-content";
@@ -92,9 +93,11 @@ export default async function RootLayout({
           >
             Skip to content
           </a>
+          <MotionConfig reducedMotion="user">
           <SiteChrome radioSamples={radioSamples} radioTriggers={radioTriggers} />
           {children}
           <SiteFooter social={social} />
+          </MotionConfig>
           </div>
         </ThemeProvider>
         <Analytics />

@@ -1,12 +1,5 @@
 import { put, list } from "@vercel/blob";
 
-export async function uploadAsset(pathnamePrefix: string, file: File) {
-  const blob = await put(`${pathnamePrefix}/${Date.now()}-${file.name}`, file, {
-    access: "public",
-  });
-  return blob;
-}
-
 /**
  * Strips the machinery Blob adds around the original filename so it can be compared
  * against a plain markdown reference like "heart.png": the old server-upload scheme's

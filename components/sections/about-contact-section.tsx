@@ -12,7 +12,7 @@ const bioBodyClass =
   "text-[1.38rem] font-[300] subpixel-antialiased leading-[1.486] md:text-[1.725rem] md:leading-[1.53]";
 
 export function AboutContactSection({ bio }: Props) {
-  const [paragraphOne = '', paragraphTwo = ''] = bio.split('\n\n');
+  const [paragraphOne = '', ...rest] = bio.split('\n\n').filter((p) => p.trim());
 
   return (
     <section id="about" className="scroll-mt-20 px-6 pb-12 pt-6 md:pb-[5.52rem] md:pt-11">
@@ -29,9 +29,11 @@ export function AboutContactSection({ bio }: Props) {
             <p className={`${bioBodyClass} text-fg`}>
               <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{paragraphOne}</Markdown>
             </p>
-            <p className={`${bioBodyClass} mt-7 text-muted md:mt-9`}>
-              <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{paragraphTwo}</Markdown>
-            </p>
+            {rest.map((para, i) => (
+              <p key={i} className={`${bioBodyClass} mt-7 text-muted md:mt-9`}>
+                <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{para}</Markdown>
+              </p>
+            ))}
           </div>
         </ScrollReveal>
       </div>
