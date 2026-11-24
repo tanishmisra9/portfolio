@@ -94,7 +94,7 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
         <div>
           {social.length > 0 && (
             <>
-          <p className="font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">Stay in touch!</p>
+          <p className="font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">Stay in touch</p>
           <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:text-lg">
             {[...social].sort((a, b) => rank(a) - rank(b)).map((link) => (
               <li key={link.id}>
