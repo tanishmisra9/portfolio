@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronUp } from "lucide-react";
@@ -35,11 +35,15 @@ function safeDecode(s: string) {
 
 function CopyEmail({ email, label, href }: { email: string; label: string; href: string }) {
   const [copied, setCopied] = useState(false);
+  // One timer: a second click restarts the 1.5s window instead of stacking timers, and unmounting clears it.
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(email);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setCopied(false), 1500);
     } catch {
       // Clipboard blocked (permission, insecure context): fall back to opening the mail client.
       window.location.href = href;
@@ -106,7 +110,7 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
           )}
         </div>
 
-        <div className="relative -top-[75px] md:justify-self-center">
+        <div className="md:relative md:-top-[75px] md:justify-self-center">
           <Tooltip label="Back to top">
             <button
               type="button"
