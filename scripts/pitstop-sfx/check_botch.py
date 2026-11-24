@@ -15,7 +15,7 @@ def rms(path, n):
     os.remove(f)
     return r
 
-LAND = [1000, 1180, 1360, 1540, 1675, 1795, 1905, 2005, 2095, 2265]   # 1540..2095 fail, 2265 = seat
+LAND = [1000, 1180, 1360, 1540, 1690, 1825, 1945, 2055, 2265]   # 1540..2055 fail, 2265 = seat (same list as build_botch.py + the 3 clean tires)
 SPLICES = {"extension in": 1350, "extension out": 2120, "xfade (botch)": 2170}
 clip = sys.argv[1]
 r10 = rms(clip, 480)

@@ -18,8 +18,8 @@ OUT = sys.argv[1]
 SHIFT = 0.77                       # = BOTCH_SHIFT_MS (770): what the extension adds; the clip's own burst resumes at 1350 + SHIFT
 INS = 0.60                         # region time where the extension goes in (clip 1.35, inside the burst, before the xfade at 1.40)
 # where each (failing) poke lands, then the final seat. Mirrors POKES in use-pitstop.ts
-LAND = [1540, 1675, 1795, 1905, 2005, 2095, 2265]
-FAIL_GAIN = [0.7, 0.6, 0.65, 0.7, 0.75, 0.8]   # the failing pokes get louder as the crew panics
+LAND = [1540, 1690, 1825, 1945, 2055, 2265]
+FAIL_GAIN = [0.7, 0.6, 0.65, 0.7, 0.8]   # the failing pokes get louder as the crew panics
 FINAL_GAIN = 1.0
 W8_AT = [0, 160, 320, 480]
 NORMAL_HITS = [(1000, 0.95), (1180, 0.85), (1360, 0.9)]   # tires 1-3 land exactly as in the normal clip
@@ -27,9 +27,8 @@ W9_AT = 3190 + int(SHIFT * 1000)   # normal clip: whoosh 9 starts 3.19s
 
 # ---- 1. extension: gated brrt pieces cut from the real rattle, ambience-only gaps, all from region.wav (same filter chain)
 # (start ms, end ms) in clip time inside [1350, 2120]. Each failing poke lands in a 50ms gap (landing -25..+25) so the
-# clack cuts through the whirr: gun brrt -> stops -> clack -> brrt. The clip's own burst resumes at 2120 for the final seat.
-PIECES = [(1350, 1515), (1565, 1650), (1700, 1770), (1820, 1880), (1930, 1980), (2030, 2070)]
-TAIL_GAP = (2070, 2120)
+# clack cuts through the whirr: gun brrt -> stops -> clack -> brrt. The clip's own burst resumes at 2120 for the final push.
+PIECES = [(1350, 1515), (1565, 1665), (1715, 1800), (1850, 1920), (1970, 2030), (2080, 2120)]
 SRC_OFF = [0.30, 0.40, 0.27, 0.45, 0.33, 0.38]   # region offsets inside the loud burst (0.25-0.60), varied so it doesn't loop
 parts = []
 t = 1350
@@ -41,9 +40,6 @@ for k, (a, b) in enumerate(PIECES):
     ff("-ss", str(SRC_OFF[k]), "-t", str(dur), "-i", "region.wav", "-af", f"afade=t=in:d=0.003,afade=t=out:st={max(0, dur - 0.005)}:d=0.005", f"piece{k}.wav")
     parts.append(f"piece{k}.wav")
     t = b
-ff("-ss", "0.02", "-t", str((TAIL_GAP[1] - TAIL_GAP[0]) / 1000), "-i", "region.wav", "-af", "afade=t=in:d=0.004", "gapT.wav")
-parts.append("gapT.wav")
-t = TAIL_GAP[1]
 assert t == int(1350 + SHIFT * 1000), (t, SHIFT)
 ins = [x for p in parts for x in ("-i", p)]
 ff(*ins, "-filter_complex", "".join(f"[{i}:a]" for i in range(len(parts))) + f"concat=n={len(parts)}:v=0:a=1", "EXT.wav")

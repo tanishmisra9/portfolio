@@ -92,8 +92,8 @@ const LAUNCH_Y = 1000;
 
 /**
  * Botched stop: chance (0..1) that a stop is the botched one. 1 ON THIS BRANCH SO IT'S ALWAYS TESTABLE; set to ~0.15 before
- * merging. `?botch=0..1` in the URL overrides it, like ?pitstopOffset. Tire BR (`RA`) is cross-threaded: the crew jabs at it
- * again and again, frantically, each failing poke a clack, then finally seats it, and the car takes off. That takes
+ * merging. `?botch=0..1` in the URL overrides it, like ?pitstopOffset. One tire (random each stop, see BOTCH_TIRES) is
+ * cross-threaded: the crew jabs at it again and again, frantically, each failing poke a clack, then finally seats it, and the car takes off. That takes
  * BOTCH_SHIFT_MS longer than a clean stop, and every sound after the gun burst is baked at fixed times, so a botched stop
  * has its own clip (`pitstop-botch.mp3`, built by scripts/pitstop-sfx/build_botch.py): the same audio with BOTCH_SHIFT_MS
  * of frantic gun inserted into the burst, so the growl, drive-off and whoosh 9 all land that much later.
@@ -111,18 +111,25 @@ const BOTCH: Profile = {
 };
 
 /**
- * BR's frantic attempts as one keyframe track: [audio-time ms, px from its slot along its diagonal]. The first point is
- * the normal slam, stopping short (lands 1540); then recoil / poke pairs, each poke landing nearer home (70 -> 10px) and
- * sooner after the last (gaps 135 -> 90ms) = the crew panicking; a back-off and one last slam (lands 2265) that seats it.
- * The failing pokes land at 1540, 1675, 1795, 1905, 2005, 2095 and the seat at 2265: the hits in build_botch.py (LAND) sit
- * on exactly these instants, so change both together. Segment eases are derived: out = easeOut, in = easeIn, first/last = snap.
+ * The botched tire's frantic attempts as one keyframe track: [audio-time ms, px from its slot]. The first point is the
+ * normal slam, stopping short (lands 1540); then recoil / poke pairs, each poke landing nearer home (70 -> 12px) and
+ * sooner after the last (period 150 -> 110ms) = the crew panicking; a back-off and one slower, determined slam (lands
+ * 2265) that seats it. EVERY SEGMENT IS >= 50ms (3 frames at 60fps): the first cut had 25-45ms ones that flickered instead
+ * of reading as motion. The failing pokes land at 1540, 1690, 1825, 1945, 2055 and the seat at 2265: the hits in
+ * build_botch.py (LAND) sit on exactly these instants, so change both together. Segment eases are derived: out =
+ * easeOut, in = easeIn, first/last = snap.
  */
 const BOTCH_TRACK = [
-  [1540, 70], [1585, 108], [1675, 56], [1715, 90], [1795, 44], [1830, 74], [1905, 30],
-  [1935, 56], [2005, 20], [2030, 42], [2095, 10], [2150, 64], [2265, 0],
+  [1540, 70], [1590, 106], [1690, 54], [1740, 86], [1825, 40], [1875, 72],
+  [1945, 26], [1995, 50], [2055, 12], [2110, 66], [2265, 0],
 ] as const;
-const BOTCH_Y_PER_X = 0.65; // BR comes in along its own diagonal
-const BOTCH_JITTER_PX = 3; // alternating y shake on every point, scaled down near home, so the jabs aren't a clean line
+/** Which tire can botch (picked at random each stop). Narrow it, e.g. ["bl", "br"] for only the bottom row. */
+const BOTCH_TIRES = ["tl", "tr", "bl", "br"] as const;
+/** Approach angle from horizontal, random per stop (the old fixed slope was ~33deg). The tire is also launched along it. */
+const BOTCH_ANGLE_DEG = [20, 60] as const;
+/** Every point of the track nudges the angle by up to this, so the crew hunts around the nut instead of repeating one line. */
+const BOTCH_DRIFT_DEG = 3;
+const BOTCH_LAUNCH_PX = 1900; // ~ the length of the normal 1600/1000 launch
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -183,6 +190,11 @@ export function usePitstop(reduceMotion: boolean | null) {
       if (phaseRef.current !== "idle") return;
       const P = profileRef.current;
       const botched = P === BOTCH;
+      // Per-stop constants (not states): which tire botches, and its approach angle.
+      const botchKey = botched ? BOTCH_TIRES[Math.floor(Math.random() * BOTCH_TIRES.length)] : null;
+      const theta = ((BOTCH_ANGLE_DEG[0] + Math.random() * (BOTCH_ANGLE_DEG[1] - BOTCH_ANGLE_DEG[0])) * Math.PI) / 180;
+      const launchOf = (key: string) =>
+        key === botchKey ? [BOTCH_LAUNCH_PX * Math.cos(theta), BOTCH_LAUNCH_PX * Math.sin(theta)] : [LAUNCH_X, LAUNCH_Y];
       const audio = audioRef.current;
       if (audio) {
         audio.pause();
@@ -212,8 +224,8 @@ export function usePitstop(reduceMotion: boolean | null) {
         await wait(LAUNCH_MS[i] + latency);
         if (!aliveRef.current) return;
         await Promise.all([
-          tween(mv.tires[key].x, dx * LAUNCH_X, { duration: LAUNCH_S, ease: "easeIn" }),
-          tween(mv.tires[key].y, dy * LAUNCH_Y, { duration: LAUNCH_S, ease: "easeIn" }),
+          tween(mv.tires[key].x, dx * launchOf(key)[0], { duration: LAUNCH_S, ease: "easeIn" }),
+          tween(mv.tires[key].y, dy * launchOf(key)[1], { duration: LAUNCH_S, ease: "easeIn" }),
         ]);
       });
 
@@ -249,41 +261,46 @@ export function usePitstop(reduceMotion: boolean | null) {
       const at = (ms: number) => wait(Math.max(0, anchor + ms + latency - performance.now()));
 
       go("bolt");
+      // Bolt order: the botched tire always takes the LAST slot (the clip's frantic section follows the 4th landing), the
+      // others keep their natural order, so any tire can botch without touching the audio.
+      const order = [...TIRES.filter((x) => x.key !== botchKey), ...TIRES.filter((x) => x.key === botchKey)];
+      const minTh = (15 * Math.PI) / 180;
+      const maxTh = (65 * Math.PI) / 180;
       const settled: Promise<unknown>[] = [];
-      for (let i = 0; i < TIRES.length; i++) {
-        await at(BOLT_MS[i]);
+      for (let k = 0; k < order.length; k++) {
+        await at(BOLT_MS[k]);
         if (!aliveRef.current) return;
-        const t = mv.tires[TIRES[i].key];
-        if (botched && TIRES[i].key === "br") {
-          // Frantic: one keyframe track per axis from where the tire is now (flying in) through every poke to the seat.
-          const t0 = BOLT_MS[i];
-          const total = BOTCH_TRACK[BOTCH_TRACK.length - 1][0] - t0;
-          const times = [0, ...BOTCH_TRACK.map(([ms]) => (ms - t0) / total)];
-          const ease = BOTCH_TRACK.map(([, d], j) =>
-            j === 0 || j === BOTCH_TRACK.length - 1 ? snapTween.ease : d > BOTCH_TRACK[j - 1][1] ? "easeOut" : "easeIn",
-          );
-          const xs = [t.x.get(), ...BOTCH_TRACK.map(([, d]) => d)];
-          const ys = [
-            t.y.get(),
-            ...BOTCH_TRACK.map(([, d], j) => d * BOTCH_Y_PER_X + (j % 2 ? 1 : -1) * BOTCH_JITTER_PX * Math.min(1, d / 20)),
-          ];
-          const opts = { duration: total / 1000, times, ease };
-          const track = [animate(t.x, xs, opts), animate(t.y, ys, opts)];
-          animsRef.current.push(...track);
-          settled.push(
-            (async () => {
-              await Promise.all(track);
-              if (!aliveRef.current) return;
-              t.y.set(LAND_KICK_PX);
-              await tween(t.y, 0, wobbleSpring);
-            })(),
-          );
-          continue;
-        }
-        // Slam home, then (at the landing instant) kick down and wobble back.
+        const { key, dx, dy } = order[k];
+        const t = mv.tires[key];
+        // Every tire is a keyframe track [audio ms, x, y] from where it is now to home. A clean tire is one slam (lands
+        // SNAP_S later); the botched one jabs at its slot first, along its per-stop angle that drifts a little per point.
+        let th = theta;
+        const pts: [number, number, number][] =
+          key === botchKey
+            ? BOTCH_TRACK.map(([ms, d]) => {
+                th = Math.min(maxTh, Math.max(minTh, th + ((Math.random() * 2 - 1) * BOTCH_DRIFT_DEG * Math.PI) / 180));
+                return [ms, dx * d * Math.cos(th), dy * d * Math.sin(th)];
+              })
+            : [[BOLT_MS[k] + SNAP_S * 1000, 0, 0]];
+        const t0 = BOLT_MS[k];
+        const total = pts[pts.length - 1][0] - t0;
+        const dist = (p: number[]) => Math.hypot(p[1], p[2]);
+        const opts = {
+          duration: total / 1000,
+          times: [0, ...pts.map((p) => (p[0] - t0) / total)],
+          ease: pts.map((p, j) =>
+            j === 0 || j === pts.length - 1 ? snapTween.ease : dist(p) > dist(pts[j - 1]) ? ("easeOut" as const) : ("easeIn" as const),
+          ),
+        };
+        const track = [
+          animate(t.x, [t.x.get(), ...pts.map((p) => p[1])], opts),
+          animate(t.y, [t.y.get(), ...pts.map((p) => p[2])], opts),
+        ];
+        animsRef.current.push(...track);
+        // Landed: kick down and wobble back (the same for every tire).
         settled.push(
           (async () => {
-            await Promise.all([tween(t.x, 0, snapTween), tween(t.y, 0, snapTween)]);
+            await Promise.all(track);
             if (!aliveRef.current) return;
             t.y.set(LAND_KICK_PX);
             await tween(t.y, 0, wobbleSpring);
