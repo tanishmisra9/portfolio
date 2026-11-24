@@ -121,14 +121,6 @@ export type PhotoCollection = {
   photos: Photo[];
 };
 
-export type RandomPhotoCandidate = {
-  src: string;
-  alt: string;
-  caption?: string;
-  collectionTitle: string;
-  collectionSlug: string;
-};
-
 // ---- Quotes ----
 
 export type QuoteEntry = {

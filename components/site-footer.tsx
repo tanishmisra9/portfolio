@@ -106,16 +106,18 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
           )}
         </div>
 
-        <div className="md:justify-self-center">
+        <div className="relative -top-[75px] md:justify-self-center">
           <Tooltip label="Back to top">
             <button
               type="button"
               onClick={backToTop}
               {...noMouseFocus}
               aria-label="Back to top"
-              className="-m-3 flex items-center justify-center p-3 text-muted transition-colors hover:bg-fg/10 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 active:bg-fg/20"
+              className={`${HOVER_FILL_LINK} -m-3 flex items-center justify-center p-3 text-muted transition-colors`}
             >
-              <ChevronUp className="size-8" strokeWidth={1.25} aria-hidden />
+              <HoverFill>
+                <ChevronUp className="size-8" strokeWidth={1.25} aria-hidden />
+              </HoverFill>
             </button>
           </Tooltip>
         </div>

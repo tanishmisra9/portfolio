@@ -9,7 +9,7 @@ All content lives in a database and is edited through a built-in, password-prote
 ## Overview
 
 - **Home (`/`)** — Hero, experience, education, skills, certifications, projects, and about/contact
-- **Photos (`/photos`)** — Collection grid, interactive header, and a “Surprise me!” random photo overlay
+- **Photos (`/photos`)** — Collection grid and interactive header
 - **Album pages (`/photos/[slug]`)** — One page per collection, each with its own title interaction
 - **Blog (`/blog`, `/blog/[slug]`)** — Markdown posts with images, rendered with a scroll-reveal
 - **Quotes (`/quotes`)** — A skyline-packed mosaic on desktop (different fonts, sizes and arrangement every visit) and a clean vertical stack on mobile
@@ -54,7 +54,7 @@ Collections are managed at `/admin/photos`. A few have code-driven title interac
 
 | Slug | Title | Notes |
 | --- | --- | --- |
-| `super-max` | Super Max | Pinned first on `/photos`; excluded from Surprise me; click title → branded flyby |
+| `super-max` | Super Max | Pinned first on `/photos`; click title → branded flyby |
 | `campus` | Purdue grounds | |
 | `snowfall` | Snowfall | Click title → snow burst |
 | `uk-2025` | UK | Click title → flag color sweep |
@@ -62,8 +62,6 @@ Collections are managed at `/admin/photos`. A few have code-driven title interac
 | `smokies` | The Smokies | Click title → fog canvas |
 | `new-year` | New Year | Click title → fireworks |
 | `standalone` | Standalones | |
-
-**Surprise me** on `/photos` draws from every collection except `super-max` (`lib/random-photo-candidates.ts`).
 
 ## Tech stack
 
@@ -247,7 +245,7 @@ Clips are uploaded to Vercel Blob and go live on Publish (read from the publishe
 - **Reduced motion** — `prefers-reduced-motion` disables or simplifies animations (hero, album titles, photos header flash, quote cloud)
 - **Photos header** — `tanishtakespics` camera-flash effect on click
 - **Quotes** — Each quote carries an `aria-label` of its text and author (the visual text is `aria-hidden`); the cloud fades/scales in with a tiered stagger
-- **Modals** — The Surprise overlay and mobile nav use `inert` on the rest of the page while open
+- **Modals** — The mobile nav uses `inert` on the rest of the page while open
 - **Logo** — Scrolls to the top via a `#top` anchor at the start of `<body>`
 
 ## Deployment

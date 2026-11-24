@@ -1,6 +1,5 @@
 import { PhotosIndexMotion } from "@/components/photos/photos-index-motion";
 import { getPublishedData } from "@/lib/site-content";
-import { getRandomPhotoCandidates } from "@/lib/random-photo-candidates";
 
 const PINNED_FIRST_SLUG = "super-max";
 
@@ -20,10 +19,7 @@ export default async function PhotosPage() {
 
   return (
     <main id="main-content" tabIndex={-1} className="relative z-0 isolate px-6 pb-24 pt-12 md:py-24">
-      <PhotosIndexMotion
-        collections={indexCollections}
-        randomPhotos={getRandomPhotoCandidates(data.collections)}
-      />
+      <PhotosIndexMotion collections={indexCollections} />
     </main>
   );
 }

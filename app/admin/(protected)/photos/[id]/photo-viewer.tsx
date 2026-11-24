@@ -9,7 +9,7 @@ import type { photos } from "@/db/schema";
 
 type Photo = InferSelectModel<typeof photos>;
 
-/** The public "Surprise!" photo dialog, cut down for the admin: same look, plus caption and alt text, none of the extras. */
+/** A photo dialog for the admin: dark glass look, plus caption and alt text, none of the extras. */
 export function PhotoViewer({ photo, onClose }: { photo: Photo | null; onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
