@@ -156,7 +156,7 @@ export default async function BlogPostPage({ params }: Props) {
       {/* The article spans the header's container (w-screen max-w-6xl, centred on the viewport) with the header's px-6, so
           the back button, title and body all share the "TM" logo's left edge; the title and body use max-w-5xl of it. */}
       <article className="relative left-1/2 w-screen max-w-6xl -translate-x-1/2 px-6">
-        <BackButton href="/blog" label="Back to thoughts" />
+        <BackButton href="/thoughts" label="Back to thoughts" />
 
         {/* pl-5 (1.25rem) lines the text up with the back button's chevron, the visible start of the button, rather than its faint border box. */}
         <div className="max-w-5xl pl-5">

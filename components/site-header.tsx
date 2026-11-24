@@ -22,7 +22,7 @@ type NavItem = { href: string; label: string; tip: string };
 const NAV: NavItem[] = [
   { href: "#about", label: "ABOUT", tip: "About me" },
   { href: "/photos", label: "PHOTOS", tip: "Photography" },
-  { href: "/blog", label: "THOUGHTS", tip: "Writing" },
+  { href: "/thoughts", label: "THOUGHTS", tip: "Writing" },
   { href: "/quotes", label: "QUOTES", tip: "Lines worth keeping" },
   { href: "/f1", label: "F1", tip: "Formula 1" },
 ];

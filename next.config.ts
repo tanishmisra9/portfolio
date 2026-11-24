@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // The page was /blog before it was renamed to /thoughts; keep old links working.
+  async redirects() {
+    return [
+      { source: "/blog", destination: "/thoughts", permanent: true },
+      { source: "/blog/:slug", destination: "/thoughts/:slug", permanent: true },
+    ];
+  },
   experimental: {
     /* Avoid dev-only SegmentViewNode / client-manifest errors with App Router + RSC */
     devtoolSegmentExplorer: false,

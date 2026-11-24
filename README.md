@@ -11,7 +11,7 @@ All content lives in a database and is edited through a built-in, password-prote
 - **Home (`/`)** — Hero, experience, education, skills, certifications, projects, and about/contact
 - **Photos (`/photos`)** — Collection grid and interactive header
 - **Album pages (`/photos/[slug]`)** — One page per collection, each with its own title interaction
-- **Thoughts (`/blog`, `/blog/[slug]`)** — Markdown posts with images, rendered with a scroll-reveal
+- **Thoughts (`/thoughts`, `/thoughts/[slug]`)** — Markdown posts with images, rendered with a scroll-reveal
 - **Quotes (`/quotes`)** — A skyline-packed mosaic on desktop (different fonts, sizes and arrangement every visit) and a clean vertical stack on mobile
 - **Admin (`/admin`)** — Draft → Publish CMS for everything above, plus the radio easter egg
 - **Box Box easter egg** — F1 team-radio clips on any page (desktop: type a trigger word such as `bbb` or `boxbox`; mobile: triple-tap within 800ms)
@@ -25,8 +25,8 @@ All content lives in a database and is edited through a built-in, password-prote
 | `/` | Portfolio home |
 | `/photos` | Photography index (Super Max pinned first) |
 | `/photos/[slug]` | Album pages (see collections below) |
-| `/blog` | Post index |
-| `/blog/[slug]` | A single post |
+| `/thoughts` | Post index |
+| `/thoughts/[slug]` | A single post |
 | `/quotes` | Generative typographic quote cloud |
 | `/admin/login` | Admin sign-in |
 | `/admin` | Admin dashboard → Portfolio, Photos, Quotes, Blog, Radio |
@@ -40,7 +40,7 @@ All content lives in a database and is edited through a built-in, password-prote
                           published_snapshot (one JSON row)
                                       │  read by
                                       ▼
-                       public pages (/, /photos, /blog, /quotes)
+                       public pages (/, /photos, /thoughts, /quotes)
 ```
 
 - **Drafts and Publish.** Edits in the admin are saved as drafts. Nothing reaches the public site until you click **Publish**, which assembles all drafts into a single snapshot (`lib/admin/publish.ts`) that the public pages read (`lib/site-content.ts`). The header button reads **Up to date** when drafts match what's live and is disabled until you change something.
