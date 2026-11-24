@@ -11,10 +11,15 @@ export default async function PhotosPage() {
       if (b.slug === PINNED_FIRST_SLUG) return 1;
       return 0;
     })
-    .map((c) => ({
+    .map((c, i) => ({
       slug: c.slug,
       title: c.title,
       coverImage: c.coverImage,
+      frames: c.photos.reduce((n, p) => n + (p.duetWith ? 2 : 1), 0),
+      strip: c.photos
+        .map((p) => p.src)
+        .filter((src) => src !== c.coverImage)
+        .slice(0, i === 0 ? 4 : 3),
     }));
 
   return (

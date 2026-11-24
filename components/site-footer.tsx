@@ -8,10 +8,11 @@ import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { SocialLink } from "@/types/content";
 
-const SOCIAL_ORDER = ["LinkedIn", "GitHub", "Resume", "Email"];
+const SOCIAL_ORDER = ["LinkedIn", "GitHub", "Instagram", "Resume", "Email"];
 const SOCIAL_TIPS: Record<string, string> = {
   LinkedIn: "Connect on LinkedIn",
   GitHub: "My projects on GitHub",
+  Instagram: "Photos on Instagram",
   Resume: "Download PDF",
 };
 
@@ -81,6 +82,9 @@ function SocialItem({ link }: { link: SocialLink }) {
   return tip ? <Tooltip label={tip}>{anchor}</Tooltip> : anchor;
 }
 
+/** Always in the footer, so it needs no admin entry; a link labelled "Instagram" added in /admin/portfolio/social replaces it. */
+const INSTAGRAM: SocialLink = { id: "social-instagram", label: "Instagram", href: "https://www.instagram.com/tanishtakespics/", display: "Instagram" };
+
 const rank = (l: SocialLink) => {
   const i = SOCIAL_ORDER.indexOf(l.label);
   return i === -1 ? SOCIAL_ORDER.length : i;
@@ -90,17 +94,19 @@ const rank = (l: SocialLink) => {
 export function SiteFooter({ social }: { social: SocialLink[] }) {
   const pathname = usePathname();
   if (pathname?.startsWith("/admin") || pathname === "/f1") return null;
+  const links = social.some((l) => l.label === "Instagram") ? social : [...social, INSTAGRAM];
 
   return (
     <footer className="px-6 pb-10 pt-20 md:pt-28">
       <div className="mx-auto max-w-6xl">
       <div className="grid gap-y-10 md:grid-cols-[1fr_auto_1fr] md:items-start md:gap-x-8">
-        <div>
-          {social.length > 0 && (
+        {/* min-w-0 + xl:flex-nowrap: at xl+ the whole row (incl. the email) stays on one line and may run under the back-to-top chevron, which sits 75px above it. */}
+        <div className="min-w-0">
+          {links.length > 0 && (
             <>
           <p className="font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">Stay in touch</p>
-          <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:text-lg">
-            {[...social].sort((a, b) => rank(a) - rank(b)).map((link) => (
+          <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:text-lg xl:w-max xl:flex-nowrap">
+            {[...links].sort((a, b) => rank(a) - rank(b)).map((link) => (
               <li key={link.id}>
                 <SocialItem link={link} />
               </li>

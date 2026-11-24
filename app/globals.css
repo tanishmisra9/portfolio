@@ -191,6 +191,40 @@ body {
   --pd-sunrise: 0;
 }
 
+/* The intro's sky runs behind the glass nav (so the glass blurs it), and the nav takes
+   whichever ink reads on the sky currently behind it. photos-intro.tsx sets
+   html[data-pd-sky] to the visible sky (0-3, absent before and after the intro); the
+   theme decides which skies are dark. This only re-points the nav's own tokens, so
+   every nav state (hover fill, active pill, focus ring) follows. */
+html:not(.dark)[data-pd-sky="0"] [data-site-header],
+html:not(.dark)[data-pd-sky="1"] [data-site-header] {
+  /* pre-dawn / dawn behind a light-theme nav: light ink */
+  --bg: #000000;
+  --bg-rgb: 0 0 0;
+  --fg: #f5f5f4;
+  --fg-rgb: 245 245 244;
+  --muted: rgba(255, 255, 255, 0.8);
+  --dim: rgba(255, 255, 255, 0.72);
+  --surface: rgba(0, 0, 0, 0.18);
+  --border: rgba(255, 255, 255, 0.16);
+  --border-strong: rgba(255, 255, 255, 0.26);
+  --hover-outline: rgba(255, 255, 255, 0.4);
+}
+
+html.dark[data-pd-sky="1"] [data-site-header] {
+  /* golden hour behind a dark-theme nav: dark ink */
+  --bg: #fafaf9;
+  --bg-rgb: 250 250 249;
+  --fg: #1c1408;
+  --fg-rgb: 28 20 8;
+  --muted: rgba(28, 20, 8, 0.78);
+  --dim: rgba(28, 20, 8, 0.7);
+  --surface: rgba(255, 255, 255, 0.14);
+  --border: rgba(0, 0, 0, 0.14);
+  --border-strong: rgba(0, 0, 0, 0.24);
+  --hover-outline: rgba(0, 0, 0, 0.32);
+}
+
 /* The two halves of "I think anyone… / since the best camera…" and the arrow linking
    them share one heading while the sky changes under them: the first half and the
    arrow take the second sky's text colour when the stage flips data-sky to 2. */
@@ -244,7 +278,7 @@ body {
 .viewfinder::after {
   --vf-c: rgb(var(--vf-rgb, var(--fg-rgb)));
   --vf-l: var(--vf-len, 18px);
-  --vf-w: 2px;
+  --vf-w: var(--vf-weight, 2px);
   content: "";
   position: absolute;
   inset: var(--vf-inset, -0.6rem);
@@ -266,6 +300,16 @@ body {
     transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
+/* Title brackets (the photos hero): longer, thicker and brighter at rest than the base corners, which the collection tiles also use. */
+.viewfinder-title {
+  --vf-len: 30px;
+}
+
+.viewfinder-title::after {
+  --vf-w: 3px;
+  --vf-opacity: 0.75;
+}
+
 /* Title: brighten on hover/focus, snap inward like an AF lock on each shot. */
 .viewfinder-title:focus-visible::after {
   --vf-opacity: 1;
@@ -275,6 +319,16 @@ body {
 @media (hover: hover) {
   .viewfinder-title:hover::after {
     --vf-opacity: 1;
+  }
+}
+
+/* Phones: the title nearly fills the width, so the corners get smaller, thinner and
+   tucked in closer, leaving them room to snap inward on a shot. */
+@media (max-width: 639px) {
+  .viewfinder-title {
+    --vf-len: 10px;
+    --vf-weight: 1.5px;
+    --vf-inset: -0.3rem;
   }
 }
 

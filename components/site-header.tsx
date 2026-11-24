@@ -216,6 +216,7 @@ export function SiteHeader() {
   return (
     <>
       <motion.header
+        data-site-header
         className={`relative sticky top-0 border-b border-border ${
           menuOpen ? "z-[10001]" : "z-50"
         }`}

@@ -43,13 +43,18 @@ export function PhotosHeader() {
   }, [flashing]);
 
   return (
-    <h1
-      onClick={handleClick}
-      className={`${PAGE_TITLE_CLASSES} cursor-default motion-reduce:animate-none ${
-        flashing ? "camera-flash-text" : ""
-      }`}
-    >
-      tanishtakespics
-    </h1>
+    <div className="flex flex-col items-center">
+      <h1 className={`${PAGE_TITLE_CLASSES} motion-reduce:animate-none ${flashing ? "camera-flash-text" : ""}`}>
+        <button
+          type="button"
+          onClick={handleClick}
+          aria-label="tanishtakespics. Take a photo"
+          data-shot={flashing ? "on" : "off"}
+          className="viewfinder viewfinder-title relative cursor-pointer px-[0.35em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 focus-visible:ring-offset-8 focus-visible:ring-offset-bg"
+        >
+          tanishtakespics
+        </button>
+      </h1>
+    </div>
   );
 }
