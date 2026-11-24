@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "app/globals.css"
+        ],
+        "createdAt": "2026-11-24T00:50:51.723Z",
+        "reason": "sanctioned exception, not confirmed by the user this session: the UK flag colour sweep on the /photos/uk-2025 title is an intentional click effect (commit 2781cf2 'Added a UK passby flag colors effect'), a literal flag-colour wipe rather than decorative gradient text"
+      }
+    ]
+  }
+}

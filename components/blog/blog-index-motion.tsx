@@ -69,17 +69,14 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
                   className="absolute right-6 top-6 size-6 -translate-x-1 text-fg opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 motion-reduce:transition-none"
                   strokeWidth={1.75}
                 />
-                {/* Dateline: a hairline rule then the date in the body face (the post page's date voice), tabular figures so stacked cards line up. */}
-                <div className="flex items-center gap-3 text-sm text-dim">
-                  <span aria-hidden className="h-px w-5 bg-border-strong" />
-                  <time dateTime={post.date} className="tabular-nums">
-                    {new Date(`${post.date}T00:00`).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </time>
-                </div>
+                {/* Flush with the title and description (one left axis), body face, tabular figures. */}
+                <time dateTime={post.date} className="block text-sm tabular-nums text-dim">
+                  {new Date(`${post.date}T00:00`).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </time>
                 {/* The card is the hover/focus target (group): an outline rectangle appears around the title instantly, and disappears instantly. */}
                 <h2 className="relative -ml-3 mt-1 w-fit px-3 py-1.5 font-display text-2xl font-bold text-fg">
                   {post.title}
