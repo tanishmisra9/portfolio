@@ -66,7 +66,7 @@ const DIM_TOKEN_SITES = [
   ["app/blog/[slug]/page.tsx", 'text-xs uppercase tracking-wide text-dim">'],
   ["components/blog/blog-index-motion.tsx", 'className="mt-8 text-dim">'],
   ["components/blog/blog-index-motion.tsx", 'text-xs uppercase tracking-wide text-dim">'],
-  ["components/hero/hero.tsx", 'translate-x-[0.14em] text-dim md:mt-4 md:translate-x-0"'],
+  ["components/hero/hero.tsx", 'translate-x-[0.14em] text-dim md:-mt-5"'],
   ["components/hero/scatter-name.tsx", '"text-fg" : "text-dim";'],
   ["components/quotes/quote-cloud.tsx", 'tracking-[0.2em] text-dim"'],
   ["components/sections/skills-section.tsx", '<span className="text-dim transition-colors group-hover:text-fg">'],

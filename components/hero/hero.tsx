@@ -118,9 +118,9 @@ export function Hero({ subtitle }: HeroProps) {
   }, []);
 
   return (
-    <section className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[85vh] md:items-center md:py-24">
+    <section className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[82vh] md:items-center md:py-24">
       <div className="mx-auto w-full max-w-6xl">
-        <div className="mb-6 flex flex-col items-center md:mb-0 md:items-start">
+        <div className="mb-6 flex flex-col items-center md:mb-32">
           <HeroNameMotion>
             <>
               <h1 className="sr-only">TANISH MISRA</h1>
@@ -128,7 +128,7 @@ export function Hero({ subtitle }: HeroProps) {
                 role="button"
                 tabIndex={0}
                 aria-label="Play name pit-stop animation"
-                className="heading-bleed-mobile flex flex-col items-center cursor-pointer select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:items-start md:text-[clamp(2.256rem,12vw,11.6rem)] md:leading-[0.85]"
+                className="heading-bleed-mobile flex flex-col items-center cursor-pointer select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tighter outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:text-[clamp(2.256rem,9.026vw,8.726rem)]"
                 onClick={onNameClick}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -149,7 +149,7 @@ export function Hero({ subtitle }: HeroProps) {
                     onScatterComplete={onLineScatterComplete}
                   />
                 </div>
-                <div className="-mt-3 translate-x-[0.14em] text-dim md:mt-4 md:translate-x-0">
+                <div className="-mt-3 translate-x-[0.14em] text-dim md:-mt-5">
                   <ScatterName
                     text="MISRA"
                     lineId="misra"
@@ -168,7 +168,7 @@ export function Hero({ subtitle }: HeroProps) {
             </>
           </HeroNameMotion>
           <motion.div
-            className="mt-7 flex max-w-4xl flex-col items-center gap-3 text-center font-sans text-xl leading-relaxed md:mt-16 md:items-start md:gap-2 md:text-left md:text-2xl"
+            className="mt-7 flex max-w-4xl flex-col items-center gap-3 text-center font-sans text-xl leading-relaxed md:mt-14 md:text-2xl"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{

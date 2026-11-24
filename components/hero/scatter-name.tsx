@@ -155,8 +155,7 @@ function ScatterEntranceSpace({
   );
 }
 
-/* 250 (was 350) so the cursor can rest beside/below the left-aligned hero name without moving it. */
-const MAGNET_RADIUS = 250;
+const MAGNET_RADIUS = 350;
 const PULL_FACTOR = 0.5;
 const MAX_PULL = 100;
 
