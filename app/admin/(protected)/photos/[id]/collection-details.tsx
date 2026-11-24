@@ -39,7 +39,7 @@ export function CollectionDetails({
       if (result.ok) return;
       // A rejected value isn't saved, so don't leave it sitting in the field.
       input.value = slug;
-      setSlugError("That slug couldn't be saved.");
+      setSlugError(result.error);
     })();
   }
 

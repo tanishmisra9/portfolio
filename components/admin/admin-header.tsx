@@ -26,12 +26,10 @@ export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const publishing = useSaveStatus();
-  const [showChanges, setShowChanges] = useState(false);
   const [ask, setAsk] = useState<Ask | null>(null);
-  const { dirty, changes } = useAdminDirty();
+  const { dirty } = useAdminDirty();
   const logoutForm = useRef<HTMLFormElement>(null);
   const bypassLogout = useRef(false);
-  const popover = useRef<HTMLDivElement>(null);
 
   // One guard for every in-app link (nav, logo, back buttons, dashboard cards, View site): with unsaved edits, ask first.
   useEffect(() => {
@@ -49,24 +47,13 @@ export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
     return () => document.removeEventListener("click", onClick, true);
   }, [dirty, router]);
 
-  // Esc closes the banner and the changes popover; a click outside closes the popover.
+  // Esc dismisses the confirm banner.
   useEffect(() => {
-    if (!ask && !showChanges) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      setAsk(null);
-      setShowChanges(false);
-    };
-    const onDown = (e: MouseEvent) => {
-      if (showChanges && !popover.current?.contains(e.target as Node)) setShowChanges(false);
-    };
+    if (!ask) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setAsk(null);
     document.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onDown);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onDown);
-    };
-  }, [ask, showChanges]);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [ask]);
 
   function doPublish() {
     startTransition(async () => {
@@ -95,28 +82,7 @@ export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
           ))}
         </nav>
         <div className="relative ml-auto flex items-center gap-2">
-          {dirty && (
-            <div ref={popover} className="relative">
-              <button
-                type="button"
-                aria-expanded={showChanges}
-                onClick={() => setShowChanges((v) => !v)}
-                className="px-2 py-1 text-sm text-danger underline decoration-danger/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-              >
-                Unsaved changes
-              </button>
-              {showChanges && changes.length > 0 && (
-                <div className="absolute right-0 top-full z-10 mt-2 w-56 border border-border-strong bg-bg p-2">
-                  <p className="mb-1 px-2 text-sm text-dim">Changed:</p>
-                  {changes.map((c) => (
-                    <a key={c.key} href={`#section-${c.key}`} onClick={() => setShowChanges(false)} className="block px-2 py-1 text-sm text-fg hover:bg-fg/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70">
-                      {c.label}
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          {dirty && <span className="px-2 text-sm text-danger">Unsaved changes</span>}
           <SaveStatus state={publishing} failed="Couldn’t publish" done="" className="hidden sm:inline" />
           <IconButton href="/" icon={<ExternalLink />} label="View site" target="_blank" />
           <ThemeToggle />

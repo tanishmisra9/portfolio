@@ -528,7 +528,14 @@ function normalizeFrontmatterDate(value: unknown): string {
 
 export async function importMarkdownPost(rawMarkdown: string, slug: string) {
   await requireAdmin();
-  const { data, content } = parseFrontmatter(rawMarkdown);
+  // Returned, not thrown: Next hides a server action's thrown message in production, so the reason would never reach the editor.
+  let parsed: ReturnType<typeof parseFrontmatter>;
+  try {
+    parsed = parseFrontmatter(rawMarkdown);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Couldn’t read that file." };
+  }
+  const { data, content } = parsed;
   const uploaded = await listAssetFilenames(`blog/${slug}`);
   const uploadedNames = uploaded.map((u) => u.name);
 

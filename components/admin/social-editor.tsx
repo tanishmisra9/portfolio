@@ -1,9 +1,8 @@
 "use client";
 
-import { ICON_OPTIONS, resolveIcon } from "@/components/social-icon";
 import { Button } from "@/components/admin/ui/button";
 import { DeleteButton } from "@/components/admin/ui/delete-button";
-import { Field, Input, Select } from "@/components/admin/ui/field";
+import { Field, Input } from "@/components/admin/ui/field";
 import { ResumeUploader } from "./resume-uploader";
 import type { SocialLink } from "@/types/content";
 
@@ -33,7 +32,6 @@ export function SocialEditor({
     <div className="space-y-4">
       <div className="grid items-start gap-5 sm:grid-cols-2">
         {items.map((item) => {
-          const Icon = resolveIcon(item);
           const locked = LOCKED_IDS.has(item.id);
           return (
             <div
@@ -41,7 +39,6 @@ export function SocialEditor({
               className="space-y-2 border border-border bg-surface p-4 backdrop-blur-md md:p-6"
             >
               <div className="flex items-center gap-2">
-                <Icon className="h-4 w-4 shrink-0 text-muted" aria-hidden />
                 {locked ? (
                   <span className="flex-1 text-base text-fg">{item.label}</span>
                 ) : (
@@ -50,21 +47,6 @@ export function SocialEditor({
                     value={item.label}
                     onChange={(e) => update(item.id, { label: e.target.value })}
                   />
-                )}
-                {!locked && (
-                  <Select
-                    aria-label="Icon"
-                    className="!w-auto"
-                    value={item.icon ?? ""}
-                    onChange={(e) => update(item.id, { icon: e.target.value || undefined })}
-                  >
-                    <option value="">Auto</option>
-                    {ICON_OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </Select>
                 )}
               </div>
 

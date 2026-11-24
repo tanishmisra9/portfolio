@@ -26,12 +26,22 @@ async function recentFailures(ip: string): Promise<number> {
   }
 }
 
-async function recordFailure(ip: string) {
+/** Records the attempt BEFORE the password is compared, so parallel guesses all count (a check-then-record throttle let N parallel requests all read the old count). */
+async function recordAttempt(ip: string) {
   try {
     await db.insert(loginAttempts).values({ ip });
     await db.delete(loginAttempts).where(lt(loginAttempts.at, new Date(Date.now() - 24 * 3_600_000)));
   } catch (e) {
-    console.error("[login] could not record failed attempt:", e);
+    console.error("[login] could not record attempt:", e);
+  }
+}
+
+/** A correct password clears this IP's attempts, so earlier typos don't keep counting. */
+async function clearAttempts(ip: string) {
+  try {
+    await db.delete(loginAttempts).where(eq(loginAttempts.ip, ip));
+  } catch (e) {
+    console.error("[login] could not clear attempts:", e);
   }
 }
 
@@ -43,7 +53,9 @@ export async function login(_prevState: string | undefined, formData: FormData) 
 
   // Vercel sets x-forwarded-for; the first entry is the client.
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-  if ((await recentFailures(ip)) >= MAX_FAILED) {
+  await recordAttempt(ip);
+  // Counts this attempt too, so the (MAX_FAILED + 1)th attempt in the window is the first one refused.
+  if ((await recentFailures(ip)) > MAX_FAILED) {
     return "Too many attempts. Try again in a few minutes.";
   }
 
@@ -69,10 +81,8 @@ export async function login(_prevState: string | undefined, formData: FormData) 
     // diagnosable message instead of an unhandled 500.
     throw new Error("ADMIN_PASSWORD_HASH is not a valid bcrypt hash.");
   }
-  if (!valid) {
-    await recordFailure(ip);
-    return "Incorrect password.";
-  }
+  if (!valid) return "Incorrect password.";
+  await clearAttempts(ip);
 
   const session = await getSession();
   session.isLoggedIn = true;

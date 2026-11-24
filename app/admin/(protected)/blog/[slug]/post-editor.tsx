@@ -78,6 +78,8 @@ export function PostEditor({
   const [pending, startTransition] = useTransition();
   const status = useSaveStatus();
   const [slugError, setSlugError] = useState<string | null>(null);
+  // Save draft upserts by slug, so it must not run while a rename is in flight (it would re-create the post under the old slug).
+  const [renaming, setRenaming] = useState(false);
   const [pendingMd, setPendingMd] = useState<File | null>(null);
   const [imageChecks, setImageChecks] = useState<ImageCheckResult[] | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -107,8 +109,10 @@ export function PostEditor({
       setSlugError(null);
       return;
     }
+    setRenaming(true);
     void (async () => {
       const result = await status.run(() => renamePost(fields.slug, input.value));
+      setRenaming(false);
       if (!result.ok) {
         setSlugError(result.error);
         input.value = fields.slug;
@@ -132,9 +136,10 @@ export function PostEditor({
         // imported result is itself the new saved baseline, not a pending edit.
         const result = await status.run(() => importMarkdownPost(raw, fields.slug));
         if (!result.ok) return;
-        setFields(result.value.post);
-        setBaseline(result.value.post);
-        setImageChecks(result.value.imageChecks);
+        const { post, imageChecks } = result.value as Exclude<typeof result.value, { error: string }>;
+        setFields(post);
+        setBaseline(post);
+        setImageChecks(imageChecks);
       })();
     };
     reader.readAsText(file);
@@ -288,7 +293,7 @@ export function PostEditor({
         </div>
       </div>
 
-      <StickyBar dirty={dirty} canSave={dirty || isNew} onSave={save} state={status} />
+      <StickyBar dirty={dirty} canSave={(dirty || isNew) && !renaming} onSave={save} state={status} />
     </div>
   );
 }

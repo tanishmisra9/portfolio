@@ -12,6 +12,8 @@ export function useSaveStatus() {
   const [view, setView] = useState<{ status: SaveStatus; error?: string }>({ status: "idle" });
   const statusRef = useRef<SaveStatus>("idle");
   const inflight = useRef(0);
+  // Any failure in the current overlapping batch wins: a later success must not turn "Couldn't save" into "Saved".
+  const batchFailure = useRef<string | undefined>(undefined);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const go = useCallback((to: SaveStatus, error?: string) => {
@@ -23,6 +25,7 @@ export function useSaveStatus() {
   const run = useCallback(
     async <T,>(fn: () => Promise<T>): Promise<{ ok: true; value: T } | { ok: false; error: string }> => {
       clearTimeout(timer.current);
+      if (inflight.current === 0) batchFailure.current = undefined;
       inflight.current++;
       if (statusRef.current !== "saving") go("saving");
       let failure: string | undefined;
@@ -35,8 +38,9 @@ export function useSaveStatus() {
         failure = e instanceof Error ? e.message : "Something went wrong";
       }
       inflight.current--;
+      if (failure) batchFailure.current = failure;
       if (inflight.current === 0) {
-        if (failure) go("error", failure);
+        if (batchFailure.current) go("error", batchFailure.current);
         else {
           go("saved");
           timer.current = setTimeout(() => go("idle"), 2000);

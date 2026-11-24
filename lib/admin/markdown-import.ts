@@ -9,7 +9,7 @@ const CODE_RE = /```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`/g;
  * Parses frontmatter as data only. gray-matter evaluates `---js` / `---javascript` frontmatter with eval() by
  * default (and merges custom engines over its defaults, so each language key must be overridden), which would be
  * server-side code execution from an imported file. Reject any language-marked fence outright and neutralise the
- * executable engines as a second layer. YAML (the default) and `---json` stay data-only.
+ * executable engines as a second layer. Only plain YAML (the default, no language marker) is accepted, so `---json` is rejected too.
  */
 export function parseFrontmatter(raw: string) {
   const fence = /^﻿?---([^\r\n]*)/.exec(raw);

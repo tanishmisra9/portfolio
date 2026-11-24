@@ -144,7 +144,10 @@ export function PhotoManager({
                       !isCover &&
                       startTransition(async () => {
                         setOptimisticCover(photo.blobUrl);
-                        await status.run(() => updateCollection(collectionId, { coverImage: photo.blobUrl }));
+                        await status.run(async () => {
+                          const error = await updateCollection(collectionId, { coverImage: photo.blobUrl });
+                          if (error) throw new Error(error);
+                        });
                       })
                     }
                   />

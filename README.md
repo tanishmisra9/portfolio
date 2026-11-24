@@ -2,7 +2,7 @@
 
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white) [![Live](https://img.shields.io/badge/live-tanishmisra.com-2ea44f)](https://www.tanishmisra.com)
 
-Personal portfolio, photography site and blog at [tanishmisra.com](https://tanishmisra.com), built with Next.js, TypeScript and Tailwind CSS. The home page is a motion-heavy resume-style experience; `/photos` is a gallery with curated collections, per-album interactions and light sound design; `/blog` is a markdown blog; `/quotes` is a generative typographic quote cloud that arranges itself differently on every visit.
+Personal portfolio, photography site and blog at [tanishmisra.com](https://tanishmisra.com), built with Next.js, TypeScript and Tailwind CSS. The home page is a motion-heavy resume-style experience; `/photos` is a gallery with curated collections, per-album interactions and light sound design; `/thoughts` is a markdown blog; `/quotes` is a generative typographic quote cloud that arranges itself differently on every visit.
 
 All content lives in a database and is edited through a built-in, password-protected admin panel (`/admin`) — there is no content to edit in the code.
 
@@ -29,7 +29,7 @@ All content lives in a database and is edited through a built-in, password-prote
 | `/thoughts/[slug]` | A single post |
 | `/quotes` | Generative typographic quote cloud |
 | `/admin/login` | Admin sign-in |
-| `/admin` | Admin dashboard → Portfolio, Photos, Quotes, Blog, Radio |
+| `/admin` | Admin dashboard → Portfolio, Photos, Thoughts, Quotes, Radio |
 
 ## How content works
 
@@ -85,7 +85,7 @@ Portfolio/
 │   ├── admin/              # Admin panel: login + protected (portfolio, photos, quotes, blog, radio)
 │   ├── api/admin/          # Blob client-upload token route
 │   ├── photos/             # Index + [slug] album pages
-│   ├── blog/               # Index + [slug] post pages
+│   ├── thoughts/           # Index + [slug] post pages
 │   ├── quotes/             # Quote cloud page, route-scoped fonts
 │   ├── error.tsx
 │   └── not-found.tsx

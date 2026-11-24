@@ -18,13 +18,17 @@ export function TriggerManager({ triggers, liveTexts }: { triggers: Trigger[]; l
   const [newText, setNewText] = useState("");
   const [errors, setErrors] = useState<Record<number | "new", string>>({} as Record<number | "new", string>);
 
+  /** The actions report a rejected word by returning a message; throw it so the status chip says "Couldn't save" too. */
+  const check = (call: () => Promise<string | null>) => async () => {
+    const error = await call();
+    if (error) throw new Error(error);
+  };
+
   function handleUpdate(id: number, value: string, previous: string) {
     if (value === previous) return;
     void (async () => {
-      const result = await status.run(() => updateRadioTrigger(id, value));
-      // updateRadioTrigger reports a rejected word by returning a message.
-      const error = result.ok ? (result.value as string | null) : null;
-      setErrors((prev) => ({ ...prev, [id]: error ?? "" }));
+      const result = await status.run(check(() => updateRadioTrigger(id, value)));
+      setErrors((prev) => ({ ...prev, [id]: result.ok ? "" : result.error }));
     })();
   }
 
@@ -35,10 +39,9 @@ export function TriggerManager({ triggers, liveTexts }: { triggers: Trigger[]; l
   function handleCreate(e: FormEvent) {
     e.preventDefault();
     void (async () => {
-      const result = await status.run(() => createRadioTrigger(newText));
-      const error = result.ok ? (result.value as string | null) : null;
-      setErrors((prev) => ({ ...prev, new: error ?? "" }));
-      if (result.ok && !error) setNewText("");
+      const result = await status.run(check(() => createRadioTrigger(newText)));
+      setErrors((prev) => ({ ...prev, new: result.ok ? "" : result.error }));
+      if (result.ok) setNewText("");
     })();
   }
 
