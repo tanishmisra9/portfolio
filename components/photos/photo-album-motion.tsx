@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useCallback, useRef, useState } from "react";
 import { AlbumTitle } from "@/components/photos/album-title";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { CONTENT_SUBTITLE_CLASSES } from "@/components/ui/class-constants";
+import { IconButton } from "@/components/ui/icon-button";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 import type { Photo } from "@/types/content";
 
@@ -42,21 +43,14 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
       animate="show"
     >
       <motion.div variants={item}>
-        <Link
-          href="/photos"
-          className="mb-10 inline-flex items-center gap-2 text-[0.9625rem] text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:mb-12"
-        >
-          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
-          Back to photos
-        </Link>
+        <IconButton href="/photos" icon={<ArrowLeft />} label="Back to photos" className="mb-10 md:mb-12" />
       </motion.div>
       <motion.div
         variants={item}
         onAnimationComplete={onTitleBlockAnimationComplete}
-        className="text-center"
       >
         <AlbumTitle title={title} slug={slug} />
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted md:text-xl">
+        <p className={CONTENT_SUBTITLE_CLASSES}>
           {description}
         </p>
       </motion.div>

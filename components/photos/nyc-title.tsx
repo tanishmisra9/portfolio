@@ -107,7 +107,7 @@ export function NYCTitle({ baseClasses }: Props) {
     <>
       <h1
         onClick={handleClick}
-        className="nyc-title-container relative inline-flex cursor-pointer select-none items-center justify-center whitespace-nowrap py-2 text-fg"
+        className="nyc-title-container relative inline-flex cursor-pointer select-none items-center justify-center whitespace-nowrap text-fg"
       >
         <span
           className={`${baseClasses} nyc-title-layer block ${
@@ -115,11 +115,11 @@ export function NYCTitle({ baseClasses }: Props) {
           }`}
           aria-hidden={showILoveNY}
         >
-          NEW YORK
+          New York
         </span>
 
         <span
-          className={`${baseClasses} nyc-title-layer nyc-ilove-text absolute inset-0 flex items-center justify-center ${
+          className={`${baseClasses} nyc-title-layer nyc-ilove-text absolute inset-0 flex items-center justify-start ${
             showILoveNY ? "scale-100 opacity-100" : "scale-105 opacity-0"
           }`}
           aria-hidden={!showILoveNY}

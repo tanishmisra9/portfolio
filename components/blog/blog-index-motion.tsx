@@ -2,6 +2,7 @@
 
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import type { BlogPostMeta } from "@/types/content";
 
@@ -48,7 +49,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
         variants={titleItem}
         className={PAGE_TITLE_CLASSES}
       >
-        Blog
+        Thoughts
       </motion.h1>
 
       {posts.length === 0 ? (
@@ -61,18 +62,23 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
             <motion.li key={post.slug} variants={item}>
               <Link
                 href={`/blog/${post.slug}`}
-                className="group block rounded-md border border-border bg-surface p-8 backdrop-blur-md transition-colors duration-200 hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                className="group relative block rounded-md border border-border bg-surface p-8 backdrop-blur-md transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-x-0.5 hover:-translate-y-0.5 hover:border-fg hover:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] focus-visible:-translate-x-0.5 focus-visible:-translate-y-0.5 focus-visible:border-fg focus-visible:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 motion-reduce:focus-visible:translate-x-0 motion-reduce:focus-visible:translate-y-0"
               >
+                <ArrowUpRight
+                  aria-hidden
+                  className="absolute right-6 top-6 size-5 -translate-x-1 translate-y-1 text-fg opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 motion-reduce:transition-none"
+                  strokeWidth={1.75}
+                />
                 <time className="font-mono text-xs uppercase tracking-wide text-dim">
                   {new Date(`${post.date}T00:00`).toLocaleDateString(
                     "en-US",
                     { year: "numeric", month: "long", day: "numeric" },
                   )}
                 </time>
-                <h2 className="mt-2 font-display text-2xl font-bold text-fg transition-colors group-hover:text-fg">
+                <h2 className="mt-2 w-fit bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-[position:0_100%] bg-no-repeat pb-1 font-display text-2xl font-bold text-fg transition-[background-size] duration-300 ease-out group-hover:bg-[length:100%_1px] group-focus-visible:bg-[length:100%_1px] motion-reduce:transition-none">
                   {post.title}
                 </h2>
-                <p className="mt-2 text-muted">{post.description}</p>
+                <p className="mt-2 text-muted transition-colors duration-200 group-hover:text-fg group-focus-visible:text-fg">{post.description}</p>
               </Link>
             </motion.li>
           ))}

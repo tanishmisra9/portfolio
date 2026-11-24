@@ -11,7 +11,7 @@ All content lives in a database and is edited through a built-in, password-prote
 - **Home (`/`)** — Hero, experience, education, skills, certifications, projects, and about/contact
 - **Photos (`/photos`)** — Collection grid and interactive header
 - **Album pages (`/photos/[slug]`)** — One page per collection, each with its own title interaction
-- **Blog (`/blog`, `/blog/[slug]`)** — Markdown posts with images, rendered with a scroll-reveal
+- **Thoughts (`/blog`, `/blog/[slug]`)** — Markdown posts with images, rendered with a scroll-reveal
 - **Quotes (`/quotes`)** — A skyline-packed mosaic on desktop (different fonts, sizes and arrangement every visit) and a clean vertical stack on mobile
 - **Admin (`/admin`)** — Draft → Publish CMS for everything above, plus the radio easter egg
 - **Box Box easter egg** — F1 team-radio clips on any page (desktop: type a trigger word such as `bbb` or `boxbox`; mobile: triple-tap within 800ms)

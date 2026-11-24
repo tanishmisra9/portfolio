@@ -11,13 +11,23 @@ export const GLASS_BUTTON_SHEEN_BACKGROUND =
   "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.13) 0%, transparent 70%)";
 
 export const SECTION_HEADING_BASE =
-  "select-none font-display font-extrabold leading-[1.2] tracking-tight text-fg text-5xl md:text-6xl lg:text-7xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+  "select-none font-display font-extrabold tracking-tight text-fg text-5xl/[1.4] md:text-6xl/[1.4] lg:text-7xl/[1.4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
-export const SECTION_HEADING_CLASSES = `${SECTION_HEADING_BASE} mb-5 md:mb-9`;
+export const SECTION_HEADING_CLASSES = `${SECTION_HEADING_BASE} mb-3 md:mb-5`;
 
 /** Top-of-page titles (Photos, Blog, Quotes, F1): same solid style as the section headings, one step larger and centered. */
 export const PAGE_TITLE_CLASSES =
-  "select-none text-center font-display font-extrabold leading-[1.2] tracking-tight text-fg text-[clamp(1.75rem,9vw,6rem)]";
+  "select-none text-center font-display font-extrabold leading-[1.4] tracking-tight text-fg text-[clamp(1.75rem,9vw,6rem)]";
+
+/**
+ * Title + subtitle for content pages (blog posts, photo albums): left-aligned, title case, one scale. No text colour
+ * on the title: album titles swap colour classes for their effects (uk-flag-fly, .supermax-title phases), so plain
+ * titles add `text-fg` themselves. A 1.4 line-height is Poppins' natural content height (written `text-4xl/[1.4]` on every breakpoint: a bare `md:text-5xl` resets line-height to 1 and would silently undo a separate `leading-[1.4]`); anything tighter clips the
+ * descender of g/p/y when something clips to the box (filter animations, Safari).
+ */
+export const CONTENT_TITLE_CLASSES =
+  "select-none font-display font-extrabold tracking-tight text-4xl/[1.4] md:text-5xl/[1.4] lg:text-6xl/[1.4]";
+export const CONTENT_SUBTITLE_CLASSES = "mt-4 max-w-2xl text-lg text-muted md:text-xl";
 
 /**
  * Admin-only: same type system as the public headings (font-display, extrabold) but at working

@@ -9,6 +9,7 @@ import {
   SnowfallCanvas,
   type SnowfallCanvasHandle,
 } from "@/components/photos/snowfall-canvas";
+import { CONTENT_TITLE_CLASSES } from "@/components/ui/class-constants";
 import { ANIM_PHASE, move, type AnimPhase } from "@/lib/state-machines";
 
 type Props = {
@@ -104,15 +105,7 @@ export function AlbumTitle({ title, slug }: Props) {
     schedule(() => go("idle"), 2800);
   }, [interactiveSuperMax, phase, playPassby, schedule]);
 
-  const isLongSingleWordTitle = !title.includes(" ") && title.length >= 10;
-  const isSuperMaxTitle = slug === "super-max";
-  const titleSizeClasses = isLongSingleWordTitle
-    ? "text-[clamp(3.75rem,13.5vw,5.75rem)] sm:text-[clamp(4.2rem,13vw,6.25rem)]"
-    : isSuperMaxTitle
-      ? "text-[clamp(3.55rem,13vw,5.75rem)] sm:text-[clamp(4.2rem,13vw,6.25rem)]"
-      : "text-[clamp(4.85rem,16.5vw,6.35rem)]";
-  const baseClasses =
-    `heading-bleed-mobile select-none font-display ${titleSizeClasses} font-extrabold uppercase tracking-tight leading-[1.08] md:text-8xl`;
+  const baseClasses = `${CONTENT_TITLE_CLASSES} capitalize`;
 
   if (!isSuperMax || reduceMotion) {
     if (isNYC && !reduceMotion) {
@@ -131,9 +124,9 @@ export function AlbumTitle({ title, slug }: Props) {
     const heading = (
       <h1
         ref={isNewYear ? titleRef : undefined}
-        className={`${baseClasses} mx-auto max-w-full py-2 ${
+        className={`${baseClasses} ${
           isInteractive ? "cursor-pointer" : "cursor-default"
-        } ${isLongSingleWordTitle ? "[overflow-wrap:anywhere]" : ""} ${
+        } ${
           ukFlying ? "uk-flag-fly" : "text-fg"
         }`}
         onClick={handleClick}
@@ -169,7 +162,7 @@ export function AlbumTitle({ title, slug }: Props) {
       : "overflow-hidden";
 
   return (
-    <div className={`${overflowForPhase} py-2`}>
+    <div className={overflowForPhase}>
       {/* React 19 hoists this <link> into <head>; only loaded on the Super Max route */}
       <link rel="preload" href="/sfx/passby.mp3" as="audio" type="audio/mpeg" />
       <h1
