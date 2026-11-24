@@ -1,9 +1,14 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import type { InferSelectModel } from "drizzle-orm";
 import type { quotes } from "@/db/schema";
+import { Button } from "@/components/admin/ui/button";
+import { DeleteButton } from "@/components/admin/ui/delete-button";
+import { Field, Input, Select, Textarea } from "@/components/admin/ui/field";
+import { EmptyState, Panel } from "@/components/admin/ui/panel";
+import { SaveStatus } from "@/components/admin/ui/save-status";
+import { useSaveStatus } from "@/components/admin/ui/use-save-status";
 import { createQuote, deleteQuote, updateQuote, updateQuotesSubtitle } from "@/lib/admin/actions";
 
 type Quote = InferSelectModel<typeof quotes>;
@@ -15,12 +20,9 @@ const SIZES: { value: Size; label: string }[] = [
   { value: 3, label: "Featured" },
 ];
 
-const fieldClass =
-  "w-full rounded border border-border-strong bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
-
 function SizePicker({ value, onChange }: { value: Size; onChange: (v: Size) => void }) {
   return (
-    <div role="radiogroup" aria-label="Size on the Quotes page" className="inline-flex rounded border border-border-strong p-0.5">
+    <div role="radiogroup" aria-label="Size on the Quotes page" className="inline-flex border border-border-strong p-0.5">
       {SIZES.map((s) => (
         <button
           key={s.value}
@@ -28,7 +30,7 @@ function SizePicker({ value, onChange }: { value: Size; onChange: (v: Size) => v
           role="radio"
           aria-checked={value === s.value}
           onClick={() => onChange(s.value)}
-          className={`min-h-9 rounded px-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+          className={`min-h-9 px-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
             value === s.value ? "bg-fg text-bg" : "text-muted hover:text-fg"
           }`}
         >
@@ -40,38 +42,29 @@ function SizePicker({ value, onChange }: { value: Size; onChange: (v: Size) => v
 }
 
 function QuoteRow({ quote }: { quote: Quote }) {
-  const [, startTransition] = useTransition();
+  const status = useSaveStatus();
   const [size, setSize] = useState<Size>((quote.emphasis as Size) ?? 1);
-  const [saved, setSaved] = useState(false);
 
   function save(fields: Parameters<typeof updateQuote>[1]) {
-    startTransition(async () => {
-      await updateQuote(quote.id, fields);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 1500);
-    });
+    void status.run(() => updateQuote(quote.id, fields));
   }
 
   return (
-    <div className="space-y-3 rounded-md border border-border bg-surface p-4 backdrop-blur-md">
-      <textarea
+    <Panel className="space-y-3 !p-4">
+      <Textarea
         aria-label="Quote text"
         rows={2}
-        className={`${fieldClass} text-lg`}
+        className="text-lg"
         defaultValue={quote.text}
         onBlur={(e) => e.target.value !== quote.text && save({ text: e.target.value })}
       />
       <div className="flex flex-wrap items-end gap-4">
-        <label className="block min-w-48 flex-1">
-          <span className="mb-1 block text-base text-dim">Attribution</span>
-          <input
-            className={fieldClass}
+        <Field label="Attribution" className="min-w-48 flex-1">
+          <Input
             defaultValue={quote.attribution ?? ""}
-            onBlur={(e) =>
-              e.target.value !== (quote.attribution ?? "") && save({ attribution: e.target.value || null })
-            }
+            onBlur={(e) => e.target.value !== (quote.attribution ?? "") && save({ attribution: e.target.value || null })}
           />
-        </label>
+        </Field>
         <div>
           <span className="mb-1 block text-base text-dim">Size</span>
           <SizePicker
@@ -82,30 +75,16 @@ function QuoteRow({ quote }: { quote: Quote }) {
             }}
           />
         </div>
-        <span aria-live="polite" className="min-w-14 pb-2 text-base text-dim">
-          {saved ? "Saved ✓" : ""}
-        </span>
-        <button
-          type="button"
-          aria-label="Delete quote"
-          onClick={() => {
-            if (!confirm("Delete this quote?")) return;
-            startTransition(async () => {
-              await deleteQuote(quote.id);
-            });
-          }}
-          className="-m-1 rounded p-3 text-muted transition-colors hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-        >
-          <Trash2 className="h-5 w-5" aria-hidden />
-        </button>
+        <SaveStatus state={status} className="min-w-14 pb-2" />
+        <DeleteButton label="Delete quote" onConfirm={() => void status.run(() => deleteQuote(quote.id))} />
       </div>
-    </div>
+    </Panel>
   );
 }
 
 export function QuotesManager({ quotes, subtitle }: { quotes: Quote[]; subtitle: string }) {
-  const [, startTransition] = useTransition();
-  const [subtitleSaved, setSubtitleSaved] = useState(false);
+  const subtitleStatus = useSaveStatus();
+  const createStatus = useSaveStatus();
   const [text, setText] = useState("");
   const [attribution, setAttribution] = useState("");
   const [size, setSize] = useState<Size>(1);
@@ -121,83 +100,73 @@ export function QuotesManager({ quotes, subtitle }: { quotes: Quote[]; subtitle:
     <div className="space-y-6">
       <label className="block">
         <span className="mb-1 block text-base text-dim">
-          Page subtitle <span aria-live="polite">{subtitleSaved ? "Saved ✓" : ""}</span>
+          Page subtitle <SaveStatus state={subtitleStatus} className="ml-2" />
         </span>
-        <div className="flex items-center gap-2 rounded border border-border-strong px-3 py-2 text-base focus-within:ring-2 focus-within:ring-fg/70">
+        <div className="flex items-center gap-2 border border-border-strong px-3 py-2 text-base focus-within:ring-2 focus-within:ring-fg/70">
           <span aria-hidden className="text-muted">&ldquo;</span>
           <input
             className="min-w-[8ch] max-w-full bg-transparent outline-none [field-sizing:content]"
             defaultValue={subtitle}
             onBlur={(e) => {
               if (e.target.value === subtitle) return;
-              startTransition(async () => {
-                await updateQuotesSubtitle(e.target.value);
-                setSubtitleSaved(true);
-                setTimeout(() => setSubtitleSaved(false), 1500);
-              });
+              void subtitleStatus.run(() => updateQuotesSubtitle(e.target.value));
             }}
           />
           <span aria-hidden className="text-muted">&rdquo;</span>
         </div>
       </label>
 
-      <label className="block">
-        <span className="mb-1 block text-base text-dim">Filter by author</span>
-        <select
-          className="rounded border border-border-strong bg-transparent px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-          value={authorFilter}
-          onChange={(e) => setAuthorFilter(e.target.value)}
-        >
+      <Field label="Filter by author">
+        <Select className="!w-auto" value={authorFilter} onChange={(e) => setAuthorFilter(e.target.value)}>
           <option value="">All authors</option>
           {authors.map((author) => (
             <option key={author} value={author}>
               {author}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
 
       <div className="space-y-3">
+        {visibleQuotes.length === 0 && <EmptyState>{authorFilter ? "No quotes by this author." : "No quotes yet."}</EmptyState>}
         {visibleQuotes.map((q) => (
           <QuoteRow key={q.id} quote={q} />
         ))}
       </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          startTransition(async () => {
-            await createQuote({ text, attribution: attribution || undefined, emphasis: size });
-            setText("");
-            setAttribution("");
-            setSize(1);
-          });
-        }}
-        className="space-y-4 rounded-md border border-border bg-surface p-4 backdrop-blur-md"
-      >
-        <h2 className="text-lg font-semibold text-fg">New quote</h2>
-        <label className="block">
-          <span className="mb-1 block text-base text-dim">Quote</span>
-          <textarea
-            className={fieldClass}
-            rows={2}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            required
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1 block text-base text-dim">Attribution</span>
-          <input className={fieldClass} value={attribution} onChange={(e) => setAttribution(e.target.value)} />
-        </label>
-        <div>
-          <span className="mb-1 block text-base text-dim">Size</span>
-          <SizePicker value={size} onChange={setSize} />
-        </div>
-        <button type="submit" className="rounded bg-fg px-4 py-2 text-base text-bg">
-          + Add quote
-        </button>
-      </form>
+      <Panel>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void (async () => {
+              const result = await createStatus.run(() => createQuote({ text, attribution: attribution || undefined, emphasis: size }));
+              if (!result.ok) return;
+              setText("");
+              setAttribution("");
+              setSize(1);
+            })();
+          }}
+          className="space-y-4"
+        >
+          <h2 className="font-display text-xl/[1.4] font-bold text-fg">New Quote</h2>
+          <Field label="Quote">
+            <Textarea rows={2} value={text} onChange={(e) => setText(e.target.value)} required />
+          </Field>
+          <Field label="Attribution">
+            <Input value={attribution} onChange={(e) => setAttribution(e.target.value)} />
+          </Field>
+          <div>
+            <span className="mb-1 block text-base text-dim">Size</span>
+            <SizePicker value={size} onChange={setSize} />
+          </div>
+          <div className="flex items-center gap-3">
+            <Button type="submit" variant="primary" pending={createStatus.status === "saving"}>
+              Add quote
+            </Button>
+            <SaveStatus state={createStatus} />
+          </div>
+        </form>
+      </Panel>
     </div>
   );
 }

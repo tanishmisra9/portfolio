@@ -15,6 +15,7 @@ import { isAllowedAudioFile } from "@/lib/radio-samples";
 import type { PortfolioContent } from "@/types/content";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/session";
+import { findPortfolioSection } from "./portfolio-sections";
 import { LOCKED_COLLECTION_SLUGS, slugify } from "@/lib/slug";
 
 // Draft edits change whether there's anything to publish; refresh the admin layout so the header's Publish button reflects it.
@@ -30,6 +31,23 @@ export async function updatePortfolio(data: PortfolioContent) {
     .insert(portfolio)
     .values({ id: 1, ...data })
     .onConflictDoUpdate({ target: portfolio.id, set: data });
+  draftChanged();
+}
+
+/**
+ * Saves ONE portfolio block (see lib/admin/portfolio-sections.ts). Only that block's columns are written, so a page
+ * opened before another block was saved can't overwrite it with stale data (updatePortfolio writes every column).
+ */
+export async function updatePortfolioSection(section: string, patch: Partial<PortfolioContent>) {
+  await requireAdmin();
+  const def = findPortfolioSection(section);
+  if (!def) throw new Error(`Unknown portfolio section: ${section}`);
+  const set = Object.fromEntries(def.keys.filter((k) => k in patch).map((k) => [k, patch[k]])) as Partial<PortfolioContent>;
+  if (Object.keys(set).length === 0) return;
+  await db
+    .insert(portfolio)
+    .values({ id: 1, ...set })
+    .onConflictDoUpdate({ target: portfolio.id, set });
   draftChanged();
 }
 
@@ -70,6 +88,23 @@ export async function setRadioSampleDisabled(url: string, disabled: boolean) {
   await requireAdmin();
   await db.update(radioSamples).set({ disabled }).where(eq(radioSamples.url, url));
   draftChanged();
+}
+
+/**
+ * Renames a clip's display name. `pathname` is only ever shown in the admin (the snapshot and playback use `url`), so this
+ * rewrites its last segment and leaves the blob alone. Returns an error message, or null on success.
+ */
+export async function renameRadioSample(url: string, name: string): Promise<string | null> {
+  await requireAdmin();
+  const clean = name.replace(/[\u0000-\u001f\\/]+/g, "-").replace(/\s+/g, " ").trim();
+  if (!clean) return "Enter a name.";
+  if (clean.length > 100) return "Keep it under 100 characters.";
+  const [row] = await db.select().from(radioSamples).where(eq(radioSamples.url, url));
+  if (!row) return "That clip no longer exists.";
+  const dir = row.pathname.includes("/") ? row.pathname.slice(0, row.pathname.lastIndexOf("/") + 1) : "";
+  await db.update(radioSamples).set({ pathname: dir + clean }).where(eq(radioSamples.url, url));
+  draftChanged();
+  return null;
 }
 
 export async function deleteRadioSample(url: string) {
@@ -444,6 +479,26 @@ export async function savePost(input: {
     .values(input)
     .onConflictDoUpdate({ target: posts.slug, set: input });
   draftChanged();
+}
+
+/**
+ * Changes a post's slug (its /thoughts/<slug> URL). Only the slug column is written, so unsaved edits elsewhere are
+ * untouched. Returns the cleaned slug, or `{ error }` (shaped for useSaveStatus). Old links break once published.
+ */
+export async function renamePost(oldSlug: string, rawSlug: string): Promise<{ slug: string } | { error: string }> {
+  await requireAdmin();
+  const slug = slugify(rawSlug);
+  if (!slug) return { error: "Enter a slug." };
+  if (slug === oldSlug) return { slug };
+  try {
+    const updated = await db.update(posts).set({ slug }).where(eq(posts.slug, oldSlug)).returning({ id: posts.id });
+    if (updated.length === 0) return { error: "Save the post first, then rename it." };
+  } catch (err) {
+    if (isUniqueViolation(err)) return { error: "A post with that slug already exists." };
+    throw err;
+  }
+  draftChanged();
+  return { slug };
 }
 
 export async function deletePost(slug: string) {

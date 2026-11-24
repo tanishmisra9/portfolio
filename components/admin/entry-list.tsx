@@ -1,6 +1,9 @@
 "use client";
 
 import { GripVertical } from "lucide-react";
+import { Button } from "@/components/admin/ui/button";
+import { DeleteButton } from "@/components/admin/ui/delete-button";
+import { MoveButtons } from "@/components/admin/ui/move-buttons";
 import { ReorderableList } from "./reorderable-list";
 import { useExpandedSet, moveItem } from "./use-expanded-set";
 import { DateRangeFields } from "./date-range-fields";
@@ -55,15 +58,14 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
       <ReorderableList
         items={items}
         onReorder={(ids) => onChange(ids.map((id) => items.find((i) => i.id === id)!))}
-        renderItem={(item, dragProps) => (
+        renderItem={(item, dragProps) => {
+          const index = items.findIndex((i) => i.id === item.id);
+          return (
           <div
-            className={
-              nested
-                ? "rounded border border-fg/10 bg-fg/[0.02]"
-                : "rounded-md border border-border bg-surface backdrop-blur-md"
-            }
+            className={nested ? "border border-border" : "border border-border bg-surface backdrop-blur-md"}
           >
             <div className={`flex items-center gap-3 ${nested ? "p-3" : "p-4"}`}>
+              <MoveButtons index={index} count={items.length} label={summary(item) || "item"} onMove={(d) => move(item.id, index + d)} />
               {/* draggable lives on this div, not the SVG — browsers don't honor draggable
                   on SVG elements, so the drag previously never started. */}
               <div
@@ -81,29 +83,19 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
                     move(item.id, index + 1);
                   }
                 }}
-                className="flex h-9 w-7 shrink-0 cursor-grab items-center justify-center rounded text-dim hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                className="flex h-9 w-7 shrink-0 cursor-grab items-center justify-center text-dim hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
               >
                 <GripVertical className="h-5 w-5" aria-hidden />
               </div>
               <span className="flex-1 truncate text-base text-fg">{summary(item)}</span>
-              <button
-                type="button"
-                onClick={() => toggle(item.id)}
-                className="rounded px-2 py-2 text-base text-fg underline decoration-fg/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-              >
+              <Button className="min-h-12" onClick={() => toggle(item.id)} aria-expanded={expanded.has(item.id)}>
                 {expanded.has(item.id) ? "Close" : "Edit"}
-              </button>
-              <button type="button" onClick={() => removeItem(item.id)} className="px-2 py-2 text-base text-red-500">
-                Remove
-              </button>
+              </Button>
+              <DeleteButton label={`Remove ${summary(item) || "entry"}`} onConfirm={() => removeItem(item.id)} />
             </div>
             {expanded.has(item.id) && (
               <div
-                className={
-                  nested
-                    ? "space-y-2 border-t border-fg/10 p-3"
-                    : "space-y-2 border-t border-border p-4"
-                }
+                className={`space-y-2 border-t border-border ${nested ? "p-3" : "p-4"}`}
               >
                 {hasDateRange && (
                   <DateRangeFields
@@ -125,11 +117,10 @@ export function EntryList({ items, fields, onChange, newItem, summary, hasDateRa
               </div>
             )}
           </div>
-        )}
+          );
+        }}
       />
-      <button type="button" onClick={addItem} className="rounded border border-border-strong px-3 py-1.5 text-base">
-        + Add
-      </button>
+      <Button onClick={addItem}>+ Add</Button>
     </div>
   );
 }

@@ -29,7 +29,7 @@ export const CONTENT_SUBTITLE_CLASSES = "mt-4 max-w-3xl text-lg text-muted md:te
 
 /**
  * Admin-only: same type system as the public headings (font-display, extrabold) but at working
- * scale and uppercase, for dense forms you're editing quickly.
+ * scale (Title case, solid fill), for dense forms you're editing quickly.
  */
 export const ADMIN_SECTION_HEADING_CLASSES =
-  "font-display text-2xl font-extrabold uppercase tracking-tight text-fg md:text-3xl";
+  "font-display text-2xl/[1.4] font-extrabold tracking-tight text-fg md:text-3xl/[1.4]";

@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { Button } from "@/components/admin/ui/button";
+import { Field, Input } from "@/components/admin/ui/field";
 import { uploadResume } from "@/lib/admin/actions";
 
 const DEFAULT_FILENAME = "Resume-TanishMisra.pdf";
@@ -53,14 +55,9 @@ export function ResumeUploader({
         </a>
       )}
 
-      <label className="block">
-        <span className="mb-1 block text-base text-dim">Download filename</span>
-        <input
-          className="w-full rounded border border-border-strong bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-          value={filename}
-          onChange={(e) => setFilename(e.target.value)}
-        />
-      </label>
+      <Field label="Download filename">
+        <Input value={filename} onChange={(e) => setFilename(e.target.value)} />
+      </Field>
 
       <div
         onDragOver={(e) => {
@@ -74,8 +71,11 @@ export function ResumeUploader({
           selectFile(e.dataTransfer.files[0]);
         }}
         onClick={() => inputRef.current?.click()}
-        className={`cursor-pointer rounded border-2 border-dashed p-4 text-center text-base ${
-          dragOver ? "border-fg bg-fg/5" : "border-border-strong text-dim"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), inputRef.current?.click())}
+        className={`cursor-pointer border border-dashed p-4 text-center text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+          dragOver ? "border-fg bg-fg/10" : "border-border-strong text-dim"
         }`}
       >
         Drag and drop a PDF here, or click to choose a file
@@ -90,26 +90,19 @@ export function ResumeUploader({
 
       {previewUrl && (
         <div className="space-y-2">
-          <embed src={previewUrl} type="application/pdf" className="h-96 w-full rounded border border-fg/10" />
+          <embed src={previewUrl} type="application/pdf" className="h-96 w-full border border-border" />
           <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={pending}
-              onClick={confirmUpload}
-              className="rounded bg-fg px-3 py-1.5 text-base text-bg disabled:opacity-50"
-            >
-              {pending ? "Uploading..." : "Use this resume"}
-            </button>
-            <button
-              type="button"
+            <Button variant="primary" pending={pending} onClick={confirmUpload}>
+              {pending ? "Uploading…" : "Use this resume"}
+            </Button>
+            <Button
               onClick={() => {
                 setPendingFile(null);
                 setPreviewUrl(null);
               }}
-              className="text-base text-dim hover:text-fg"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -3,7 +3,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { collections } from "@/db/schema";
 import { listDraftPhotos } from "@/lib/admin/actions";
-import { ADMIN_SECTION_HEADING_CLASSES } from "@/components/ui/class-constants";
+import { AdminHeading } from "@/components/admin/ui/panel";
+import { AdminBackLink } from "@/components/admin/ui/back-link";
 import { PhotoManager } from "./photo-manager";
 import { CollectionDetails } from "./collection-details";
 
@@ -21,8 +22,8 @@ export default async function CollectionPhotosPage({
 
   return (
     <div className="max-w-5xl">
-      <h1 className={ADMIN_SECTION_HEADING_CLASSES}>{collection.title}</h1>
-      <p className="mb-6 mt-1 font-mono text-base text-dim">/{collection.slug}</p>
+      <AdminBackLink href="/admin/photos" label="Back to collections" />
+      <AdminHeading title={collection.title} subtitle={`/photos/${collection.slug}`} />
       <CollectionDetails id={collection.id} slug={collection.slug} title={collection.title} description={collection.description} />
       <PhotoManager collectionId={collection.id} collectionSlug={collection.slug} coverImage={collection.coverImage} photos={photos} />
     </div>

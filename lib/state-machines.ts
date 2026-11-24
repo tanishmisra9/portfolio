@@ -56,3 +56,12 @@ export const AI_STATUS = {
   failed: [],
 } as const satisfies Edges<string>;
 export type AiStatus = keyof typeof AI_STATUS;
+
+/** Admin save feedback (components/admin/ui/use-save-status.ts). saved fades to idle on a timer; any state can start a new save except saving itself (the hook counts overlapping saves). */
+export const SAVE_STATUS = {
+  idle: ["saving"],
+  saving: ["saved", "error"],
+  saved: ["idle", "saving"],
+  error: ["idle", "saving"],
+} as const satisfies Edges<string>;
+export type SaveStatus = keyof typeof SAVE_STATUS;

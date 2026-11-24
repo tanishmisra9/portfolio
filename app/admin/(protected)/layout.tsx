@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Suspense fallback={<AdminHeader />}>
           <ChangesHeader />
         </Suspense>
-        <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
+        <main className="mx-auto max-w-6xl px-6 pb-16 pt-8">{children}</main>
       </div>
     </DirtyProvider>
   );

@@ -1,15 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
-  deletePost,
   importMarkdownPost,
+  renamePost,
   savePost,
   type ImageCheckResult,
 } from "@/lib/admin/actions";
+import { slugify } from "@/lib/slug";
 import { uploadImageToBlob } from "@/lib/admin/client-upload";
 import { useRegisterDirty } from "@/components/admin/dirty-context";
+import { Button } from "@/components/admin/ui/button";
+import { Field, Input, Textarea } from "@/components/admin/ui/field";
+import { AdminHeading, Panel } from "@/components/admin/ui/panel";
+import { StickyBar } from "@/components/admin/ui/sticky-bar";
+import { useSaveStatus } from "@/components/admin/ui/use-save-status";
+import { AdminBackLink } from "@/components/admin/ui/back-link";
+import { PostPreview } from "@/components/blog/post-preview";
 
 interface PostFields {
   slug: string;
@@ -19,11 +27,36 @@ interface PostFields {
   body: string;
 }
 
-const inputClass =
-  "w-full rounded border border-border-strong bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+type ViewMode = "write" | "split" | "preview";
+const VIEW_MODES: { value: ViewMode; label: string; className?: string }[] = [
+  { value: "write", label: "Write" },
+  { value: "split", label: "Split", className: "hidden lg:inline-flex" }, // side by side needs the width
+  { value: "preview", label: "Preview" },
+];
+
+/** Same segmented-control look as the quotes size picker: sharp, one solid selected segment. */
+function ViewToggle({ value, onChange }: { value: ViewMode; onChange: (v: ViewMode) => void }) {
+  return (
+    <div role="radiogroup" aria-label="Editor view" className="inline-flex border border-border-strong p-0.5">
+      {VIEW_MODES.map((m) => (
+        <button
+          key={m.value}
+          type="button"
+          role="radio"
+          aria-checked={value === m.value}
+          onClick={() => onChange(m.value)}
+          className={`${m.className ?? "inline-flex"} min-h-9 items-center px-3 text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+            value === m.value ? "bg-fg text-bg" : "text-muted hover:text-fg"
+          }`}
+        >
+          {m.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function PostEditor({
-  slug,
   initial,
   isNew,
 }: {
@@ -43,43 +76,82 @@ export function PostEditor({
     return () => window.removeEventListener("beforeunload", handler);
   }, [dirty]);
   const [pending, startTransition] = useTransition();
-  const [saved, setSaved] = useState(false);
+  const status = useSaveStatus();
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [pendingMd, setPendingMd] = useState<File | null>(null);
   const [imageChecks, setImageChecks] = useState<ImageCheckResult[] | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [view, setView] = useState<ViewMode>("write");
+  // Typing stays instant; the preview re-renders the markdown a beat behind it.
+  const deferredBody = useDeferredValue(fields.body);
 
   function save() {
-    startTransition(async () => {
-      await savePost(fields);
+    void (async () => {
+      const result = await status.run(() => savePost(fields));
+      if (!result.ok) return;
       setBaseline(fields);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
-      if (isNew) router.replace(`/admin/blog/${slug}`);
-    });
+      if (isNew) router.replace(`/admin/blog/${fields.slug}`);
+    })();
+  }
+
+  /**
+   * Renames the post right away (its own action, not part of Save draft). The page URL is swapped with
+   * history.replaceState rather than router.replace: a new [slug] param would remount the editor and drop unsaved edits.
+   */
+  function saveSlug(input: HTMLInputElement) {
+    const next = slugify(input.value);
+    if (next === fields.slug) {
+      input.value = fields.slug;
+      setSlugError(null);
+      return;
+    }
+    void (async () => {
+      const result = await status.run(() => renamePost(fields.slug, input.value));
+      if (!result.ok) {
+        setSlugError(result.error);
+        input.value = fields.slug;
+        return;
+      }
+      const { slug: saved } = result.value as { slug: string };
+      setFields((f) => ({ ...f, slug: saved }));
+      setBaseline((b) => ({ ...b, slug: saved }));
+      input.value = saved;
+      setSlugError(null);
+      window.history.replaceState(null, "", `/admin/blog/${saved}`);
+    })();
   }
 
   function importMdFile(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
       const raw = String(reader.result);
-      startTransition(async () => {
+      void (async () => {
         // importMarkdownPost already persists the post inside the action, so the
         // imported result is itself the new saved baseline, not a pending edit.
-        const { post, imageChecks } = await importMarkdownPost(raw, slug);
-        setFields(post);
-        setBaseline(post);
-        setImageChecks(imageChecks);
-      });
+        const result = await status.run(() => importMarkdownPost(raw, fields.slug));
+        if (!result.ok) return;
+        setFields(result.value.post);
+        setBaseline(result.value.post);
+        setImageChecks(result.value.imageChecks);
+      })();
     };
     reader.readAsText(file);
+  }
+
+  /** A .md file replaces the whole post (and saves it at once), so ask first when there is something to lose. */
+  function handleFile(file: File) {
+    if (!file.name.endsWith(".md")) return uploadImage(file);
+    if (fields.body.trim() || fields.title.trim()) setPendingMd(file);
+    else importMdFile(file);
   }
 
   function uploadImage(file: File) {
     setUploadError(null);
     startTransition(async () => {
       try {
-        const { url } = await uploadImageToBlob(file, `blog/${slug}`);
+        const { url } = await uploadImageToBlob(file, `blog/${fields.slug}`);
         setFields((f) => ({ ...f, body: `${f.body}\n\n![${file.name}](${url})\n` }));
       } catch (err) {
         setUploadError(err instanceof Error ? err.message : "Upload failed.");
@@ -88,54 +160,41 @@ export function PostEditor({
   }
 
   return (
-    <div className="space-y-4 pb-24">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-xl">{isNew ? "New post" : fields.title}</h1>
-        {!isNew && (
-          <button
-            type="button"
-            onClick={() => {
-              if (confirm("Delete this post permanently?")) {
-                startTransition(async () => {
-                  await deletePost(slug);
-                  router.push("/admin/blog");
-                });
-              }
-            }}
-            className="text-base text-red-500"
-          >
-            Delete post
-          </button>
-        )}
-      </div>
+    <div className="space-y-4">
+      <AdminBackLink href="/admin/blog" label="Back to thoughts" />
+      <AdminHeading title={isNew ? "New Post" : fields.title || "Untitled"} />
 
-      <label className="block">
-        <span className="mb-1 block text-base text-dim">Title</span>
-        <input
-          className={inputClass}
-          value={fields.title}
-          onChange={(e) => setFields({ ...fields, title: e.target.value })}
-        />
-      </label>
-      <label className="block">
-        <span className="mb-1 block text-base text-dim">Date</span>
-        <input
-          type="date"
-          className={inputClass}
-          value={fields.date}
-          onChange={(e) => setFields({ ...fields, date: e.target.value })}
-        />
-      </label>
-      <label className="block">
-        <span className="mb-1 block text-base text-dim">Description</span>
-        <input
-          className={inputClass}
-          value={fields.description}
-          onChange={(e) => setFields({ ...fields, description: e.target.value })}
-        />
-      </label>
+      <Field label="Title">
+        <Input value={fields.title} onChange={(e) => setFields({ ...fields, title: e.target.value })} />
+      </Field>
+      {!isNew && (
+        <Field
+          label="Slug (the /thoughts/… URL)"
+          hint="Changes this post's URL once published; old links stop working. Saves as soon as you leave the field."
+          error={slugError}
+        >
+          <Input
+            key={fields.slug}
+            className="font-mono"
+            defaultValue={fields.slug}
+            onChange={() => setSlugError(null)}
+            onBlur={(e) => saveSlug(e.target)}
+          />
+        </Field>
+      )}
+      <Field label="Date">
+        <Input type="date" value={fields.date} onChange={(e) => setFields({ ...fields, date: e.target.value })} />
+      </Field>
+      <Field label="Description">
+        <Input value={fields.description} onChange={(e) => setFields({ ...fields, description: e.target.value })} />
+      </Field>
 
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Upload an image or import a markdown file"
+        onClick={() => fileInputRef.current?.click()}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), fileInputRef.current?.click())}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -145,79 +204,91 @@ export function PostEditor({
           e.preventDefault();
           setDragOver(false);
           const file = e.dataTransfer.files[0];
-          if (!file) return;
-          if (file.name.endsWith(".md")) importMdFile(file);
-          else uploadImage(file);
+          if (file) handleFile(file);
         }}
-        className={`rounded border-2 border-dashed p-4 text-center text-base ${
-          dragOver ? "border-fg bg-fg/5" : "border-border-strong text-dim"
+        className={`cursor-pointer border border-dashed p-4 text-center text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+          dragOver ? "border-fg bg-fg/10" : "border-border-strong text-dim"
         }`}
       >
-        Drop a .md file to import its content, or drop/click to upload an image into the post
+        {pending ? "Working…" : "Drop or click to add an image to the post, or import a .md file"}
         <input
           ref={fileInputRef}
           type="file"
           hidden
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (!file) return;
-            if (file.name.endsWith(".md")) importMdFile(file);
-            else uploadImage(file);
+            e.target.value = "";
+            if (file) handleFile(file);
           }}
         />
-        <div>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="mt-2 underline"
-          >
-            choose a file
-          </button>
-        </div>
       </div>
 
-      {uploadError && <p className="text-base text-red-500">{uploadError}</p>}
+      {pendingMd && (
+        <div role="alert" className="flex flex-wrap items-center gap-3 border border-border-strong p-3">
+          <p className="mr-auto text-sm text-fg">Importing {pendingMd.name} replaces this post&rsquo;s fields and saves it right away.</p>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => {
+              const f = pendingMd;
+              setPendingMd(null);
+              importMdFile(f);
+            }}
+          >
+            Replace post
+          </Button>
+          <Button size="sm" onClick={() => setPendingMd(null)}>
+            Cancel
+          </Button>
+        </div>
+      )}
+
+      {uploadError && <p role="alert" className="text-base text-danger">{uploadError}</p>}
 
       {imageChecks && imageChecks.length > 0 && (
-        <div className="space-y-1 rounded border border-fg/10 p-3 text-base">
+        <Panel inset className="space-y-1 text-base">
           <p className="text-dim">Image references in the imported markdown:</p>
           {imageChecks.map((check, i) => (
             <div key={i}>
-              {check.status === "ok" && <span className="text-green-500">✓ {check.referencedPath}</span>}
+              {check.status === "ok" && <span className="text-fg">✓ {check.referencedPath}</span>}
               {check.status === "suggested" && (
-                <span className="text-yellow-500">
+                <span className="text-muted">
                   ~ {check.referencedPath} — closest uploaded match: {check.suggestion} (
                   {Math.round((check.score ?? 0) * 100)}%). Upload the right image or fix the path.
                 </span>
               )}
               {check.status === "missing" && (
-                <span className="text-red-500">✗ {check.referencedPath} — no uploaded match found</span>
+                <span className="text-danger">✗ {check.referencedPath} — no uploaded match found</span>
               )}
             </div>
           ))}
-        </div>
+        </Panel>
       )}
 
-      <label className="block">
-        <span className="mb-1 block text-base text-dim">Body (markdown)</span>
-        <textarea
-          className={`${inputClass} font-mono`}
-          rows={20}
-          value={fields.body}
-          onChange={(e) => setFields({ ...fields, body: e.target.value })}
-        />
-      </label>
-
-      <div className="fixed bottom-0 left-0 right-0 border-t border-fg/10 bg-bg p-4">
-        <button
-          type="button"
-          disabled={pending || (!dirty && !isNew)}
-          onClick={save}
-          className="rounded bg-fg px-4 py-1.5 text-base text-bg disabled:opacity-50"
-        >
-          {pending ? "Saving..." : saved ? "Saved ✓" : "Save draft"}
-        </button>
+      <div>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <label htmlFor="post-body" className="text-base text-dim">
+            Body (markdown)
+          </label>
+          <ViewToggle value={view} onChange={setView} />
+        </div>
+        <div className={view === "split" ? "grid items-start gap-4 lg:grid-cols-2" : ""}>
+          <Textarea
+            id="post-body"
+            className={`font-mono ${view === "preview" ? "hidden" : ""}`}
+            rows={view === "split" ? 28 : 20}
+            value={fields.body}
+            onChange={(e) => setFields({ ...fields, body: e.target.value })}
+          />
+          {view !== "write" && (
+            <div className="max-h-[70dvh] min-w-0 overflow-y-auto border border-border bg-surface p-5 backdrop-blur-md md:p-6 lg:sticky lg:top-24">
+              <PostPreview title={fields.title} description={fields.description} date={fields.date} body={deferredBody} />
+            </div>
+          )}
+        </div>
       </div>
+
+      <StickyBar dirty={dirty} canSave={dirty || isNew} onSave={save} state={status} />
     </div>
   );
 }

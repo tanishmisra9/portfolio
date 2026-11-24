@@ -1,11 +1,11 @@
 "use client";
 
 import { ICON_OPTIONS, resolveIcon } from "@/components/social-icon";
+import { Button } from "@/components/admin/ui/button";
+import { DeleteButton } from "@/components/admin/ui/delete-button";
+import { Field, Input, Select } from "@/components/admin/ui/field";
 import { ResumeUploader } from "./resume-uploader";
 import type { SocialLink } from "@/types/content";
-
-const inputClass =
-  "w-full rounded border border-border-strong bg-transparent px-2 py-1.5 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 /** These four are load-bearing: iconFor/email/resume special-casing all key off the label text, so renaming or deleting one would silently break the site. */
 const LOCKED_IDS = new Set(["social-github", "social-linkedin", "social-email", "social-resume"]);
@@ -38,24 +38,23 @@ export function SocialEditor({
           return (
             <div
               key={item.id}
-              className="space-y-2 rounded-md border border-border bg-surface p-6 backdrop-blur-md"
+              className="space-y-2 border border-border bg-surface p-4 backdrop-blur-md md:p-6"
             >
               <div className="flex items-center gap-2">
                 <Icon className="h-4 w-4 shrink-0 text-muted" aria-hidden />
                 {locked ? (
                   <span className="flex-1 text-base text-fg">{item.label}</span>
                 ) : (
-                  <input
-                    className={inputClass}
+                  <Input
                     placeholder="Label"
                     value={item.label}
                     onChange={(e) => update(item.id, { label: e.target.value })}
                   />
                 )}
                 {!locked && (
-                  <select
+                  <Select
                     aria-label="Icon"
-                    className="rounded border border-border-strong bg-transparent px-2 py-1 text-base"
+                    className="!w-auto"
                     value={item.icon ?? ""}
                     onChange={(e) => update(item.id, { icon: e.target.value || undefined })}
                   >
@@ -65,26 +64,23 @@ export function SocialEditor({
                         {opt}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 )}
               </div>
 
               {!locked && (
-                <label className="block">
-                  <span className="mb-1 block text-base text-dim">Tooltip (shown on hover)</span>
-                  <input
-                    className={inputClass}
+                <Field label="Tooltip (shown on hover)">
+                  <Input
                     placeholder={item.label || "Tooltip"}
                     value={item.tooltip ?? ""}
                     onChange={(e) => update(item.id, { tooltip: e.target.value || undefined })}
                   />
-                </label>
+                </Field>
               )}
 
               {item.label === "Email" ? (
-                <input
+                <Input
                   type="email"
-                  className={inputClass}
                   placeholder="you@example.com"
                   value={item.href.replace(/^mailto:/, "")}
                   onChange={(e) =>
@@ -94,9 +90,8 @@ export function SocialEditor({
               ) : item.label === "Resume" ? (
                 <ResumeUploader currentUrl={item.href} onUploaded={(url) => update(item.id, { href: url })} />
               ) : (
-                <input
+                <Input
                   aria-label="URL"
-                  className={inputClass}
                   placeholder="URL"
                   value={item.href}
                   onChange={(e) => update(item.id, { href: e.target.value })}
@@ -104,17 +99,15 @@ export function SocialEditor({
               )}
 
               {!locked && (
-                <button type="button" onClick={() => remove(item.id)} className="text-base text-red-500">
-                  Remove
-                </button>
+                <div className="flex justify-end">
+                  <DeleteButton label={`Remove ${item.label || "link"}`} onConfirm={() => remove(item.id)} />
+                </div>
               )}
             </div>
           );
         })}
       </div>
-      <button type="button" onClick={addLink} className="rounded border border-border-strong px-3 py-1.5 text-base">
-        + Add link
-      </button>
+      <Button onClick={addLink}>+ Add link</Button>
     </div>
   );
 }

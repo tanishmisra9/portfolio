@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/admin/ui/field";
 import type { StartEndDate } from "@/types/content";
 
 const MONTHS = [
@@ -11,9 +12,6 @@ const CURRENT_YEAR = new Date().getFullYear();
 // Native <input type="month"> isn't supported in Safari — it silently degrades to a
 // text box, which would defeat structured dates entirely. Plain <select>s work everywhere.
 const YEARS = Array.from({ length: CURRENT_YEAR - 2000 + 6 }, (_, i) => CURRENT_YEAR + 5 - i);
-
-const selectClass =
-  "rounded border border-border-strong bg-transparent px-2 py-1 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 function MonthYearSelect({
   value,
@@ -30,8 +28,8 @@ function MonthYearSelect({
 
   return (
     <div className="flex gap-2">
-      <select
-        className={selectClass}
+      <Select
+        className="!w-auto"
         value={mm}
         onChange={(e) => commit(yyyy || String(CURRENT_YEAR), e.target.value)}
       >
@@ -43,9 +41,9 @@ function MonthYearSelect({
             {label}
           </option>
         ))}
-      </select>
-      <select
-        className={selectClass}
+      </Select>
+      <Select
+        className="!w-auto"
         value={yyyy}
         onChange={(e) => commit(e.target.value, mm || "01")}
       >
@@ -57,7 +55,7 @@ function MonthYearSelect({
             {y}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }
@@ -99,15 +97,15 @@ export function DateRangeFields({
           value={value.startDate}
           onChange={(startDate) => onChange({ ...value, startDate })}
         />
-        <select
-          className={selectClass}
+        <Select
+          className="!w-auto"
           value={endMode}
           onChange={(e) => setEndMode(e.target.value as EndMode)}
         >
           <option value="single">Single date</option>
           <option value="range">Has an end date</option>
           <option value="present">Ongoing (Present)</option>
-        </select>
+        </Select>
         {endMode === "range" && (
           <>
             <span className="text-base text-dim">End</span>
@@ -118,7 +116,7 @@ export function DateRangeFields({
           </>
         )}
       </div>
-      {invalid && <p className="text-sm text-red-500">End date must be after the start date.</p>}
+      {invalid && <p className="text-sm text-danger">End date must be after the start date.</p>}
     </div>
   );
 }

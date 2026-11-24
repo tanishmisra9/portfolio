@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/admin/ui/button";
+import { DeleteButton } from "@/components/admin/ui/delete-button";
 import { FieldInput, type FieldDef, type Item } from "./array-editor";
 import { EntryList } from "./entry-list";
 
@@ -82,12 +84,13 @@ export function CertificationsEditor({
           const label = isSeries && courseCount ? `${name} (${courseCount})` : name;
 
           return (
-            <div key={item.id} className="space-y-2 rounded-md border border-border bg-surface p-6 backdrop-blur-md">
+            <div key={item.id} className="space-y-2 border border-border bg-surface p-4 backdrop-blur-md md:p-6">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => toggle(item.id)}
-                  className="flex flex-1 items-center gap-2 text-left"
+                  aria-expanded={isOpen}
+                  className="flex min-h-9 flex-1 items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
                 >
                   <ChevronDown
                     className={`h-4 w-4 shrink-0 text-muted transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
@@ -95,9 +98,7 @@ export function CertificationsEditor({
                   />
                   <span className="text-base text-fg">{label}</span>
                 </button>
-                <button type="button" onClick={() => remove(item.id)} className="px-2 py-2 text-base text-red-500">
-                  Remove
-                </button>
+                <DeleteButton label={`Remove ${name}`} onConfirm={() => remove(item.id)} />
               </div>
 
               {isOpen && (
@@ -130,12 +131,8 @@ export function CertificationsEditor({
         })}
       </div>
       <div className="flex gap-2">
-        <button type="button" onClick={addSingle} className="rounded border border-border-strong px-3 py-1.5 text-base">
-          + Add certification
-        </button>
-        <button type="button" onClick={addSeries} className="rounded border border-border-strong px-3 py-1.5 text-base">
-          + Add course series
-        </button>
+        <Button onClick={addSingle}>+ Add certification</Button>
+        <Button onClick={addSeries}>+ Add course series</Button>
       </div>
     </div>
   );

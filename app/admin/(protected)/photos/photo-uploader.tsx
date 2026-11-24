@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2, RotateCcw, Sparkles } from "lucide-react";
+import { Button } from "@/components/admin/ui/button";
+import { Select, Textarea } from "@/components/admin/ui/field";
 import { suggestAltText, uploadPhoto } from "@/lib/admin/actions";
 import { toAltPreviewDataUrl, uploadImageToBlob } from "@/lib/admin/client-upload";
 import { AI_STATUS, move, UPLOAD_STATUS, type AiStatus, type UploadStatus } from "@/lib/state-machines";
@@ -25,8 +27,7 @@ interface PendingPhoto {
 // Alt/caption are single logical lines; the textareas exist only for room to read and edit.
 export const oneLine = (v: string) => v.replace(/\s*\n+\s*/g, " ").trim();
 
-export const fieldClass =
-  "w-full rounded border border-border-strong bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70 disabled:opacity-60";
+export { fieldClass } from "@/components/admin/ui/field";
 
 type UploadTarget = { id: number; slug: string; title: string };
 
@@ -130,9 +131,17 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
     }
   }
 
+  const ready = pending.filter((p) => p.status === "idle" && p.alt.trim() && p.collectionId !== null);
+  async function uploadAll() {
+    for (const item of ready) await uploadPending(item.key);
+  }
+
   return (
     <div className="space-y-6">
       <div
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), inputRef.current?.click())}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -144,8 +153,8 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
           addFiles(e.dataTransfer.files);
         }}
         onClick={() => inputRef.current?.click()}
-        className={`cursor-pointer rounded border-2 border-dashed p-6 text-center text-base ${
-          dragOver ? "border-fg bg-fg/5" : "border-border-strong text-dim"
+        className={`cursor-pointer border border-dashed p-6 text-center text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 ${
+          dragOver ? "border-fg bg-fg/10" : "border-border-strong text-dim"
         }`}
       >
         Drag and drop images here, or click to choose files
@@ -159,21 +168,26 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
         />
       </div>
 
+      {ready.length > 1 && (
+        <Button variant="primary" onClick={() => void uploadAll()}>
+          Upload all ({ready.length})
+        </Button>
+      )}
+
       {pending.map((item) => {
         const busy = item.status !== "idle";
         return (
-          <div key={item.key} className="space-y-3 rounded-md border border-border bg-surface p-4 backdrop-blur-md">
-            <div className="flex gap-4">
+          <div key={item.key} className="space-y-3 border border-border bg-surface p-4 backdrop-blur-md">
+            <div className="flex flex-col gap-4 sm:flex-row">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.previewUrl} alt="" className="h-28 w-28 shrink-0 rounded object-cover" />
+              <img src={item.previewUrl} alt="" className="h-28 w-28 shrink-0 object-cover" />
               <div className="min-w-0 flex-1 space-y-3">
                 <p className="truncate text-base text-dim">{item.file.name}</p>
                 {collections.length > 1 && (
                   <label className="block">
                     <span className="mb-1 block text-base text-dim">Collection</span>
-                    <select
+                    <Select
                       disabled={busy}
-                      className={fieldClass}
                       value={item.collectionId ?? ""}
                       onChange={(e) =>
                         patchPending(item.key, { collectionId: e.target.value ? Number(e.target.value) : null })
@@ -185,7 +199,7 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
                           {c.title}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </label>
                 )}
                 <div>
@@ -202,21 +216,15 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
                       </span>
                     )}
                     {item.aiAlt && item.alt !== item.aiAlt && (
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => patchPending(item.key, { alt: item.aiAlt! })}
-                        className="ml-auto inline-flex items-center gap-1 rounded px-2 py-1 text-base text-fg underline decoration-fg/40 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-                      >
+                      <Button size="sm" disabled={busy} onClick={() => patchPending(item.key, { alt: item.aiAlt! })} className="ml-auto">
                         <RotateCcw className="h-4 w-4" aria-hidden /> Reset to suggestion
-                      </button>
+                      </Button>
                     )}
                   </div>
-                  <textarea
+                  <Textarea
                     id={`alt-${item.key}`}
                     rows={4}
                     disabled={busy}
-                    className={fieldClass}
                     placeholder={item.aiStatus === "generating" ? "Generating alt text…" : "Describe the photo"}
                     value={item.alt}
                     onChange={(e) => patchPending(item.key, { alt: e.target.value })}
@@ -224,10 +232,9 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
                 </div>
                 <label className="block">
                   <span className="mb-1 block text-base text-dim">Caption (optional)</span>
-                  <textarea
+                  <Textarea
                     rows={3}
                     disabled={busy}
-                    className={fieldClass}
                     value={item.caption}
                     onChange={(e) => patchPending(item.key, { caption: e.target.value })}
                   />
@@ -235,11 +242,11 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button
-                type="button"
+              <Button
+                variant="primary"
+                className="min-w-36"
                 disabled={!item.alt.trim() || item.collectionId === null || busy}
                 onClick={() => void uploadPending(item.key)}
-                className="inline-flex min-w-36 items-center justify-center gap-2 rounded bg-fg px-4 py-2 text-base text-bg disabled:opacity-60"
               >
                 {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
                 {item.status === "uploading"
@@ -247,15 +254,10 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
                   : item.status === "saving"
                     ? "Saving…"
                     : "Upload"}
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => removePending(item.key)}
-                className="rounded px-3 py-2 text-base text-dim hover:text-fg disabled:opacity-60"
-              >
+              </Button>
+              <Button disabled={busy} onClick={() => removePending(item.key)}>
                 Remove
-              </button>
+              </Button>
             </div>
             {busy && (
               <div
@@ -263,12 +265,12 @@ export function PhotoUploader({ collections }: { collections: UploadTarget[] }) 
                 aria-valuenow={Math.round(item.progress)}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                className="h-1 overflow-hidden rounded bg-fg/10"
+                className="h-1 overflow-hidden bg-fg/10"
               >
                 <div className="h-full bg-fg transition-[width] duration-200" style={{ width: `${item.progress}%` }} />
               </div>
             )}
-            {errors[item.key] && <p className="text-base text-red-500">{errors[item.key]}</p>}
+            {errors[item.key] && <p role="alert" className="text-base text-danger">{errors[item.key]}</p>}
           </div>
         );
       })}

@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import Markdown from "react-markdown";
+import { Button } from "@/components/admin/ui/button";
+import { Input, Textarea } from "@/components/admin/ui/field";
 import { bioMarkdownComponents, bioMarkdownAllowedElements } from "@/components/bio-markdown";
 
 function validateUrl(raw: string): string | null {
@@ -69,27 +71,20 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => wrapSelection("**", "**")}
-          className="rounded border border-border-strong px-2 py-1 text-base font-bold"
-        >
+        <Button size="sm" onClick={() => wrapSelection("**", "**")} aria-label="Bold" className="font-bold">
           B
-        </button>
-        <button
-          type="button"
-          onClick={startLink}
-          className="rounded border border-border-strong px-2 py-1 text-base underline"
-        >
+        </Button>
+        <Button size="sm" onClick={startLink} className="underline">
           Link
-        </button>
+        </Button>
       </div>
 
       {linkPrompt && (
-        <div className="flex flex-wrap items-center gap-2 rounded border border-border-strong p-2">
-          <input
+        <div className="flex flex-wrap items-center gap-2 border border-border-strong p-2">
+          <Input
             autoFocus
-            className="min-w-0 flex-1 rounded border border-border-strong bg-transparent px-2 py-1 text-base"
+            className="min-w-0 flex-1"
+            aria-label="Link URL"
             placeholder="/photos or https://example.com"
             value={linkUrl}
             onChange={(e) => {
@@ -97,25 +92,26 @@ export function BioEditor({ value, onChange }: { value: string; onChange: (value
               setLinkError(null);
             }}
           />
-          <button type="button" onClick={confirmLink} className="rounded bg-fg px-2 py-1 text-base text-bg">
+          <Button variant="primary" size="sm" onClick={confirmLink}>
             Insert
-          </button>
-          <button type="button" onClick={() => setLinkPrompt(null)} className="text-base text-dim">
+          </Button>
+          <Button size="sm" onClick={() => setLinkPrompt(null)}>
             Cancel
-          </button>
-          {linkError && <p className="w-full text-sm text-red-500">{linkError}</p>}
+          </Button>
+          {linkError && <p className="w-full text-sm text-danger">{linkError}</p>}
         </div>
       )}
 
-      <textarea
+      <Textarea
         ref={textareaRef}
-        className="w-full rounded border border-border-strong bg-transparent px-2 py-1.5 font-mono text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+        aria-label="About bio"
+        className="font-mono"
         rows={6}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
 
-      <div className="space-y-2 rounded border border-fg/10 bg-fg/[0.02] p-3 text-base">
+      <div className="space-y-2 border border-border p-3 text-base">
         <p className="text-base text-dim">Preview</p>
         <p>
           <Markdown components={bioMarkdownComponents} allowedElements={bioMarkdownAllowedElements} unwrapDisallowed>{previewOne}</Markdown>

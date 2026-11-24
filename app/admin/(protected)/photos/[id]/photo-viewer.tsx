@@ -4,13 +4,15 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { IconButton } from "@/components/ui/icon-button";
 import type { InferSelectModel } from "drizzle-orm";
 import type { photos } from "@/db/schema";
 
-type Photo = InferSelectModel<typeof photos>;
+// Only what the dialog shows, so a collection cover (no photo row) can use it too.
+export type ViewerPhoto = Pick<InferSelectModel<typeof photos>, "blobUrl" | "alt" | "caption">;
 
 /** A photo dialog for the admin: dark glass look, plus caption and alt text, none of the extras. */
-export function PhotoViewer({ photo, onClose }: { photo: Photo | null; onClose: () => void }) {
+export function PhotoViewer({ photo, onClose }: { photo: ViewerPhoto | null; onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export function PhotoViewer({ photo, onClose }: { photo: Photo | null; onClose: 
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-5 backdrop-blur-sm md:p-8"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-bg/80 p-5 backdrop-blur-sm md:p-8"
       onClick={onClose}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -49,19 +51,13 @@ export function PhotoViewer({ photo, onClose }: { photo: Photo | null; onClose: 
         aria-modal="true"
         aria-label="Photo preview"
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/15 bg-neutral-950/95 shadow-[0_24px_90px_-28px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.16)]"
+        className="relative w-full max-w-5xl overflow-hidden border border-border-strong bg-bg"
       >
-        <button
-          ref={closeRef}
-          type="button"
-          onClick={onClose}
-          aria-label="Close photo preview"
-          className="absolute right-4 top-4 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/45 text-neutral-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14)] transition-[border-color,background-color] duration-300 hover:border-white/30 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-        >
-          <X className="h-4 w-4" strokeWidth={1.9} aria-hidden />
-        </button>
+        <div className="absolute right-4 top-4 z-20 bg-bg">
+          <IconButton ref={closeRef} icon={<X />} label="Close photo preview" onClick={onClose} />
+        </div>
         <div className="grid md:grid-cols-[minmax(0,1fr)_20rem]">
-          <div className="relative aspect-[3/2] max-h-[min(80vh,44rem)] overflow-hidden bg-neutral-950">
+          <div className="relative aspect-[3/2] max-h-[min(80vh,44rem)] overflow-hidden bg-bg">
             <Image
               src={photo.blobUrl}
               alt={photo.alt}
@@ -71,14 +67,14 @@ export function PhotoViewer({ photo, onClose }: { photo: Photo | null; onClose: 
               quality={72}
             />
           </div>
-          <div className="flex min-w-0 flex-col justify-center gap-6 border-t border-white/10 p-6 md:border-l md:border-t-0 md:p-7">
+          <div className="flex min-w-0 flex-col justify-center gap-6 border-t border-border p-6 md:border-l md:border-t-0 md:p-7">
             <div>
-              <p className="text-base text-neutral-400">Caption</p>
-              <p className="mt-2 break-words text-sm leading-relaxed text-neutral-300">{photo.caption || "No caption"}</p>
+              <p className="text-base text-dim">Caption</p>
+              <p className="mt-2 break-words text-sm leading-relaxed text-fg">{photo.caption || "No caption"}</p>
             </div>
             <div>
-              <p className="text-base text-neutral-400">Alt text</p>
-              <p className="mt-2 break-words text-sm leading-relaxed text-neutral-300">{photo.alt || "No alt text"}</p>
+              <p className="text-base text-dim">Alt text</p>
+              <p className="mt-2 break-words text-sm leading-relaxed text-fg">{photo.alt || "No alt text"}</p>
             </div>
           </div>
         </div>

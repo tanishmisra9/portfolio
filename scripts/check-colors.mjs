@@ -27,10 +27,13 @@ function check(label, ok) {
 // 1. Dark-mode token values must match the exact prod baseline.
 const DARK_TOKEN_BASELINE = {
   "--bg": "#000000",
+  "--bg-rgb": "0 0 0",
   "--surface": "rgba(0, 0, 0, 0.4)",
   "--surface-strong": "#000000",
   "--fg": "#e5e5e5",
   "--fg-rgb": "229 229 229",
+  "--danger": "#ff7b72",
+  "--danger-rgb": "255 123 114",
   "--muted": "#b4b4b8",
   "--dim": "#7a7a7a",
   "--border": "rgba(255, 255, 255, 0.12)",
@@ -92,7 +95,7 @@ check(
 // 3. tailwind.config.ts must still map every color token to its CSS variable.
 console.log("\ntailwind.config.ts token mapping:");
 const twConfig = read("tailwind.config.ts");
-for (const token of ["bg", "muted", "dim", "surface", "surface-strong", "border", "border-strong", "hover-outline"]) {
+for (const token of ["muted", "dim", "surface", "surface-strong", "border", "border-strong", "hover-outline"]) {
   const re = new RegExp(`["']?${token}["']?:\\s*"var\\(--${token}\\)"`);
   check(`colors.${token} -> var(--${token})`, re.test(twConfig));
 }
@@ -100,6 +103,18 @@ for (const token of ["bg", "muted", "dim", "surface", "surface-strong", "border"
 check(
   'colors.fg -> rgb(var(--fg-rgb) / <alpha-value>)',
   /fg:\s*"rgb\(var\(--fg-rgb\)\s*\/\s*<alpha-value>\)"/.test(twConfig),
+);
+
+// bg maps through --bg-rgb (like fg) so opacity modifiers such as bg-bg/90 compile instead of being silently dropped.
+check(
+  'colors.bg -> rgb(var(--bg-rgb) / <alpha-value>)',
+  /bg:\s*"rgb\(var\(--bg-rgb\)\s*\/\s*<alpha-value>\)"/.test(twConfig),
+);
+
+// --danger (admin delete/error text) maps through --danger-rgb like fg, so /NN modifiers compile.
+check(
+  'colors.danger -> rgb(var(--danger-rgb) / <alpha-value>)',
+  /danger:\s*"rgb\(var\(--danger-rgb\)\s*\/\s*<alpha-value>\)"/.test(twConfig),
 );
 
 // 3. Numeric WCAG contrast: dim text (small) >= 4.5:1, muted quote text (large) >= 3:1, in both themes.
@@ -114,6 +129,7 @@ const mix = (fg, a, bg) => fg.map((c, i) => c * a + bg[i] * (1 - a));
 for (const [theme, block] of [["light", lightBlock], ["dark", darkBlock]]) {
   const bg = hex(tok(block, "--bg"));
   check(`${theme} --dim >= 4.5:1`, ratio(hex(tok(block, "--dim")), bg) >= 4.5);
+  check(`${theme} --danger >= 4.5:1`, ratio(hex(tok(block, "--danger")), bg) >= 4.5);
   const q = tok(block, "--quote-muted");
   const rgba = q.startsWith("#")
     ? [hex(q), parseInt(q.slice(7, 9), 16) / 255]

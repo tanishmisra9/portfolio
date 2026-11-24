@@ -1,6 +1,6 @@
 import { listDraftRadioSamples, listDraftRadioTriggers } from "@/lib/admin/actions";
 import { getPublishedData, NO_SNAPSHOT_MESSAGE } from "@/lib/site-content";
-import { ADMIN_SECTION_HEADING_CLASSES } from "@/components/ui/class-constants";
+import { AdminHeading } from "@/components/admin/ui/panel";
 import { RadioManager } from "./radio-manager";
 import { TriggerManager } from "./trigger-manager";
 
@@ -19,24 +19,20 @@ export default async function RadioAdminPage() {
   ]);
 
   return (
-    <div className="max-w-5xl space-y-10">
-      <div>
-        <h1 className={`${ADMIN_SECTION_HEADING_CLASSES} mb-6`}>Radio samples</h1>
-        <p className="mb-6 text-muted">
-          Clips played by the easter egg below. Playback order is randomized, so
-          there&apos;s nothing to reorder here — just add or remove clips. Changes go live on
-          Publish; anything outlined is new since the last publish.
-        </p>
+    <div className="max-w-5xl space-y-12">
+      <section>
+        <AdminHeading
+          title="Radio Samples"
+          subtitle="Clips played by the easter egg below. Playback order is randomized, so there's nothing to reorder here: just add or remove clips. Changes go live on Publish; anything tagged New or outlined differs from the last publish."
+        />
         <RadioManager samples={samples} liveUrls={live?.samples ?? []} />
-      </div>
+      </section>
 
-      <div>
-        <h2 className={`${ADMIN_SECTION_HEADING_CLASSES} mb-6`}>Keystroke triggers</h2>
-        <p className="mb-6 text-muted">
-          Typing one of these words fires the easter egg. Letters a–z only.
-        </p>
+      <section>
+        <h2 className="font-display text-2xl/[1.4] font-extrabold tracking-tight text-fg md:text-3xl/[1.4]">Keystroke Triggers</h2>
+        <p className="mb-6 max-w-2xl text-base text-muted">Typing one of these words fires the easter egg. Letters a–z only.</p>
         <TriggerManager triggers={triggers} liveTexts={live?.triggers ?? []} />
-      </div>
+      </section>
     </div>
   );
 }

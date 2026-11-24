@@ -2,6 +2,12 @@
 
 import { useState } from "react";
 import { ChevronDown, Eye, EyeOff, GripVertical } from "lucide-react";
+import { IconButton } from "@/components/ui/icon-button";
+import { Button } from "@/components/admin/ui/button";
+import { DeleteButton } from "@/components/admin/ui/delete-button";
+import { Field, Input, Select, Textarea } from "@/components/admin/ui/field";
+import { MoveButtons } from "@/components/admin/ui/move-buttons";
+import { Tag } from "@/components/admin/ui/panel";
 import { useExpandedSet, moveItem } from "./use-expanded-set";
 
 export interface FieldDef {
@@ -72,13 +78,13 @@ export function ArrayEditor({
   }
 
   const itemClassName = nested
-    ? "space-y-2 rounded border border-fg/10 bg-fg/[0.02] p-3"
-    : "space-y-2 rounded-md border border-border bg-surface p-6 backdrop-blur-md";
+    ? "space-y-2 border border-border p-3"
+    : "space-y-2 border border-border bg-surface p-4 backdrop-blur-md md:p-6";
 
   return (
     <div className={layout === "cards" ? "space-y-4" : "space-y-3"}>
       <div className={layout === "cards" ? "grid items-start gap-5 sm:grid-cols-2" : "space-y-3"}>
-        {items.map((item) => {
+        {items.map((item, index) => {
           if (cardLabel) {
             const isOpen = expanded.has(item.id);
             return (
@@ -96,6 +102,7 @@ export function ArrayEditor({
                 }}
               >
                 <div className="flex items-center gap-2">
+                  {reorderable && <MoveButtons index={index} count={items.length} label={cardLabel(item) || "item"} onMove={(d) => move(item.id, index + d)} />}
                   {reorderable && (
                     // Only the grip is draggable (not the whole card) so text selection inside inputs still works.
                     <div
@@ -124,7 +131,7 @@ export function ArrayEditor({
                           move(item.id, index + 1);
                         }
                       }}
-                      className="flex h-11 w-7 shrink-0 cursor-grab items-center justify-center rounded text-dim hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+                      className="flex h-11 w-7 shrink-0 cursor-grab items-center justify-center text-dim hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
                     >
                       <GripVertical className="h-5 w-5" aria-hidden />
                     </div>
@@ -143,27 +150,21 @@ export function ArrayEditor({
                       {cardLabel(item) || "Untitled"}
                     </span>
                     {hideToggle && item.hidden ? (
-                      <span className="rounded-full border border-border-strong px-2 py-0.5 text-base text-dim">Hidden</span>
+                      <Tag>Hidden</Tag>
                     ) : null}
                   </button>
                   {hideToggle && (
-                    <button
-                      type="button"
+                    <IconButton
+                      icon={item.hidden ? <EyeOff /> : <Eye />}
+                      label={item.hidden ? "Show on site" : "Hide from site"}
                       aria-pressed={Boolean(item.hidden)}
-                      aria-label={item.hidden ? "Show on site" : "Hide from site"}
-                      title={item.hidden ? "Show on site" : "Hide from site"}
                       onClick={() => {
                         const { hidden: _hidden, ...rest } = item;
                         onChange(items.map((i) => (i.id === item.id ? (item.hidden ? rest : { ...item, hidden: true }) : i)));
                       }}
-                      className="flex h-11 w-11 items-center justify-center rounded text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-                    >
-                      {item.hidden ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
-                    </button>
+                    />
                   )}
-                  <button type="button" onClick={() => removeItem(item.id)} className="px-2 py-1 text-base text-red-500">
-                    Remove
-                  </button>
+                  <DeleteButton label={`Remove ${cardLabel(item) || "item"}`} onConfirm={() => removeItem(item.id)} />
                 </div>
                 {isOpen && (
                   <div className="space-y-2 pl-6">
@@ -190,21 +191,15 @@ export function ArrayEditor({
                   onChange={(v) => updateItem(item.id, field.key, v)}
                 />
               ))}
-              <button type="button" onClick={() => removeItem(item.id)} className="text-base text-red-500">
-                Remove
-              </button>
+              <div className="flex justify-end">
+                <DeleteButton label="Remove" onConfirm={() => removeItem(item.id)} />
+              </div>
             </div>
           );
         })}
       </div>
       {newItem && (
-        <button
-          type="button"
-          onClick={addItem}
-          className="rounded border border-border-strong px-3 py-1.5 text-base"
-        >
-          + Add
-        </button>
+        <Button onClick={addItem}>+ Add</Button>
       )}
     </div>
   );
@@ -219,16 +214,11 @@ export function FieldInput({
   value: unknown;
   onChange: (v: unknown) => void;
 }) {
-  const base =
-    "w-full rounded border border-border-strong bg-transparent px-2 py-1 text-base outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
-
   if (field.type === "tags") {
     const list = Array.isArray(value) ? (value as string[]) : [];
     return (
-      <label className="block">
-        <span className="mb-1 block text-base text-dim">{field.label} (comma-separated)</span>
-        <input
-          className={base}
+      <Field label={`${field.label} (comma-separated)`}>
+        <Input
           defaultValue={list.join(", ")}
           onBlur={(e) =>
             onChange(
@@ -239,30 +229,26 @@ export function FieldInput({
             )
           }
         />
-      </label>
+      </Field>
     );
   }
 
   if (field.type === "textarea") {
     return (
-      <label className="block">
-        <span className="mb-1 block text-base text-dim">{field.label}</span>
-        <textarea
-          className={base}
+      <Field label={field.label}>
+        <Textarea
           rows={3}
           defaultValue={typeof value === "string" ? value : ""}
           onBlur={(e) => onChange(e.target.value)}
         />
-      </label>
+      </Field>
     );
   }
 
   if (field.type === "select") {
     return (
-      <label className="block">
-        <span className="mb-1 block text-base text-dim">{field.label}</span>
-        <select
-          className={base}
+      <Field label={field.label}>
+        <Select
           defaultValue={typeof value === "string" ? value : ""}
           onChange={(e) => onChange(e.target.value || undefined)}
         >
@@ -271,8 +257,8 @@ export function FieldInput({
               {opt.label}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
     );
   }
 
@@ -293,13 +279,8 @@ export function FieldInput({
   }
 
   return (
-    <label className="block">
-      <span className="mb-1 block text-base text-dim">{field.label}</span>
-      <input
-        className={base}
-        defaultValue={typeof value === "string" ? value : ""}
-        onBlur={(e) => onChange(e.target.value)}
-      />
-    </label>
+    <Field label={field.label}>
+      <Input defaultValue={typeof value === "string" ? value : ""} onBlur={(e) => onChange(e.target.value)} />
+    </Field>
   );
 }

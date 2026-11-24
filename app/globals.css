@@ -48,10 +48,13 @@
 
 :root {
   --bg: #fafaf9;
+  --bg-rgb: 250 250 249;
   --surface: rgba(0, 0, 0, 0.03);
   --surface-strong: #fafaf9;
   --fg: #1c1c1a;
   --fg-rgb: 28 28 26;
+  --danger: #b42318;
+  --danger-rgb: 180 35 24;
   --muted: #6b6b68;
   --dim: #727269;
   --border: rgba(0, 0, 0, 0.1);
@@ -63,10 +66,13 @@
 
 .dark {
   --bg: #000000;
+  --bg-rgb: 0 0 0;
   --surface: rgba(0, 0, 0, 0.4);
   --surface-strong: #000000;
   --fg: #e5e5e5;
   --fg-rgb: 229 229 229;
+  --danger: #ff7b72;
+  --danger-rgb: 255 123 114;
   --muted: #b4b4b8;
   --dim: #7a7a7a;
   --border: rgba(255, 255, 255, 0.12);

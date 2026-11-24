@@ -7,7 +7,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { move, ANIM_PHASE, HERO_PHASE, NYC_PHASE, UPLOAD_STATUS, AI_STATUS } from "../lib/state-machines.ts";
+import { move, ANIM_PHASE, HERO_PHASE, NYC_PHASE, UPLOAD_STATUS, AI_STATUS, SAVE_STATUS } from "../lib/state-machines.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (path) => readFileSync(join(ROOT, path), "utf8");
@@ -29,6 +29,7 @@ const MACHINES = {
   HERO_PHASE: { edges: HERO_PHASE, allowed: ["idle>launch", "launch>bolt", "bolt>drive", "drive>enter", "enter>idle"], terminal: [] },
   NYC_PHASE: { edges: NYC_PHASE, allowed: ["idle>swap", "swap>hold"], terminal: ["hold"] },
   UPLOAD_STATUS: { edges: UPLOAD_STATUS, allowed: ["idle>uploading", "uploading>saving", "uploading>idle", "saving>idle"], terminal: [] },
+  SAVE_STATUS: { edges: SAVE_STATUS, allowed: ["idle>saving", "saving>saved", "saving>error", "saved>idle", "saved>saving", "error>idle", "error>saving"], terminal: [] },
   AI_STATUS: { edges: AI_STATUS, allowed: ["generating>ready", "generating>failed"], terminal: ["ready", "failed"] },
 };
 
@@ -54,6 +55,7 @@ noRaw("components/hero/use-pitstop.ts", /phaseRef\.current\s*=(?!=)(?!\s*move\()
 noRaw("components/photos/nyc-title.tsx", /setPhase\(\s*"/, 'no raw setPhase("...")');
 noRaw("app/admin/(protected)/photos/photo-uploader.tsx", /aiStatus: "(ready|failed)"/, "no raw aiStatus ready/failed write");
 noRaw("app/admin/(protected)/photos/photo-uploader.tsx", /setPending\([^)]*status:/, "no raw status write via setPending");
+noRaw("components/admin/ui/use-save-status.ts", /statusRef\.current\s*=(?!=)(?!\s*move\()/, "status only written via move()");
 
 if (failures) {
   console.error(`\n${failures} check(s) failed`);
