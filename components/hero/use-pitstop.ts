@@ -11,13 +11,13 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { HERO_PHASE, move, type HeroPhase } from "@/lib/state-machines";
 
 /*
- * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (5.24s) is, baked into one file
+ * Timeline, all in ms from the moment public/sfx/pitstop.mp3 starts playing. The clip (4.52s) is, baked into one file
  * so it starts inside the click gesture: a "whoosh 8" per tire at LAUNCH_MS - 40 (0/0.16/0.32/0.48s; +60 felt late) as
  * the chunks split, then the original Short through ONE filter chain with no gaps: the wheel-gun burst 0.92-1.57s as
  * the tires rejoin, CROSSFADED (0.35s, equal power, 1.40-1.75s) into the car's engine growl (rising from 1.68s to
- * 2.82s) so the two weave together over the same ambience instead of leaving a lull, the drive-off from ~3.15s
- * (engine rev peaks ~3.75s), and a "whoosh 9" that starts at 3.19s and peaks at 4.35s as the name re-enters
- * (re-entry starts at DRIVE_MS + DRIVE_S + ENTER_PAUSE_MS = 4.25s). The burst is one continuous sound, so on top of
+ * 2.29s: the growl was 1.4s, now time-compressed 2x to 0.7s) so the two weave together over the same ambience instead of leaving a lull, the drive-off from ~2.45s
+ * (engine rev peaks ~3.05s), and a "whoosh 9" that starts at 2.49s and peaks at 3.65s as the name re-enters
+ * (re-entry starts at DRIVE_MS + DRIVE_S + ENTER_PAUSE_MS = 3.55s). The burst is one continuous sound, so on top of
  * it sit FOUR synthetic-plus-source impact hits (thump + crack + a slice of the real gun rattle), one per tire at
  * BOLT_MS + SNAP_S (1.00/1.18/1.36/1.54s) = the instant each tire lands, with the burst ducked under each one so
  * they pop. The sounds are mixed in at fixed times: if LAUNCH_MS, BOLT_MS, SNAP_S, DRIVE_MS, DRIVE_S or
@@ -28,7 +28,7 @@ export const LAUNCH_MS = [40, 200, 360, 520] as const;
 /** Each tire starts snapping back, in TIRES order: they land SNAP_S (160ms) later at 1.00/1.18/1.36/1.54s, inside the gun burst. */
 export const BOLT_MS = [840, 1020, 1200, 1380] as const;
 /** The whole name starts sliding off (slowly, then accelerating); it is fastest right around the engine rev peak. */
-export const DRIVE_MS = 3350;
+export const DRIVE_MS = 2650;
 
 /**
  * Every visual is delayed by this much after the audio's `playing` event: that event fires before the sound reaches the
@@ -74,7 +74,7 @@ const ENTER_KICK_PX = 5;
  */
 const RUMBLE_PX = 2.4; // 1.2 was "not noticeable enough"; keep it under DRIVE_SQUAT_PX so the pull-out still reads bigger
 const RUMBLE_HZ = 15; // 30 direction changes a second: ~2 frames each at 60fps, so it can't alias into a wobble
-const RUMBLE_PEAK_MS = 2820;
+const RUMBLE_PEAK_MS = 2285;
 /** velocity: 0 matters: set() doesn't reset a MotionValue's velocity, so without it the wobble inherits the slam's speed. */
 const wobbleSpring = { type: "spring" as const, stiffness: 420, damping: 13, mass: 0.6, velocity: 0 };
 
