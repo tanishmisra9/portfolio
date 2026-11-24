@@ -468,6 +468,13 @@ html:not(.dark) .f1-bloom {
 
 /* <main tabindex="-1"> is only a programmatic focus target (skip link, route change), never a Tab stop; Safari paints
    a focus box on it after every client navigation. */
+/* Next scrolls the new page's first element (its <main>) into view after a client-side navigation. <main> sits below the
+   sticky 5rem header, so without a margin the page landed ~85px scrolled down. A big scroll-margin makes the target
+   negative, which the browser clamps to 0. (Direct loads were never affected.) */
+main {
+  scroll-margin-top: 8rem;
+}
+
 main[tabindex="-1"]:focus {
   outline: none;
 }

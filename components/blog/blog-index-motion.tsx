@@ -75,7 +75,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
                     { year: "numeric", month: "long", day: "numeric" },
                   )}
                 </time>
-                {/* The card is the hover/focus target (group): a rectangle traces itself around the title on hover and switches off instantly on leave (the transition lives only on the hover/focus state). */}
+                {/* The card is the hover/focus target (group): an outline rectangle appears around the title instantly, and disappears instantly. */}
                 <h2 className="relative -ml-3 mt-1 w-fit px-3 py-1.5 font-display text-2xl font-bold text-fg">
                   {post.title}
                   <svg aria-hidden className="pointer-events-none absolute inset-0 size-full overflow-visible">
@@ -86,7 +86,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
                       stroke="currentColor"
                       strokeWidth="1.5"
                       pathLength={1}
-                      className="[stroke-dasharray:1] [stroke-dashoffset:1] group-hover:[stroke-dashoffset:0] group-hover:transition-[stroke-dashoffset] group-hover:duration-[250ms] group-hover:ease-out group-focus-visible:[stroke-dashoffset:0] group-focus-visible:transition-[stroke-dashoffset] group-focus-visible:duration-[250ms] group-focus-visible:ease-out motion-reduce:!transition-none"
+                      className="[stroke-dasharray:1] [stroke-dashoffset:1] group-hover:[stroke-dashoffset:0] group-focus-visible:[stroke-dashoffset:0]"
                     />
                   </svg>
                 </h2>

@@ -22,12 +22,10 @@ export const PAGE_TITLE_CLASSES =
 /**
  * Title + subtitle for content pages (blog posts, photo albums): left-aligned, title case, one scale. No text colour
  * on the title: album titles swap colour classes for their effects (uk-flag-fly, .supermax-title phases), so plain
- * titles add `text-fg` themselves. A 1.4 line-height is Poppins' natural content height (written `text-4xl/[1.4]` on every breakpoint: a bare `md:text-5xl` resets line-height to 1 and would silently undo a separate `leading-[1.4]`); anything tighter clips the
- * descender of g/p/y when something clips to the box (filter animations, Safari).
- */
+ * titles add `text-fg` themselves. Tight leading (1.15) keeps multi-line titles compact, and `pb-[0.2em]` gives the last line's descenders (g/p/y) room when something clips to the box (filter animations, Safari); written `text-3xl/[1.15]` on every breakpoint because a bare `md:text-4xl` resets line-height. (Section headings stay at 1.4: single line, no padding trick needed.) */
 export const CONTENT_TITLE_CLASSES =
-  "select-none font-display font-extrabold tracking-tight text-4xl/[1.4] md:text-5xl/[1.4] lg:text-6xl/[1.4]";
-export const CONTENT_SUBTITLE_CLASSES = "mt-4 max-w-2xl text-lg text-muted md:text-xl";
+  "select-none pb-[0.2em] font-display font-extrabold tracking-tight text-3xl/[1.15] md:text-4xl/[1.15] lg:text-5xl/[1.15]";
+export const CONTENT_SUBTITLE_CLASSES = "mt-4 max-w-3xl text-lg text-muted md:text-xl";
 
 /**
  * Admin-only: same type system as the public headings (font-display, extrabold) but at working

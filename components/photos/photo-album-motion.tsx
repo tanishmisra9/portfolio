@@ -1,13 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronLeft } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useCallback, useRef, useState } from "react";
 import { AlbumTitle } from "@/components/photos/album-title";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { CONTENT_SUBTITLE_CLASSES } from "@/components/ui/class-constants";
-import { IconButton } from "@/components/ui/icon-button";
+import { BackButton } from "@/components/ui/back-button";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 import type { Photo } from "@/types/content";
 
@@ -37,17 +36,19 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
 
   return (
     <motion.div
-      className="mx-auto max-w-4xl"
+      // Same container as the header and the blog post page: back button, title and photos share the "TM" logo's left edge.
+      className="relative left-1/2 w-screen max-w-6xl -translate-x-1/2 px-6"
       variants={root}
       initial="hidden"
       animate="show"
     >
       <motion.div variants={item}>
-        <IconButton href="/photos" icon={<ChevronLeft />} label="Back to photos" className="mb-10 md:mb-12" />
+        <BackButton href="/photos" label="Back to photos" />
       </motion.div>
       <motion.div
         variants={item}
         onAnimationComplete={onTitleBlockAnimationComplete}
+        className="max-w-5xl"
       >
         <AlbumTitle title={title} slug={slug} />
         <p className={CONTENT_SUBTITLE_CLASSES}>
@@ -58,7 +59,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
         variants={albumGridSlot}
         initial="hidden"
         animate="show"
-        className="mt-12 flex flex-col gap-10 md:mt-16 md:gap-10"
+        className="mt-12 flex max-w-5xl flex-col gap-10 md:mt-16 md:gap-10"
       >
         {photos.map((photo, index) =>
           photo.duetWith ? (

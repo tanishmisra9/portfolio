@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import type { Components } from "react-markdown";
 import Image from "next/image";
-import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { CONTENT_SUBTITLE_CLASSES, CONTENT_TITLE_CLASSES } from "@/components/ui/class-constants";
-import { IconButton } from "@/components/ui/icon-button";
+import { BackButton } from "@/components/ui/back-button";
 import { getImageDimensions } from "@/lib/image-dimensions";
 import { getPublishedData } from "@/lib/site-content";
 
@@ -154,25 +153,29 @@ export default async function BlogPostPage({ params }: Props) {
       tabIndex={-1}
       className="relative z-0 isolate px-6 pb-24 pt-12 md:py-24"
     >
-      <article className="mx-auto max-w-3xl">
-        <IconButton href="/blog" icon={<ChevronLeft />} label="Back to thoughts" className="mb-10 md:mb-12" />
+      {/* The article spans the header's container (w-screen max-w-6xl, centred on the viewport) with the header's px-6, so
+          the back button, title and body all share the "TM" logo's left edge; the title and body use max-w-5xl of it. */}
+      <article className="relative left-1/2 w-screen max-w-6xl -translate-x-1/2 px-6">
+        <BackButton href="/blog" label="Back to thoughts" />
 
-        <header>
-          <h1 className={`${CONTENT_TITLE_CLASSES} text-balance text-fg`}>{post.title}</h1>
-          <p className={CONTENT_SUBTITLE_CLASSES}>{post.description}</p>
-          <time className="mt-3 block font-mono text-xs uppercase tracking-wide text-dim">
-            {new Date(`${post.date}T00:00`).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </time>
-        </header>
+        <div className="max-w-5xl">
+          <header>
+            <h1 className={`${CONTENT_TITLE_CLASSES} text-balance text-fg`}>{post.title}</h1>
+            <p className={CONTENT_SUBTITLE_CLASSES}>{post.description}</p>
+            <time className="mt-3 block text-sm text-dim">
+              {new Date(`${post.date}T00:00`).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </time>
+          </header>
 
-        <div className="mt-12 space-y-6 text-fg">
-          <Markdown remarkPlugins={[remarkGfm]} components={components}>
-            {post.content}
-          </Markdown>
+          <div className="mt-12 space-y-6 text-fg">
+            <Markdown remarkPlugins={[remarkGfm]} components={components}>
+              {post.content}
+            </Markdown>
+          </div>
         </div>
       </article>
     </main>
