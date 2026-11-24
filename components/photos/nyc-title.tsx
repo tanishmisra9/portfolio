@@ -105,10 +105,12 @@ export function NYCTitle({ baseClasses }: Props) {
 
   return (
     <>
-      <h1
-        onClick={handleClick}
-        className="nyc-title-container relative inline-flex cursor-pointer select-none items-center justify-center whitespace-nowrap text-fg"
-      >
+      <h1 className="nyc-title-container relative inline-flex select-none items-center justify-center whitespace-nowrap text-fg">
+        <button
+          type="button"
+          onClick={handleClick}
+          className="relative inline-flex items-center justify-center whitespace-nowrap [font:inherit] [letter-spacing:inherit] [text-transform:inherit] [text-align:inherit] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+        >
         <span
           className={`${baseClasses} nyc-title-layer block ${
             showILoveNY ? "scale-95 opacity-0" : "scale-100 opacity-100"
@@ -137,6 +139,7 @@ export function NYCTitle({ baseClasses }: Props) {
           />
           <span className="nyc-typewriter-text">NY</span>
         </span>
+        </button>
       </h1>
 
       {exploding && (

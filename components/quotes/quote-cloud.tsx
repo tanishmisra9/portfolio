@@ -2,7 +2,8 @@
 
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 import { motion, useReducedMotion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { QuoteEntry } from "@/types/content";
 import {
@@ -95,6 +96,16 @@ const COLOR_NEIGHBORS_K = 4;
 /** Easter egg: clicking any Max Verstappen quote drives off to the super-max album. */
 const EASTER_EGG_AUTHOR = "Max Verstappen";
 const EASTER_EGG_HREF = "/photos/super-max";
+
+/** The Verstappen quote links to the Super Max album: a real link, so keyboard users can reach it. Other quotes pass through. */
+function EggLink({ on, label, children }: { on: boolean; label: string; children: ReactNode }) {
+  if (!on) return <>{children}</>;
+  return (
+    <Link href={EASTER_EGG_HREF} aria-label={label} className="block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70">
+      {children}
+    </Link>
+  );
+}
 
 /** Wrap bound per size tier (ch resolves against each quote's own font size). */
 const TIER_MAX_WIDTHS_CH = [14, 20, 26, 32] as const;
@@ -499,7 +510,6 @@ function packBlocks(
 
 export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitle: string }) {
   const reduceMotion = useReducedMotion();
-  const router = useRouter();
 
   // Generated after mount so randomization never causes a hydration mismatch.
   const [assignments, setAssignments] = useState<QuoteAssignment[] | null>(
@@ -673,16 +683,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                   }}
                   role="figure"
                   aria-label={label}
-                  className={`select-none ${
-                    a.quote.attribution === EASTER_EGG_AUTHOR
-                      ? "cursor-pointer"
-                      : ""
-                  }`}
-                  onClick={
-                    a.quote.attribution === EASTER_EGG_AUTHOR
-                      ? () => router.push(EASTER_EGG_HREF)
-                      : undefined
-                  }
+                  className="select-none"
                   onPointerEnter={
                     isDesktop && a.quote.attribution
                       ? (e) => {
@@ -735,6 +736,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                       : { position: "relative" }
                   }
                 >
+                  <EggLink on={a.quote.attribution === EASTER_EGG_AUTHOR} label={label}>
                   <blockquote
                     aria-hidden="true"
                     style={{
@@ -753,6 +755,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                   >
                     {a.quote.text}
                   </blockquote>
+                  </EggLink>
                 </motion.figure>
               );
             })}
@@ -764,16 +767,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
               {assignments.map((a) => (
                 <motion.li
                   key={a.quote.id}
-                  className={`select-none ${
-                    a.quote.attribution === EASTER_EGG_AUTHOR
-                      ? "cursor-pointer"
-                      : ""
-                  }`}
-                  onClick={
-                    a.quote.attribution === EASTER_EGG_AUTHOR
-                      ? () => router.push(EASTER_EGG_HREF)
-                      : undefined
-                  }
+                  className="select-none"
                   initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                   whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "0px 0px -10% 0px" }}
@@ -787,6 +781,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                         : a.quote.text
                     }
                   >
+                    <EggLink on={a.quote.attribution === EASTER_EGG_AUTHOR} label={a.quote.text}>
                     <blockquote
                       aria-hidden="true"
                       className="text-fg"
@@ -810,13 +805,27 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                         {a.quote.attribution}
                       </figcaption>
                     ) : null}
+                    </EggLink>
                   </figure>
                 </motion.li>
               ))}
             </ul>
           )
         ) : (
-          <div className="min-h-[70vh]" aria-hidden="true" />
+          <>
+            <div className="min-h-[70vh]" aria-hidden="true" />
+            {/* Layout and shuffle are client-only; without JS (or if it fails) the quotes are still readable. */}
+            <noscript>
+              <ul className="flex flex-col gap-8">
+                {quotes.map((q) => (
+                  <li key={q.id}>
+                    <blockquote className="text-fg">{q.text}</blockquote>
+                    {q.attribution ? <p className="mt-1 text-sm text-dim">{q.attribution}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            </noscript>
+          </>
         )}
       </div>
       <div

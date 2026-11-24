@@ -68,7 +68,7 @@ const DIM_TOKEN_SITES = [
   ["app/thoughts/[slug]/page.tsx", 'mt-3 block text-sm text-dim">'],
   ["components/blog/blog-index-motion.tsx", 'className="mt-8 text-dim">'],
   ["components/blog/blog-index-motion.tsx", 'className="block text-sm tabular-nums text-dim">'],
-  ["components/hero/hero.tsx", 'translate-x-[0.14em] text-dim md:mt-4 md:translate-x-0"'],
+  ["components/hero/hero.tsx", '-mt-3 text-dim md:mt-4"'],
   ["components/hero/scatter-name.tsx", '"text-fg" : "text-dim";'],
   ["components/quotes/quote-cloud.tsx", 'tracking-[0.2em] text-dim"'],
   ["components/sections/skills-section.tsx", '<span className="text-dim transition-colors group-hover:text-fg">'],
@@ -117,7 +117,7 @@ check(
   /danger:\s*"rgb\(var\(--danger-rgb\)\s*\/\s*<alpha-value>\)"/.test(twConfig),
 );
 
-// 3. Numeric WCAG contrast: dim text (small) >= 4.5:1, muted quote text (large) >= 3:1, in both themes.
+// 3. Numeric WCAG contrast: dim text (small) >= 4.5:1, muted quote text >= 4.5:1 (the smallest tier is ~19px regular, not "large text"), in both themes.
 console.log("Contrast ratios:");
 const lin = (c) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
 const lum = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
@@ -134,7 +134,7 @@ for (const [theme, block] of [["light", lightBlock], ["dark", darkBlock]]) {
   const rgba = q.startsWith("#")
     ? [hex(q), parseInt(q.slice(7, 9), 16) / 255]
     : [q.match(/[\d.]+/g).slice(0, 3).map(Number), Number(q.match(/[\d.]+/g)[3])];
-  check(`${theme} --quote-muted >= 3:1`, ratio(mix(rgba[0], rgba[1], bg), bg) >= 3);
+  check(`${theme} --quote-muted >= 4.5:1`, ratio(mix(rgba[0], rgba[1], bg), bg) >= 4.5);
 }
 
 console.log(

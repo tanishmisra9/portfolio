@@ -129,9 +129,14 @@ export function AlbumTitle({ title, slug }: Props) {
         } ${
           ukFlying ? "uk-flag-fly" : "text-fg"
         }`}
-        onClick={handleClick}
       >
-        {title}
+        {isInteractive ? (
+          <button type="button" onClick={handleClick} className="[font:inherit] [letter-spacing:inherit] [text-transform:inherit] [text-align:inherit] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70">
+            {title}
+          </button>
+        ) : (
+          title
+        )}
       </h1>
     );
 
@@ -166,11 +171,12 @@ export function AlbumTitle({ title, slug }: Props) {
       {/* React 19 hoists this <link> into <head>; only loaded on the Super Max route */}
       <link rel="preload" href="/sfx/passby.mp3" as="audio" type="audio/mpeg" />
       <h1
-        onClick={startFlyby}
-        className={`${baseClasses} supermax-title relative cursor-pointer whitespace-nowrap`}
+        className={`${baseClasses} supermax-title relative whitespace-nowrap`}
         data-phase={phase}
       >
-        {title}
+        <button type="button" onClick={startFlyby} className="[font:inherit] [letter-spacing:inherit] [text-transform:inherit] [text-align:inherit] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70">
+          {title}
+        </button>
       </h1>
     </div>
   );

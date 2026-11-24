@@ -89,6 +89,11 @@ export function Hero({ subtitle }: HeroProps) {
       tanishResetRef.current?.();
       misraResetRef.current?.();
     };
+    // Reduced motion: the magnet drives MotionValues directly (MotionConfig doesn't gate those), so don't pull at all.
+    if (reduceHeroMotion) {
+      reset();
+      return;
+    }
     window.addEventListener("pointermove", move);
     document.documentElement.addEventListener("pointerleave", reset);
     window.addEventListener("pointercancel", reset);
@@ -98,12 +103,12 @@ export function Hero({ subtitle }: HeroProps) {
       document.documentElement.removeEventListener("pointerleave", reset);
       window.removeEventListener("pointercancel", reset);
     };
-  }, [isIdle]);
+  }, [isIdle, reduceHeroMotion]);
 
   return (
     <section className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[85vh] md:items-center md:py-24">
       <div className="mx-auto w-full max-w-6xl">
-        <div className="mb-6 flex flex-col items-center md:mb-0 md:items-start">
+        <div className="mb-6 flex flex-col items-start md:mb-0">
           <HeroNameMotion>
             <>
               <h1 className="sr-only">TANISH MISRA</h1>
@@ -124,7 +129,7 @@ export function Hero({ subtitle }: HeroProps) {
                         }
                       },
                     })}
-                className={`heading-bleed-mobile flex flex-col items-center ${plainName ? "" : "cursor-pointer "}select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:items-start md:text-[clamp(2.256rem,12vw,11.6rem)] md:leading-[0.85]`}
+                className={`flex flex-col items-start ${plainName ? "" : "cursor-pointer "}select-none font-display text-[clamp(4rem,17.5vw,16rem)] font-extrabold uppercase leading-none tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-fg/70 md:items-start md:text-[clamp(2.256rem,12vw,11.6rem)] md:leading-[0.85]`}
               >
                 <div className="text-fg">
                   <ScatterName
@@ -138,7 +143,7 @@ export function Hero({ subtitle }: HeroProps) {
                     magnetResetRef={tanishResetRef}
                   />
                 </div>
-                <div className="-mt-3 translate-x-[0.14em] text-dim md:mt-4 md:translate-x-0">
+                <div className="-mt-3 text-dim md:mt-4">
                   <ScatterName
                     text="MISRA"
                     lineId="misra"
@@ -158,7 +163,7 @@ export function Hero({ subtitle }: HeroProps) {
             </>
           </HeroNameMotion>
           <motion.div
-            className="mt-7 flex max-w-4xl flex-col items-center gap-3 text-center font-sans text-xl leading-relaxed md:mt-16 md:items-start md:gap-2 md:text-left md:text-2xl"
+            className="mt-7 flex max-w-4xl flex-col items-start gap-3 text-left font-sans text-xl leading-relaxed md:mt-16 md:gap-2 md:text-2xl"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{

@@ -61,7 +61,7 @@
   --border-strong: rgba(0, 0, 0, 0.16);
   --hover-outline: rgba(0, 0, 0, 0.32);
   --quote-strong: rgba(28, 28, 26, 0.88);
-  --quote-muted: rgba(28, 28, 26, 0.5);
+  --quote-muted: rgba(28, 28, 26, 0.62);
 }
 
 .dark {
@@ -94,16 +94,6 @@
   --muted: #cfcfd2;
   --border: rgba(255, 255, 255, 0.2);
   --border-strong: rgba(255, 255, 255, 0.32);
-}
-
-/* Mobile full-bleed for display headings inside padded sections */
-@media (max-width: 767px) {
-  .heading-bleed-mobile {
-    width: 100vw;
-    max-width: 100vw;
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
-  }
 }
 
 html {
@@ -158,36 +148,165 @@ body {
   }
 }
 
-/* ── Photos index collection tile cursor illumination ── */
-.collection-tile {
-  --hover-x: 50%;
-  --hover-y: 50%;
+/* ── Photos intro light (components/photos/photos-intro.tsx) ──
+   The intro is one day of light, and it always resolves into the page's own theme:
+   light mode is a SUNRISE (pre-dawn → dawn → golden → daylight = --bg), dark mode a
+   SUNSET (page → golden → blue hour → night). Theme-scoped variables pick the order
+   in CSS, so there is no first-paint flash. l0–l3 are the stage layers behind beats
+   1–4, t1–t4 the text on them. Every pair is WCAG-measured (≥ 4.5; lowest: gold on
+   daylight, 4.71). */
+.photos-day {
+  --pd-l0: #0b1020;
+  --pd-l1: linear-gradient(180deg, #141d3f 0%, #2b3b78 65%, #5a4a86 100%);
+  --pd-l2: #f2b65a;
+  --pd-l3: var(--bg);
+  --pd-t1: #ffffff;
+  --pd-t2: #ffffff;
+  --pd-t3: #1c1408;
+  --pd-t4: rgb(var(--fg-rgb));
+  --pd-rain: #1d5fa6;
+  --pd-sodium: #b45309;
+  --pd-gold: #a16207;
+  --pd-tower: rgb(var(--fg-rgb));
+  --pd-glow: 0%; /* no glow in daylight */
+  --pd-sunset: 0;
+  --pd-sunrise: 1;
 }
 
-.collection-tile-spotlight {
-  position: absolute;
-  inset: 0;
-  z-index: 8;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.35s ease;
-  background: radial-gradient(
-    circle 9rem at var(--hover-x) var(--hover-y),
-    rgba(255, 255, 255, 0.34) 0%,
-    rgba(255, 255, 255, 0.14) 32%,
-    rgba(255, 255, 255, 0.04) 52%,
-    transparent 72%
-  );
-  mix-blend-mode: soft-light;
+.dark .photos-day {
+  --pd-l0: transparent;
+  --pd-l1: #e8a33d;
+  --pd-l2: linear-gradient(180deg, #24366e 0%, #18234a 60%);
+  --pd-l3: var(--bg); /* night = the page itself, so the exit has no edge */
+  --pd-t1: rgb(var(--fg-rgb));
+  --pd-t2: #1c1408;
+  --pd-t3: #ffffff;
+  --pd-t4: #ffe9c7;
+  --pd-rain: #b9dcff;
+  --pd-sodium: #ffb347;
+  --pd-gold: #f5c04a;
+  --pd-tower: #ffffff;
+  --pd-glow: 66%;
+  --pd-sunset: 1;
+  --pd-sunrise: 0;
 }
 
-.collection-tile[data-spotlight="on"] .collection-tile-spotlight {
-  opacity: 1;
+/* The two halves of "I think anyone… / since the best camera…" and the arrow linking
+   them share one heading while the sky changes under them: the first half and the
+   arrow take the second sky's text colour when the stage flips data-sky to 2. */
+.photos-day .pd-b2,
+.photos-day .pd-arrow {
+  color: var(--pd-t2);
+  transition: color 0.5s ease;
+}
+
+.photos-day .pd-b3,
+.photos-day [data-sky="2"] .pd-b2,
+.photos-day [data-sky="2"] .pd-arrow {
+  color: var(--pd-t3);
+}
+
+/* Dark mode: the arrow is white from its first stroke (owner's call). It reads as
+   light drawn across golden hour into blue hour. Light mode keeps the switch, because
+   white would vanish on its golden morning. */
+.dark .photos-day .pd-arrow,
+.dark .photos-day [data-sky="2"] .pd-arrow {
+  color: #ffffff;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .collection-tile-spotlight {
-    display: none;
+  .photos-day .pd-b2,
+  .photos-day .pd-arrow {
+    transition: none;
+  }
+}
+
+/* Copying from the intro selects in the same iOS blue as its Live Text highlight,
+   and drops the night glow so selected text stays crisp. */
+.photos-day ::selection {
+  background: #0a6cdc;
+  color: #ffffff;
+  text-shadow: none;
+}
+
+/* Typing caret (photos intro). Hard on/off, like a real text caret. */
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── Viewfinder corner brackets (photos title camera + collection tile hover) ──
+   Four L-shaped corners drawn as one ::after with 8 gradients, so any element
+   can opt in with a class. Knobs: --vf-inset, --vf-len, --vf-rgb, opacity.
+   The element must be positioned (relative/absolute) itself: this class sets no
+   `position`, because unlayered CSS here would override Tailwind's `absolute`. */
+.viewfinder::after {
+  --vf-c: rgb(var(--vf-rgb, var(--fg-rgb)));
+  --vf-l: var(--vf-len, 18px);
+  --vf-w: 2px;
+  content: "";
+  position: absolute;
+  inset: var(--vf-inset, -0.6rem);
+  z-index: 10;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--vf-c), var(--vf-c)) top left / var(--vf-l) var(--vf-w),
+    linear-gradient(var(--vf-c), var(--vf-c)) top left / var(--vf-w) var(--vf-l),
+    linear-gradient(var(--vf-c), var(--vf-c)) top right / var(--vf-l) var(--vf-w),
+    linear-gradient(var(--vf-c), var(--vf-c)) top right / var(--vf-w) var(--vf-l),
+    linear-gradient(var(--vf-c), var(--vf-c)) bottom left / var(--vf-l) var(--vf-w),
+    linear-gradient(var(--vf-c), var(--vf-c)) bottom left / var(--vf-w) var(--vf-l),
+    linear-gradient(var(--vf-c), var(--vf-c)) bottom right / var(--vf-l) var(--vf-w),
+    linear-gradient(var(--vf-c), var(--vf-c)) bottom right / var(--vf-w) var(--vf-l);
+  background-repeat: no-repeat;
+  opacity: var(--vf-opacity, 0.3);
+  transition:
+    opacity 0.25s ease,
+    transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+/* Title: brighten on hover/focus, snap inward like an AF lock on each shot. */
+.viewfinder-title:focus-visible::after {
+  --vf-opacity: 1;
+}
+
+/* Hover only where a pointer can hover: iOS keeps a tapped element in :hover until you tap elsewhere. */
+@media (hover: hover) {
+  .viewfinder-title:hover::after {
+    --vf-opacity: 1;
+  }
+}
+
+.viewfinder-title[data-shot="on"]::after {
+  --vf-opacity: 1;
+  transform: scale(0.94);
+}
+
+/* Collection cover: hidden at rest, white corners inside the photo on hover/focus. */
+.viewfinder-cover::after {
+  --vf-rgb: 255 255 255;
+  --vf-inset: 0.75rem;
+  --vf-opacity: 0;
+  transform: scale(1.04);
+}
+
+.group:focus-visible .viewfinder-cover::after {
+  --vf-opacity: 1;
+  transform: scale(1);
+}
+
+@media (hover: hover) {
+  .group:hover .viewfinder-cover::after {
+    --vf-opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewfinder::after {
+    transition: none;
+    transform: none !important;
   }
 }
 
