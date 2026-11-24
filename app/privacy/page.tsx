@@ -34,7 +34,9 @@ export default async function PrivacyPage() {
           <h2 className="mb-2 text-lg font-semibold text-fg">Cookies and local storage</h2>
           <p>
             Visitors get no cookies. Your light/dark theme choice is saved in your browser&apos;s
-            local storage so it persists; it never leaves your device.
+            local storage so it persists; it never leaves your device. The home page also remembers,
+            for the length of your tab, which letters last misbehaved in the name animation, so the
+            same ones don&apos;t repeat; that is cleared when you close the tab.
           </p>
         </section>
         <section>
