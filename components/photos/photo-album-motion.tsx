@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useCallback, useRef, useState } from "react";
 import { AlbumTitle } from "@/components/photos/album-title";
@@ -43,7 +43,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
       animate="show"
     >
       <motion.div variants={item}>
-        <IconButton href="/photos" icon={<ArrowLeft />} label="Back to photos" className="mb-10 md:mb-12" />
+        <IconButton href="/photos" icon={<ChevronLeft />} label="Back to photos" className="mb-10 md:mb-12" />
       </motion.div>
       <motion.div
         variants={item}

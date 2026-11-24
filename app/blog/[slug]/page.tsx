@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Components } from "react-markdown";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -155,7 +155,7 @@ export default async function BlogPostPage({ params }: Props) {
       className="relative z-0 isolate px-6 pb-24 pt-12 md:py-24"
     >
       <article className="mx-auto max-w-3xl">
-        <IconButton href="/blog" icon={<ArrowLeft />} label="Back to thoughts" className="mb-10 md:mb-12" />
+        <IconButton href="/blog" icon={<ChevronLeft />} label="Back to thoughts" className="mb-10 md:mb-12" />
 
         <header>
           <h1 className={`${CONTENT_TITLE_CLASSES} text-balance text-fg`}>{post.title}</h1>
