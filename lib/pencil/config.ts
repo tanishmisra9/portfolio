@@ -69,9 +69,12 @@ export const PENCIL = {
      * random paper-tooth clicks live), level ratio 1.004. The near-zero 3150/4000 gains are right: the tooth supplies them.
      */
     outGain: 0.3655,
-    /** Level range (linear): any movement plays at `floor`, speed adds up to `max`. */
-    floor: 0.11,
-    max: 0.3,
+    /**
+     * Level range (linear): any movement plays at `floor`, speed adds up to `max`. Owner: 0.22/0.6 on the normalised
+     * sample was "too loud", 0.11/0.3 "a tad too loud still", so 0.085/0.23 (−2.3 dB). Move both together.
+     */
+    floor: 0.085,
+    max: 0.23,
     /** px/s of tip travel at which the level reaches `max`. */
     fullSpeed: 900,
     /** Level × (1 + this × down): a downstroke presses harder. */
@@ -89,9 +92,13 @@ export const PENCIL = {
     pan: 0.6,
     /** Level smoothing time constants (s): how fast the pen bites, and how fast it fades once you stop. */
     attack: 0.012,
-    release: 0.06,
-    /** ms with no movement before the level releases (bridges mouse-wheel notches ~120ms apart). */
-    releaseAfterMs: 150,
+    release: 0.04,
+    /**
+     * ms with no tip movement before the level releases. Short, so a small scroll doesn't ring on (owner: small scrolls
+     * had "overly long" pencil sound at 150ms + a 60ms fade). Scroll events arrive every frame while the page moves,
+     * including during a wheel notch's smooth-scroll animation, so 80ms still bridges them.
+     */
+    releaseAfterMs: 80,
     /** Transients: a tick where the pen turns sharply (arrowhead tips, tight loop turns), a touch where it lands. */
     tick: 0.5,
     touch: 0.35,

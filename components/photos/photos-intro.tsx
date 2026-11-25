@@ -10,7 +10,8 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { createIntroSound, type IntroSound } from "./intro-sound";
+import { createPencilVoice, type PencilVoice } from "@/lib/pencil/voice";
+import { PencilStroke } from "./pencil-stroke";
 
 // One day of light passes over the manifesto, and it always resolves into the page's
 // own theme: dark mode is a sunset (page → golden hour → blue hour → night), light mode
@@ -427,21 +428,14 @@ function useArrowPath(pair: RefObject<HTMLElement | null>) {
   return path;
 }
 
-type Stroke = { pathLength: MotionValue<number>; opacity: MotionValue<number> };
-
-function ArrowSvg({ path, body }: { path: ArrowPath | null; body?: Stroke }) {
-  if (!path) return null;
-  return (
-    <svg aria-hidden className="pd-arrow pointer-events-none absolute inset-0 size-full overflow-visible" fill="none" stroke="currentColor" strokeWidth={path.width} strokeLinecap="round" strokeLinejoin="round">
-      <motion.path d={path.body} style={body} />
-    </svg>
-  );
+/** The intro arrow, drawn by the pencil engine (graphite line + voice). */
+function ArrowSvg({ path, draw, sound }: { path: ArrowPath | null; draw: MotionValue<number>; sound?: SoundRef }) {
+  return <PencilStroke d={path?.body ?? null} base={path?.width ?? 0} draw={draw} voice={sound} seed={11} className="pd-arrow" />;
 }
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
-/** One pen stroke drawn by scroll; hidden until it starts (a round cap at length 0 still paints a dot). */
 /**
  * Pencil doesn't un-draw (owner): a stroke only ever grows with scroll, and scrolling back up leaves what's been drawn.
  * The scratch is fed from this too, so it only sounds while new pencil goes down. Everything else (words, sky, camera)
@@ -455,9 +449,6 @@ function useRatchet(src: MotionValue<number>) {
   return out;
 }
 
-function useStroke(length: MotionValue<number>): Stroke {
-  return { pathLength: length, opacity: useTransform(length, (x): number => (x > 0.001 ? 1 : 0)) };
-}
 
 /** How much of the stroke is drawn at scroll x: the curl in place, the fall over the travel, then the head. */
 function drawAt(x: number, g: ArrowPath | null) {
@@ -467,22 +458,7 @@ function drawAt(x: number, g: ArrowPath | null) {
   return fb + (1 - fb) * clamp01((x - T.head[0]) / (T.head[1] - T.head[0]));
 }
 
-type SoundRef = RefObject<IntroSound | null>;
-
-/** The pencil scratches only while a stroke moves, as loud as the pen is fast. `scale` evens
- *  out strokes of different lengths (a circle's whole 0→1 is far shorter than the arrow's). */
-function useScratch(draw: MotionValue<number>, sound?: SoundRef, scale = 1) {
-  const last = useRef({ v: 0, t: 0 });
-  useMotionValueEvent(draw, "change", (v) => {
-    const now = performance.now();
-    const prev = last.current;
-    last.current = { v, t: now };
-    // dt is capped at about a few frames: after a pause, the first move's distance was divided
-    // by the whole idle time and came out near zero (silent), so a fresh scroll didn't sound at once.
-    const dt = prev.t ? Math.min(now - prev.t, 50) : 16;
-    if (dt > 0 && v !== prev.v) sound?.current?.scratch((scale * Math.abs(v - prev.v) * 1000) / dt);
-  });
-}
+type SoundRef = RefObject<PencilVoice | null>;
 
 // ── Pencil circles ──
 // "anyone" and "pocket." get a loose pencil loop drawn around them by scroll. Unlike the
@@ -531,16 +507,10 @@ function PencilCircle({ p, range, sound, children }: { p?: MotionValue<number>; 
   }, []);
   const done = useMotionValue(1);
   const draw = useRatchet(useTransform(p ?? done, (x) => (range ? clamp01((x - range[0]) / (range[1] - range[0])) : 1)));
-  useScratch(draw, sound, 0.3);
-  const stroke = useStroke(draw);
   return (
     <span ref={ref} className="relative inline-block">
       {children}
-      {path && (
-        <svg aria-hidden className="pd-arrow pointer-events-none absolute inset-0 size-full overflow-visible" fill="none" stroke="currentColor" strokeWidth={path.width} strokeLinecap="round" strokeLinejoin="round">
-          <motion.path data-circle d={path.d} style={stroke} />
-        </svg>
-      )}
+      {path && <PencilStroke d={path.d} base={path.width} draw={draw} voice={sound} seed={5} className="pd-arrow" />}
     </span>
   );
 }
@@ -611,8 +581,6 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
   });
   // The pen: the curl in place, then the fall at the camera's pace, so the tip stays on screen.
   const draw = useRatchet(useTransform(p, (x) => drawAt(x, arrowRef.current)));
-  const body = useStroke(draw);
-  useScratch(draw, sound);
   const [sky, setSky] = useState<1 | 2>(1);
   const [lit, setLit] = useState(false);
   useMotionValueEvent(p, "change", (x) => {
@@ -677,7 +645,7 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
               <span data-half className={`${DISPLAY} pd-b3 block pl-[0.9em]`}>
                 <LitWords p={p} segs={POCKET} range={T.pocket.words} circle={T.pocket.select} sound={sound} anchor="first" />
               </span>
-              <ArrowSvg path={arrow} body={body} />
+              <ArrowSvg path={arrow} draw={draw} sound={sound} />
             </motion.h2>
 
             <motion.div style={{ opacity: b4, pointerEvents: h4, color: v("t4") }} className="col-start-1 row-start-1 flex flex-col gap-8 md:gap-10">
@@ -727,11 +695,12 @@ function StaticWords({ segs, anchor }: { segs: Seg[]; anchor?: "first" | "last" 
 function StaticPair() {
   const ref = useRef<HTMLHeadingElement>(null);
   const arrow = useArrowPath(ref);
+  const full = useMotionValue(1);
   return (
     <h2 ref={ref} data-sky={2} className={`${SIZE} relative flex flex-col gap-[3em]`}>
       <span data-half className={`${DISPLAY} pd-b2 block`}><StaticWords segs={ANYONE} anchor="last" /></span>
       <span data-half className={`${DISPLAY} pd-b3 block pl-[0.9em]`}><StaticWords segs={POCKET} anchor="first" /></span>
-      <ArrowSvg path={arrow} />
+      <ArrowSvg path={arrow} draw={full} />
     </h2>
   );
 }
@@ -758,10 +727,10 @@ function StaticIntro() {
  * AudioContext and fetching the sample for a visitor who never hears it.
  */
 export function useIntroSound(): SoundRef {
-  const sound = useRef<IntroSound | null>(null);
+  const sound = useRef<PencilVoice | null>(null);
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    sound.current = createIntroSound();
+    sound.current = createPencilVoice();
     return () => {
       sound.current?.dispose();
       sound.current = null;
@@ -857,26 +826,13 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
   });
 
   const draw = useRatchet(useTransform(p, (x) => noteDrawAt(x, pathRef.current)));
-  useScratch(draw, sound, 0.6);
-  // Hidden until the line is two stroke-widths long: a round cap at a near-zero length paints a dot.
-  const stroke = {
-    pathLength: draw,
-    opacity: useTransform(draw, (x): number => {
-      const g = pathRef.current;
-      return g && x * g.len >= 2 * g.width ? 1 : 0;
-    }),
-  };
 
   return (
     <section ref={ref} aria-labelledby="pencil-note" className="relative pb-[60svh] pt-[22svh] md:pb-[95svh]">
       <h2 id="pencil-note" className={`${DISPLAY} text-fg`}>
         <LitWords p={p} segs={NOTE} range={N.words} anchor="last" />
       </h2>
-      {path && (
-        <svg aria-hidden className="pointer-events-none absolute inset-0 size-full overflow-visible text-fg" fill="none" stroke="currentColor" strokeWidth={path.width} strokeLinecap="round" strokeLinejoin="round">
-          <motion.path d={path.d} style={stroke} />
-        </svg>
-      )}
+      {path && <PencilStroke d={path.d} base={path.width} draw={draw} voice={sound} seed={23} className="text-fg" />}
     </section>
   );
 }
