@@ -7,9 +7,11 @@ import { RadioKeystrokeListener } from "@/components/easter-eggs/radio-keystroke
 /** The public nav + radio easter egg don't belong on /admin — it has its own minimal header. */
 export function SiteChrome({
   radioSamples,
+  radioGains,
   radioTriggers,
 }: {
   radioSamples: string[];
+  radioGains: Record<string, number>;
   radioTriggers: string[];
 }) {
   const pathname = usePathname();
@@ -17,7 +19,7 @@ export function SiteChrome({
 
   return (
     <>
-      <RadioKeystrokeListener samples={radioSamples} triggers={radioTriggers} />
+      <RadioKeystrokeListener samples={radioSamples} gains={radioGains} triggers={radioTriggers} />
       <SiteHeader />
     </>
   );

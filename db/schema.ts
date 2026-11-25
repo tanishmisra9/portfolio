@@ -6,6 +6,7 @@ import {
   jsonb,
   timestamp,
   boolean,
+  real,
 } from "drizzle-orm/pg-core";
 import type {
   ExperienceEntry,
@@ -85,6 +86,8 @@ export const radioSamples = pgTable("radio_samples", {
   pathname: text("pathname").notNull(),
   /** Kept in the admin but left out of the published snapshot, so it never plays. */
   disabled: boolean("disabled").notNull().default(false),
+  /** RMS loudness, measured in the admin browser (lib/radio-loudness.ts). Null until measured; publish() turns it into a playback gain. */
+  rms: real("rms"),
 });
 
 /** What the public site actually reads. Written only by the global publish() action. */

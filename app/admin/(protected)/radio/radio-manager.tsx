@@ -8,12 +8,15 @@ import { SaveStatus } from "@/components/admin/ui/save-status";
 import { useSaveStatus } from "@/components/admin/ui/use-save-status";
 import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/admin/ui/field";
-import { deleteRadioSample, renameRadioSample, setRadioSampleDisabled, uploadRadioSample } from "@/lib/admin/actions";
+import { Button } from "@/components/admin/ui/button";
+import { measureRms } from "@/lib/radio-loudness";
+import { deleteRadioSample, renameRadioSample, setRadioSampleDisabled, setRadioSampleRms, uploadRadioSample } from "@/lib/admin/actions";
 
 interface Sample {
   url: string;
   pathname: string;
   disabled: boolean;
+  rms: number | null;
 }
 
 function filenameOf(pathname: string): string {
@@ -90,7 +93,7 @@ export function RadioManager({ samples, liveUrls }: { samples: Sample[]; liveUrl
       for (const file of fileArray) {
         // uploadRadioSample returns a falsy value for a non-audio file; anything else that throws is a real failure.
         const result = await status.run(async () => {
-          const url = await uploadRadioSample(file);
+          const url = await uploadRadioSample(file, await measureRms(file));
           if (!url) throw new Error("not an audio file");
         });
         if (!result.ok) failed.push(`${file.name}: couldn't upload (is it an audio file?)`);
@@ -98,6 +101,19 @@ export function RadioManager({ samples, liveUrls }: { samples: Sample[]; liveUrl
       setErrors(failed);
       setUploading(false);
     })();
+  }
+
+  /** One-time backfill: measures clips uploaded before loudness was stored (decoded here, never on the public site). */
+  function analyzeLoudness() {
+    void status.run(async () => {
+      let failed = 0;
+      for (const sample of samples.filter((s) => s.rms === null)) {
+        const rms = await measureRms(sample.url);
+        if (rms === null) failed += 1;
+        else await setRadioSampleRms(sample.url, rms);
+      }
+      if (failed > 0) throw new Error(`${failed} clip(s) couldn't be analyzed; they'll play at default volume.`);
+    });
   }
 
   function toggleDisabled(url: string, disabled: boolean) {
@@ -156,6 +172,10 @@ export function RadioManager({ samples, liveUrls }: { samples: Sample[]; liveUrl
             <p key={msg}>{msg}</p>
           ))}
         </div>
+      )}
+
+      {samples.some((s) => s.rms === null) && (
+        <Button onClick={analyzeLoudness}>Analyze loudness ({samples.filter((s) => s.rms === null).length} clips)</Button>
       )}
 
       <SaveStatus state={status} />

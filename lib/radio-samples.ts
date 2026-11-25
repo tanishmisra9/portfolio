@@ -13,6 +13,15 @@ export function isAllowedAudioFile(filename: string, mimeType: string): boolean 
   return hasAudioExtension && !hasNonAudioMimeType;
 }
 
+/** Precomputed playback gains (see publish.ts); empty before the first measured publish, so every clip plays at 1. */
+export async function getRadioGains(): Promise<Record<string, number>> {
+  try {
+    return (await getPublishedData()).radio?.gains ?? {};
+  } catch {
+    return {};
+  }
+}
+
 /**
  * Radio easter-egg samples are uploaded to Vercel Blob via /admin/radio and go live on
  * Publish (read from the published snapshot). Falls back to a fixed local list if the

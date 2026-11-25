@@ -1,20 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import {
-  RADIO_REFERENCE_SAMPLE_FILENAME,
-  RADIO_SAMPLE_FALLBACK,
-} from "@/lib/radio-samples.constants";
+import { RADIO_SAMPLE_FALLBACK } from "@/lib/radio-samples.constants";
 
 const TRIPLE_TAP_COUNT = 3;
 const TRIPLE_TAP_WINDOW_MS = 800;
 const BASE_VOLUME = 0.72;
-const RMS_FLOOR = 0.0008;
-const GAIN_MIN = 0.45;
-const GAIN_MAX = 2.2;
 
 type Props = {
   samples: string[];
+  /** Precomputed per-clip playback gain (published snapshot); missing = 1. Visitors never download clips to measure loudness. */
+  gains: Record<string, number>;
   triggers: string[];
 };
 
@@ -86,103 +82,19 @@ function pickNextSampleFromCycle(
   return { src, remaining: nextRemaining };
 }
 
-function clampGain(gain: number): number {
-  return Math.min(GAIN_MAX, Math.max(GAIN_MIN, gain));
-}
-
-function computeRms(buffer: AudioBuffer): number {
-  const { numberOfChannels, length } = buffer;
-  let sumSquares = 0;
-  let count = 0;
-
-  for (let channel = 0; channel < numberOfChannels; channel += 1) {
-    const data = buffer.getChannelData(channel);
-    for (let i = 0; i < length; i += 1) {
-      sumSquares += data[i] * data[i];
-      count += 1;
-    }
-  }
-
-  return Math.sqrt(sumSquares / count);
-}
-
-async function fetchAndDecode(
-  context: AudioContext,
-  url: string,
-): Promise<AudioBuffer | null> {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    const arrayBuffer = await response.arrayBuffer();
-    return await context.decodeAudioData(arrayBuffer.slice(0));
-  } catch {
-    return null;
-  }
-}
-
-async function buildGainMap(pool: string[]): Promise<Map<string, number>> {
-  const fallback = new Map<string, number>(pool.map((url) => [url, 1]));
-  if (pool.length === 0) return fallback;
-
-  let context: AudioContext | null = null;
-  try {
-    context = new AudioContext();
-    if (context.state === "suspended") {
-      await context.resume();
-    }
-  } catch {
-    return fallback;
-  }
-
-  try {
-    const referenceUrl =
-      pool.find((url) => url.endsWith(`/${RADIO_REFERENCE_SAMPLE_FILENAME}`)) ?? pool[0];
-
-    const referenceBuffer = await fetchAndDecode(context, referenceUrl);
-    if (!referenceBuffer) return fallback;
-
-    const referenceRms = Math.max(computeRms(referenceBuffer), RMS_FLOOR);
-    const gainMap = new Map<string, number>();
-
-    await Promise.all(
-      pool.map(async (url) => {
-        const buffer =
-          url === referenceUrl
-            ? referenceBuffer
-            : await fetchAndDecode(context!, url);
-
-        if (!buffer) {
-          gainMap.set(url, 1);
-          return;
-        }
-
-        const sampleRms = Math.max(computeRms(buffer), RMS_FLOOR);
-        gainMap.set(url, clampGain(referenceRms / sampleRms));
-      }),
-    );
-
-    return gainMap.size > 0 ? gainMap : fallback;
-  } catch {
-    return fallback;
-  } finally {
-    void context.close();
-  }
-}
-
-function playbackVolume(gainBySample: Map<string, number>, src: string): number {
-  const gain = gainBySample.get(src) ?? 1;
+function playbackVolume(gains: Record<string, number>, src: string): number {
+  const gain = gains[src] ?? 1;
   return Math.min(1, BASE_VOLUME * gain);
 }
 
-export function RadioKeystrokeListener({ samples, triggers }: Props) {
+export function RadioKeystrokeListener({ samples, gains, triggers }: Props) {
   const bufferRef = useRef("");
   const playingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const poolRef = useRef(samples);
   const remainingPoolRef = useRef<string[]>(shuffleCopy(samples));
   const lastPlayedRef = useRef<string | null>(null);
-  const gainBuiltRef = useRef(false);
-  const gainBySampleRef = useRef<Map<string, number>>(new Map<string, number>(samples.map((url) => [url, 1])));
+  const gainsRef = useRef(gains);
   const triggersRef = useRef(triggers);
   const bufferMaxRef = useRef(computeBufferMax(triggers));
   const tapCountRef = useRef(0);
@@ -192,10 +104,11 @@ export function RadioKeystrokeListener({ samples, triggers }: Props) {
   useEffect(() => {
     poolRef.current = samples;
     remainingPoolRef.current = samples.length > 0 ? shuffleCopy(samples) : [];
-    gainBySampleRef.current = new Map<string, number>(samples.map((url) => [url, 1]));
-    // Loudness analysis (downloads + decodes every clip) waits for the first actual play: most visitors never trigger the egg.
-    gainBuiltRef.current = false;
   }, [samples]);
+
+  useEffect(() => {
+    gainsRef.current = gains;
+  }, [gains]);
 
   useEffect(() => {
     triggersRef.current = triggers;
@@ -210,13 +123,6 @@ export function RadioKeystrokeListener({ samples, triggers }: Props) {
       if (playingRef.current) return false;
 
       const pool = poolRef.current;
-      if (!gainBuiltRef.current) {
-        // First play uses unity gain; later plays are level-matched once the analysis lands.
-        gainBuiltRef.current = true;
-        void buildGainMap(pool).then((map) => {
-          if (poolRef.current === pool) gainBySampleRef.current = map;
-        });
-      }
       const { src, remaining } = pickNextSampleFromCycle(
         pool,
         remainingPoolRef.current,
@@ -227,7 +133,7 @@ export function RadioKeystrokeListener({ samples, triggers }: Props) {
       const sfx = new Audio(src);
       audioRef.current = sfx;
       playingRef.current = true;
-      sfx.volume = playbackVolume(gainBySampleRef.current, src);
+      sfx.volume = playbackVolume(gainsRef.current, src);
 
       const onDone = () => {
         playingRef.current = false;

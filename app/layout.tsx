@@ -6,7 +6,7 @@ import { SiteChrome } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
 import { TapFill } from "@/components/ui/tap-fill";
 import { getPublishedData } from "@/lib/site-content";
-import { getRadioSampleUrls } from "@/lib/radio-samples";
+import { getRadioGains, getRadioSampleUrls } from "@/lib/radio-samples";
 import { getRadioTriggers } from "@/lib/radio-triggers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -64,6 +64,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const radioSamples = await getRadioSampleUrls();
+  const radioGains = await getRadioGains();
   const radioTriggers = await getRadioTriggers();
   // The footer's links come from the published snapshot. This layout also wraps /admin, where the first snapshot
   // is created, so a missing snapshot must not throw here.
@@ -95,7 +96,7 @@ export default async function RootLayout({
             Skip to content
           </a>
           <MotionConfig reducedMotion="user">
-          <SiteChrome radioSamples={radioSamples} radioTriggers={radioTriggers} />
+          <SiteChrome radioSamples={radioSamples} radioGains={radioGains} radioTriggers={radioTriggers} />
           {children}
           <SiteFooter social={social} />
           <TapFill />

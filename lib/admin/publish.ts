@@ -1,5 +1,6 @@
 import { asc } from "drizzle-orm";
 import { db } from "@/db/client";
+import { RADIO_REFERENCE_SAMPLE_FILENAME, radioGain } from "@/lib/radio-samples.constants";
 import { portfolio, collections, photos, quotes, posts, radioSamples, radioTriggers, publishedSnapshot } from "@/db/schema";
 import type { PortfolioContent, PhotoCollection, QuoteEntry, BlogPostMeta } from "@/types/content";
 
@@ -13,9 +14,17 @@ export interface PublishedData {
   quotes: QuoteEntry[];
   posts: PublishedBlogPost[];
   /** Absent on snapshots published before radio was part of them. */
-  radio?: { samples: string[]; triggers: string[] };
+  radio?: { samples: string[]; triggers: string[]; /** Playback gain per sample URL; a missing URL plays at 1. */ gains?: Record<string, number> };
   /** Absent on snapshots published before it was editable; the page falls back to the default. */
   quotesSubtitle?: string;
+}
+
+/** Gain per enabled clip, level-matched to the reference clip's RMS (first measured clip if the reference is absent). Matches the blob URL, not `pathname`, because renaming a clip in the admin rewrites `pathname`. */
+function radioGains(rows: { url: string; disabled: boolean; rms: number | null }[]): Record<string, number> {
+  const measured = rows.filter((r) => !r.disabled && r.rms !== null);
+  const reference = measured.find((r) => r.url.endsWith(`/${RADIO_REFERENCE_SAMPLE_FILENAME}`)) ?? measured[0];
+  if (!reference) return {};
+  return Object.fromEntries(measured.map((r) => [r.url, radioGain(reference.rms!, r.rms!)]));
 }
 
 /** Assembles the current draft state into the shape the public site reads. */
@@ -114,7 +123,11 @@ async function buildPublishedData(): Promise<PublishedData> {
       description: p.description,
       content: p.body,
     })),
-    radio: { samples: sampleRows.filter((s) => !s.disabled).map((s) => s.url), triggers: triggerRows.map((t) => t.text) },
+    radio: {
+      samples: sampleRows.filter((s) => !s.disabled).map((s) => s.url),
+      triggers: triggerRows.map((t) => t.text),
+      gains: radioGains(sampleRows),
+    },
     quotesSubtitle: portfolioRow?.quotesSubtitle,
   };
 

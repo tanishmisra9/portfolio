@@ -65,14 +65,25 @@ export async function listDraftRadioSamples() {
   return db.select().from(radioSamples).orderBy(asc(radioSamples.id));
 }
 
-/** Returns the uploaded blob's URL, or null if the file failed the audio check. */
-export async function uploadRadioSample(file: File): Promise<string | null> {
+/** Returns the uploaded blob's URL, or null if the file failed the audio check. `rms` is measured in the browser (lib/radio-loudness.ts). */
+export async function uploadRadioSample(file: File, rms: number | null): Promise<string | null> {
   await requireAdmin();
   if (!isAllowedAudioFile(file.name, file.type)) return null;
   const blob = await uploadRadioBlob(file);
-  await db.insert(radioSamples).values({ url: blob.url, pathname: blob.pathname });
+  await db.insert(radioSamples).values({ url: blob.url, pathname: blob.pathname, rms: finiteOrNull(rms) });
   draftChanged();
   return blob.url;
+}
+
+const finiteOrNull = (n: number | null) => (typeof n === "number" && Number.isFinite(n) && n >= 0 && n <= 10 ? n : null);
+
+/** Backfill for clips uploaded before loudness was stored. */
+export async function setRadioSampleRms(url: string, rms: number) {
+  await requireAdmin();
+  const value = finiteOrNull(rms);
+  if (value === null) throw new Error("Invalid loudness value.");
+  await db.update(radioSamples).set({ rms: value }).where(eq(radioSamples.url, url));
+  draftChanged();
 }
 
 export async function setRadioSampleDisabled(url: string, disabled: boolean) {
