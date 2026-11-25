@@ -103,7 +103,11 @@ export function PostEditor({
   const savePressed = useRef(false);
   const noteSavePress = () => {
     savePressed.current = true;
-    queueMicrotask(() => (savePressed.current = false)); // only the blur inside this same mousedown may claim it
+    // Only the blur inside this same mousedown may claim it, so clear it once the whole event has been dispatched. Not a
+    // microtask: browsers run microtasks between listeners, and React's capture and bubble listeners are separate ones,
+    // so a microtask cleared the flag before noMouseFocus (bubble phase) blurred the field. Verified with a real click:
+    // microtask → false in the bubble listener, setTimeout(0) → true.
+    window.setTimeout(() => (savePressed.current = false), 0);
   };
 
   function save(f: PostFields = fields) {

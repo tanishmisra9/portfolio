@@ -402,6 +402,9 @@ html.dark[data-pd-sky="2"] { --nav-tint: rgb(36 54 110 / 1); }        /* blue ho
 .viewfinder-title {
   --vf-len: 30px;
   --vf-weight: 3px; /* the phone block below overrides both (shorter, thinner) */
+  /* The half-press (hold the title) must not open iOS's long-press callout. Plain CSS on purpose: Tailwind reads the
+     leading "-" of [-webkit-touch-callout:none] as a negative prefix and generates nothing. */
+  -webkit-touch-callout: none;
 }
 
 .viewfinder-title::after {

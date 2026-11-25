@@ -57,7 +57,8 @@ export function PhotosHeader() {
     const beep = new Audio("/sfx/focus-beep.mp3");
     beep.preload = "auto";
     beepRef.current = beep;
-    shutter("GET").then(setCount);
+    // Only ever forward: a slow GET landing after a click's POST must not roll the counter back.
+    shutter("GET").then((n) => setCount((c) => (n === null ? c : c === null ? n : Math.max(c, n))));
     return () => {
       audioRef.current = null;
       beepRef.current = null;
@@ -70,7 +71,9 @@ export function PhotosHeader() {
 
   /** Half-press (hold): focus hunts, exposure meters, then both lock with the AF beep at FOCUS_LOCK_MS. */
   const startHalf = useCallback(() => {
-    if (flashing) return;
+    // One half-press at a time: a second start (mouse held + Space, a second finger) would stack another set of timers,
+    // beep twice and re-meter. halfTimersRef is non-empty exactly while a half-press is running (endHalf empties it).
+    if (flashing || halfTimersRef.current.length) return;
     lockedRef.current = false;
     setHalf((h) => move(HALF_PRESS, h, "focusing"));
     const settle = randomExposure();
@@ -98,6 +101,9 @@ export function PhotosHeader() {
     halfTimersRef.current.forEach(clearTimeout);
     halfTimersRef.current = [];
     if (cancel) lockedRef.current = false;
+    // A release's click arrives right after it. If none comes (iOS can swallow the click after a long press), drop the
+    // lock, or a later unrelated shot (Enter, a quick tap) would reuse this exposure and focus.
+    else timersRef.current.push(window.setTimeout(() => (lockedRef.current = false), 300));
     setHalf((h) => (h === "off" ? h : move(HALF_PRESS, h, "off")));
   }, []);
 
@@ -120,7 +126,8 @@ export function PhotosHeader() {
       window.setTimeout(() => {
         sfx?.play().catch(() => {});
         // The counter advances with the shutter, not the click; the server's number also brings in everyone else's shots.
-        shot.then((n) => setCount((c) => (c === null ? c : (n ?? c + 1))));
+        // Only ever forward, and a POST that answers before the first GET still shows its (newer) number.
+        shot.then((n) => setCount((c) => (n !== null ? Math.max(c ?? n, n) : c === null ? c : c + 1)));
       }, SHUTTER_DELAY_MS),
     );
 
@@ -161,7 +168,7 @@ export function PhotosHeader() {
           data-shot={flashing ? "on" : "off"}
           data-half={half}
           data-aflock={flashing && shotLocked ? "" : undefined}
-          className="viewfinder viewfinder-title group/shot relative cursor-pointer touch-manipulation px-[0.35em] [-webkit-touch-callout:none]focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 focus-visible:ring-offset-8 focus-visible:ring-offset-bg"
+          className="viewfinder viewfinder-title group/shot relative cursor-pointer touch-manipulation px-[0.35em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 focus-visible:ring-offset-8 focus-visible:ring-offset-bg"
         >
           tanishtakespics
           {/* Names the action on hover/focus (the aria-label already says it for screen readers). Hidden while the shutter fires. */}
