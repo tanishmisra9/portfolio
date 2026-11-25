@@ -65,3 +65,11 @@ export const SAVE_STATUS = {
   error: ["idle", "saving"],
 } as const satisfies Edges<string>;
 export type SaveStatus = keyof typeof SAVE_STATUS;
+
+/** Half-pressed shutter on the /photos title (components/photos/photos-header.tsx; CSS keys off data-half). Releasing at any point goes back to off (the click then takes the shot); a lock only comes after focusing. */
+export const HALF_PRESS = {
+  off: ["focusing"],
+  focusing: ["locked", "off"],
+  locked: ["off"],
+} as const satisfies Edges<string>;
+export type HalfPress = keyof typeof HALF_PRESS;

@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
+import { HALF_PRESS, move, type HalfPress } from "@/lib/state-machines";
 
 const SHUTTER_DELAY_MS = 330;
+/** Hold this long and the half-press locks (beep). Matches the af-half keyframe's 0.48s in globals.css. */
+const FOCUS_LOCK_MS = 480;
 
 /** Shared text of the viewfinder HUD (exposure, counter): the site's Poppins, dim, overriding the h1's display styles. */
 const HUD_TEXT =
@@ -38,24 +41,72 @@ export function PhotosHeader() {
   const [count, setCount] = useState<number | null>(null);
   const [exposure, setExposure] = useState<Exposure>(FIRST_EXPOSURE);
   const reduceMotion = useReducedMotion();
+  const [half, setHalf] = useState<HalfPress>("off");
+  const [shotLocked, setShotLocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const beepRef = useRef<HTMLAudioElement | null>(null);
   const timersRef = useRef<number[]>([]);
+  const halfTimersRef = useRef<number[]>([]);
+  // Focus and exposure locked by a half-press: the click on release shoots with them instead of re-metering.
+  const lockedRef = useRef(false);
 
   useEffect(() => {
     const el = new Audio("/sfx/camera.mp3");
     el.preload = "auto";
     audioRef.current = el;
+    const beep = new Audio("/sfx/focus-beep.mp3");
+    beep.preload = "auto";
+    beepRef.current = beep;
     shutter("GET").then(setCount);
     return () => {
       audioRef.current = null;
+      beepRef.current = null;
       timersRef.current.forEach(clearTimeout);
       timersRef.current = [];
+      halfTimersRef.current.forEach(clearTimeout);
+      halfTimersRef.current = [];
     };
+  }, []);
+
+  /** Half-press (hold): focus hunts, exposure meters, then both lock with the AF beep at FOCUS_LOCK_MS. */
+  const startHalf = useCallback(() => {
+    if (flashing) return;
+    lockedRef.current = false;
+    setHalf((h) => move(HALF_PRESS, h, "focusing"));
+    const settle = randomExposure();
+    if (!reduceMotion) {
+      for (let t = METER_STEP_MS; t < FOCUS_LOCK_MS; t += METER_STEP_MS) {
+        halfTimersRef.current.push(window.setTimeout(() => setExposure(randomExposure()), t));
+      }
+    }
+    halfTimersRef.current.push(
+      window.setTimeout(() => {
+        lockedRef.current = true;
+        setExposure(settle);
+        setHalf((h) => move(HALF_PRESS, h, "locked"));
+        const beep = beepRef.current?.cloneNode() as HTMLAudioElement | undefined;
+        if (beep) {
+          beep.volume = 0.3; // the clip is ~13 dB hotter than the shutter
+          beep.play().catch(() => {});
+        }
+      }, FOCUS_LOCK_MS),
+    );
+  }, [flashing, reduceMotion]);
+
+  /** Release (the click that follows takes the shot) or abandon (`cancel`: dragged off, pointer cancelled; no click comes). */
+  const endHalf = useCallback((cancel: boolean) => {
+    halfTimersRef.current.forEach(clearTimeout);
+    halfTimersRef.current = [];
+    if (cancel) lockedRef.current = false;
+    setHalf((h) => (h === "off" ? h : move(HALF_PRESS, h, "off")));
   }, []);
 
   const handleClick = useCallback(() => {
     if (flashing) return;
     setFlashing(true);
+    const locked = lockedRef.current;
+    lockedRef.current = false;
+    setShotLocked(locked);
 
     const shot = shutter("POST");
     const sfx = audioRef.current?.cloneNode() as HTMLAudioElement | undefined;
@@ -74,14 +125,17 @@ export function PhotosHeader() {
     );
 
     // The readout meters (shuffles) from the click and settles as the shutter fires; reduced motion just swaps.
-    const settle = randomExposure();
-    const steps = reduceMotion ? 0 : METER_STEPS;
-    for (let k = 1; k <= steps; k++) {
-      timersRef.current.push(window.setTimeout(() => setExposure(randomExposure()), k * METER_STEP_MS));
+    // After a half-press lock the exposure is already locked (AE lock), so it doesn't re-meter.
+    if (!locked) {
+      const settle = randomExposure();
+      const steps = reduceMotion ? 0 : METER_STEPS;
+      for (let k = 1; k <= steps; k++) {
+        timersRef.current.push(window.setTimeout(() => setExposure(randomExposure()), k * METER_STEP_MS));
+      }
+      timersRef.current.push(
+        window.setTimeout(() => setExposure(settle), reduceMotion ? 0 : SHUTTER_DELAY_MS),
+      );
     }
-    timersRef.current.push(
-      window.setTimeout(() => setExposure(settle), reduceMotion ? 0 : SHUTTER_DELAY_MS),
-    );
 
     timersRef.current.push(
       window.setTimeout(() => setFlashing(false), 800),
@@ -94,9 +148,20 @@ export function PhotosHeader() {
         <button
           type="button"
           onClick={handleClick}
+          onPointerDown={(e) => e.button === 0 && startHalf()}
+          onPointerUp={() => endHalf(false)}
+          onPointerCancel={() => endHalf(true)}
+          // Dragged off while held: no click will come. (Touch also fires pointerleave after pointerup, with no buttons down.)
+          onPointerLeave={(e) => e.buttons > 0 && endHalf(true)}
+          onKeyDown={(e) => e.key === " " && !e.repeat && startHalf()}
+          onKeyUp={(e) => e.key === " " && endHalf(false)}
+          onBlur={() => endHalf(true)}
+          onContextMenu={(e) => e.preventDefault()} // a long press on touch would open the callout
           aria-label="tanishtakespics. Take a photo"
           data-shot={flashing ? "on" : "off"}
-          className="viewfinder viewfinder-title group/shot relative cursor-pointer px-[0.35em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 focus-visible:ring-offset-8 focus-visible:ring-offset-bg"
+          data-half={half}
+          data-aflock={flashing && shotLocked ? "" : undefined}
+          className="viewfinder viewfinder-title group/shot relative cursor-pointer touch-manipulation px-[0.35em] [-webkit-touch-callout:none]focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 focus-visible:ring-offset-8 focus-visible:ring-offset-bg"
         >
           tanishtakespics
           {/* Names the action on hover/focus (the aria-label already says it for screen readers). Hidden while the shutter fires. */}

@@ -458,10 +458,58 @@ html.dark[data-pd-sky="1"] [data-site-header] {
   52%, 100% { opacity: 1; transform: scale(0.94); color: var(--af-lock); }
 }
 
+/* Half-press (hold the title; data-half from photos-header.tsx): brackets half-tighten, grid shows, the point
+   hunts for 0.48s (= FOCUS_LOCK_MS) and holds locked; the AF beep plays at the lock. Releasing takes the shot,
+   which then keeps the lock (af-shot-locked: no re-hunt, just the blink). */
+.viewfinder-title[data-half="focusing"]::after,
+.viewfinder-title[data-half="locked"]::after {
+  --vf-opacity: 1;
+  transform: scale(0.97);
+}
+.viewfinder-title[data-half="focusing"]::before,
+.viewfinder-title[data-half="locked"]::before {
+  opacity: 0.2;
+}
+.viewfinder-title[data-half="focusing"] .af-point {
+  animation: af-half 0.48s ease-out both;
+}
+.viewfinder-title[data-half="locked"] .af-point {
+  animation: none;
+  opacity: 1;
+  transform: scale(0.94);
+  color: var(--af-lock);
+}
+.viewfinder-title[data-shot="on"][data-aflock] .af-point {
+  animation: af-shot-locked 0.8s linear both;
+}
+@keyframes af-half {
+  0% { opacity: 0; transform: scale(1.35); color: rgb(var(--fg-rgb)); }
+  15% { opacity: 1; }
+  45% { transform: scale(0.9); }
+  75% { transform: scale(1.06); }
+  96% { opacity: 1; transform: scale(1); color: rgb(var(--fg-rgb)); }
+  100% { opacity: 1; transform: scale(0.94); color: var(--af-lock); }
+}
+@keyframes af-shot-locked {
+  0%, 40% { opacity: 1; transform: scale(0.94); color: var(--af-lock); }
+  44%, 48% { opacity: 0.15; transform: scale(0.94); color: var(--af-lock); }
+  52%, 100% { opacity: 1; transform: scale(0.94); color: var(--af-lock); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .af-point,
-  .viewfinder-title[data-shot="on"] .af-point {
+  .viewfinder-title[data-shot="on"] .af-point,
+  .viewfinder-title[data-half="focusing"] .af-point,
+  .viewfinder-title[data-shot="on"][data-aflock] .af-point {
     animation: none;
+  }
+  /* No hunt while holding: the point shows, then turns green at the lock. */
+  .viewfinder-title[data-half="focusing"] .af-point {
+    opacity: 1;
+  }
+  .viewfinder-title[data-shot="on"][data-aflock] .af-point {
+    opacity: 1;
+    color: var(--af-lock);
   }
   /* No hunt: the point just appears locked. */
   .viewfinder-title:focus-visible .af-point,
