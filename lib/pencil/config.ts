@@ -34,21 +34,41 @@ export const PENCIL = {
   },
   sound: {
     /**
-     * The friction bed: white noise through these parallel resonant bands (Hz, Q, linear gain). Fitted to the reference
-     * recording (public/sfx/pencil.mp3) by scripts/pencil-fit.mjs, so the synth sounds like the scratch the owner liked.
+     * The friction bed: a graphic EQ of 1/3-octave resonant bands (Hz, Q, linear gain), each fed its own independent
+     * noise so band powers add (a shared source made neighbouring bands interfere). Fitted to the reference recording
+     * (public/sfx/pencil.mp3) by scripts/pencil-fit.mjs, so the synth sounds like the scratch the owner liked.
+     * Re-run the fit after changing any band, `hp`, or the tooth settings.
      */
     bands: [
-      { f: 250, q: 1.2, g: 0.2 },
-      { f: 500, q: 1.2, g: 0.35 },
-      { f: 1000, q: 1.2, g: 0.6 },
-      { f: 2000, q: 1.2, g: 0.8 },
-      { f: 3000, q: 1.4, g: 0.8 },
-      { f: 4500, q: 1.4, g: 0.6 },
-      { f: 6500, q: 1.4, g: 0.4 },
-      { f: 9000, q: 1.4, g: 0.25 },
+      { f: 125, q: 4.3, g: 0.2642 },
+      { f: 160, q: 4.3, g: 0.2508 },
+      { f: 200, q: 4.3, g: 0.259 },
+      { f: 250, q: 4.3, g: 0.3536 },
+      { f: 315, q: 4.3, g: 0.3415 },
+      { f: 400, q: 4.3, g: 0.8402 },
+      { f: 500, q: 4.3, g: 2.9578 },
+      { f: 630, q: 4.3, g: 1.7818 },
+      { f: 800, q: 4.3, g: 1.2744 },
+      { f: 1000, q: 4.3, g: 0.7346 },
+      { f: 1250, q: 4.3, g: 0.4433 },
+      { f: 1600, q: 4.3, g: 0.7825 },
+      { f: 2000, q: 4.3, g: 0.1139 },
+      { f: 2500, q: 4.3, g: 0.3271 },
+      { f: 3150, q: 4.3, g: 0.0027 },
+      { f: 4000, q: 4.3, g: 0.0113 },
+      { f: 5000, q: 4.3, g: 0.1507 },
+      { f: 6300, q: 4.3, g: 0.3565 },
+      { f: 8000, q: 4.3, g: 0.4593 },
+      { f: 10000, q: 4.3, g: 0.8227 },
     ],
-    /** Output scale at pressure 1, fitted so the synth's level matches the normalised recording's. */
-    outGain: 1,
+    /** Hz: a 4th-order high-pass under the bed, only to remove rumble below the lowest band. */
+    hp: 100,
+    /**
+     * Output scale at pressure 1, fitted so the synth's level matches the normalised recording's.
+     * Last fit: every 1/3-octave band 125 Hz–10 kHz within ±1.5 dB of the recording (worst 1.4 dB at 3.15 kHz, where the
+     * random paper-tooth clicks live), level ratio 1.004. The near-zero 3150/4000 gains are right: the tooth supplies them.
+     */
+    outGain: 0.3655,
     /** Level range (linear): any movement plays at `floor`, speed adds up to `max`. */
     floor: 0.11,
     max: 0.3,
