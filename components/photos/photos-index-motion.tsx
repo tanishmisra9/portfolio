@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { PhotosHeader } from "@/components/photos/photos-header";
-import { PhotosIntro } from "@/components/photos/photos-intro";
+import { PencilNote, PhotosIntro, useIntroSound } from "@/components/photos/photos-intro";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 
 export type PhotosIndexCollection = {
@@ -30,6 +30,7 @@ function CollectionTile({ collection, index, hero }: CollectionTileProps) {
       className="group relative block outline-none transition-transform duration-200 ease-out after:pointer-events-none after:absolute after:-inset-3 after:border after:border-fg after:opacity-0 after:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:after:opacity-100 focus-visible:-translate-x-0.5 focus-visible:-translate-y-0.5 focus-visible:after:opacity-100 motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 motion-reduce:focus-visible:translate-x-0 motion-reduce:focus-visible:translate-y-0"
     >
       <div
+        data-collection-tile={index === 0 ? "" : undefined}
         className={`viewfinder viewfinder-cover relative overflow-hidden border border-border ${
           hero ? "aspect-[4/3] sm:aspect-[16/9]" : "aspect-[4/3]"
         }`}
@@ -85,6 +86,7 @@ type Props = {
 export function PhotosIndexMotion({ collections }: Props) {
   const reduceMotion = useReducedMotion();
   const { root, item, gridSection } = photosEntranceVariants(reduceMotion);
+  const sound = useIntroSound(); // one pencil sound for the intro and the note
 
   return (
     <motion.div
@@ -106,11 +108,12 @@ export function PhotosIndexMotion({ collections }: Props) {
           Skip to collections
         </a>
       </div>
-      <PhotosIntro />
+      <PhotosIntro sound={sound} />
+      <PencilNote sound={sound} />
       <motion.div
         id="collections"
         variants={gridSection}
-        className="mt-12 grid scroll-mt-32 grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 md:mt-16 md:gap-y-16"
+        className="grid scroll-mt-32 grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 md:gap-y-16"
       >
         {collections.map((collection, index) => (
           <motion.div key={collection.slug} variants={item} className={index === 0 ? "sm:col-span-2" : undefined}>
