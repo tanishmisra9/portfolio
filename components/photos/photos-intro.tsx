@@ -320,7 +320,49 @@ function handDrawnPointer(A: Pt, B: Pt, em: number, width: number) {
   const [dx, dy] = [B[0] - start[0], runTop - start[1]];
   const span = Math.hypot(dx, dy) || 1;
   const bow = 0.12 * span * (0.85 + r() * 0.3) * (dx <= 0 ? 1 : -1); // bulge away from the direction of travel
-  const fall: Pt[] = [[inside(start[0] + dx / 2 + (-dy / span) * bow), start[1] + dy / 2 + (dx / span) * bow + j(0.03)]];
+  const mid: Pt = [start[0] + dx / 2 + (-dy / span) * bow, start[1] + dy / 2 + (dx / span) * bow];
+  // The arc as a quadratic through start, mid (at t = 0.5) and runTop, so points and directions can be read along it.
+  const ctrl: Pt = [2 * mid[0] - (start[0] + B[0]) / 2, 2 * mid[1] - (start[1] + runTop) / 2];
+  const arcAt = (t: number): Pt => {
+    const u = 1 - t;
+    return [u * u * start[0] + 2 * u * t * ctrl[0] + t * t * B[0], u * u * start[1] + 2 * u * t * ctrl[1] + t * t * runTop];
+  };
+  const arcDir = (t: number): Pt => {
+    const v: Pt = [2 * (1 - t) * (ctrl[0] - start[0]) + 2 * t * (B[0] - ctrl[0]), 2 * (1 - t) * (ctrl[1] - start[1]) + 2 * t * (runTop - ctrl[1])];
+    const l = Math.hypot(v[0], v[1]) || 1;
+    return [v[0] / l, v[1] / l];
+  };
+  // Two more cursive loops on the way down (owner: "one to two more loops"). A real cursive loop crosses its own
+  // line: the pen runs forward, curls back over itself and carries on (a prolate trochoid: forward speed k < radius R).
+  // A circle tangent to the line instead looked like beads stuck on a string. Same turning side as the first loop,
+  // sizes a little uneven, like a hand.
+  const loopAt = (t: number, R: number): { pts: Pt[]; advance: number } => {
+    const P = arcAt(t);
+    const d = arcDir(t);
+    const n: Pt = [-d[1] * -dir, d[0] * -dir]; // the side the loop turns toward
+    const k = 0.38 * R;
+    const at = (phi: number): Pt => {
+      const along = k * phi + R * Math.sin(phi);
+      const side = R * (1 - Math.cos(phi));
+      return [P[0] + d[0] * along + n[0] * side, P[1] + d[1] * along + n[1] * side];
+    };
+    return { pts: [1, 2, 3, 4, 5, 6, 7].map((i) => at((i / 7) * 2 * Math.PI)), advance: 2 * Math.PI * k };
+  };
+  const loopR = (s: number) => Math.max(0.32 * em, 15) * s * (0.9 + r() * 0.2);
+  const l1 = loopAt(0.35, loopR(1));
+  const l2 = loopAt(0.66, loopR(0.82));
+  const skip = (adv: number) => adv / span; // resume the arc just past where the loop came back to it
+  const fall: Pt[] = [
+    arcAt(0.18),
+    arcAt(0.35),
+    ...l1.pts,
+    arcAt(0.35 + skip(l1.advance) + 0.06),
+    arcAt(0.52),
+    arcAt(0.66),
+    ...l2.pts,
+    arcAt(0.66 + skip(l2.advance) + 0.06),
+    arcAt(0.86),
+  ].map(([x, y]): Pt => [inside(x), y]);
   const way: Pt[] = [...curl, ...fall, [B[0] + j(0.03), runTop], B];
   const cr = (p0: Pt, p1: Pt, p2: Pt, p3: Pt, t: number): Pt => {
     const f = (a: number, b: number, c: number, d: number) =>
@@ -744,9 +786,10 @@ function noteDrawAt(x: number, g: { curlFrac: number; bodyFrac: number } | null)
 export function PencilNote({ sound }: { sound: SoundRef }) {
   const ref = useRef<HTMLElement>(null);
   const still = useStill();
-  // The drop is tall (owner: about 3× the first version), so the head lands with the note's bottom (the cover's top)
-  // low on the screen, at 90%: the heading the line starts from is still in view below the nav at that moment.
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.85", "end 0.9"] });
+  // The drop is very tall (owner: ~3× the first version, then more again), so the head lands with the note's bottom
+  // (the cover's top) at the bottom of the screen (95%). The heading scrolls away during the long fall; the line then
+  // reads as coming from above, like the intro's arrow. Landing any lower would put the head below the fold.
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.85", "end 0.95"] });
   // Identity transform (see ScrollIntro): keeps every downstream transform on the JS path.
   const progress = useTransform(scrollYProgress, (v) => v);
   const p = useMotionValue(0);
@@ -766,7 +809,9 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
     if (!el.isConnected || !(em > 0)) return; // a late callback after unmount (see useArrowPath)
     // Below the baseline and clear of the full stop: started inside the line's glyph band, the first millimetre of
     // stroke read as a second full stop ("seen..") and the half-drawn loop as a letter ("seen.q").
-    const A: Pt = [a.right - o.left + 0.27 * em, a.top - o.top + a.height * 0.8 + 0.2 * em];
+    // ...and at least 0.7em inside the column, so the first loop has room: on phones "work." ends at the edge, and a
+    // start clamped against it squashed the loop into a hook.
+    const A: Pt = [Math.min(a.right - o.left + 0.27 * em, el.clientWidth - 0.7 * em), a.top - o.top + a.height * 0.8 + 0.2 * em];
     // Into the cover, below the end of the line (clamped inside it), ending just above the image.
     // The middle of the page (the cover's centre), at the owner's request: the line sweeps from the end of the heading
     // across the tall gap to centre stage. (In the first, short gap, pulling even an em sideways made a cramped hook.)
@@ -808,7 +853,7 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
   };
 
   return (
-    <section ref={ref} aria-labelledby="pencil-note" className="relative pb-[44svh] pt-[22svh] md:pb-[70svh]">
+    <section ref={ref} aria-labelledby="pencil-note" className="relative pb-[60svh] pt-[22svh] md:pb-[95svh]">
       <h2 id="pencil-note" className={`${DISPLAY} text-fg`}>
         <LitWords p={p} segs={NOTE} range={N.words} anchor="last" />
       </h2>
