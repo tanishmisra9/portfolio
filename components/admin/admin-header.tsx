@@ -26,6 +26,8 @@ export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
   const [pending, startTransition] = useTransition();
   const publishing = useSaveStatus();
   const [ask, setAsk] = useState<Ask | null>(null);
+  // Enabled radio clips the last publish shipped without a loudness gain (they play unmatched until analysed).
+  const [unmeasuredRadio, setUnmeasuredRadio] = useState(0);
   const { dirty } = useAdminDirty();
   const logoutForm = useRef<HTMLFormElement>(null);
   const bypassLogout = useRef(false);
@@ -56,7 +58,8 @@ export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
 
   function doPublish() {
     startTransition(async () => {
-      await publishing.run(() => publishAll());
+      const r = await publishing.run(() => publishAll());
+      setUnmeasuredRadio(r.ok ? r.value.unmeasuredRadio : 0);
     });
   }
   function handlePublish() {
@@ -83,6 +86,11 @@ export function AdminHeader({ hasChanges }: { hasChanges?: boolean }) {
         <div className="relative ml-auto flex items-center gap-2">
           {dirty && <span className="px-2 text-sm text-danger">Unsaved changes</span>}
           <SaveStatus state={publishing} failed="Couldn’t publish" done="" className="hidden sm:inline" />
+          {unmeasuredRadio > 0 && (
+            <Link href="/admin/radio" onMouseDown={noMouseFocus} className="px-2 text-sm text-danger underline underline-offset-4">
+              {unmeasuredRadio} radio {unmeasuredRadio === 1 ? "clip plays" : "clips play"} unmatched: analyze loudness
+            </Link>
+          )}
           <IconButton href="/" icon={<ExternalLink />} label="View site" target="_blank" />
           <ThemeToggle />
           <Button variant="primary" className="min-h-12 whitespace-nowrap !px-3 md:!px-4" onClick={handlePublish} pending={pending} disabled={!hasChanges}>

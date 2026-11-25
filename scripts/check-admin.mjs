@@ -14,6 +14,11 @@ for (const lang of ["js", "javascript", "coffee"]) {
 }
 assert.equal(globalThis.__pwned, false, "JS frontmatter was evaluated");
 assert.equal(parseFrontmatter("---\ntitle: Hi\ndate: 2026-01-02\n---\nbody").data.title, "Hi");
+// A file opening with a thematic break (four or more dashes) has no frontmatter at all; it must import, not be refused.
+for (const rule of ["----", "-----"]) {
+  const r = parseFrontmatter(`${rule}\n\nJust a post.\n`);
+  assert.ok(r.content.includes("Just a post."), `${rule}: body lost`);
+}
 
 // BUG-003: only image destinations are rewritten; prose, links and code keep the same filename.
 const md = "![a](./img/sample.png)\n\nsample.png in prose, [link](./img/sample.png), `![x](./img/sample.png)`\n\n```\n![y](./img/sample.png)\n```\n";

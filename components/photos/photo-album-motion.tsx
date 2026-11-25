@@ -43,7 +43,8 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
       animate="show"
     >
       <motion.div variants={item}>
-        <BackButton href="/photos" label="Back to photos" />
+        {/* Back to the collections, not the top of /photos (which would replay the whole scroll intro). */}
+        <BackButton href="/photos#collections" label="Back to photos" />
       </motion.div>
       <motion.div
         variants={item}

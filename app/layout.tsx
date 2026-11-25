@@ -19,8 +19,10 @@ const inter = Inter({
 });
 
 // Static-weight face used only for the punctuation YD Gothic is excluded from (see the @font-face unicode-range in
-// globals.css). The body is font-weight 120, which variable Inter renders ultra-thin (near-invisible periods). It must be
-// a different family from Inter: next/font names both "Inter", so the variable face would still win the weight match.
+// globals.css). Poppins now leads the stack (body `font-[300]`), so this only matters where YD Gothic, a fallback, paints.
+// It was added when the body was YD Gothic at font-weight 120, which variable Inter rendered ultra-thin (near-invisible
+// periods). It must stay a different family from Inter: next/font names both "Inter", so the variable face would still
+// win the weight match at light weights.
 const interPunct = Inter_Tight({
   subsets: ["latin"],
   weight: "400",

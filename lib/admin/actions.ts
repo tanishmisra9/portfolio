@@ -595,4 +595,9 @@ export async function publishAll() {
   // old per-slug loop) left a deleted post's or collection's prerendered page live and
   // fully readable at its old URL until the next deploy.
   revalidatePath("/", "layout");
+
+  // Enabled radio clips with no measured loudness ship without a gain and play unmatched; the header shows this count
+  // so the owner knows to run "Analyze loudness" (in /admin/radio) and publish again.
+  const clips = await db.select({ disabled: radioSamples.disabled, rms: radioSamples.rms }).from(radioSamples);
+  return { unmeasuredRadio: clips.filter((c) => !c.disabled && c.rms === null).length };
 }

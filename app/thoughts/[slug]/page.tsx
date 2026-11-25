@@ -151,6 +151,7 @@ export default async function BlogPostPage({ params }: Props) {
   if (!post) notFound();
 
   const headings = extractHeadings(post.content);
+  const hasToc = headings.length >= 2;
 
   return (
     <main
@@ -177,9 +178,11 @@ export default async function BlogPostPage({ params }: Props) {
             </time>
           </header>
 
-          <div className="mt-12 xl:grid xl:grid-cols-[13rem_minmax(0,1fr)] xl:gap-12">
-            {headings.length >= 2 && <PostToc headings={headings} />}
-            <div className="space-y-6 text-fg xl:col-start-2">
+          {/* The TOC column exists only when there is a TOC: reserving it always pushed short posts' text ~16rem
+              right of their title on xl screens, next to an empty gutter. */}
+          <div className={`mt-12 ${hasToc ? "xl:grid xl:grid-cols-[13rem_minmax(0,1fr)] xl:gap-12" : ""}`}>
+            {hasToc && <PostToc headings={headings} />}
+            <div className={`space-y-6 text-fg ${hasToc ? "xl:col-start-2" : ""}`}>
               <Markdown remarkPlugins={[remarkGfm, remarkHeadingIds]} components={components}>
                 {post.content}
               </Markdown>

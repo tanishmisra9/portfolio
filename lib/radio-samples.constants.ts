@@ -12,6 +12,19 @@ export const RADIO_SAMPLE_FALLBACK = [
   "/sfx/radio/stupid.mp3",
 ] as const;
 
+/**
+ * Playback gains for the fallback clips, precomputed exactly as publish() does for uploaded ones: RMS over every channel
+ * (lib/radio-loudness.ts, measured in Chromium), then radioGain() against stupid.mp3. Without these the fallback clips
+ * played unmatched once gains moved into the published snapshot. Re-measure if a fallback clip changes.
+ * Measured RMS: stay-out 0.07127, simply-lovely 0.06880, max-squeaky 0.05413, stupid 0.07303.
+ */
+export const RADIO_FALLBACK_GAINS: Record<string, number> = {
+  "/sfx/radio/stay-out.mp3": 1.025,
+  "/sfx/radio/simply-lovely.mp3": 1.061,
+  "/sfx/radio/max-squeaky.mp3": 1.349,
+  "/sfx/radio/stupid.mp3": 1,
+};
+
 /** Used when the published snapshot has no keystroke triggers (nothing published yet, or none left). */
 export const RADIO_TRIGGER_FALLBACK = ["bbb", "boxbox"] as const;
 

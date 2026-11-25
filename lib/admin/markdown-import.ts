@@ -13,7 +13,7 @@ import type { Definition, Image, ImageReference, Root } from "mdast";
  * executable engines as a second layer. Only plain YAML (the default, no language marker) is accepted, so `---json` is rejected too.
  */
 export function parseFrontmatter(raw: string) {
-  const fence = /^﻿?---([^\r\n]*)/.exec(raw);
+  const fence = /^﻿?---(?!-)([^\r\n]*)/.exec(raw); // (?!-): four or more dashes are a thematic break, not a fence (gray-matter agrees), so `----` has no frontmatter and isn't refused for a "language marker" of `-`
   const lang = fence?.[1].trim().toLowerCase() ?? "";
   if (lang && lang !== "yaml" && lang !== "yml") {
     throw new Error("Frontmatter must be plain YAML (no language marker).");

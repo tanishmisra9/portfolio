@@ -191,7 +191,9 @@ export function usePitstop(reduceMotion: boolean | null) {
 
   useEffect(() => {
     aliveRef.current = true;
-    prepare();
+    // Reduced motion never plays a pit stop (run() returns early), so don't download a 55-64KB clip it can't use.
+    // Read from matchMedia rather than the hook's value, which may not be settled on the first effect.
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) prepare();
     return () => {
       aliveRef.current = false;
       animsRef.current.forEach((a) => a.stop());

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { getPublishedData } from "@/lib/site-content";
-import { RADIO_SAMPLE_FALLBACK } from "@/lib/radio-samples.constants";
+import { RADIO_FALLBACK_GAINS, RADIO_SAMPLE_FALLBACK } from "@/lib/radio-samples.constants";
 
 export const ALLOWED_AUDIO_EXTENSIONS = new Set([".mp3", ".m4a", ".wav", ".ogg", ".webm"]);
 
@@ -13,12 +13,16 @@ export function isAllowedAudioFile(filename: string, mimeType: string): boolean 
   return hasAudioExtension && !hasNonAudioMimeType;
 }
 
-/** Precomputed playback gains (see publish.ts); empty before the first measured publish, so every clip plays at 1. */
+/**
+ * Precomputed playback gains: the published ones (see publish.ts) plus the fixed ones for the local fallback clips, so
+ * the fallback list is level-matched too. Their URLs (/sfx/radio/…) can't collide with uploaded Blob URLs. A clip with
+ * no gain (an uploaded clip not yet analysed) plays at 1; publishAll() reports those.
+ */
 export async function getRadioGains(): Promise<Record<string, number>> {
   try {
-    return (await getPublishedData()).radio?.gains ?? {};
+    return { ...RADIO_FALLBACK_GAINS, ...((await getPublishedData()).radio?.gains ?? {}) };
   } catch {
-    return {};
+    return { ...RADIO_FALLBACK_GAINS };
   }
 }
 

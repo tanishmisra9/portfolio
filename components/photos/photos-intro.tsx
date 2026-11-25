@@ -837,7 +837,11 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
     // Into the cover, below the end of the line (clamped inside it), ending just above the image.
     // The middle of the page (the cover's centre), at the owner's request: the line sweeps from the end of the heading
     // across the tall gap to centre stage. (In the first, short gap, pulling even an em sideways made a cramped hook.)
-    const bx = (cover.left + cover.right) / 2 - o.left;
+    // The first tile spans the whole grid, which sits in the same column as this section, so the cover's centre is
+    // this section's centre. Read from layout (clientWidth), not the cover's rect: the tiles slide in on load
+    // (x: −40 → 0), and a measurement taken mid-slide (e.g. a reload restored near the note) left the arrow pointing
+    // left of centre for good. The slide is horizontal only, so the cover's top (below) is unaffected.
+    const bx = el.clientWidth / 2;
     // Clear air above the cover (owner: "it overlaps with the collection"). 0.12em measured 12px at the line's centre,
     // but half the stroke width and the tile's hover/focus frame (-inset-3, 12px above the cover) ate all of it.
     const B: Pt = [bx, cover.top - o.top - Math.max(0.5 * em, 24)];
