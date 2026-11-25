@@ -29,13 +29,12 @@ const ANYONE: Seg[] = [{ t: "I think" }, { t: "anyone", select: true }, { t: "ca
 const POCKET: Seg[] = [{ t: "since the best camera is the one in your" }, { t: "pocket.", select: true }];
 const NEON = "Mobile photography.";
 const PARAGRAPH: Seg[] = [
-  { t: "Everything here was shot on the phone in my pocket. No bag of lenses, no presets to buy. Just" },
+  { t: "Every photo here was shot on my phone. No bag of lenses, no presets. Just" },
   { t: "rain on glass,", color: v("rain") },
   { t: "night light,", color: v("sodium") },
-  { t: "golden hour,", color: v("gold") },
-  { t: "and one" },
-  { t: "clock tower", color: v("tower") },
-  { t: "I can't stop photographing. If you have a phone, you already have everything you need." },
+  { t: "and" },
+  { t: "golden hour.", color: v("gold") },
+  { t: "If you have a phone, you have everything you need." },
 ];
 
 // ── Timeline (fractions of the section's scroll distance) ──
