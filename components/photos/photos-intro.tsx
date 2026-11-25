@@ -9,7 +9,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createIntroSound, type IntroSound } from "./intro-sound";
 
 // One day of light passes over the manifesto, and it always resolves into the page's
@@ -132,7 +132,9 @@ function Typed({ p }: { p: MotionValue<number> }) {
     setN(k);
   });
   return (
-    <span aria-label={TYPED}>
+    // The heading carries the name (aria-label on its <h2>): a label on a plain <span> is ignored by many screen
+    // readers, and the partly typed text is aria-hidden, so the line was read as nothing.
+    <span>
       <span aria-hidden>{TYPED.slice(0, n)}</span>
       {/* Gone once the horizon starts: a time-driven blink on a line being wiped by scroll is a second rhythm. */}
       <motion.span aria-hidden style={{ opacity: caret }} className="ml-[0.04em] inline-block h-[0.85em] w-[0.09em] translate-y-[0.1em] animate-[caret_1.05s_steps(1,end)_infinite] bg-current" />
@@ -258,20 +260,7 @@ function handDrawnArrow(A: Pt, B: Pt, em: number, width: number) {
     if (i === curlEnd) curlLen = total;
   }
 
-  // The arrowhead without lifting the pencil: from the tip, up one side, back down
-  // through the tip, out the other side. Sides deliberately unequal, each slightly bowed.
-  const [px, py] = pts[pts.length - 3];
-  const dl = Math.hypot(B[0] - px, B[1] - py) || 1;
-  const back: Pt = [(px - B[0]) / dl, (py - B[1]) / dl];
-  const wingEnd = (deg: number, len: number): Pt => {
-    const a = (deg * Math.PI) / 180;
-    return [B[0] + (back[0] * Math.cos(a) - back[1] * Math.sin(a)) * len * em, B[1] + (back[0] * Math.sin(a) + back[1] * Math.cos(a)) * len * em];
-  };
-  const w1 = wingEnd(31 + r() * 6, 0.42);
-  const w2 = wingEnd(-(24 + r() * 6), 0.36);
-  const bow = (a: Pt, b: Pt) => `Q ${((a[0] + b[0]) / 2 + j(0.03)).toFixed(1)} ${((a[1] + b[1]) / 2 + j(0.03)).toFixed(1)}, ${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
-  const head = ` ${bow(B, w1)} ${bow(w1, B)} ${bow(B, w2)}`;
-  const headLen = 2 * Math.hypot(w1[0] - B[0], w1[1] - B[1]) + Math.hypot(w2[0] - B[0], w2[1] - B[1]);
+  const { d: head, len: headLen } = arrowHead(B, pts[pts.length - 3], em, r);
   const all = total + headLen;
   // The tip's height at each 1% of the stroke, so the camera can follow the pencil.
   const tipY: number[] = [];
@@ -288,6 +277,79 @@ function handDrawnArrow(A: Pt, B: Pt, em: number, width: number) {
   return { body: smooth(pts) + head, curlFrac: curlLen / all, bodyFrac: total / all, tipY };
 }
 
+/**
+ * The arrowhead without lifting the pencil: from the tip `B`, up one side, back down through the tip, out the other
+ * side, pointing away from `from` (a point a little back along the line). Sides deliberately unequal, each slightly
+ * bowed. Shared by both arrows; it draws from `r` in a fixed order, so a given seed always gives the same head.
+ */
+function arrowHead(B: Pt, from: Pt, em: number, r: () => number) {
+  const j = (amt: number) => (r() * 2 - 1) * amt * em;
+  const dl = Math.hypot(B[0] - from[0], B[1] - from[1]) || 1;
+  const back: Pt = [(from[0] - B[0]) / dl, (from[1] - B[1]) / dl];
+  const wingEnd = (deg: number, len: number): Pt => {
+    const a = (deg * Math.PI) / 180;
+    return [B[0] + (back[0] * Math.cos(a) - back[1] * Math.sin(a)) * len * em, B[1] + (back[0] * Math.sin(a) + back[1] * Math.cos(a)) * len * em];
+  };
+  const w1 = wingEnd(31 + r() * 6, 0.42);
+  const w2 = wingEnd(-(24 + r() * 6), 0.36);
+  const bow = (a: Pt, b: Pt) => `Q ${((a[0] + b[0]) / 2 + j(0.03)).toFixed(1)} ${((a[1] + b[1]) / 2 + j(0.03)).toFixed(1)}, ${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+  return {
+    d: ` ${bow(B, w1)} ${bow(w1, B)} ${bow(B, w2)}`,
+    len: 2 * Math.hypot(w1[0] - B[0], w1[1] - B[1]) + Math.hypot(w2[0] - B[0], w2[1] - B[1]),
+  };
+}
+
+/**
+ * The note's pointer ("Here's my work." → the first collection): a small curl past the end of the line, a
+ * loosely swaying fall down the gap, then a short straight run so the head points straight down into the cover.
+ * Same construction as the intro arrow (seeded jitter, Catmull-Rom, tiny wobble), smaller and with a fixed seed.
+ */
+function handDrawnPointer(A: Pt, B: Pt, em: number, width: number) {
+  const r = rng(23);
+  const j = (amt: number) => (r() * 2 - 1) * amt * em;
+  const inside = (x: number) => Math.min(width - 0.25 * em, Math.max(0.15 * em, x));
+  const dir = A[0] + 0.8 * em < width ? 1 : -1; // loop toward open space, back over the word at the column edge
+  const at = (base: Pt, dx: number, dy: number, amt = 0.03): Pt => [inside(base[0] + dir * dx * em + j(amt)), base[1] + dy * em + j(amt)];
+  // A cursive loop *below* the line (down, back under itself, crossing, then on down). The intro's hooked curl,
+  // shrunk and set beside a full stop, read as a question mark ("seen.?").
+  const curl: Pt[] = [A, at(A, 0.22, 0.4), at(A, 0.12, 0.92), at(A, -0.22, 0.86), at(A, -0.12, 0.5), at(A, 0.26, 0.72), at(A, 0.36, 1.25)];
+  const start = curl[curl.length - 1];
+  const runTop = B[1] - 0.55 * em; // the straight run in, so the head lands vertical
+  // One soft arc: a single midpoint, bowed sideways by ~12% of the sweep. Several sway points (the intro arrow's,
+  // ±0.3em) kinked into a zig-zag on a short drop; with no bow, the long sweep to the middle read as a ruler line.
+  const [dx, dy] = [B[0] - start[0], runTop - start[1]];
+  const span = Math.hypot(dx, dy) || 1;
+  const bow = 0.12 * span * (0.85 + r() * 0.3) * (dx <= 0 ? 1 : -1); // bulge away from the direction of travel
+  const fall: Pt[] = [[inside(start[0] + dx / 2 + (-dy / span) * bow), start[1] + dy / 2 + (dx / span) * bow + j(0.03)]];
+  const way: Pt[] = [...curl, ...fall, [B[0] + j(0.03), runTop], B];
+  const cr = (p0: Pt, p1: Pt, p2: Pt, p3: Pt, t: number): Pt => {
+    const f = (a: number, b: number, c: number, d: number) =>
+      0.5 * (2 * b + (c - a) * t + (2 * a - 5 * b + 4 * c - d) * t * t + (3 * b - a - 3 * c + d) * t * t * t);
+    return [f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])];
+  };
+  const pts: Pt[] = [way[0]];
+  let curlEnd = 0;
+  for (let i = 0; i < way.length - 1; i++) {
+    const [p0, p1, p2, p3] = [way[i - 1] ?? way[i], way[i], way[i + 1], way[i + 2] ?? way[i + 1]];
+    const steps = Math.max(2, Math.round(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / (0.3 * em)));
+    for (let k = 1; k <= steps; k++) {
+      const [x, y] = cr(p0, p1, p2, p3, k / steps);
+      const last = i === way.length - 2 && k === steps;
+      pts.push(last ? [x, y] : [x + j(0.012), y + j(0.012)]);
+    }
+    if (i === curl.length - 2) curlEnd = pts.length - 1;
+  }
+  let total = 0;
+  let curlLen = 0;
+  for (let i = 1; i < pts.length; i++) {
+    total += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    if (i === curlEnd) curlLen = total;
+  }
+  const head = arrowHead(B, pts[pts.length - 3], em, r);
+  const all = total + head.len;
+  return { d: smooth(pts) + head.d, curlFrac: curlLen / all, bodyFrac: total / all, len: all };
+}
+
 function useArrowPath(pair: RefObject<HTMLElement | null>) {
   const [path, setPath] = useState<ArrowPath | null>(null);
   useLayoutEffect(() => {
@@ -300,6 +362,9 @@ function useArrowPath(pair: RefObject<HTMLElement | null>) {
       if (!a || !b || halves.length < 2) return;
       const o = el.getBoundingClientRect();
       const em = parseFloat(getComputedStyle(el).fontSize);
+      // A late callback (fonts.ready, the observer) can land after unmount; a removed element has no font size, em is
+      // NaN, no points are sampled and the arrowhead read past the array (a page error under reduced motion).
+      if (!el.isConnected || !(em > 0)) return;
       // Word boxes are read relative to the element itself, so its own scroll-driven
       // translate cancels out.
       const A: Pt = [a.right - o.left + 0.22 * em, a.top - o.top + a.height * 0.6]; // a little past where the period was
@@ -310,8 +375,12 @@ function useArrowPath(pair: RefObject<HTMLElement | null>) {
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
-    document.fonts?.ready.then(measure);
-    return () => ro.disconnect();
+    let alive = true;
+    document.fonts?.ready.then(() => alive && measure());
+    return () => {
+      alive = false;
+      ro.disconnect();
+    };
   }, [pair]);
   return path;
 }
@@ -423,7 +492,7 @@ function PencilCircle({ p, range, sound, children }: { p?: MotionValue<number>; 
 
 // ── Scrubbed version ──
 
-function ScrollIntro() {
+function ScrollIntro({ sound }: { sound: SoundRef }) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
   // Identity transform on purpose: it keeps every downstream useTransform on the JS path.
@@ -488,11 +557,6 @@ function ScrollIntro() {
   // The pen: the curl in place, then the fall at the camera's pace, so the tip stays on screen.
   const draw = useTransform(p, (x) => drawAt(x, arrowRef.current));
   const body = useStroke(draw);
-  const sound = useRef<IntroSound | null>(null);
-  useEffect(() => {
-    sound.current = createIntroSound();
-    return () => sound.current?.dispose();
-  }, []);
   useScratch(draw, sound);
   const [sky, setSky] = useState<1 | 2>(1);
   const [lit, setLit] = useState(false);
@@ -539,7 +603,7 @@ function ScrollIntro() {
 
         <div className="absolute inset-x-6 bottom-8 top-24 grid grid-cols-[minmax(0,1fr)] items-center md:inset-x-16">
           <div className="relative mx-auto grid h-full w-full max-w-6xl grid-cols-[minmax(0,1fr)] items-center">
-            <motion.h2 ref={b1Ref} style={{ opacity: b1, pointerEvents: h1, color: v("t1"), maskImage: b1Mask, WebkitMaskImage: b1Mask }} className={`${DISPLAY} col-start-1 row-start-1`}>
+            <motion.h2 ref={b1Ref} aria-label={TYPED} style={{ opacity: b1, pointerEvents: h1, color: v("t1"), maskImage: b1Mask, WebkitMaskImage: b1Mask }} className={`${DISPLAY} col-start-1 row-start-1`}>
               <Typed p={p} />
             </motion.h2>
 
@@ -632,12 +696,139 @@ function StaticIntro() {
   );
 }
 
-export function PhotosIntro() {
+/**
+ * The page's one pencil sound, shared by the intro and the note before the collections (one AudioContext).
+ * Under reduced motion there is none: the scroll versions mount for one beat before the static ones (they swap
+ * after mount, and child effects run first), so this checks the preference itself rather than opening an
+ * AudioContext and fetching the sample for a visitor who never hears it.
+ */
+export function useIntroSound(): SoundRef {
+  const sound = useRef<IntroSound | null>(null);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    sound.current = createIntroSound();
+    return () => {
+      sound.current?.dispose();
+      sound.current = null;
+    };
+  }, []);
+  return sound;
+}
+
+/** Reduced motion, read after mount (see PhotosIntro): the first client render must match the server's. */
+function useStill() {
+  const reduce = useReducedMotion();
+  const [still, setStill] = useState(false);
+  useLayoutEffect(() => setStill(!!reduce), [reduce]);
+  return still;
+}
+
+// ── The note before the collections ──
+const NOTE: Seg[] = [{ t: "Here's my work." }];
+// Words light from 0.2: before that the heading is still below the fold (lit over 0–0.3 it finished unseen).
+const N = { words: [0.2, 0.4] as R, curl: [0.4, 0.52] as R, fall: [0.52, 0.88] as R, head: [0.88, 0.96] as R };
+
+/** How much of the pointer is drawn at note progress x: the curl in place, the eased fall, then the head. */
+function noteDrawAt(x: number, g: { curlFrac: number; bodyFrac: number } | null) {
+  const [fc, fb] = [g?.curlFrac ?? 0.15, g?.bodyFrac ?? 0.95];
+  if (x < N.fall[0]) return fc * clamp01((x - N.curl[0]) / (N.curl[1] - N.curl[0]));
+  if (x < N.head[0]) return fc + (fb - fc) * easeInOut(clamp01((x - N.fall[0]) / (N.fall[1] - N.fall[0])));
+  return fb + (1 - fb) * clamp01((x - N.head[0]) / (N.head[1] - N.head[0]));
+}
+
+/**
+ * "Here's my work.": lit word by word, then the pencil draws from the end of the line down into the first
+ * collection's cover, scrubbed by scroll, with the scratch. It hands the reader from the intro to the photographs.
+ * Normal flow (not pinned), so it reads as a pause, not another stage. Fully drawn under reduced motion.
+ */
+export function PencilNote({ sound }: { sound: SoundRef }) {
+  const ref = useRef<HTMLElement>(null);
+  const still = useStill();
+  // The drop is tall (owner: about 3× the first version), so the head lands with the note's bottom (the cover's top)
+  // low on the screen, at 90%: the heading the line starts from is still in view below the nav at that moment.
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.85", "end 0.9"] });
+  // Identity transform (see ScrollIntro): keeps every downstream transform on the JS path.
+  const progress = useTransform(scrollYProgress, (v) => v);
+  const p = useMotionValue(0);
+  useMotionValueEvent(progress, "change", (x) => p.set(still ? 1 : x));
+  useEffect(() => p.set(still ? 1 : progress.get()), [still, p, progress]);
+
+  const [path, setPath] = useState<{ d: string; width: number; curlFrac: number; bodyFrac: number; len: number } | null>(null);
+  const pathRef = useRef(path);
+  pathRef.current = path;
+  const measure = useCallback(() => {
+    const el = ref.current;
+    const a = el?.querySelector("[data-arrow-from]")?.getBoundingClientRect();
+    const cover = document.querySelector("[data-collection-tile]")?.getBoundingClientRect();
+    if (!el || !a || !cover) return;
+    const o = el.getBoundingClientRect();
+    const em = parseFloat(getComputedStyle(el.querySelector("h2")!).fontSize);
+    if (!el.isConnected || !(em > 0)) return; // a late callback after unmount (see useArrowPath)
+    // Below the baseline and clear of the full stop: started inside the line's glyph band, the first millimetre of
+    // stroke read as a second full stop ("seen..") and the half-drawn loop as a letter ("seen.q").
+    const A: Pt = [a.right - o.left + 0.27 * em, a.top - o.top + a.height * 0.8 + 0.2 * em];
+    // Into the cover, below the end of the line (clamped inside it), ending just above the image.
+    // The middle of the page (the cover's centre), at the owner's request: the line sweeps from the end of the heading
+    // across the tall gap to centre stage. (In the first, short gap, pulling even an em sideways made a cramped hook.)
+    const bx = (cover.left + cover.right) / 2 - o.left;
+    const B: Pt = [bx, cover.top - o.top - 0.12 * em];
+    setPath({ ...handDrawnPointer(A, B, em, el.clientWidth), width: Math.max(3.5, 0.075 * em) });
+  }, []);
+  useLayoutEffect(() => {
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (ref.current) ro.observe(ref.current);
+    const tile = document.querySelector("[data-collection-tile]");
+    if (tile) ro.observe(tile);
+    let alive = true;
+    document.fonts?.ready.then(() => alive && measure());
+    return () => {
+      alive = false;
+      ro.disconnect();
+    };
+  }, [measure]);
+  // The tiles slide in on load: measure again once the reader actually reaches the note, long after that settles.
+  const remeasured = useRef(false);
+  useMotionValueEvent(progress, "change", (x) => {
+    if (x > 0 && !remeasured.current) {
+      remeasured.current = true;
+      measure();
+    }
+  });
+
+  const draw = useTransform(p, (x) => noteDrawAt(x, pathRef.current));
+  useScratch(draw, sound, 0.6);
+  // Hidden until the line is two stroke-widths long: a round cap at a near-zero length paints a dot.
+  const stroke = {
+    pathLength: draw,
+    opacity: useTransform(draw, (x): number => {
+      const g = pathRef.current;
+      return g && x * g.len >= 2 * g.width ? 1 : 0;
+    }),
+  };
+
+  return (
+    <section ref={ref} aria-labelledby="pencil-note" className="relative pb-[44svh] pt-[22svh] md:pb-[70svh]">
+      <h2 id="pencil-note" className={`${DISPLAY} text-fg`}>
+        <LitWords p={p} segs={NOTE} range={N.words} anchor="last" />
+      </h2>
+      {path && (
+        <svg aria-hidden className="pointer-events-none absolute inset-0 size-full overflow-visible text-fg" fill="none" stroke="currentColor" strokeWidth={path.width} strokeLinecap="round" strokeLinejoin="round">
+          <motion.path d={path.d} style={stroke} />
+        </svg>
+      )}
+    </section>
+  );
+}
+
+export function PhotosIntro({ sound }: { sound: SoundRef }) {
   // Read after mount, never during render: the server can't know the preference and renders
   // ScrollIntro, so the first client render must too (Framer seeds useReducedMotion from
   // matchMedia on the client, which made reduced-motion visitors hit a hydration mismatch).
   const reduce = useReducedMotion();
   const [staticIntro, setStaticIntro] = useState(false);
-  useEffect(() => setStaticIntro(!!reduce), [reduce]);
-  return staticIntro ? <StaticIntro /> : <ScrollIntro />;
+  // A layout effect, so the swap lands before the first paint: the 500svh scroll stage is never shown, and the
+  // page height settles before the browser restores a reload's scroll position against it.
+  useLayoutEffect(() => setStaticIntro(!!reduce), [reduce]);
+  return staticIntro ? <StaticIntro /> : <ScrollIntro sound={sound} />;
 }

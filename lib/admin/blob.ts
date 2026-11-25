@@ -1,4 +1,4 @@
-import { put, list } from "@vercel/blob";
+import { put, list, copy } from "@vercel/blob";
 
 /**
  * Strips the machinery Blob adds around the original filename so it can be compared
@@ -15,6 +15,22 @@ export async function listAssetFilenames(
 ): Promise<{ name: string; url: string }[]> {
   const { blobs } = await list({ prefix: `${pathnamePrefix}/` });
   return blobs.map((b) => ({ name: originalFilename(b.pathname.split("/").pop()!), url: b.url }));
+}
+
+/**
+ * Copies every asset under `fromPrefix/` to `toPrefix/` (same relative paths), skipping any already there, so renaming
+ * a→b→a never collides. Copies, never moves: a published post's body still points at the old URLs, so deleting
+ * them would break the live page. Used by renamePost, so an import after a rename still finds the uploaded images.
+ */
+export async function copyAssets(fromPrefix: string, toPrefix: string) {
+  const [{ blobs: src }, { blobs: dst }] = await Promise.all([list({ prefix: `${fromPrefix}/` }), list({ prefix: `${toPrefix}/` })]);
+  const have = new Set(dst.map((b) => b.pathname.slice(toPrefix.length + 1)));
+  await Promise.all(
+    src
+      .map((b) => ({ url: b.url, rel: b.pathname.slice(fromPrefix.length + 1) }))
+      .filter(({ rel }) => rel && !have.has(rel))
+      .map(({ url, rel }) => copy(url, `${toPrefix}/${rel}`, { access: "public" })),
+  );
 }
 
 /**

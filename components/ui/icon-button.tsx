@@ -20,7 +20,13 @@ type AsButton = Common & { href?: undefined } & Omit<ComponentProps<"button">, "
 const CLASSES = `${HOVER_FILL_LINK} inline-flex items-center justify-center border border-border p-[0.6875rem] text-muted transition-colors [&_svg]:size-[1.375rem] [&_svg]:[stroke-width:1.75]`;
 
 // Safari paints a focus ring on a mouse-clicked link/button; keep focus off on click (Tab still works).
-const noMouseFocus = (e: React.MouseEvent) => e.preventDefault();
+// Cancelling mousedown also stops the focused field from blurring, and admin fields commit on blur (photo alt,
+// radio names), so blur it first or the click acts on the field's old value. Same rule as the admin `noMouseFocus`.
+const noMouseFocus = (e: React.MouseEvent) => {
+  const a = document.activeElement;
+  if (a instanceof HTMLInputElement || a instanceof HTMLTextAreaElement || a instanceof HTMLSelectElement) a.blur();
+  e.preventDefault();
+};
 
 export function IconButton(props: AsLink | AsButton) {
   const { icon, label, className = "", ...rest } = props;

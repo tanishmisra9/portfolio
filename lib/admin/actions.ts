@@ -5,6 +5,7 @@ import { db } from "@/db/client";
 import { portfolio, collections, photos, quotes, posts, radioSamples, radioTriggers } from "@/db/schema";
 import {
   listAssetFilenames,
+  copyAssets,
   uploadResume as uploadResumeBlob,
   uploadRadioSample as uploadRadioBlob,
 } from "./blob";
@@ -498,6 +499,13 @@ export async function renamePost(oldSlug: string, rawSlug: string): Promise<{ sl
   } catch (err) {
     if (isUniqueViolation(err)) return { error: "A post with that slug already exists." };
     throw err;
+  }
+  // Uploaded images live under blog/<slug>; without this, the next import under the new slug can't find any of
+  // them. The rename itself has already succeeded, so a failed copy is logged rather than undoing it.
+  try {
+    await copyAssets(`blog/${oldSlug}`, `blog/${slug}`);
+  } catch (err) {
+    console.error(`[renamePost] could not copy images from blog/${oldSlug} to blog/${slug}:`, err);
   }
   draftChanged();
   return { slug };
