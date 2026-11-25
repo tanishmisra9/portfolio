@@ -29,12 +29,12 @@ const ANYONE: Seg[] = [{ t: "I think" }, { t: "anyone", select: true }, { t: "ca
 const POCKET: Seg[] = [{ t: "since the best camera is the one in your" }, { t: "pocket.", select: true }];
 const NEON = "Mobile photography.";
 const PARAGRAPH: Seg[] = [
-  { t: "Every photo here was shot on my phone. No bag of lenses, no presets. Just" },
+  { t: "No bag of lenses, no presets, no plan. Just" },
   { t: "rain on glass,", color: v("rain") },
-  { t: "night light,", color: v("sodium") },
+  { t: "night light", color: v("sodium") },
   { t: "and" },
-  { t: "golden hour.", color: v("gold") },
-  { t: "If you have a phone, you have everything you need." },
+  { t: "golden hour,", color: v("gold") },
+  { t: "caught on the way to somewhere else." },
 ];
 
 // ── Timeline (fractions of the section's scroll distance) ──
@@ -66,7 +66,7 @@ const SUN_GRADIENT = "radial-gradient(closest-side, #ffe3a3 0%, rgba(255,214,140
 
 const SIZE = "text-[clamp(2.75rem,7vw,6rem)]/[1.1]";
 const DISPLAY = `font-display font-bold tracking-tight text-balance ${SIZE} pb-[0.08em]`;
-const BODY = "max-w-[34ch] text-xl/[1.55] font-[300] md:text-[1.75rem]/[1.5]";
+const BODY = "max-w-[34ch] text-xl/[1.55] font-[300] md:max-w-[54ch] md:text-[1.75rem]/[1.5]";
 // Glow strength is a theme variable: lit signs glow at night, not in daylight.
 const glow = (c: string) =>
   `0 0 0.35em color-mix(in srgb, ${c} var(--pd-glow), transparent), 0 0 1.2em color-mix(in srgb, ${c} calc(var(--pd-glow) / 2), transparent)`;
