@@ -97,6 +97,12 @@ export const publishedSnapshot = pgTable("published_snapshot", {
   publishedAt: timestamp("published_at").notNull().defaultNow(),
 });
 
+/** Single row: how many times anyone has clicked the /photos camera title (app/api/shutter/route.ts). */
+export const shutterCount = pgTable("shutter_count", {
+  id: integer("id").primaryKey().default(1),
+  count: integer("count").notNull().default(0),
+});
+
 /** Failed admin-login attempts, for the per-IP throttle in lib/auth/actions.ts. Rows older than a day are pruned on login. */
 export const loginAttempts = pgTable("login_attempts", {
   id: serial("id").primaryKey(),
