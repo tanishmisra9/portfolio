@@ -185,14 +185,10 @@ function NeonLetter({ p, t, children }: { p: MotionValue<number>; t: number; chi
   return <motion.span style={{ opacity }}>{children}</motion.span>;
 }
 
-function Typed({ p, sound }: { p: MotionValue<number>; sound: RefObject<IntroSound | null> }) {
+function Typed({ p }: { p: MotionValue<number> }) {
   const [n, setN] = useState(0);
-  const shown = useRef(0);
   useMotionValueEvent(p, "change", (v) => {
     const k = Math.round(Math.min(1, Math.max(0, (v - T.type[0]) / (T.type[1] - T.type[0]))) * TYPED.length);
-    // A click per letter that appears (or is deleted on the way back up), so no scroll, no sound.
-    if (k !== shown.current) sound.current?.key();
-    shown.current = k;
     setN(k);
   });
   return (
@@ -478,7 +474,7 @@ function ScrollIntro() {
         <div className="absolute inset-x-6 bottom-8 top-24 grid grid-cols-[minmax(0,1fr)] items-center md:inset-x-16">
           <div className="relative mx-auto grid h-full w-full max-w-6xl grid-cols-[minmax(0,1fr)] items-center">
             <motion.h2 style={{ opacity: b1, pointerEvents: h1, color: v("t1") }} className={`${DISPLAY} col-start-1 row-start-1`}>
-              <Typed p={p} sound={sound} />
+              <Typed p={p} />
             </motion.h2>
 
             {/* One heading, two screens: the phrases sit a screen apart on a track, and the
