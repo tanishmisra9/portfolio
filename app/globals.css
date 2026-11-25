@@ -128,6 +128,37 @@ body {
 .camera-flash-text {
   animation: iphone-flash 0.8s ease-out both;
 }
+/* Light mode: the same rhythm as overexposure. White text on the near-white page simply vanished (the owner: "looks
+   weird on light mode"), so here the letters blow out to a pale wash with a warm bloom of flash light around them,
+   then fall back to ink. Dark mode keeps the white pop. */
+html:not(.dark) .camera-flash-text {
+  animation-name: daylight-flash;
+}
+/* The title's text sits in a <button>, and browsers' own stylesheet sets `text-shadow: none` on buttons, so the bloom
+   animated on the h1 never reached the letters. */
+html:not(.dark) .camera-flash-text button {
+  text-shadow: inherit;
+}
+/* Only the title flashes: the HUD (exposure readout, shot counter, hover label) stays plain. */
+html:not(.dark) .camera-flash-text button > span {
+  text-shadow: none;
+}
+@keyframes daylight-flash {
+  0%, 36%, 70%, 78% {
+    color: rgb(255 246 226);
+    text-shadow:
+      0 0 0.05em rgb(232 150 50 / 0.95),
+      0 0 0.22em rgb(255 190 90 / 0.55);
+  }
+  40%, 66%, 86% {
+    color: rgb(var(--fg-rgb) / 0.55);
+    text-shadow: none;
+  }
+  100% {
+    color: rgb(var(--fg-rgb));
+    text-shadow: none;
+  }
+}
 
 @keyframes iphone-flash {
   0%, 36%, 70%, 78% {
@@ -167,12 +198,12 @@ body {
   --pd-rain: #1d5fa6;
   --pd-sodium: #b45309;
   --pd-gold: #a16207;
-  /* Daylight neon: a lit tube in sunshine shows its coloured glass and a tight halo, not the night bloom. The sign's
-     letters take the sodium ink (5:1 on the daylight page), so the stutter reads as a tube switching on, and a small
-     glow gives the lit sign something to breathe. Was 0% with the page's own ink: the owner "can barely tell". */
+  /* Daylight neon: crisp sodium-ink letters (4.81:1 on the daylight page), no glow. With the page's own ink the owner
+     "can barely tell there's an effect"; the amber makes the stutter read as tubes switching on. A halo (even tight, even
+     without the wide bloom) read on white as a pale boxy haze / bleeding ink, and a warm-white "lit tube" fill read as
+     outlined text, so daylight stays crisp. */
   --pd-neon-ink: var(--pd-sodium);
-  --pd-glow: 30%;
-  --pd-bloom: 0; /* no wide bloom in daylight (photos-intro.tsx neonGlow) */
+  --pd-glow: 0%;
   --pd-sunset: 0;
   --pd-sunrise: 1;
 }
@@ -260,8 +291,8 @@ html.dark[data-pd-sky="1"] [data-site-header] {
 }
 
 /* Once "Mobile photography." has fully switched on, the sign stays alive: its glow breathes 100% → 55% → 100% (light
-   only, nothing moves). In daylight the glow is small (--pd-glow 30%) and the letters carry the sodium ink, so the
-   breath is a gentle pulse of the halo around a coloured tube.
+   only, nothing moves). In daylight there is no glow (--pd-glow 0): the sign is crisp sodium ink, and its effect is
+   the amber stutter as the letters switch on.
    The glow lives on its own layer (NeonSign in photos-intro.tsx: a shadows-only copy of the text), hidden until the
    sign is fully lit, then breathing by opacity alone: compositor-only, one rasterisation, no per-frame repaint of the
    blurs. Paused while the sign is off screen. */
