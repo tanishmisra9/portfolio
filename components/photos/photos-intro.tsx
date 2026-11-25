@@ -9,6 +9,7 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { createIntroSound, type IntroSound } from "./intro-sound";
 
 // One day of light passes over the manifesto, and it always resolves into the page's
 // own theme: dark mode is a sunset (page → golden hour → blue hour → night), light mode
@@ -184,10 +185,14 @@ function NeonLetter({ p, t, children }: { p: MotionValue<number>; t: number; chi
   return <motion.span style={{ opacity }}>{children}</motion.span>;
 }
 
-function Typed({ p }: { p: MotionValue<number> }) {
+function Typed({ p, sound }: { p: MotionValue<number>; sound: RefObject<IntroSound | null> }) {
   const [n, setN] = useState(0);
+  const shown = useRef(0);
   useMotionValueEvent(p, "change", (v) => {
     const k = Math.round(Math.min(1, Math.max(0, (v - T.type[0]) / (T.type[1] - T.type[0]))) * TYPED.length);
+    // A click per letter that appears (or is deleted on the way back up), so no scroll, no sound.
+    if (k !== shown.current) sound.current?.key();
+    shown.current = k;
     setN(k);
   });
   return (
@@ -423,6 +428,19 @@ function ScrollIntro() {
   // The pen: the curl in place, then the fall at the camera's pace, so the tip stays on screen.
   const draw = useTransform(p, (x) => drawAt(x, arrowRef.current));
   const body = useStroke(draw);
+  const sound = useRef<IntroSound | null>(null);
+  useEffect(() => {
+    sound.current = createIntroSound();
+    return () => sound.current?.dispose();
+  }, []);
+  // The pencil scratches only while the stroke moves, as loud as the pen is fast.
+  const lastDraw = useRef({ v: 0, t: 0 });
+  useMotionValueEvent(draw, "change", (v) => {
+    const now = performance.now();
+    const prev = lastDraw.current;
+    lastDraw.current = { v, t: now };
+    if (prev.t && now > prev.t) sound.current?.scratch((Math.abs(v - prev.v) * 1000) / (now - prev.t));
+  });
   const [sky, setSky] = useState<1 | 2>(1);
   useMotionValueEvent(p, "change", (x) => {
     setSky(x >= T.sky ? 2 : 1);
@@ -460,7 +478,7 @@ function ScrollIntro() {
         <div className="absolute inset-x-6 bottom-8 top-24 grid grid-cols-[minmax(0,1fr)] items-center md:inset-x-16">
           <div className="relative mx-auto grid h-full w-full max-w-6xl grid-cols-[minmax(0,1fr)] items-center">
             <motion.h2 style={{ opacity: b1, pointerEvents: h1, color: v("t1") }} className={`${DISPLAY} col-start-1 row-start-1`}>
-              <Typed p={p} />
+              <Typed p={p} sound={sound} />
             </motion.h2>
 
             {/* One heading, two screens: the phrases sit a screen apart on a track, and the
