@@ -10,8 +10,10 @@ type Props = {
   d: string | null;
   /** Stroke width in px. */
   base: number;
-  /** 0..1 drawn, already ratcheted (never decreases). */
+  /** 0..1 drawn: the most drawn so far (never decreases, until a fully faded stroke resets; see usePencilInk). */
   draw: MotionValue<number>;
+  /** 0..1 opacity for scrolling back up (usePencilInk). Omitted = always 1. */
+  fade?: MotionValue<number>;
   /** The page's pencil voice; omitted (or null) = silent. */
   voice?: RefObject<PencilVoice | null>;
   /** Colour comes from `currentColor` (e.g. `pd-arrow`, `text-fg`). */
@@ -27,7 +29,7 @@ type Props = {
  * `useIntroSound` effect creates the voice (a child's effects run before its parent's), so capturing `voice.current`
  * here would capture null and stay silent.
  */
-export function PencilStroke({ d, base, draw, voice, className = "" }: Props) {
+export function PencilStroke({ d, base, draw, fade, voice, className = "" }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const lengthRef = useRef(0);
   // Hidden until the line is minVisible × its width long: a round cap at a near-zero length paints a dot.
@@ -36,6 +38,19 @@ export function PencilStroke({ d, base, draw, voice, className = "" }: Props) {
     const minFrac = len > 0 ? (PENCIL_LINE.minVisible * base) / len : 0.001;
     return v >= minFrac ? 1 : 0;
   });
+
+  // The scroll-back fade is a plain style write on the <svg>, not a Framer value on the path. Framer re-renders an SVG
+  // element's whole attribute set and measures it (getBBox, a forced layout) on every change, so fading through it made
+  // scrolling up cost as much as drawing (measured: forced layouts 2 → 32 per 100 frames in the note).
+  useEffect(() => {
+    if (!fade) return;
+    const apply = (f: number) => {
+      const s = svgRef.current?.style;
+      if (s && s.opacity !== String(f)) s.opacity = f === 1 ? "" : String(f);
+    };
+    apply(fade.get());
+    return fade.on("change", apply);
+  }, [fade, d]);
 
   useEffect(() => {
     if (!d) return;

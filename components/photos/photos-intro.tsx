@@ -88,33 +88,44 @@ const neonGlow = (c: string) =>
  * animation runs on the compositor from one rasterised layer, and scaling the layer's opacity scales the shadows' alpha
  * exactly as the old multiplier did, so it looks the same. It also pauses whenever the sign is off screen.
  */
-function NeonSign({ lit, children }: { lit: boolean; children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [onScreen, setOnScreen] = useState(true);
+const NEON_GLOW = neonGlow(v("sodium"));
+
+/**
+ * Lit or not is written straight to the DOM by `lightNeon` (from the scroll listener), never through React state: a state
+ * flip re-rendered the whole intro on that scroll frame, a visible hitch. The same goes for pausing off screen.
+ */
+function NeonSign({ signRef, children }: { signRef: RefObject<HTMLDivElement | null>; children: ReactNode }) {
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting));
-    io.observe(el);
+    const glow = signRef.current?.querySelector(".pd-neon-glow");
+    if (!glow) return;
+    const io = new IntersectionObserver(([e]) => glow.toggleAttribute("data-paused", !e.isIntersecting));
+    io.observe(glow);
     return () => io.disconnect();
-  }, []);
+  }, [signRef]);
   return (
-    <div ref={ref} className="relative">
+    <div ref={signRef} className="relative">
       {/* Shadows only (transparent letters), behind the real text; same classes, so it wraps identically. */}
       <span
         aria-hidden
-        data-lit={lit || undefined}
-        data-paused={onScreen ? undefined : ""}
         className={`${DISPLAY} pd-neon-glow pointer-events-none absolute inset-0 block select-none text-transparent`}
-        style={{ textShadow: neonGlow(v("sodium")) }}
+        style={{ textShadow: NEON_GLOW }}
       >
         {NEON}
       </span>
-      <h2 aria-label={NEON} className={`${DISPLAY} pd-neon relative`} style={{ textShadow: lit ? "none" : neonGlow(v("sodium")) }}>
+      <h2 aria-label={NEON} className={`${DISPLAY} pd-neon relative`} style={{ textShadow: NEON_GLOW }}>
         {children}
       </h2>
     </div>
   );
+}
+
+/** Lit: the glow moves from the heading's own shadow to the breathing layer (see NeonSign). Writes only on a change. */
+function lightNeon(sign: HTMLDivElement | null, lit: boolean) {
+  const glow = sign?.querySelector(".pd-neon-glow");
+  const h2 = sign?.querySelector<HTMLElement>(".pd-neon");
+  if (!glow || !h2 || glow.hasAttribute("data-lit") === lit) return;
+  glow.toggleAttribute("data-lit", lit);
+  h2.style.textShadow = lit ? "none" : NEON_GLOW;
 }
 
 const words = (segs: Seg[]) =>
@@ -167,19 +178,24 @@ function NeonLetter({ p, t, children }: { p: MotionValue<number>; t: number; chi
 }
 
 function Typed({ p }: { p: MotionValue<number> }) {
-  const [n, setN] = useState(0);
+  const textRef = useRef<HTMLSpanElement>(null);
   const caret = useTransform(p, (x): number => (x < T.l1[0] ? 1 : 0));
-  useMotionValueEvent(p, "change", (v) => {
+  // Letters are written straight to the DOM, not through state: a state update per letter was a React commit on that
+  // scroll frame (18 per pass).
+  const type = (v: number) => {
+    const el = textRef.current;
     const k = Math.round(Math.min(1, Math.max(0, (v - T.type[0]) / (T.type[1] - T.type[0]))) * TYPED.length);
-    setN(k);
-  });
+    if (el && el.textContent!.length !== k) el.textContent = TYPED.slice(0, k);
+  };
+  useMotionValueEvent(p, "change", type);
+  useLayoutEffect(() => type(p.get()), [p]); // a reload partway down
   return (
     // The heading carries the name (aria-label on its <h2>): a label on a plain <span> is ignored by many screen
     // readers, and the partly typed text is aria-hidden, so the line was read as nothing.
     <span>
-      <span aria-hidden>{TYPED.slice(0, n)}</span>
+      <span ref={textRef} aria-hidden />
       {/* Gone once the horizon starts: a time-driven blink on a line being wiped by scroll is a second rhythm. */}
-      <motion.span aria-hidden style={{ opacity: caret }} className="ml-[0.04em] inline-block h-[0.85em] w-[0.09em] translate-y-[0.1em] animate-[caret_1.05s_steps(1,end)_infinite] bg-current" />
+      <motion.span aria-hidden style={{ opacity: caret }} className="ml-[0.18em] inline-block h-[0.85em] w-[0.09em] translate-y-[0.1em] animate-[caret_1.05s_steps(1,end)_infinite] bg-current" />
     </span>
   );
 }
@@ -470,24 +486,41 @@ function useArrowPath(pair: RefObject<HTMLElement | null>) {
 }
 
 /** The intro arrow, drawn by the pencil engine (graphite line + voice). */
-function ArrowSvg({ path, draw, sound }: { path: ArrowPath | null; draw: MotionValue<number>; sound?: SoundRef }) {
-  return <PencilStroke d={path?.body ?? null} base={path?.width ?? 0} draw={draw} voice={sound} className="pd-arrow" />;
+function ArrowSvg({ path, draw, fade, sound }: { path: ArrowPath | null; draw: MotionValue<number>; fade?: MotionValue<number>; sound?: SoundRef }) {
+  return <PencilStroke d={path?.body ?? null} base={path?.width ?? 0} draw={draw} fade={fade} voice={sound} className="pd-arrow" />;
 }
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
+/** Below this the stroke counts as scrolled all the way back to its start (fully faded). */
+const INK_GONE = 0.001;
+
 /**
- * Pencil doesn't un-draw (owner): a stroke only ever grows with scroll, and scrolling back up leaves what's been drawn.
- * The scratch is fed from this too, so it only sounds while new pencil goes down. Everything else (words, sky, camera)
- * stays scrubbed.
+ * Pencil never un-draws (owner); scrolling back up fades it instead (owner: "fade out while scrolling up").
+ * - `draw`: the most drawn so far. It only grows while you scroll down, so the scratch only sounds for new ink.
+ * - `fade`: how much of the way back over this stroke you've scrolled. Halfway back = 0.5; back at its start = 0. Scroll
+ *   down again and it brightens along the same curve; past the old peak, new ink draws at full strength.
+ * - Once fully faded, `draw` resets, so the next pass draws the stroke fresh with sound (the follower hears the reset
+ *   as a decrease: silent).
+ * Both are motion values set in one listener, so nothing re-renders. Words, sky and camera stay scrubbed.
  */
-function useRatchet(src: MotionValue<number>) {
-  const out = useMotionValue(src.get());
+function usePencilInk(src: MotionValue<number>) {
+  const draw = useMotionValue(src.get());
+  const fade = useMotionValue(1);
   useMotionValueEvent(src, "change", (v) => {
-    if (v > out.get()) out.set(v);
+    const peak = draw.get();
+    if (v >= peak) {
+      draw.set(v);
+      fade.set(1);
+    } else if (v <= INK_GONE) {
+      draw.set(v); // fully faded: reset for a fresh redraw
+      fade.set(1);
+    } else {
+      fade.set(v / peak);
+    }
   });
-  return out;
+  return { draw, fade };
 }
 
 
@@ -547,11 +580,11 @@ function PencilCircle({ p, range, sound, children }: { p?: MotionValue<number>; 
     return () => ro.disconnect();
   }, []);
   const done = useMotionValue(1);
-  const draw = useRatchet(useTransform(p ?? done, (x) => (range ? clamp01((x - range[0]) / (range[1] - range[0])) : 1)));
+  const { draw, fade } = usePencilInk(useTransform(p ?? done, (x) => (range ? clamp01((x - range[0]) / (range[1] - range[0])) : 1)));
   return (
     <span ref={ref} className="relative inline-block">
       {children}
-      {path && <PencilStroke d={path.d} base={path.width} draw={draw} voice={sound} className="pd-arrow" />}
+      {path && <PencilStroke d={path.d} base={path.width} draw={draw} fade={fade} voice={sound} className="pd-arrow" />}
     </span>
   );
 }
@@ -621,18 +654,28 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
     return -(g.halves[0] + (g.halves[1] - g.halves[0]) * clamp01((y - y0) / (y1 - y0 || 1)));
   });
   // The pen: the curl in place, then the fall at the camera's pace, so the tip stays on screen.
-  const draw = useRatchet(useTransform(p, (x) => drawAt(x, arrowRef.current)));
-  const [sky, setSky] = useState<1 | 2>(1);
-  const [lit, setLit] = useState(false);
-  useMotionValueEvent(p, "change", (x) => {
-    setSky(x >= T.sky ? 2 : 1);
-    setLit(x >= NEON_LIT);
+  const { draw, fade: arrowFade } = usePencilInk(useTransform(p, (x) => drawAt(x, arrowRef.current)));
+  // Threshold switches (the second sky's colours, the lit sign, the nav's ink) are DOM writes made only when they
+  // change. As React state, each flip re-rendered the whole intro on that scroll frame: a visible hitch.
+  const signRef = useRef<HTMLDivElement>(null);
+  const flip = (x: number) => {
+    const pairEl = pairRef.current;
+    // Only on a change: rewriting the same attribute still invalidates style, and the horizon's mask then forced a
+    // fresh layout reading its rects (layouts per frame doubled while scrolling up through the intro).
+    const sky2 = x >= T.sky;
+    if (pairEl && (pairEl.dataset.sky === "2") !== sky2) {
+      if (sky2) pairEl.dataset.sky = "2";
+      else delete pairEl.dataset.sky;
+    }
+    lightNeon(signRef.current, x >= NEON_LIT);
     // Tell the glass nav which sky is behind it (globals.css picks its ink per theme).
     const root = document.documentElement;
     const visible = skyBehindNav(x);
     if (visible === null) delete root.dataset.pdSky;
     else if (root.dataset.pdSky !== String(visible)) root.dataset.pdSky = String(visible);
-  });
+  };
+  useMotionValueEvent(p, "change", flip);
+  useLayoutEffect(() => flip(p.get()), []); // eslint-disable-line react-hooks/exhaustive-deps -- once, after mount
   useEffect(() => () => void delete document.documentElement.dataset.pdSky, []);
   const b4 = useTransform(p, [...T.neon.in], [0, 1]);
   const para = useTransform(p, [...T.para.in], [0, 1]);
@@ -675,7 +718,6 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
                 camera (the track's y) follows the arrow from the first to the second. */}
             <motion.h2
               ref={pairRef}
-              data-sky={sky}
               style={{ y: trackY, opacity: pair, pointerEvents: h2, maskImage: pairMask, WebkitMaskImage: pairMask }}
               className={`${SIZE} absolute inset-x-0 top-1/2 flex flex-col gap-[120svh]`}
             >
@@ -686,11 +728,11 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
               <span data-half className={`${DISPLAY} pd-b3 block pl-[0.9em]`}>
                 <LitWords p={p} segs={POCKET} range={T.pocket.words} circle={T.pocket.select} sound={sound} anchor="first" />
               </span>
-              <ArrowSvg path={arrow} draw={draw} sound={sound} />
+              <ArrowSvg path={arrow} draw={draw} fade={arrowFade} sound={sound} />
             </motion.h2>
 
             <motion.div style={{ opacity: b4, pointerEvents: h4, color: v("t4") }} className="col-start-1 row-start-1 flex flex-col gap-8 md:gap-10">
-              <NeonSign lit={lit}>
+              <NeonSign signRef={signRef}>
                 {letters.map((c, i) => (
                   <NeonLetter key={i} p={p} t={T.neon.letters[0] + i * lStep}>{c}</NeonLetter>
                 ))}
@@ -870,14 +912,14 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
     }
   });
 
-  const draw = useRatchet(useTransform(p, (x) => noteDrawAt(x, pathRef.current)));
+  const { draw, fade } = usePencilInk(useTransform(p, (x) => noteDrawAt(x, pathRef.current)));
 
   return (
     <section ref={ref} aria-labelledby="pencil-note" className="relative pb-[60svh] pt-[22svh] md:pb-[95svh]">
       <h2 id="pencil-note" className={`${DISPLAY} text-fg`}>
         <LitWords p={p} segs={NOTE} range={N.words} anchor="last" />
       </h2>
-      {path && <PencilStroke d={path.d} base={path.width} draw={draw} voice={sound} className="text-fg" />}
+      {path && <PencilStroke d={path.d} base={path.width} draw={draw} fade={fade} voice={sound} className="text-fg" />}
     </section>
   );
 }
