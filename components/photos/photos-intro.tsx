@@ -2,6 +2,7 @@
 
 import {
   motion,
+  useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
@@ -18,7 +19,6 @@ import { createIntroSound, type IntroSound } from "./intro-sound";
 // "layer 0–3" and "text 1–4". One typeface, one display size, nothing scales: the
 // motion is light, typing and selection. Every value is scrubbed, so it rewinds.
 
-const SELECT = "#0a6cdc"; // iOS-ish selection, both themes; white on it 5.01 (#0a84ff was only 3.65)
 const v = (name: string) => `var(--pd-${name})`;
 
 // ── Copy (edit freely) ──
@@ -76,90 +76,22 @@ const words = (segs: Seg[]) =>
 
 // ── Pieces ──
 
-// Live Text selection, grown one character at a time the way dragging the iPhone's
-// selection handle does: the block always ends on a glyph boundary (a continuous
-// clip-path wipe sliced letters in half mid-scroll). Each letter carries its own
-// background, so adjacent letters form one block with no measuring.
-const KNOB = "absolute size-[11px]";
-const BAR = "absolute inset-y-0 w-[3px]";
-
-function Handles({ start, end, startStyle, endStyle }: {
-  start: boolean; end: boolean; startStyle?: { opacity: MotionValue<number> }; endStyle?: { opacity: MotionValue<number> };
-}) {
-  return (
-    <>
-      {start && (
-        <motion.span aria-hidden style={{ ...startStyle, background: SELECT }} className={`${BAR} -left-[3px]`}>
-          <span className={`${KNOB} -left-[4px] -top-[9px]`} style={{ background: SELECT }} />
-        </motion.span>
-      )}
-      {end && (
-        <motion.span aria-hidden style={{ ...endStyle, background: SELECT }} className={`${BAR} -right-[3px]`}>
-          <span className={`${KNOB} -bottom-[9px] -left-[4px]`} style={{ background: SELECT }} />
-        </motion.span>
-      )}
-    </>
-  );
-}
-
-function SelectLetter({ p, t, next, until, first, last, children }: {
-  p: MotionValue<number>; t: number; next: number; until: number; first: boolean; last: boolean; children: string;
-}) {
-  // Selected from t until `until`: like iOS, only one selection exists at a time, so an
-  // earlier word deselects when the next one is selected.
-  const on = (v: number) => v >= t && v < until;
-  const background = useTransform(p, (v) => (on(v) ? SELECT : "rgba(0,0,0,0)"));
-  const color = useTransform(p, (v) => (on(v) ? "#ffffff" : "inherit"));
-  const startOpacity = useTransform(p, (v): number => (on(v) ? 1 : 0));
-  // The trailing handle rides the newest selected letter, and stays on the last one.
-  const endOpacity = useTransform(p, (v): number => (on(v) && (last || v < next) ? 1 : 0));
-  return (
-    <motion.span style={{ background, color }} className="relative">
-      {children}
-      <Handles start={first} end startStyle={{ opacity: startOpacity }} endStyle={{ opacity: endOpacity }} />
-    </motion.span>
-  );
-}
-
-/** Animated when `p`/`range` are given; otherwise drawn fully selected (reduced motion). */
-function Selection({ p, range, until = Infinity, children }: { p?: MotionValue<number>; range?: R; until?: number; children: string }) {
-  const chars = children.split("");
-  if (!p || !range) {
-    return (
-      <span className="relative text-white" style={{ background: SELECT }}>
-        {children}
-        <Handles start end />
-      </span>
-    );
-  }
-  const step = (range[1] - range[0]) / chars.length;
-  return (
-    <span>
-      {chars.map((c, i) => (
-        <SelectLetter key={i} p={p} t={range[0] + i * step} next={range[0] + (i + 1) * step} until={until} first={i === 0} last={i === chars.length - 1}>
-          {c}
-        </SelectLetter>
-      ))}
-    </span>
-  );
-}
-
 type Anchor = "from" | "to" | undefined;
 const anchorAttr = (a: Anchor) => (a === "from" ? { "data-arrow-from": "" } : a === "to" ? { "data-arrow-to": "" } : {});
 
-function LitWord({ p, range, color, select, selectRange, selectUntil, anchor, children }: {
-  p: MotionValue<number>; range: R; color?: string; select?: boolean; selectRange?: R; selectUntil?: number; anchor?: Anchor; children: string;
+function LitWord({ p, range, color, select, circle, sound, anchor, children }: {
+  p: MotionValue<number>; range: R; color?: string; select?: boolean; circle?: R; sound?: SoundRef; anchor?: Anchor; children: string;
 }) {
   const opacity = useTransform(p, [...range], [0.15, 1]);
   return (
     <motion.span {...anchorAttr(anchor)} style={{ opacity, color, textShadow: color ? glow(color) : undefined }}>
-      {select && selectRange ? <Selection p={p} range={selectRange} until={selectUntil}>{children}</Selection> : children}{" "}
+      {select && circle ? <PencilCircle p={p} range={circle} sound={sound}>{children}</PencilCircle> : children}{" "}
     </motion.span>
   );
 }
 
-function LitWords({ p, segs, range, selectRange, selectUntil, anchor }: {
-  p: MotionValue<number>; segs: Seg[]; range: R; selectRange?: R; selectUntil?: number; anchor?: "first" | "last";
+function LitWords({ p, segs, range, circle, sound, anchor }: {
+  p: MotionValue<number>; segs: Seg[]; range: R; circle?: R; sound?: SoundRef; anchor?: "first" | "last";
 }) {
   const list = words(segs);
   const step = (range[1] - range[0]) / list.length;
@@ -167,7 +99,7 @@ function LitWords({ p, segs, range, selectRange, selectUntil, anchor }: {
     <>
       {list.map(({ w, color, select }, i) => (
         <LitWord
-          key={i} p={p} range={[range[0] + i * step, range[0] + (i + 1) * step]} color={color} select={select} selectRange={selectRange} selectUntil={selectUntil}
+          key={i} p={p} range={[range[0] + i * step, range[0] + (i + 1) * step]} color={color} select={select} circle={circle} sound={sound}
           anchor={anchor === "last" && i === list.length - 1 ? "from" : anchor === "first" && i === 0 ? "to" : undefined}
         >
           {w}
@@ -386,6 +318,81 @@ function drawAt(x: number, g: ArrowPath | null) {
   return fb + (1 - fb) * clamp01((x - T.head[0]) / (T.head[1] - T.head[0]));
 }
 
+type SoundRef = RefObject<IntroSound | null>;
+
+/** The pencil scratches only while a stroke moves, as loud as the pen is fast. `scale` evens
+ *  out strokes of different lengths (a circle's whole 0→1 is far shorter than the arrow's). */
+function useScratch(draw: MotionValue<number>, sound?: SoundRef, scale = 1) {
+  const last = useRef({ v: 0, t: 0 });
+  useMotionValueEvent(draw, "change", (v) => {
+    const now = performance.now();
+    const prev = last.current;
+    last.current = { v, t: now };
+    if (prev.t && now > prev.t) sound?.current?.scratch((scale * Math.abs(v - prev.v) * 1000) / (now - prev.t));
+  });
+}
+
+// ── Pencil circles ──
+// "anyone" and "pocket." get a loose pencil loop drawn around them by scroll. Unlike the
+// arrow (one tuned seed), every page load draws a new loop: where it starts, which way it
+// goes, its tilt, wobble and overshoot all vary, so it never looks stamped.
+function handDrawnCircle(w: number, h: number, em: number, r: () => number) {
+  // A slightly squared loop (superellipse) hugs the word's box, so it clears the word's own
+  // corners without reaching into the neighbouring words the way a plain ellipse has to.
+  const rx = w / 2 + 0.1 * em;
+  const ry = h / 2 + 0.06 * em;
+  const sq = (c: number) => Math.sign(c) * Math.abs(c) ** 0.75;
+  const cx = w / 2 + (r() - 0.5) * 0.08 * em;
+  const cy = h / 2 + 0.03 * em + (r() - 0.5) * 0.06 * em;
+  const tilt = ((r() * 2 - 1) * 5 * Math.PI) / 180;
+  const dir = r() < 0.5 ? 1 : -1;
+  const a0 = ((-160 + r() * 40) * Math.PI) / 180; // starts near the top left, like most hands
+  const turns = 1.06 + r() * 0.12; // overshoots past the start instead of closing neatly
+  const n = 22;
+  const pts: Pt[] = [];
+  for (let k = 0; k <= n; k++) {
+    const t = k / n;
+    const a = a0 + dir * t * turns * 2 * Math.PI;
+    const s = 1 + (r() * 2 - 1) * 0.035 + t * 0.07; // drifts outward, so the overshoot doesn't retrace
+    const [x, y] = [sq(Math.cos(a)) * rx * s, sq(Math.sin(a)) * ry * s];
+    pts.push([cx + x * Math.cos(tilt) - y * Math.sin(tilt), cy + x * Math.sin(tilt) + y * Math.cos(tilt)]);
+  }
+  return smooth(pts);
+}
+
+/** A word circled in pencil: drawn by scroll over `range`, or fully drawn without `p` (reduced motion). */
+function PencilCircle({ p, range, sound, children }: { p?: MotionValue<number>; range?: R; sound?: SoundRef; children: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [path, setPath] = useState<{ d: string; width: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const seed = (Math.random() * 2 ** 31) | 0; // per load, client-only: the path never exists on the server
+    const measure = () => {
+      const em = parseFloat(getComputedStyle(el).fontSize);
+      setPath({ d: handDrawnCircle(el.offsetWidth, el.offsetHeight, em, rng(seed)), width: Math.max(2.5, 0.055 * em) });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const done = useMotionValue(1);
+  const draw = useTransform(p ?? done, (x) => (range ? clamp01((x - range[0]) / (range[1] - range[0])) : 1));
+  useScratch(draw, sound, 0.3);
+  const stroke = useStroke(draw);
+  return (
+    <span ref={ref} className="relative inline-block">
+      {children}
+      {path && (
+        <svg aria-hidden className="pd-arrow pointer-events-none absolute inset-0 size-full overflow-visible" fill="none" stroke="currentColor" strokeWidth={path.width} strokeLinecap="round" strokeLinejoin="round">
+          <motion.path data-circle d={path.d} style={stroke} />
+        </svg>
+      )}
+    </span>
+  );
+}
+
 // ── Scrubbed version ──
 
 function ScrollIntro() {
@@ -428,14 +435,7 @@ function ScrollIntro() {
     sound.current = createIntroSound();
     return () => sound.current?.dispose();
   }, []);
-  // The pencil scratches only while the stroke moves, as loud as the pen is fast.
-  const lastDraw = useRef({ v: 0, t: 0 });
-  useMotionValueEvent(draw, "change", (v) => {
-    const now = performance.now();
-    const prev = lastDraw.current;
-    lastDraw.current = { v, t: now };
-    if (prev.t && now > prev.t) sound.current?.scratch((Math.abs(v - prev.v) * 1000) / (now - prev.t));
-  });
+  useScratch(draw, sound);
   const [sky, setSky] = useState<1 | 2>(1);
   useMotionValueEvent(p, "change", (x) => {
     setSky(x >= T.sky ? 2 : 1);
@@ -485,11 +485,11 @@ function ScrollIntro() {
               className={`${SIZE} absolute inset-x-0 top-1/2 flex flex-col gap-[120svh]`}
             >
               <span data-half className={`${DISPLAY} pd-b2 block`}>
-                <LitWords p={p} segs={ANYONE} range={T.anyone.words} selectRange={T.anyone.select} selectUntil={T.pocket.select[0]} anchor="last" />
+                <LitWords p={p} segs={ANYONE} range={T.anyone.words} circle={T.anyone.select} sound={sound} anchor="last" />
               </span>
               {/* indented so the arrow can come in from the left and point at "since" */}
               <span data-half className={`${DISPLAY} pd-b3 block pl-[0.9em]`}>
-                <LitWords p={p} segs={POCKET} range={T.pocket.words} selectRange={T.pocket.select} anchor="first" />
+                <LitWords p={p} segs={POCKET} range={T.pocket.words} circle={T.pocket.select} sound={sound} anchor="first" />
               </span>
               <ArrowSvg path={arrow} body={body} />
             </motion.h2>
@@ -531,7 +531,7 @@ function StaticWords({ segs, anchor }: { segs: Seg[]; anchor?: "first" | "last" 
           {...anchorAttr(anchor === "last" && i === list.length - 1 ? "from" : anchor === "first" && i === 0 ? "to" : undefined)}
           style={{ color, textShadow: color ? glow(color) : undefined }}
         >
-          {select ? <Selection>{w}</Selection> : w}{" "}
+          {select ? <PencilCircle>{w}</PencilCircle> : w}{" "}
         </span>
       ))}
     </>
@@ -543,8 +543,7 @@ function StaticPair() {
   const arrow = useArrowPath(ref);
   return (
     <h2 ref={ref} data-sky={2} className={`${SIZE} relative flex flex-col gap-[3em]`}>
-      {/* Final state: only one selection at a time, so "anyone" is no longer selected. */}
-      <span data-half className={`${DISPLAY} pd-b2 block`}><StaticWords segs={ANYONE.map((g) => ({ ...g, select: false }))} anchor="last" /></span>
+      <span data-half className={`${DISPLAY} pd-b2 block`}><StaticWords segs={ANYONE} anchor="last" /></span>
       <span data-half className={`${DISPLAY} pd-b3 block pl-[0.9em]`}><StaticWords segs={POCKET} anchor="first" /></span>
       <ArrowSvg path={arrow} />
     </h2>
