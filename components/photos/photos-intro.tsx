@@ -55,7 +55,11 @@ const T = {
   travel: [0.32, 0.45] as R,
   head: [0.45, 0.47] as R, // the same stroke carries on into the arrowhead
   l2: [0.34, 0.44] as R,
-  sky: 0.38, // the first phrase and the arrow take the second sky's colour here
+  // The first phrase and the arrow take the second sky's colour here. 0.395 is where, in light mode, the white and the
+  // dark ink have equal contrast on the blue→gold blend behind the arrow (about 4.3:1 each). At 0.38 the arrow turned
+  // dark on a muddy blue (2.96:1, below the 3:1 graphics minimum; owner: "it looks like it'll be ok white"). Dark mode's
+  // arrow is always white, and the first phrase is above the screen by then, so only light mode's arrow sees this.
+  sky: 0.395,
   pocket: { words: [0.475, 0.53] as R, select: [0.535, 0.575] as R },
   l3: [0.62, 0.68] as R,
   neon: { in: [0.65, 0.68] as R, letters: [0.68, 0.76] as R },
