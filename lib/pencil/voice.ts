@@ -22,8 +22,6 @@ export type PencilMove = {
   down: number;
   /** Signed curvature, 1/px. */
   curvature: number;
-  /** Implied pen pace 0..1 from the stroke model (slow in curves and at the ends). */
-  pace: number;
 };
 
 export type PencilVoice = {
@@ -87,7 +85,7 @@ export function createPencilVoice(): PencilVoice {
     move(m) {
       if (!live() || !(m.speed > 0)) return;
       const t = ctx.currentTime;
-      const tight = 1 - 1 / (1 + PENCIL.line.curvatureSlow * Math.abs(m.curvature)); // 0 straight … →1 tight
+      const tight = 1 - 1 / (1 + s.curvatureScale * Math.abs(m.curvature)); // 0 straight … →1 tight
       const level =
         (s.floor + (s.max - s.floor) * clamp(m.speed / s.fullSpeed, 0, 1)) * (1 + s.downWeight * m.down) * (1 - s.curvatureSoft * tight);
       param("pressure")?.setTargetAtTime(level, t, s.attack);

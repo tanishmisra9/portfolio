@@ -1,35 +1,13 @@
-// Every knob of the pencil engine in one place: how the graphite line responds to the stroke (lib/pencil/stroke.ts)
-// and how the synthesized scratch responds to the tip (lib/pencil/voice.ts + public/worklets/pencil.js).
+// Every knob of the pencil engine in one place: the stroke model the voice reads (lib/pencil/stroke.ts) and how the
+// synthesized scratch responds to the tip (lib/pencil/voice.ts + public/worklets/pencil.js). The line itself is a
+// plain SVG stroke (the graphite line was rolled back for performance; see components/photos/pencil-stroke.tsx).
 // No `@/` imports and no enums: scripts/check-pencil.mjs loads this on Node's native TS stripping.
 
 export const PENCIL = {
   line: {
-    /** px between resampled centerline points. */
+    /** px between resampled centerline points (the tip is read from these). */
     sampleStep: 2,
-    /** Width × (1 + this × down): heavier on downstrokes, lighter on upstrokes (down runs −1..1). */
-    downWeight: 0.18,
-    /** Width at the slowest implied pen speed: × (1 + slowThick). */
-    slowThick: 0.2,
-    /** Width at the fastest implied pen speed: × (1 − fastThin). */
-    fastThin: 0.16,
-    /** px. Implied speed = 1 / (1 + curvatureSlow × |curvature|): a hand slows into tight curves. */
-    curvatureSlow: 30,
-    /** Fraction of the stroke eased at each end: the pen lands and lifts slower. */
-    endSlow: 0.08,
-    /** px over which width ramps up from `taperMin` at the very start and down to it at the very end. */
-    taper: 8,
-    taperMin: 0.35,
-    /** ± fraction of low-frequency, seeded width wobble along the stroke, and its period in px. */
-    wobble: 0.06,
-    wobblePeriod: 90,
-    /** Width clamp, × the stroke's base width. */
-    min: 0.55,
-    max: 1.4,
-    /** Width levels the line is rendered at (one round-capped path each). More = smoother width changes. */
-    buckets: 8,
-    /** Graphite grain strength 0..1 (0 = a clean line). */
-    grain: 0.3,
-    /** Nothing shows until the drawn length reaches this × base width (a near-zero round cap paints a dot). */
+    /** Nothing shows until the drawn length reaches this × the stroke width (a near-zero round cap paints a dot). */
     minVisible: 2,
   },
   sound: {
@@ -81,6 +59,8 @@ export const PENCIL = {
     downWeight: 0.15,
     /** Level × (1 − this × tightness) through tight curves (tightness from curvature, 0..1). */
     curvatureSoft: 0.35,
+    /** px: tightness = 1 − 1 / (1 + this × |curvature|), from 0 on a straight run toward 1 in a tight loop. */
+    curvatureScale: 30,
     /** Octaves the band bank shifts: up on upstrokes (lighter, thinner), down on downstrokes (darker, fuller). */
     brightness: 0.35,
     /** Paper tooth: clicks per px of tip travel, their level relative to the bed, centre frequency and decay (s). */
@@ -102,9 +82,9 @@ export const PENCIL = {
     /** Transients: a tick where the pen turns sharply (arrowhead tips, tight loop turns), a touch where it lands. */
     tick: 0.5,
     touch: 0.35,
-    /** A "sharp turn" = heading change above `tickTurn` degrees within `tickSpan` × base width of travel. */
+    /** A "sharp turn" = heading change above `tickTurn` degrees within `tickSpan` px of travel. */
     tickTurn: 100,
-    tickSpan: 4,
+    tickSpan: 28,
   },
 };
 

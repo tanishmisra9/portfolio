@@ -430,7 +430,7 @@ function useArrowPath(pair: RefObject<HTMLElement | null>) {
 
 /** The intro arrow, drawn by the pencil engine (graphite line + voice). */
 function ArrowSvg({ path, draw, sound }: { path: ArrowPath | null; draw: MotionValue<number>; sound?: SoundRef }) {
-  return <PencilStroke d={path?.body ?? null} base={path?.width ?? 0} draw={draw} voice={sound} seed={11} className="pd-arrow" />;
+  return <PencilStroke d={path?.body ?? null} base={path?.width ?? 0} draw={draw} voice={sound} className="pd-arrow" />;
 }
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
@@ -510,7 +510,7 @@ function PencilCircle({ p, range, sound, children }: { p?: MotionValue<number>; 
   return (
     <span ref={ref} className="relative inline-block">
       {children}
-      {path && <PencilStroke d={path.d} base={path.width} draw={draw} voice={sound} seed={5} className="pd-arrow" />}
+      {path && <PencilStroke d={path.d} base={path.width} draw={draw} voice={sound} className="pd-arrow" />}
     </span>
   );
 }
@@ -832,7 +832,7 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
       <h2 id="pencil-note" className={`${DISPLAY} text-fg`}>
         <LitWords p={p} segs={NOTE} range={N.words} anchor="last" />
       </h2>
-      {path && <PencilStroke d={path.d} base={path.width} draw={draw} voice={sound} seed={23} className="text-fg" />}
+      {path && <PencilStroke d={path.d} base={path.width} draw={draw} voice={sound} className="text-fg" />}
     </section>
   );
 }

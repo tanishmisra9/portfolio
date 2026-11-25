@@ -1,27 +1,13 @@
 // The pencil stroke model: a drawn SVG path (the hand-drawn builders' `d`, unchanged) becomes a densely resampled
-// centerline that knows, at every point, where the tip is, which way it is heading, how tightly it is turning and how
-// fast a hand would be moving there. That drives both the graphite line's width (rendered by PencilStroke) and the
-// synthesized scratch (lib/pencil/voice.ts). Pure: no DOM, no `@/` imports (scripts/check-pencil.mjs runs it on Node).
-
+// centerline that knows, at every point, where the tip is, which way it is heading and how tightly it is turning, plus
+// where its sharp turns are. It voices the synthesized scratch (lib/pencil/voice.ts) from the real tip; the line itself
+// is a plain SVG path (PencilStroke). Pure: no DOM, no `@/` imports (scripts/check-pencil.mjs runs it on Node).
+// Built once per path; per frame only `tipAt` (a binary search) runs.
+//
 // No imports at all: Next's TS setup rejects `.ts` import extensions while Node's type stripping requires them, so the
-// config (lib/pencil/config.ts, PENCIL.line and the turn settings) is passed in by the caller.
+// config (lib/pencil/config.ts) is passed in by the caller.
 
 export type Pt = [number, number];
-export type LineConfig = {
-  sampleStep: number;
-  downWeight: number;
-  slowThick: number;
-  fastThin: number;
-  curvatureSlow: number;
-  endSlow: number;
-  taper: number;
-  taperMin: number;
-  wobble: number;
-  wobblePeriod: number;
-  min: number;
-  max: number;
-  buckets: number;
-};
 export type TurnConfig = { tickTurn: number; tickSpan: number };
 
 export type Tip = {
@@ -33,8 +19,6 @@ export type Tip = {
   down: number;
   /** Signed curvature (1/px). */
   curvature: number;
-  /** Implied pen speed 0..1 (slow in tight curves and at the ends). */
-  speed: number;
 };
 
 export type Stroke = {
@@ -42,14 +26,9 @@ export type Stroke = {
   pts: Pt[];
   /** Arc length at each point. */
   cum: number[];
-  width: number[];
   /** Arc lengths of sharp turns (for the voice's ticks). */
   turns: number[];
   tipAt(len: number): Tip;
-  /** The line drawn up to `len`, as round-capped paths grouped by width level. */
-  paths(len: number): { w: number; d: string }[];
-  /** The width levels (fixed per stroke), so a renderer can create one element per level up front. */
-  levels: number[];
 };
 
 // ── Path sampling (absolute M / L / C / Q, which is all the builders emit) ──
@@ -125,18 +104,13 @@ export function resample(poly: Pt[], step: number): Pt[] {
 
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
-const smoothstep = (t: number) => {
-  const c = clamp(t, 0, 1);
-  return c * c * (3 - 2 * c);
-};
 
 /**
- * Builds the stroke model from a path `d` and the stroke's base width (px). `seed` varies the width wobble.
- * `cfg` is PENCIL.line (or an override for a stroke that should draw differently); `turn` is PENCIL.sound's
- * tickTurn/tickSpan.
+ * Builds the stroke model from a path `d`, resampled every `step` px (PENCIL.line.sampleStep). `turn` is PENCIL.sound's
+ * tickTurn (degrees) and tickSpan (px of travel) for sharp-turn detection.
  */
-export function createStroke(d: string, base: number, seed: number, cfg: LineConfig, turn: TurnConfig): Stroke {
-  const pts = resample(samplePath(d), cfg.sampleStep);
+export function createStroke(d: string, step: number, turn: TurnConfig): Stroke {
+  const pts = resample(samplePath(d), step);
   const n = pts.length;
   const cum = [0];
   for (let k = 1; k < n; k++) cum.push(cum[k - 1] + dist(pts[k - 1], pts[k]));
@@ -154,26 +128,9 @@ export function createStroke(d: string, base: number, seed: number, cfg: LineCon
     return ds > 0 ? wrap(angle[j] - angle[i]) / ds : 0;
   });
   const down = angle.map((a) => Math.sin(a));
-  const ends = Math.max(1e-6, cfg.endSlow * length);
-  const speed = pts.map((_, k) => {
-    const s = 1 / (1 + cfg.curvatureSlow * Math.abs(curv[k]));
-    const ease = 0.35 + 0.65 * Math.min(smoothstep(cum[k] / ends), smoothstep((length - cum[k]) / ends));
-    return s * ease;
-  });
 
-  // Width: direction × implied speed × wobble × end taper, clamped.
-  const ph = [seed * 1.7, seed * 4.3];
-  const wobble = (s: number) =>
-    0.6 * Math.sin((2 * Math.PI * s) / cfg.wobblePeriod + ph[0]) + 0.4 * Math.sin((2 * Math.PI * s) / (cfg.wobblePeriod * 0.37) + ph[1]);
-  const width = pts.map((_, k) => {
-    const dir = 1 + cfg.downWeight * down[k];
-    const pace = 1 + cfg.slowThick - (cfg.slowThick + cfg.fastThin) * speed[k];
-    const taper = cfg.taper > 0 ? cfg.taperMin + (1 - cfg.taperMin) * Math.min(smoothstep(cum[k] / cfg.taper), smoothstep((length - cum[k]) / cfg.taper)) : 1;
-    return base * clamp(dir * pace * (1 + cfg.wobble * wobble(cum[k])) * taper, cfg.min * taper, cfg.max);
-  });
-
-  // Sharp turns: heading change above tickTurn degrees within tickSpan × base of travel; nearby hits merged.
-  const span = turn.tickSpan * base;
+  // Sharp turns: heading change above tickTurn degrees within tickSpan px of travel; nearby hits merged.
+  const span = turn.tickSpan;
   const limit = (turn.tickTurn * Math.PI) / 180;
   const turns: number[] = [];
   for (let k = 0, j = 0; k < n; k++) {
@@ -185,9 +142,6 @@ export function createStroke(d: string, base: number, seed: number, cfg: LineCon
       if (!turns.length || at - turns[turns.length - 1] > span * 2) turns.push(at);
     }
   }
-
-  const levels = Array.from({ length: cfg.buckets }, (_, b) => base * (cfg.min + ((cfg.max - cfg.min) * (b + 0.5)) / cfg.buckets));
-  const levelOf = (w: number) => clamp(Math.floor(((w / base - cfg.min) / (cfg.max - cfg.min)) * cfg.buckets), 0, cfg.buckets - 1);
 
   const indexAt = (len: number) => {
     let lo = 0;
@@ -210,9 +164,7 @@ export function createStroke(d: string, base: number, seed: number, cfg: LineCon
     length,
     pts,
     cum,
-    width,
     turns,
-    levels,
     tipAt(len) {
       const [k, t] = lerpAt(len);
       const j = Math.min(n - 1, k + 1);
@@ -223,28 +175,7 @@ export function createStroke(d: string, base: number, seed: number, cfg: LineCon
         angle: angle[k] + wrap(angle[j] - angle[k]) * t,
         down: mix(down[k], down[j]),
         curvature: mix(curv[k], curv[j]),
-        speed: mix(speed[k], speed[j]),
       };
-    },
-    paths(len) {
-      const out = levels.map((w) => ({ w, d: "" }));
-      if (n < 2 || len <= 0) return out;
-      const [k, t] = lerpAt(len);
-      const last = Math.min(k, n - 2);
-      const f = (v: number) => v.toFixed(1);
-      // Each segment goes to its width level; consecutive segments on one level are chained into one subpath.
-      let prevLevel = -1;
-      for (let s = 0; s <= last; s++) {
-        const a = pts[s];
-        const partial = s === k && k < n - 1;
-        const b: Pt = partial ? [a[0] + (pts[s + 1][0] - a[0]) * t, a[1] + (pts[s + 1][1] - a[1]) * t] : pts[s + 1];
-        if (partial && t <= 0) break;
-        const lv = levelOf((width[s] + width[s + 1]) / 2);
-        out[lv].d += lv === prevLevel ? ` L${f(b[0])} ${f(b[1])}` : ` M${f(a[0])} ${f(a[1])} L${f(b[0])} ${f(b[1])}`;
-        prevLevel = lv;
-        if (partial) break;
-      }
-      return out;
     },
   };
 }

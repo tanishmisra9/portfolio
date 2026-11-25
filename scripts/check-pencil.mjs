@@ -1,10 +1,10 @@
-// Checks for the pencil engine's stroke model (lib/pencil/stroke.ts): the geometry the line and the sound read.
+// Checks for the pencil engine's stroke model (lib/pencil/stroke.ts): the tip geometry the sound reads.
 // Runs on Node's native TS stripping (22.18+): `npm run check:pencil`.
 import assert from "node:assert/strict";
 import { PENCIL } from "../lib/pencil/config.ts";
 import { createStroke, resample, samplePath } from "../lib/pencil/stroke.ts";
 
-const make = (d, base = 7) => createStroke(d, base, 1, PENCIL.line, PENCIL.sound);
+const make = (d) => createStroke(d, PENCIL.line.sampleStep, PENCIL.sound);
 const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg}: ${a} vs ${b} (±${tol})`);
 
 // Path sampling follows the real curve: a cubic's sampled polyline ends at its end point and is longer than its chord.
@@ -43,32 +43,13 @@ const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg}: ${a}
   near(make("M 0 200 L 0 0").tipAt(100).down, -1, 1e-6, "upstroke");
 }
 
-// Width: always within [min, max] × base, and heavier on a downstroke than an upstroke at equal speed.
+// The tip: starts at the path's start, ends at its end, and moves along the path in between (what the voice pans by).
 {
-  const base = 7;
-  for (const d of ["M 0 0 L 0 300", "M 0 300 L 0 0", "M 0 0 C 0 200, 200 200, 200 0 Q 260 -80, 120 -40"]) {
-    const s = make(d, base);
-    for (const w of s.width) assert.ok(w >= PENCIL.line.min * base * PENCIL.line.taperMin - 1e-9 && w <= PENCIL.line.max * base + 1e-9, `width ${w} out of range`);
-  }
-  const down = make("M 0 0 L 0 300", base);
-  const up = make("M 0 300 L 0 0", base);
-  const at = (s) => s.width[Math.floor(s.width.length / 2)];
-  assert.ok(at(down) > at(up), `downstroke ${at(down)} should be heavier than upstroke ${at(up)}`);
-}
-
-// Drawing: paths(len) grows monotonically with len and is empty at 0; the full draw covers every segment.
-{
-  const s = make("M 0 0 C 0 200, 200 200, 200 0");
-  const segs = (len) => s.paths(len).reduce((n, p) => n + (p.d.match(/L/g) ?? []).length, 0);
-  assert.equal(segs(0), 0);
-  let prev = 0;
-  for (let k = 1; k <= 20; k++) {
-    const c = segs((s.length * k) / 20);
-    assert.ok(c >= prev, `segments shrank at ${k}/20`);
-    prev = c;
-  }
-  assert.equal(prev, s.pts.length - 1, "full draw covers every segment");
-  assert.equal(s.paths(s.length).length, PENCIL.line.buckets);
+  const s = make("M 10 20 L 210 20");
+  near(s.tipAt(0).x, 10, 1e-9, "tip at start x");
+  near(s.tipAt(s.length).x, 210, 1e-9, "tip at end x");
+  near(s.tipAt(s.length / 2).x, 110, 1e-9, "tip halfway x");
+  near(s.tipAt(s.length * 2).x, 210, 1e-9, "tip clamps past the end");
 }
 
 // Sharp turns: an arrowhead-style reversal (down, then straight back up) is found; a gentle arc has none.
