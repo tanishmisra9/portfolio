@@ -72,10 +72,11 @@ const BODY = "max-w-[34ch] text-xl/[1.55] font-[300] md:max-w-[54ch] md:text-[1.
 const glow = (c: string) =>
   `0 0 0.35em color-mix(in srgb, ${c} var(--pd-glow), transparent), 0 0 1.2em color-mix(in srgb, ${c} calc(var(--pd-glow) / 2), transparent)`;
 // The "Mobile photography." sign: a hotter core, a fuller halo and a wide bloom (it breathes once lit, see NeonSign).
-// Still 0 in daylight, where --pd-glow is 0.
+// Strength is the theme's --pd-glow; the wide bloom also scales by --pd-bloom, which is 0 in daylight: on a white page
+// it read as a dull grey-peach smudge around the heading, and a sign in sunshine only glows close to the tube.
 const NEON_G = "var(--pd-glow)";
 const neonGlow = (c: string) =>
-  `0 0 0.2em color-mix(in srgb, ${c} calc(${NEON_G} * 1.3), transparent), 0 0 0.8em color-mix(in srgb, ${c} calc(${NEON_G}), transparent), 0 0 2.2em color-mix(in srgb, ${c} calc(${NEON_G} * 0.6), transparent)`;
+  `0 0 0.2em color-mix(in srgb, ${c} calc(${NEON_G} * 1.3), transparent), 0 0 0.8em color-mix(in srgb, ${c} calc(${NEON_G}), transparent), 0 0 2.2em color-mix(in srgb, ${c} calc(${NEON_G} * 0.6 * var(--pd-bloom, 1)), transparent)`;
 
 /**
  * "Mobile photography." as a lit sign. While its letters switch on, the heading carries the glow itself. Once fully
@@ -795,7 +796,7 @@ function StaticIntro() {
       <Band bg={v("l2")}><StaticPair /></Band>
       <Band bg={v("l3")} color={v("t4")}>
         <div className="flex flex-col gap-8 md:gap-10">
-          <h2 className={DISPLAY} style={{ textShadow: neonGlow(v("sodium")) }}>{NEON}</h2>
+          <h2 className={`${DISPLAY} pd-neon`} style={{ textShadow: neonGlow(v("sodium")) }}>{NEON}</h2>
           <p className={BODY}><StaticWords segs={PARAGRAPH} /></p>
         </div>
       </Band>

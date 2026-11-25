@@ -167,7 +167,12 @@ body {
   --pd-rain: #1d5fa6;
   --pd-sodium: #b45309;
   --pd-gold: #a16207;
-  --pd-glow: 0%; /* no glow in daylight */
+  /* Daylight neon: a lit tube in sunshine shows its coloured glass and a tight halo, not the night bloom. The sign's
+     letters take the sodium ink (5:1 on the daylight page), so the stutter reads as a tube switching on, and a small
+     glow gives the lit sign something to breathe. Was 0% with the page's own ink: the owner "can barely tell". */
+  --pd-neon-ink: var(--pd-sodium);
+  --pd-glow: 30%;
+  --pd-bloom: 0; /* no wide bloom in daylight (photos-intro.tsx neonGlow) */
   --pd-sunset: 0;
   --pd-sunrise: 1;
 }
@@ -184,6 +189,7 @@ body {
   --pd-rain: #b9dcff;
   --pd-sodium: #ffb347;
   --pd-gold: #f5c04a;
+  --pd-neon-ink: var(--pd-t4); /* at night the tube's light is the cream ink; the glow carries the colour */
   --pd-glow: 66%;
   --pd-sunset: 1;
   --pd-sunrise: 0;
@@ -254,10 +260,15 @@ html.dark[data-pd-sky="1"] [data-site-header] {
 }
 
 /* Once "Mobile photography." has fully switched on, the sign stays alive: its glow breathes 100% → 55% → 100% (light
-   only, nothing moves). In daylight --pd-glow is 0, so there is nothing to breathe, by design.
+   only, nothing moves). In daylight the glow is small (--pd-glow 30%) and the letters carry the sodium ink, so the
+   breath is a gentle pulse of the halo around a coloured tube.
    The glow lives on its own layer (NeonSign in photos-intro.tsx: a shadows-only copy of the text), hidden until the
    sign is fully lit, then breathing by opacity alone: compositor-only, one rasterisation, no per-frame repaint of the
    blurs. Paused while the sign is off screen. */
+.photos-day .pd-neon {
+  color: var(--pd-neon-ink);
+}
+
 .photos-day .pd-neon-glow {
   opacity: 0;
 }
