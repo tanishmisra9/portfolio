@@ -260,6 +260,33 @@ html.dark[data-pd-sky="1"] [data-site-header] {
   --hover-outline: rgba(0, 0, 0, 0.32);
 }
 
+/* ── Nav tint (components/site-header.tsx): no backdrop blur ──
+   The blur was the biggest per-frame scroll cost on every page (headed Chromium, scripts/perf/nav-blur.mjs: graphics
+   pipeline +28%, frame drawing 8×; the radius doesn't matter, the filter's existence does). The nav is instead an
+   opaque tint of what the frosted glass averaged to: the page background, or over the /photos sky that sky's
+   colour at the top of the stage (per theme and html[data-pd-sky]); the usual --surface sits on top as before.
+   `--nav-tint` is set on <html> so its var() resolves to the page's own background, not the nav's re-pointed ink
+   tokens. The sky colour glides (0.3s) when the sky behind the nav changes. Opaque on purpose: at 94% the content
+   under the nav showed through as a faint, sharp ghost (big headings read as a rendering mistake, not glass). */
+html {
+  --nav-tint: rgb(var(--bg-rgb) / 1);
+}
+html:not(.dark)[data-pd-sky="0"] { --nav-tint: rgb(11 16 32 / 1); }   /* pre-dawn  --pd-l0 */
+html:not(.dark)[data-pd-sky="1"] { --nav-tint: rgb(20 29 63 / 1); }   /* dawn, top of --pd-l1 */
+html:not(.dark)[data-pd-sky="2"] { --nav-tint: rgb(242 182 90 / 1); } /* golden morning --pd-l2 */
+html.dark[data-pd-sky="1"] { --nav-tint: rgb(232 163 61 / 1); }       /* golden hour --pd-l1 */
+html.dark[data-pd-sky="2"] { --nav-tint: rgb(36 54 110 / 1); }        /* blue hour, top of --pd-l2 */
+
+.nav-tint {
+  background: linear-gradient(var(--surface), var(--surface)), var(--nav-tint);
+  transition: background-color 0.3s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-tint {
+    transition: none;
+  }
+}
+
 /* The two halves of "I think anyone… / since the best camera…" and the arrow linking
    them share one heading while the sky changes under them: the first half and the
    arrow take the second sky's text colour when the stage flips data-sky to 2. */

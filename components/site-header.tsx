@@ -230,8 +230,10 @@ export function SiteHeader() {
       >
         {/* Glass lives on an inner layer so the sticky <header> has no background-color: Safari 26 tints its
             toolbar from a top sticky/fixed element's background-color, and this one fades on theme switch.
-            With none, Safari uses <body>, which snaps (app/layout.tsx), and Safari animates its tint itself. */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-surface backdrop-blur-md" />
+            With none, Safari uses <body>, which snaps (app/layout.tsx), and Safari animates its tint itself.
+            No backdrop blur: a tint of what frosted glass would average to (globals.css, "Nav tint"). The blur was the
+            biggest per-frame scroll cost on every page. */}
+        <div aria-hidden className="nav-tint pointer-events-none absolute inset-0 -z-10" />
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 pl-6 pr-3 sm:pr-4">
           <Link
             href={logoHref}
