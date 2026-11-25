@@ -167,7 +167,6 @@ body {
   --pd-rain: #1d5fa6;
   --pd-sodium: #b45309;
   --pd-gold: #a16207;
-  --pd-tower: rgb(var(--fg-rgb));
   --pd-glow: 0%; /* no glow in daylight */
   --pd-sunset: 0;
   --pd-sunrise: 1;
@@ -185,7 +184,6 @@ body {
   --pd-rain: #b9dcff;
   --pd-sodium: #ffb347;
   --pd-gold: #f5c04a;
-  --pd-tower: #ffffff;
   --pd-glow: 66%;
   --pd-sunset: 1;
   --pd-sunrise: 0;
