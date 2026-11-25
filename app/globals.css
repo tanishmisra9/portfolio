@@ -253,6 +253,32 @@ html.dark[data-pd-sky="1"] [data-site-header] {
   }
 }
 
+/* Once "Mobile photography." has fully switched on, the sign stays alive: its glow
+   breathes 100% → 85% → 100% (light only, nothing moves). The multiplier is a registered
+   property so it interpolates; glow() in photos-intro.tsx multiplies --pd-glow by it. In
+   daylight --pd-glow is 0, so there is nothing to breathe, by design. */
+@property --pd-breathe {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@keyframes pd-breathe {
+  50% {
+    --pd-breathe: 0.85;
+  }
+}
+
+.photos-day .pd-neon[data-lit] {
+  animation: pd-breathe 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photos-day .pd-neon[data-lit] {
+    animation: none;
+  }
+}
+
 /* Copying from the intro selects in the same iOS blue as its Live Text highlight,
    and drops the night glow so selected text stays crisp. */
 .photos-day ::selection {

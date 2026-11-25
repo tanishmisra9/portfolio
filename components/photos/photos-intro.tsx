@@ -69,7 +69,7 @@ const DISPLAY = `font-display font-bold tracking-tight text-balance ${SIZE} pb-[
 const BODY = "max-w-[34ch] text-xl/[1.55] font-[300] md:max-w-[54ch] md:text-[1.75rem]/[1.5]";
 // Glow strength is a theme variable: lit signs glow at night, not in daylight.
 const glow = (c: string) =>
-  `0 0 0.35em color-mix(in srgb, ${c} var(--pd-glow), transparent), 0 0 1.2em color-mix(in srgb, ${c} calc(var(--pd-glow) / 2), transparent)`;
+  `0 0 0.35em color-mix(in srgb, ${c} calc(var(--pd-glow) * var(--pd-breathe, 1)), transparent), 0 0 1.2em color-mix(in srgb, ${c} calc(var(--pd-glow) * var(--pd-breathe, 1) / 2), transparent)`;
 
 const words = (segs: Seg[]) =>
   segs.flatMap(({ t, color, select }) => t.split(" ").map((w) => ({ w, color, select })));
@@ -110,8 +110,12 @@ function LitWords({ p, segs, range, circle, sound, anchor }: {
 }
 
 /** A neon tube switching on: off → on → stutter → on. */
+const FLICKER = 0.0025; // one step of a letter's off → on → stutter → on
+// The last letter's stutter has finished: from here the sign is lit and its glow breathes.
+const NEON_LIT = T.neon.letters[1] + 3 * FLICKER;
+
 function NeonLetter({ p, t, children }: { p: MotionValue<number>; t: number; children: string }) {
-  const d = 0.0025;
+  const d = FLICKER;
   const opacity = useTransform(p, [t, t + d, t + 2 * d, t + 3 * d], [0.08, 1, 0.35, 1]);
   return <motion.span style={{ opacity }}>{children}</motion.span>;
 }
@@ -437,8 +441,10 @@ function ScrollIntro() {
   }, []);
   useScratch(draw, sound);
   const [sky, setSky] = useState<1 | 2>(1);
+  const [lit, setLit] = useState(false);
   useMotionValueEvent(p, "change", (x) => {
     setSky(x >= T.sky ? 2 : 1);
+    setLit(x >= NEON_LIT);
     // Tell the glass nav which sky is behind it (globals.css picks its ink per theme).
     const root = document.documentElement;
     const visible = skyBehindNav(x);
@@ -497,7 +503,7 @@ function ScrollIntro() {
             </motion.h2>
 
             <motion.div style={{ opacity: b4, pointerEvents: h4, color: v("t4") }} className="col-start-1 row-start-1 flex flex-col gap-8 md:gap-10">
-              <h2 aria-label={NEON} className={DISPLAY} style={{ textShadow: glow(v("sodium")) }}>
+              <h2 aria-label={NEON} data-lit={lit || undefined} className={`${DISPLAY} pd-neon`} style={{ textShadow: glow(v("sodium")) }}>
                 {letters.map((c, i) => (
                   <NeonLetter key={i} p={p} t={T.neon.letters[0] + i * lStep}>{c}</NeonLetter>
                 ))}
