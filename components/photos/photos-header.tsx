@@ -6,11 +6,10 @@ import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 
 const SHUTTER_DELAY_MS = 330;
 
-/** Shared text of the viewfinder HUD (REC, exposure, counter): the site's Poppins, dim, overriding the h1's display styles. */
+/** Shared text of the viewfinder HUD (exposure, counter): the site's Poppins, dim, overriding the h1's display styles. */
 const HUD_TEXT =
-  "pointer-events-none absolute flex items-baseline whitespace-nowrap font-sans text-base font-normal normal-case leading-[1.4] tracking-normal text-dim tabular-nums md:text-lg";
-/** Top-left / bottom-left / bottom-right of the brackets, which sit at var(--vf-inset) outside the button. */
-const ABOVE = "bottom-[calc(100%-var(--vf-inset,-0.6rem)+0.6rem)]";
+  "pointer-events-none absolute flex items-baseline whitespace-nowrap font-sans text-sm font-normal normal-case leading-[1.4] tracking-normal text-dim tabular-nums";
+/** Under the brackets, which sit at var(--vf-inset) outside the button. */
 const BELOW = "top-[calc(100%-var(--vf-inset,-0.6rem)+0.6rem)]";
 
 /** Exposure the readout settles on after each shot (it shuffles through these while "metering"). */
@@ -107,12 +106,8 @@ export function PhotosHeader() {
           >
             Take a photo
           </span>
-          {/* Camera HUD: REC top-left, exposure bottom-left, shot count bottom-right, focus point in the middle (globals.css). */}
+          {/* Camera HUD: exposure bottom-left, shot count bottom-right, focus point in the middle (globals.css). */}
           <span aria-hidden className="af-point" />
-          <span aria-hidden className={`${HUD_TEXT} ${ABOVE} left-[var(--vf-inset,-0.6rem)] items-center gap-[0.4em]`}>
-            <span className="rec-dot size-[0.5em] rounded-full bg-[var(--rec)]" />
-            REC
-          </span>
           <span aria-hidden className={`${HUD_TEXT} ${BELOW} left-[var(--vf-inset,-0.6rem)] gap-[0.8em]`}>
             <span>{SHUTTERS[exposure[0]]}</span>
             <span>{APERTURES[exposure[1]]}</span>

@@ -368,23 +368,10 @@ html.dark[data-pd-sky="1"] [data-site-header] {
   transform: scale(0.94);
 }
 
-/* ── Title HUD (photos-header.tsx): REC dot, focus point, rule-of-thirds grid ──
-   Knobs: --rec / --af-lock colours, the keyframe timings below. */
+/* ── Title HUD (photos-header.tsx): focus point, rule-of-thirds grid ──
+   Knobs: the --af-lock colour, the grid opacity, the keyframe timings below. */
 .viewfinder-title {
-  --rec: #ff3b30;
   --af-lock: #34c759;
-}
-
-/* Camcorder REC: hard on/off blink; solid while the shutter fires. */
-.rec-dot {
-  animation: rec-blink 1s step-end infinite;
-}
-.viewfinder-title[data-shot="on"] .rec-dot {
-  animation: none;
-}
-@keyframes rec-blink {
-  0% { opacity: 1; }
-  60% { opacity: 0.15; }
 }
 
 /* Rule-of-thirds grid inside the brackets, on hover/focus only (hidden while the shutter fires). */
@@ -404,11 +391,11 @@ html.dark[data-pd-sky="1"] [data-site-header] {
   transition: opacity 0.25s ease;
 }
 .viewfinder-title:focus-visible::before {
-  opacity: 0.14;
+  opacity: 0.08;
 }
 @media (hover: hover) {
   .viewfinder-title:hover::before {
-    opacity: 0.14;
+    opacity: 0.08;
   }
 }
 .viewfinder-title[data-shot="on"]::before {
@@ -421,9 +408,9 @@ html.dark[data-pd-sky="1"] [data-site-header] {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 0.45em;
-  height: 0.45em;
-  margin: -0.225em 0 0 -0.225em; /* centred without transform: the animation owns transform */
+  width: 0.3em;
+  height: 0.3em;
+  margin: -0.15em 0 0 -0.15em; /* centred without transform: the animation owns transform */
   pointer-events: none;
   color: rgb(var(--fg-rgb) / 0.7);
   --l: 28%;
@@ -471,7 +458,6 @@ html.dark[data-pd-sky="1"] [data-site-header] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rec-dot,
   .af-point,
   .viewfinder-title[data-shot="on"] .af-point {
     animation: none;
