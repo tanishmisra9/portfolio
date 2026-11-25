@@ -41,6 +41,8 @@ export function createPencilVoice(): PencilVoice {
   if (!AC) return NOOP;
   const ctx = new AC();
   if (!ctx.audioWorklet) {
+    // AudioWorklet exists only in a secure context: a phone on the LAN dev server (http://192.168…) gets no pencil sound.
+    console.warn(`[pencil] no AudioWorklet${window.isSecureContext ? "" : " (insecure context: needs https or localhost)"}; the pencil is silent.`);
     void ctx.close().catch(() => {});
     return NOOP;
   }
