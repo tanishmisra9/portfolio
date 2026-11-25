@@ -442,6 +442,19 @@ const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
 /** One pen stroke drawn by scroll; hidden until it starts (a round cap at length 0 still paints a dot). */
+/**
+ * Pencil doesn't un-draw (owner): a stroke only ever grows with scroll, and scrolling back up leaves what's been drawn.
+ * The scratch is fed from this too, so it only sounds while new pencil goes down. Everything else (words, sky, camera)
+ * stays scrubbed.
+ */
+function useRatchet(src: MotionValue<number>) {
+  const out = useMotionValue(src.get());
+  useMotionValueEvent(src, "change", (v) => {
+    if (v > out.get()) out.set(v);
+  });
+  return out;
+}
+
 function useStroke(length: MotionValue<number>): Stroke {
   return { pathLength: length, opacity: useTransform(length, (x): number => (x > 0.001 ? 1 : 0)) };
 }
@@ -517,7 +530,7 @@ function PencilCircle({ p, range, sound, children }: { p?: MotionValue<number>; 
     return () => ro.disconnect();
   }, []);
   const done = useMotionValue(1);
-  const draw = useTransform(p ?? done, (x) => (range ? clamp01((x - range[0]) / (range[1] - range[0])) : 1));
+  const draw = useRatchet(useTransform(p ?? done, (x) => (range ? clamp01((x - range[0]) / (range[1] - range[0])) : 1)));
   useScratch(draw, sound, 0.3);
   const stroke = useStroke(draw);
   return (
@@ -597,7 +610,7 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
     return -(g.halves[0] + (g.halves[1] - g.halves[0]) * clamp01((y - y0) / (y1 - y0 || 1)));
   });
   // The pen: the curl in place, then the fall at the camera's pace, so the tip stays on screen.
-  const draw = useTransform(p, (x) => drawAt(x, arrowRef.current));
+  const draw = useRatchet(useTransform(p, (x) => drawAt(x, arrowRef.current)));
   const body = useStroke(draw);
   useScratch(draw, sound);
   const [sky, setSky] = useState<1 | 2>(1);
@@ -816,7 +829,9 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
     // The middle of the page (the cover's centre), at the owner's request: the line sweeps from the end of the heading
     // across the tall gap to centre stage. (In the first, short gap, pulling even an em sideways made a cramped hook.)
     const bx = (cover.left + cover.right) / 2 - o.left;
-    const B: Pt = [bx, cover.top - o.top - 0.12 * em];
+    // Clear air above the cover (owner: "it overlaps with the collection"). 0.12em measured 12px at the line's centre,
+    // but half the stroke width and the tile's hover/focus frame (-inset-3, 12px above the cover) ate all of it.
+    const B: Pt = [bx, cover.top - o.top - Math.max(0.5 * em, 24)];
     setPath({ ...handDrawnPointer(A, B, em, el.clientWidth), width: Math.max(3.5, 0.075 * em) });
   }, []);
   useLayoutEffect(() => {
@@ -841,7 +856,7 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
     }
   });
 
-  const draw = useTransform(p, (x) => noteDrawAt(x, pathRef.current));
+  const draw = useRatchet(useTransform(p, (x) => noteDrawAt(x, pathRef.current)));
   useScratch(draw, sound, 0.6);
   // Hidden until the line is two stroke-widths long: a round cap at a near-zero length paints a dot.
   const stroke = {
