@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { RotateCcw } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
+import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { createF1Sound, type F1Sound } from "@/components/f1/f1-sound";
 import {
   F1_CAR_EMERGE,
@@ -625,14 +626,17 @@ function F1IntroRun({ onReplay, refocus }: { onReplay: (byKeyboard: boolean) => 
             </div>
           </div>
           <canvas ref={canvasRef} aria-hidden className="absolute inset-0 h-full w-full" />
-          <button
-            type="button"
-            onClick={skip}
-            onMouseDown={(e) => e.preventDefault()}
-            className="absolute bottom-6 right-6 font-sans text-sm font-normal uppercase tracking-wide text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
-          >
-            Skip
-          </button>
+          {/* Positioned by the wrapper: HOVER_FILL_LINK sets `relative`, which would fight `absolute` on the button itself. */}
+          <div className="absolute bottom-6 right-6">
+            <button
+              type="button"
+              onClick={skip}
+              onMouseDown={(e) => e.preventDefault()}
+              className={`${HOVER_FILL_LINK} inline-flex items-center justify-center border border-border-strong px-5 py-2.5 font-sans text-sm font-normal uppercase tracking-wide text-muted`}
+            >
+              <HoverFill>Skip</HoverFill>
+            </button>
+          </div>
         </>
       )}
     </div>

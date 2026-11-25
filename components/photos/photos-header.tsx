@@ -50,9 +50,16 @@ export function PhotosHeader() {
           onClick={handleClick}
           aria-label="tanishtakespics. Take a photo"
           data-shot={flashing ? "on" : "off"}
-          className="viewfinder viewfinder-title relative cursor-pointer px-[0.35em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 focus-visible:ring-offset-8 focus-visible:ring-offset-bg"
+          className="viewfinder viewfinder-title group/shot relative cursor-pointer px-[0.35em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 focus-visible:ring-offset-8 focus-visible:ring-offset-bg"
         >
           tanishtakespics
+          {/* Names the action on hover/focus (the aria-label already says it for screen readers). Hidden while the shutter fires. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-full mt-6 -translate-x-1/2 translate-y-1 whitespace-nowrap font-sans text-sm font-normal uppercase leading-none tracking-wide text-fg opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover/shot:translate-y-0 group-hover/shot:opacity-100 group-focus-visible/shot:translate-y-0 group-focus-visible/shot:opacity-100 group-data-[shot=on]/shot:opacity-0 motion-reduce:transition-none"
+          >
+            Take a photo
+          </span>
         </button>
       </h1>
     </div>

@@ -303,22 +303,24 @@ html.dark[data-pd-sky="1"] [data-site-header] {
 /* Title brackets (the photos hero): longer, thicker and brighter at rest than the base corners, which the collection tiles also use. */
 .viewfinder-title {
   --vf-len: 30px;
+  --vf-weight: 3px; /* the phone block below overrides both (shorter, thinner) */
 }
 
 .viewfinder-title::after {
-  --vf-w: 3px;
   --vf-opacity: 0.75;
 }
 
 /* Title: brighten on hover/focus, snap inward like an AF lock on each shot. */
 .viewfinder-title:focus-visible::after {
   --vf-opacity: 1;
+  transform: scale(0.99);
 }
 
 /* Hover only where a pointer can hover: iOS keeps a tapped element in :hover until you tap elsewhere. */
 @media (hover: hover) {
   .viewfinder-title:hover::after {
     --vf-opacity: 1;
+    transform: scale(0.99); /* barely a nudge: the big inward snap (scale 0.94) stays reserved for the click */
   }
 }
 
