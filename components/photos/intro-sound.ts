@@ -10,8 +10,9 @@ const UNLOCK_EVENTS = ["pointerdown", "keydown", "touchend"] as const;
 // ── Tuning ──
 // Any pen movement is clearly audible (the floor); speed only adds loudness on top. Gain that
 // was purely proportional to speed left slow scrolls silent and a single nudge inaudible.
-const SCRATCH_FLOOR = 0.22;
-const SCRATCH_MAX = 0.6;
+// Halved (−6 dB) after the sample was normalised to −1 dB: the owner found the full range "a bit too loud".
+const SCRATCH_FLOOR = 0.11;
+const SCRATCH_MAX = 0.3;
 const SCRATCH_FULL_SPEED = 2; // stroke fraction / second at which it reaches SCRATCH_MAX
 const SCRATCH_ATTACK = 0.012; // s time constant: the pen bites almost at once
 const SCRATCH_DECAY = 0.06; // s time constant of the fade once you stop
