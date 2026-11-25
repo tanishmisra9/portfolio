@@ -8,7 +8,7 @@ const SHUTTER_DELAY_MS = 330;
 
 /** Shared text of the viewfinder HUD (exposure, counter): the site's Poppins, dim, overriding the h1's display styles. */
 const HUD_TEXT =
-  "pointer-events-none absolute flex items-baseline whitespace-nowrap font-sans text-sm font-normal normal-case leading-[1.4] tracking-normal text-dim tabular-nums";
+  "pointer-events-none absolute flex items-baseline whitespace-nowrap font-sans font-medium normal-case leading-[1.4] tracking-normal text-fg/85 tabular-nums";
 /** Under the brackets, which sit at var(--vf-inset) outside the button. */
 const BELOW = "top-[calc(100%-var(--vf-inset,-0.6rem)+0.6rem)]";
 
@@ -108,7 +108,7 @@ export function PhotosHeader() {
           </span>
           {/* Camera HUD: exposure bottom-left, shot count bottom-right, focus point in the middle (globals.css). */}
           <span aria-hidden className="af-point" />
-          <span aria-hidden className={`${HUD_TEXT} ${BELOW} left-[var(--vf-inset,-0.6rem)] gap-[0.8em]`}>
+          <span aria-hidden className={`${HUD_TEXT} ${BELOW} left-[var(--vf-inset,-0.6rem)] gap-[0.8em] text-xs`}>
             <span>{SHUTTERS[exposure[0]]}</span>
             <span>{APERTURES[exposure[1]]}</span>
             <span className="max-sm:hidden">ISO {ISOS[exposure[2]]}</span>
@@ -134,7 +134,7 @@ function ExposureCounter({ count }: { count: number }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className={`${HUD_TEXT} ${BELOW} right-[var(--vf-inset,-0.6rem)]`}
+      className={`${HUD_TEXT} ${BELOW} right-[var(--vf-inset,-0.6rem)] text-sm`}
     >
       <span className="mr-[0.3em]">No.</span>
       {chars
