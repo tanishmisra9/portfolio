@@ -253,28 +253,33 @@ html.dark[data-pd-sky="1"] [data-site-header] {
   }
 }
 
-/* Once "Mobile photography." has fully switched on, the sign stays alive: its glow
-   breathes 100% → 55% → 100% (light only, nothing moves). The multiplier is a registered
-   property so it interpolates; glow() in photos-intro.tsx multiplies --pd-glow by it. In
-   daylight --pd-glow is 0, so there is nothing to breathe, by design. */
-@property --pd-breathe {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1;
+/* Once "Mobile photography." has fully switched on, the sign stays alive: its glow breathes 100% → 55% → 100% (light
+   only, nothing moves). In daylight --pd-glow is 0, so there is nothing to breathe, by design.
+   The glow lives on its own layer (NeonSign in photos-intro.tsx: a shadows-only copy of the text), hidden until the
+   sign is fully lit, then breathing by opacity alone: compositor-only, one rasterisation, no per-frame repaint of the
+   blurs. Paused while the sign is off screen. */
+.photos-day .pd-neon-glow {
+  opacity: 0;
+}
+
+.photos-day .pd-neon-glow[data-lit] {
+  opacity: 1;
+  will-change: opacity;
+  animation: pd-breathe 5s ease-in-out infinite;
+}
+
+.photos-day .pd-neon-glow[data-paused] {
+  animation-play-state: paused;
 }
 
 @keyframes pd-breathe {
   50% {
-    --pd-breathe: 0.55;
+    opacity: 0.55;
   }
 }
 
-.photos-day .pd-neon[data-lit] {
-  animation: pd-breathe 5s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .photos-day .pd-neon[data-lit] {
+  .photos-day .pd-neon-glow[data-lit] {
     animation: none;
   }
 }

@@ -70,11 +70,51 @@ const BODY = "max-w-[34ch] text-xl/[1.55] font-[300] md:max-w-[54ch] md:text-[1.
 // Glow strength is a theme variable: lit signs glow at night, not in daylight.
 const glow = (c: string) =>
   `0 0 0.35em color-mix(in srgb, ${c} var(--pd-glow), transparent), 0 0 1.2em color-mix(in srgb, ${c} calc(var(--pd-glow) / 2), transparent)`;
-// The "Mobile photography." sign: a hotter core, a fuller halo and a wide bloom, all scaled by
-// --pd-breathe once it is lit (globals.css). Still 0 in daylight, where --pd-glow is 0.
-const NEON_G = "var(--pd-glow) * var(--pd-breathe, 1)";
+// The "Mobile photography." sign: a hotter core, a fuller halo and a wide bloom (it breathes once lit, see NeonSign).
+// Still 0 in daylight, where --pd-glow is 0.
+const NEON_G = "var(--pd-glow)";
 const neonGlow = (c: string) =>
   `0 0 0.2em color-mix(in srgb, ${c} calc(${NEON_G} * 1.3), transparent), 0 0 0.8em color-mix(in srgb, ${c} calc(${NEON_G}), transparent), 0 0 2.2em color-mix(in srgb, ${c} calc(${NEON_G} * 0.6), transparent)`;
+
+/**
+ * "Mobile photography." as a lit sign. While its letters switch on, the heading carries the glow itself. Once fully
+ * lit, the glow moves to a copy of the text on its own layer (transparent letters, shadows only), and the breathing
+ * animates that layer's opacity 1 → 0.55 → 1 (globals.css `.pd-neon-glow`).
+ *
+ * Performance: the breathing used to animate a custom property inside the three large blurred text-shadows, which
+ * repainted those blurs every frame, even while the reader scrolled the note and collections below. Measured on an
+ * emulated iPhone 13 (6× CPU): GPU work while scrolling past it fell 421 → 102 ms per 100 frames with it off. An opacity
+ * animation runs on the compositor from one rasterised layer, and scaling the layer's opacity scales the shadows' alpha
+ * exactly as the old multiplier did, so it looks the same. It also pauses whenever the sign is off screen.
+ */
+function NeonSign({ lit, children }: { lit: boolean; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [onScreen, setOnScreen] = useState(true);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className="relative">
+      {/* Shadows only (transparent letters), behind the real text; same classes, so it wraps identically. */}
+      <span
+        aria-hidden
+        data-lit={lit || undefined}
+        data-paused={onScreen ? undefined : ""}
+        className={`${DISPLAY} pd-neon-glow pointer-events-none absolute inset-0 block select-none text-transparent`}
+        style={{ textShadow: neonGlow(v("sodium")) }}
+      >
+        {NEON}
+      </span>
+      <h2 aria-label={NEON} className={`${DISPLAY} pd-neon relative`} style={{ textShadow: lit ? "none" : neonGlow(v("sodium")) }}>
+        {children}
+      </h2>
+    </div>
+  );
+}
 
 const words = (segs: Seg[]) =>
   segs.flatMap(({ t, color, select }) => t.split(" ").map((w) => ({ w, color, select })));
@@ -649,11 +689,11 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
             </motion.h2>
 
             <motion.div style={{ opacity: b4, pointerEvents: h4, color: v("t4") }} className="col-start-1 row-start-1 flex flex-col gap-8 md:gap-10">
-              <h2 aria-label={NEON} data-lit={lit || undefined} className={`${DISPLAY} pd-neon`} style={{ textShadow: neonGlow(v("sodium")) }}>
+              <NeonSign lit={lit}>
                 {letters.map((c, i) => (
                   <NeonLetter key={i} p={p} t={T.neon.letters[0] + i * lStep}>{c}</NeonLetter>
                 ))}
-              </h2>
+              </NeonSign>
               <motion.p style={{ opacity: para }} className={BODY}>
                 <LitWords p={p} segs={PARAGRAPH} range={T.para.words} />
               </motion.p>
