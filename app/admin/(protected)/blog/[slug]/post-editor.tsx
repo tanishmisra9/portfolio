@@ -94,12 +94,25 @@ export function PostEditor({
   // Typing stays instant; the preview re-renders the markdown a beat behind it.
   const deferredBody = useDeferredValue(fields.body);
 
-  function save() {
+  // Latest fields for code that runs after an await (a closure would hold the render's copy).
+  const fieldsRef = useRef(fields);
+  fieldsRef.current = fields;
+  // Pressing Save while the slug field has focus: the button's mousedown blurs the field, the blur starts the
+  // rename, and the rename disables Save before the click arrives, so the click (and every other edit) was lost.
+  // The press is noted in the capture phase, before that blur, and the rename then runs the save itself.
+  const savePressed = useRef(false);
+  const noteSavePress = () => {
+    savePressed.current = true;
+    queueMicrotask(() => (savePressed.current = false)); // only the blur inside this same mousedown may claim it
+  };
+
+  function save(f: PostFields = fields) {
+    savePressed.current = false;
     void (async () => {
-      const result = await status.run(() => savePost(fields));
+      const result = await status.run(() => savePost(f));
       if (!result.ok) return;
-      setBaseline(fields);
-      if (isNew) router.replace(`/admin/blog/${fields.slug}`);
+      setBaseline(f);
+      if (isNew) router.replace(`/admin/blog/${f.slug}`);
     })();
   }
 
@@ -120,6 +133,8 @@ export function PostEditor({
     }
     writing.current = true;
     setRenaming(true);
+    const thenSave = savePressed.current;
+    savePressed.current = false;
     void (async () => {
       const result = await status.run(() => renamePost(fields.slug, input.value));
       writing.current = false;
@@ -135,6 +150,8 @@ export function PostEditor({
       input.value = saved;
       setSlugError(null);
       window.history.replaceState(null, "", `/admin/blog/${saved}`);
+      // The Save press that triggered this rename: save the rest now, under the new slug.
+      if (thenSave) save({ ...fieldsRef.current, slug: saved });
     })();
   }
 
@@ -315,7 +332,10 @@ export function PostEditor({
         </div>
       </div>
 
-      <StickyBar dirty={dirty} canSave={(dirty || isNew) && !renaming} onSave={save} state={status} />
+      {/* `contents`: no box of its own, so the bar stays sticky against the page, not against this wrapper. */}
+      <div className="contents" onMouseDownCapture={noteSavePress}>
+        <StickyBar dirty={dirty} canSave={(dirty || isNew) && !renaming} onSave={() => save()} state={status} />
+      </div>
     </div>
   );
 }

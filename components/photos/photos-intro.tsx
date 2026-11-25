@@ -132,7 +132,9 @@ function Typed({ p }: { p: MotionValue<number> }) {
     setN(k);
   });
   return (
-    <span aria-label={TYPED}>
+    // The heading carries the name (aria-label on its <h2>): a label on a plain <span> is ignored by many screen
+    // readers, and the partly typed text is aria-hidden, so the line was read as nothing.
+    <span>
       <span aria-hidden>{TYPED.slice(0, n)}</span>
       {/* Gone once the horizon starts: a time-driven blink on a line being wiped by scroll is a second rhythm. */}
       <motion.span aria-hidden style={{ opacity: caret }} className="ml-[0.04em] inline-block h-[0.85em] w-[0.09em] translate-y-[0.1em] animate-[caret_1.05s_steps(1,end)_infinite] bg-current" />
@@ -490,6 +492,9 @@ function ScrollIntro() {
   const body = useStroke(draw);
   const sound = useRef<IntroSound | null>(null);
   useEffect(() => {
+    // ScrollIntro mounts for one beat even under reduced motion (PhotosIntro swaps to StaticIntro after mount,
+    // and child effects run first), so don't open an AudioContext or fetch the sample for a visitor who never hears it.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     sound.current = createIntroSound();
     return () => sound.current?.dispose();
   }, []);
@@ -539,7 +544,7 @@ function ScrollIntro() {
 
         <div className="absolute inset-x-6 bottom-8 top-24 grid grid-cols-[minmax(0,1fr)] items-center md:inset-x-16">
           <div className="relative mx-auto grid h-full w-full max-w-6xl grid-cols-[minmax(0,1fr)] items-center">
-            <motion.h2 ref={b1Ref} style={{ opacity: b1, pointerEvents: h1, color: v("t1"), maskImage: b1Mask, WebkitMaskImage: b1Mask }} className={`${DISPLAY} col-start-1 row-start-1`}>
+            <motion.h2 ref={b1Ref} aria-label={TYPED} style={{ opacity: b1, pointerEvents: h1, color: v("t1"), maskImage: b1Mask, WebkitMaskImage: b1Mask }} className={`${DISPLAY} col-start-1 row-start-1`}>
               <Typed p={p} />
             </motion.h2>
 
@@ -638,6 +643,8 @@ export function PhotosIntro() {
   // matchMedia on the client, which made reduced-motion visitors hit a hydration mismatch).
   const reduce = useReducedMotion();
   const [staticIntro, setStaticIntro] = useState(false);
-  useEffect(() => setStaticIntro(!!reduce), [reduce]);
+  // A layout effect, so the swap lands before the first paint: the 500svh scroll stage is never shown, and the
+  // page height settles before the browser restores a reload's scroll position against it.
+  useLayoutEffect(() => setStaticIntro(!!reduce), [reduce]);
   return staticIntro ? <StaticIntro /> : <ScrollIntro />;
 }

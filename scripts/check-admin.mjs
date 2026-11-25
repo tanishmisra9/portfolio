@@ -28,6 +28,18 @@ assert.deepEqual(imageRefs(md2).sort(), ["./b.png", "./c.png"]);
 const out2 = rewriteImageDestinations(md2, new Map([["./a.png", "A"], ["./b.png", "B"], ["./c.png", "C"]]));
 assert.equal(out2, "    ![ex](./a.png)\n\n![t](B \"a title\")\n\n![r][p]\n\n[p]: C\n");
 
+// A destination written differently from its decoded url (escapes, entities) is still found and rewritten, not dropped.
+assert.deepEqual(imageRefs("![x](my\\_photo.png)\n"), ["my_photo.png"]);
+assert.equal(rewriteImageDestinations("![x](my\\_photo.png)\n", new Map([["my_photo.png", "U"]])), "![x](U)\n");
+assert.equal(rewriteImageDestinations("![x](a&amp;b.png \"t\")\n", new Map([["a&b.png", "U"]])), "![x](U \"t\")\n");
+assert.equal(rewriteImageDestinations("![x](<my photo.png>)\n", new Map([["my photo.png", "U"]])), "![x](<U>)\n");
+assert.equal(rewriteImageDestinations("![y][d]\n\n[d]: my\\_pic.png\n", new Map([["my_pic.png", "U"]])), "![y][d]\n\n[d]: U\n");
+
+// A definition shared by an image and a normal link: only the image moves to the Blob URL; the link keeps its target.
+const shared = "![pic][a] and [see original][a]\n\n[a]: /blog/x/pic.png\n";
+assert.deepEqual(imageRefs(shared), ["/blog/x/pic.png"]);
+assert.equal(rewriteImageDestinations(shared, new Map([["/blog/x/pic.png", "U"]])), "![pic](U) and [see original][a]\n\n[a]: /blog/x/pic.png\n");
+
 // BUG-008: heading ids are unique even when a literal heading equals a generated suffix, and never empty.
 const ids = extractHeadings("# Intro\n\n# Intro\n\n# Intro-1\n\n# Top\n\n# !!!\n\n# !!!\n").map((h) => h.id);
 assert.equal(new Set(ids).size, ids.length, `duplicate heading ids: ${ids}`);
