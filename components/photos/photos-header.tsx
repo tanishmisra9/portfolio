@@ -1,10 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 
 const SHUTTER_DELAY_MS = 330;
+
+/** Shared text of the viewfinder HUD (REC, exposure, counter): the site's Poppins, dim, overriding the h1's display styles. */
+const HUD_TEXT =
+  "pointer-events-none absolute flex items-baseline whitespace-nowrap font-sans text-base font-normal normal-case leading-[1.4] tracking-normal text-dim tabular-nums md:text-lg";
+/** Top-left / bottom-left / bottom-right of the brackets, which sit at var(--vf-inset) outside the button. */
+const ABOVE = "bottom-[calc(100%-var(--vf-inset,-0.6rem)+0.6rem)]";
+const BELOW = "top-[calc(100%-var(--vf-inset,-0.6rem)+0.6rem)]";
+
+/** Exposure the readout settles on after each shot (it shuffles through these while "metering"). */
+const SHUTTERS = ["1/60", "1/125", "1/250", "1/500", "1/1000", "1/2000"];
+const APERTURES = ["f/1.4", "f/1.8", "f/2.8", "f/4", "f/5.6", "f/8"];
+const ISOS = [50, 100, 200, 400, 800, 1600];
+type Exposure = [number, number, number];
+const FIRST_EXPOSURE: Exposure = [2, 1, 1]; // 1/250 f/1.8 ISO 100, fixed so SSR and hydration agree
+const METER_STEPS = 6;
+const METER_STEP_MS = 50;
+const randomExposure = (): Exposure => [SHUTTERS, APERTURES, ISOS].map((l) => Math.floor(Math.random() * l.length)) as Exposure;
 
 /** Global shot count from app/api/shutter; null = unknown (loading or the DB is unreachable), which hides the counter. */
 async function shutter(method: "GET" | "POST"): Promise<number | null> {
@@ -20,6 +37,8 @@ async function shutter(method: "GET" | "POST"): Promise<number | null> {
 export function PhotosHeader() {
   const [flashing, setFlashing] = useState(false);
   const [count, setCount] = useState<number | null>(null);
+  const [exposure, setExposure] = useState<Exposure>(FIRST_EXPOSURE);
+  const reduceMotion = useReducedMotion();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timersRef = useRef<number[]>([]);
 
@@ -55,10 +74,20 @@ export function PhotosHeader() {
       }, SHUTTER_DELAY_MS),
     );
 
+    // The readout meters (shuffles) from the click and settles as the shutter fires; reduced motion just swaps.
+    const settle = randomExposure();
+    const steps = reduceMotion ? 0 : METER_STEPS;
+    for (let k = 1; k <= steps; k++) {
+      timersRef.current.push(window.setTimeout(() => setExposure(randomExposure()), k * METER_STEP_MS));
+    }
+    timersRef.current.push(
+      window.setTimeout(() => setExposure(settle), reduceMotion ? 0 : SHUTTER_DELAY_MS),
+    );
+
     timersRef.current.push(
       window.setTimeout(() => setFlashing(false), 800),
     );
-  }, [flashing]);
+  }, [flashing, reduceMotion]);
 
   return (
     <div className="flex flex-col items-center">
@@ -77,6 +106,17 @@ export function PhotosHeader() {
             className="pointer-events-none absolute left-1/2 top-full mt-6 -translate-x-1/2 translate-y-1 whitespace-nowrap font-sans text-sm font-normal uppercase leading-none tracking-wide text-fg opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover/shot:translate-y-0 group-hover/shot:opacity-100 group-focus-visible/shot:translate-y-0 group-focus-visible/shot:opacity-100 group-data-[shot=on]/shot:opacity-0 motion-reduce:transition-none"
           >
             Take a photo
+          </span>
+          {/* Camera HUD: REC top-left, exposure bottom-left, shot count bottom-right, focus point in the middle (globals.css). */}
+          <span aria-hidden className="af-point" />
+          <span aria-hidden className={`${HUD_TEXT} ${ABOVE} left-[var(--vf-inset,-0.6rem)] items-center gap-[0.4em]`}>
+            <span className="rec-dot size-[0.5em] rounded-full bg-[var(--rec)]" />
+            REC
+          </span>
+          <span aria-hidden className={`${HUD_TEXT} ${BELOW} left-[var(--vf-inset,-0.6rem)] gap-[0.8em]`}>
+            <span>{SHUTTERS[exposure[0]]}</span>
+            <span>{APERTURES[exposure[1]]}</span>
+            <span className="max-sm:hidden">ISO {ISOS[exposure[2]]}</span>
           </span>
           {count !== null && <ExposureCounter count={count} />}
         </button>
@@ -99,9 +139,9 @@ function ExposureCounter({ count }: { count: number }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="pointer-events-none absolute right-[var(--vf-inset,-0.6rem)] top-[calc(100%-var(--vf-inset,-0.6rem)+0.6rem)] flex items-baseline whitespace-nowrap font-mono text-xs font-normal leading-[1.4] tracking-normal text-dim tabular-nums"
+      className={`${HUD_TEXT} ${BELOW} right-[var(--vf-inset,-0.6rem)]`}
     >
-      <span className="mr-[0.5em]">No.</span>
+      <span className="mr-[0.3em]">No.</span>
       {chars
         .map((ch, i) => (
           <span key={i} className="relative inline-block h-[1.4em] overflow-hidden">
