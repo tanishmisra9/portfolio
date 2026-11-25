@@ -10,7 +10,8 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { createPencilVoice, type PencilVoice } from "@/lib/pencil/voice";
+import { createPencilVoice, type PencilVoice } from "pencil-voice";
+import { SITE_PENCIL } from "@/lib/pencil/config";
 import { PencilStroke } from "./pencil-stroke";
 
 // One day of light passes over the manifesto, and it always resolves into the page's
@@ -770,7 +771,7 @@ export function useIntroSound(): SoundRef {
   const sound = useRef<PencilVoice | null>(null);
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    sound.current = createPencilVoice();
+    sound.current = createPencilVoice({ config: SITE_PENCIL });
     return () => {
       sound.current?.dispose();
       sound.current = null;
