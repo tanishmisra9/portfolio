@@ -11,6 +11,13 @@ interface ReorderableListProps<T extends { id: ItemId }> {
   renderItem: (
     item: T,
     dragHandleProps: { draggable: true; onDragStart: (e: React.DragEvent) => void },
+    /**
+     * The item's place in the list as shown, and `move(±1)` for arrow buttons. Arrows must move through this, not by
+     * rebuilding ids from the parent's items: a drag updates the shown order first, and the parent's prop only catches
+     * up when the server refresh lands, so an arrow click in between rebuilt the pre-drag order and reverted the drag.
+     * `move` updates the shown order at once (like a drop) and reports it through onReorder.
+     */
+    position: { index: number; count: number; move: (delta: -1 | 1) => void },
   ) => ReactNode;
 }
 
@@ -56,6 +63,17 @@ export function ReorderableList<T extends { id: ItemId }>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemIds]);
 
+  function moveBy(id: ItemId, delta: -1 | 1) {
+    const next = [...order];
+    const from = next.indexOf(id);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= next.length) return;
+    next.splice(from, 1);
+    next.splice(to, 0, id);
+    setOrder(next);
+    onReorder(next);
+  }
+
   function handleDrop(targetId: ItemId) {
     if (draggingId === null || draggingId === targetId) return;
     const next = [...order];
@@ -70,7 +88,7 @@ export function ReorderableList<T extends { id: ItemId }>({
 
   return (
     <div className="space-y-2">
-      {order.map((id) => {
+      {order.map((id, index) => {
         const item = itemsById.get(id);
         if (!item) return null;
         return (
@@ -83,7 +101,7 @@ export function ReorderableList<T extends { id: ItemId }>({
                 e.dataTransfer.setData("text/plain", String(id));
                 setDraggingId(id);
               },
-            })}
+            }, { index, count: order.length, move: (delta) => moveBy(id, delta) })}
           </div>
         );
       })}

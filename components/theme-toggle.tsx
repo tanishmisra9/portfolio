@@ -71,7 +71,13 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       <button
         type="button"
         className={`${HOVER_FILL_LINK} flex shrink-0 items-center justify-center p-2 text-muted`}
-        onMouseDown={(e) => e.preventDefault()}
+        onMouseDown={(e) => {
+          // Keep the Safari focus ring off on click, but blur a focused field first: admin fields commit on blur, and
+          // a cancelled mousedown otherwise leaves them focused (same rule as noMouseFocus / IconButton).
+          const a = document.activeElement;
+          if (a instanceof HTMLInputElement || a instanceof HTMLTextAreaElement || a instanceof HTMLSelectElement) a.blur();
+          e.preventDefault();
+        }}
         aria-label={label}
         onClick={toggle}
       >

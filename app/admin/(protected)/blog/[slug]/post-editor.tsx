@@ -67,6 +67,11 @@ export function PostEditor({
   isNew: boolean;
 }) {
   const router = useRouter();
+  // Whether the post exists in the database, owned here rather than read live from `isNew`. A rename swaps the URL with
+  // history.replaceState after its action returns, but that action's revalidatePath refresh re-renders the page for the
+  // old slug, which no longer exists, so the prop came back `isNew=true`. The editor then flipped to "New Post": the
+  // slug field hidden, Save always on. Once a save, import or rename succeeds, a later prop can't undo that.
+  const [exists, setExists] = useState(!isNew);
   const [fields, setFields] = useState(initial);
   const [baseline, setBaseline] = useState(initial);
   const dirty = useMemo(() => JSON.stringify(fields) !== JSON.stringify(baseline), [fields, baseline]);
@@ -116,7 +121,10 @@ export function PostEditor({
       const result = await status.run(() => savePost(f));
       if (!result.ok) return;
       setBaseline(f);
-      if (isNew) router.replace(`/admin/blog/${f.slug}`);
+      if (!exists) {
+        setExists(true);
+        router.replace(`/admin/blog/${f.slug}`);
+      }
     })();
   }
 
@@ -178,6 +186,7 @@ export function PostEditor({
           setFields(post);
           setBaseline(post);
           setImageChecks(imageChecks);
+          setExists(true);
         } finally {
           writing.current = false;
         }
@@ -190,6 +199,9 @@ export function PostEditor({
   function handleFile(file: File) {
     // A rename is in flight: fields.slug is stale, so an import (upsert by slug) or an upload (blob prefix) would target the old post.
     if (renaming) return setUploadError(RENAMING_MSG);
+    // An import is in flight: it replaces the whole body when it lands, so an image appended now would be silently
+    // dropped (and its blob orphaned).
+    if (writing.current) return setUploadError("Wait for the import to finish, then add images.");
     if (!file.name.endsWith(".md")) return uploadImage(file);
     if (fields.body.trim() || fields.title.trim()) setPendingMd(file);
     else importMdFile(file);
@@ -210,12 +222,12 @@ export function PostEditor({
   return (
     <div className="space-y-4">
       <AdminBackLink href="/admin/blog" label="Back to thoughts" />
-      <AdminHeading title={isNew ? "New Post" : fields.title || "Untitled"} />
+      <AdminHeading title={exists ? fields.title || "Untitled" : "New Post"} />
 
       <Field label="Title">
         <Input value={fields.title} onChange={(e) => setFields({ ...fields, title: e.target.value })} />
       </Field>
-      {!isNew && (
+      {exists && (
         <Field
           label="Slug (the /thoughts/… URL)"
           hint="Changes this post's URL once published; old links stop working. Saves as soon as you leave the field."
@@ -338,7 +350,7 @@ export function PostEditor({
 
       {/* `contents`: no box of its own, so the bar stays sticky against the page, not against this wrapper. */}
       <div className="contents" onMouseDownCapture={noteSavePress}>
-        <StickyBar dirty={dirty} canSave={(dirty || isNew) && !renaming} onSave={() => save()} state={status} />
+        <StickyBar dirty={dirty} canSave={(dirty || !exists) && !renaming} onSave={() => save()} state={status} />
       </div>
     </div>
   );

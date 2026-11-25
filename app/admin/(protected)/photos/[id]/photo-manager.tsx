@@ -68,21 +68,15 @@ export function PhotoManager({
         <ReorderableList
           items={photos}
           onReorder={(ids) => void status.run(() => reorderPhotos(ids as number[]))}
-          renderItem={(photo, dragProps) => {
-            const index = photos.findIndex((p) => p.id === photo.id);
+          renderItem={(photo, dragProps, { index, count, move }) => {
             const isCover = photo.blobUrl === optimisticCover;
             return (
               <div className="relative flex flex-wrap items-start gap-3 border border-border bg-surface p-3 backdrop-blur-md">
                 <MoveButtons
                   index={index}
-                  count={photos.length}
+                  count={count}
                   label="photo"
-                  onMove={(d) => {
-                    const ids = photos.map((p) => p.id);
-                    const [moved] = ids.splice(index, 1);
-                    ids.splice(index + d, 0, moved);
-                    void status.run(() => reorderPhotos(ids));
-                  }}
+                  onMove={move}
                 />
                 <div {...dragProps} aria-hidden className="flex h-16 w-7 shrink-0 cursor-grab items-center justify-center text-dim hover:text-fg">
                   <GripVertical className="h-5 w-5" />

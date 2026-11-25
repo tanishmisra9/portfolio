@@ -118,21 +118,15 @@ export function CollectionsManager({
         <ReorderableList
           items={collections}
           onReorder={(ids) => reorder(ids as number[])}
-          renderItem={(c, dragProps) => {
-            const index = collections.findIndex((x) => x.id === c.id);
+          renderItem={(c, dragProps, { index, count, move }) => {
             return (
               <div className="relative flex flex-wrap items-center gap-3 border border-border bg-surface p-3 backdrop-blur-md transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-x-0.5 hover:-translate-y-0.5 hover:border-fg hover:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] has-[:focus-visible]:-translate-x-0.5 has-[:focus-visible]:-translate-y-0.5 has-[:focus-visible]:border-fg motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0">
                 <div className="relative z-10">
                   <MoveButtons
                     index={index}
-                    count={collections.length}
+                    count={count}
                     label={c.title}
-                    onMove={(d) => {
-                      const ids = collections.map((x) => x.id);
-                      const [moved] = ids.splice(index, 1);
-                      ids.splice(index + d, 0, moved);
-                      reorder(ids);
-                    }}
+                    onMove={move}
                   />
                 </div>
                 <div
