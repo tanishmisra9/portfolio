@@ -67,7 +67,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   };
 
   return (
-    <Tooltip label={isDark ? "Light mode" : "Dark mode"} align="end" className={className}>
+    <Tooltip label={label} align="end" className={className}>
       <button
         type="button"
         className={`${HOVER_FILL_LINK} flex shrink-0 items-center justify-center p-2 text-muted`}
