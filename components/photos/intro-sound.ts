@@ -8,9 +8,14 @@ const NOOP: IntroSound = { scratch() {}, dispose() {} };
 const UNLOCK_EVENTS = ["pointerdown", "keydown", "touchend"] as const;
 
 // ── Tuning ──
+// Any pen movement is clearly audible (the floor); speed only adds loudness on top. Gain that
+// was purely proportional to speed left slow scrolls silent and a single nudge inaudible.
+const SCRATCH_FLOOR = 0.22;
 const SCRATCH_MAX = 0.6;
-const SCRATCH_PER_SPEED = 0.25; // gain per (stroke fraction / second)
-const SCRATCH_RELEASE_MS = 90; // scroll events stop when you stop, so the scratch fades on its own
+const SCRATCH_FULL_SPEED = 2; // stroke fraction / second at which it reaches SCRATCH_MAX
+const SCRATCH_ATTACK = 0.012; // s time constant: the pen bites almost at once
+const SCRATCH_DECAY = 0.06; // s time constant of the fade once you stop
+const SCRATCH_RELEASE_MS = 150; // scroll events stop when you stop; this bridges mouse-wheel notches (~120ms apart)
 const LOOP_MARGIN = 0.05; // s trimmed off each end of the loop (mp3 encoder padding)
 
 export function createIntroSound(): IntroSound {
@@ -42,14 +47,14 @@ export function createIntroSound(): IntroSound {
 
   let pencil: { src: AudioBufferSourceNode; g: GainNode } | null = null;
   let release = 0;
-  const target = (level: number, rate: number) => {
+  const target = (level: number, rate: number, tau: number) => {
     if (!pencil) return;
     const t = ctx.currentTime;
-    pencil.g.gain.setTargetAtTime(level, t, 0.03);
+    pencil.g.gain.setTargetAtTime(level, t, tau);
     pencil.src.playbackRate.setTargetAtTime(rate, t, 0.05);
   };
   const scratch = (speed: number) => {
-    if (!running() || !buf) return;
+    if (!running() || !buf || !(speed > 0)) return;
     if (!pencil) {
       const src = ctx.createBufferSource();
       src.buffer = buf;
@@ -62,10 +67,10 @@ export function createIntroSound(): IntroSound {
       src.start(0, LOOP_MARGIN);
       pencil = { src, g };
     }
-    const level = Math.min(SCRATCH_MAX, speed * SCRATCH_PER_SPEED);
-    target(level, 0.9 + Math.min(0.2, speed * 0.05)); // a faster stroke scratches a little higher
+    const level = SCRATCH_FLOOR + (SCRATCH_MAX - SCRATCH_FLOOR) * Math.min(1, speed / SCRATCH_FULL_SPEED);
+    target(level, 0.9 + Math.min(0.2, speed * 0.05), SCRATCH_ATTACK); // a faster stroke scratches a little higher
     window.clearTimeout(release);
-    release = window.setTimeout(() => target(0, 0.9), SCRATCH_RELEASE_MS);
+    release = window.setTimeout(() => target(0, 0.9, SCRATCH_DECAY), SCRATCH_RELEASE_MS);
   };
 
   return {

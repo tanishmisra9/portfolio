@@ -254,7 +254,7 @@ html.dark[data-pd-sky="1"] [data-site-header] {
 }
 
 /* Once "Mobile photography." has fully switched on, the sign stays alive: its glow
-   breathes 100% → 85% → 100% (light only, nothing moves). The multiplier is a registered
+   breathes 100% → 55% → 100% (light only, nothing moves). The multiplier is a registered
    property so it interpolates; glow() in photos-intro.tsx multiplies --pd-glow by it. In
    daylight --pd-glow is 0, so there is nothing to breathe, by design. */
 @property --pd-breathe {
@@ -265,7 +265,7 @@ html.dark[data-pd-sky="1"] [data-site-header] {
 
 @keyframes pd-breathe {
   50% {
-    --pd-breathe: 0.85;
+    --pd-breathe: 0.55;
   }
 }
 

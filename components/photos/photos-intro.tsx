@@ -68,7 +68,12 @@ const DISPLAY = `font-display font-bold tracking-tight text-balance ${SIZE} pb-[
 const BODY = "max-w-[34ch] text-xl/[1.55] font-[300] md:max-w-[54ch] md:text-[1.75rem]/[1.5]";
 // Glow strength is a theme variable: lit signs glow at night, not in daylight.
 const glow = (c: string) =>
-  `0 0 0.35em color-mix(in srgb, ${c} calc(var(--pd-glow) * var(--pd-breathe, 1)), transparent), 0 0 1.2em color-mix(in srgb, ${c} calc(var(--pd-glow) * var(--pd-breathe, 1) / 2), transparent)`;
+  `0 0 0.35em color-mix(in srgb, ${c} var(--pd-glow), transparent), 0 0 1.2em color-mix(in srgb, ${c} calc(var(--pd-glow) / 2), transparent)`;
+// The "Mobile photography." sign: a hotter core, a fuller halo and a wide bloom, all scaled by
+// --pd-breathe once it is lit (globals.css). Still 0 in daylight, where --pd-glow is 0.
+const NEON_G = "var(--pd-glow) * var(--pd-breathe, 1)";
+const neonGlow = (c: string) =>
+  `0 0 0.2em color-mix(in srgb, ${c} calc(${NEON_G} * 1.3), transparent), 0 0 0.8em color-mix(in srgb, ${c} calc(${NEON_G}), transparent), 0 0 2.2em color-mix(in srgb, ${c} calc(${NEON_G} * 0.6), transparent)`;
 
 const words = (segs: Seg[]) =>
   segs.flatMap(({ t, color, select }) => t.split(" ").map((w) => ({ w, color, select })));
@@ -348,7 +353,10 @@ function useScratch(draw: MotionValue<number>, sound?: SoundRef, scale = 1) {
     const now = performance.now();
     const prev = last.current;
     last.current = { v, t: now };
-    if (prev.t && now > prev.t) sound?.current?.scratch((scale * Math.abs(v - prev.v) * 1000) / (now - prev.t));
+    // dt is capped at about a few frames: after a pause, the first move's distance was divided
+    // by the whole idle time and came out near zero (silent), so a fresh scroll didn't sound at once.
+    const dt = prev.t ? Math.min(now - prev.t, 50) : 16;
+    if (dt > 0 && v !== prev.v) sound?.current?.scratch((scale * Math.abs(v - prev.v) * 1000) / dt);
   });
 }
 
@@ -554,7 +562,7 @@ function ScrollIntro() {
             </motion.h2>
 
             <motion.div style={{ opacity: b4, pointerEvents: h4, color: v("t4") }} className="col-start-1 row-start-1 flex flex-col gap-8 md:gap-10">
-              <h2 aria-label={NEON} data-lit={lit || undefined} className={`${DISPLAY} pd-neon`} style={{ textShadow: glow(v("sodium")) }}>
+              <h2 aria-label={NEON} data-lit={lit || undefined} className={`${DISPLAY} pd-neon`} style={{ textShadow: neonGlow(v("sodium")) }}>
                 {letters.map((c, i) => (
                   <NeonLetter key={i} p={p} t={T.neon.letters[0] + i * lStep}>{c}</NeonLetter>
                 ))}
@@ -616,7 +624,7 @@ function StaticIntro() {
       <Band bg={v("l2")}><StaticPair /></Band>
       <Band bg={v("l3")} color={v("t4")}>
         <div className="flex flex-col gap-8 md:gap-10">
-          <h2 className={DISPLAY} style={{ textShadow: glow(v("sodium")) }}>{NEON}</h2>
+          <h2 className={DISPLAY} style={{ textShadow: neonGlow(v("sodium")) }}>{NEON}</h2>
           <p className={BODY}><StaticWords segs={PARAGRAPH} /></p>
         </div>
       </Band>
