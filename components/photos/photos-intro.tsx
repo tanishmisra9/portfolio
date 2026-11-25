@@ -42,11 +42,10 @@ type R = readonly [number, number];
 const T = {
   l0: [0, 0.03] as R, // light mode: the page dims to pre-dawn only after the stage pins (no dark slab scrolling in)
   type: [0.03, 0.095] as R, // typing starts once it is dark enough to read white text
-  dayOut: [0.12, 0.15] as R,
-  l1: [0.12, 0.2] as R,
+  l1: [0.12, 0.2] as R, // the light horizon: layer 1 rises up the stage and carries beat 1 out, beat 2 in
   sunset: [0.12, 0.42] as R, // dark mode: the sun sinks through layer 1 (golden hour)
   sunrise: [0.38, 0.66] as R, // light mode: the sun rises through layer 2 (golden morning)
-  pair: { in: [0.16, 0.19] as R, out: [0.61, 0.64] as R },
+  pair: { in: [0.12, 0.1201] as R, out: [0.61, 0.64] as R }, // revealed by the horizon's mask, not a fade
   anyone: { words: [0.19, 0.25] as R, select: [0.25, 0.29] as R },
   // The arrow: its curl is drawn in place, then the camera follows the pen down to the
   // next phrase through the whole sky change, then the arrowhead's two strokes, in turn.
@@ -122,6 +121,7 @@ function NeonLetter({ p, t, children }: { p: MotionValue<number>; t: number; chi
 
 function Typed({ p }: { p: MotionValue<number> }) {
   const [n, setN] = useState(0);
+  const caret = useTransform(p, (x): number => (x < T.l1[0] ? 1 : 0));
   useMotionValueEvent(p, "change", (v) => {
     const k = Math.round(Math.min(1, Math.max(0, (v - T.type[0]) / (T.type[1] - T.type[0]))) * TYPED.length);
     setN(k);
@@ -129,16 +129,32 @@ function Typed({ p }: { p: MotionValue<number> }) {
   return (
     <span aria-label={TYPED}>
       <span aria-hidden>{TYPED.slice(0, n)}</span>
-      <span aria-hidden className="ml-[0.04em] inline-block h-[0.85em] w-[0.09em] translate-y-[0.1em] animate-[caret_1.05s_steps(1,end)_infinite] bg-current" />
+      {/* Gone once the horizon starts: a time-driven blink on a line being wiped by scroll is a second rhythm. */}
+      <motion.span aria-hidden style={{ opacity: caret }} className="ml-[0.04em] inline-block h-[0.85em] w-[0.09em] translate-y-[0.1em] animate-[caret_1.05s_steps(1,end)_infinite] bg-current" />
     </span>
   );
 }
 
-// Which sky layer is dominant behind the nav: the midpoint of each crossfade. null before
-// the light-mode pre-dawn has come up (the page is still showing) and after the intro.
+// ── The light horizon (beat 1 → beat 2) ──
+// Layer 1 doesn't fade in: it rises up the stage as a soft-edged band of light. Where its
+// edge passes "What I believe in." the letters dissolve into it, and "I think anyone…" is
+// already there underneath, in the light. One edge drives the sky mask, both text masks
+// and the nav's ink, so they can never disagree.
+const HORIZON_FEATHER = 18; // % of the stage: half the soft band of the sky's edge
+const TEXT_FEATHER = 0.035; // of the stage height: half the band a line dissolves across
+
+/** The horizon's height at scroll x, as % from the stage's top: below the bottom before the
+ *  wipe, past the top after it (each by the feather, so both ends are clean). */
+const horizonAt = (x: number) =>
+  100 + HORIZON_FEATHER - (100 + 2 * HORIZON_FEATHER) * easeInOut(clamp01((x - T.l1[0]) / (T.l1[1] - T.l1[0])));
+const inWipe = (x: number) => x >= T.l1[0] && x < T.l1[1];
+
+// Which sky layer is dominant behind the nav: layer 1 once the horizon has passed the top,
+// the midpoint of each later crossfade. null before the light-mode pre-dawn has come up
+// (the page is still showing) and after the intro.
 const skyBehindNav = (x: number): number | null =>
   x < (T.l0[0] + T.l0[1]) / 2 || x >= 1 ? null
-  : x < (T.l1[0] + T.l1[1]) / 2 ? 0
+  : x < T.l1[1] && horizonAt(x) > 0 ? 0
   : x < (T.l2[0] + T.l2[1]) / 2 ? 1
   : x < (T.l3[0] + T.l3[1]) / 2 ? 2
   : 3;
@@ -408,15 +424,45 @@ function ScrollIntro() {
   const p = useTransform(scrollYProgress, (v) => v);
 
   const l0 = useTransform(p, [...T.l0], [0, 1]);
-  const l1 = useTransform(p, [...T.l1], [0, 1]);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const b1Ref = useRef<HTMLHeadingElement>(null);
+  const l1 = useTransform(p, (x): number => (x < T.l1[0] ? 0 : 1));
+  const l1Mask = useTransform(p, (x) => {
+    if (!inWipe(x)) return "none";
+    const y = horizonAt(x);
+    return `linear-gradient(to bottom, transparent ${y - HORIZON_FEATHER}%, #000 ${y + HORIZON_FEATHER}%)`;
+  });
+  // The same edge in an element's own pixels: text boxes aren't stage-sized, so the edge is
+  // measured against them (only during the wipe; the stage is pinned, so this is stable).
+  // `below` keeps what the light has reached; otherwise what it hasn't.
+  const textMask = (el: HTMLElement | null, x: number, below: boolean) => {
+    const stage = stageRef.current;
+    if (!inWipe(x) || !el || !stage) return "none";
+    const st = stage.getBoundingClientRect();
+    const f = st.height * TEXT_FEATHER;
+    // Beat 2 surfaces behind the edge by exactly the distance from beat 1's top to the bottom of
+    // beat 2's first phrase (plus both feathers): its first ink appears only once beat 1's last
+    // ink has gone, at any wrap or screen size. Any overlap read as a double exposure.
+    let lag = 0;
+    if (below) {
+      const top = b1Ref.current?.getBoundingClientRect().top;
+      const bottom = el.querySelector("[data-half]")?.getBoundingClientRect().bottom;
+      lag = top !== undefined && bottom !== undefined ? Math.max(0, bottom - top) + 2 * f : 0;
+    }
+    const edge = st.top + (st.height * horizonAt(x)) / 100 + lag - el.getBoundingClientRect().top;
+    const [a, b] = below ? ["transparent", "#000"] : ["#000", "transparent"];
+    return `linear-gradient(to bottom, ${a} ${edge - f}px, ${b} ${edge + f}px)`;
+  };
   const l2 = useTransform(p, [...T.l2], [0, 1]);
   const l3 = useTransform(p, [...T.l3], [0, 1]);
   const sunsetY = useTransform(p, [...T.sunset], ["-25%", "30%"]); // sinks below the horizon
   const sunriseY = useTransform(p, [...T.sunrise], ["35%", "-20%"]); // climbs out of it
 
-  const b1 = useTransform(p, [...T.dayOut], [1, 0]);
+  const b1 = useTransform(p, (x): number => (x < T.l1[1] ? 1 : 0)); // the horizon's mask carries it out
+  const b1Mask = useTransform(p, (x) => textMask(b1Ref.current, x, false));
   const pair = useTransform(p, [...T.pair.in, ...T.pair.out], [0, 1, 1, 0]);
   const pairRef = useRef<HTMLHeadingElement>(null);
+  const pairMask = useTransform(p, (x) => textMask(pairRef.current, x, true));
   const arrow = useArrowPath(pairRef);
   const arrowRef = useRef(arrow);
   arrowRef.current = arrow;
@@ -454,7 +500,12 @@ function ScrollIntro() {
   useEffect(() => () => void delete document.documentElement.dataset.pdSky, []);
   const b4 = useTransform(p, [...T.neon.in], [0, 1]);
   const para = useTransform(p, [...T.para.in], [0, 1]);
-  const [h1, h2, h4] = [useHit(b1), useHit(pair), useHit(b4)];
+  // During the horizon both beats are opaque (their masks do the hiding), so the pointer
+  // goes to whichever owns the middle of the stage: beat 1 until the light passes it.
+  const beat1Leads = (x: number) => x < T.l1[1] && horizonAt(x) > 50;
+  const h1 = useTransform(p, (x): "auto" | "none" => (beat1Leads(x) ? "auto" : "none"));
+  const h2 = useTransform([pair, p], ([o, x]: number[]): "auto" | "none" => (o > 0.5 && !beat1Leads(x) ? "auto" : "none"));
+  const h4 = useHit(b4);
 
   const letters = NEON.split("");
   const lStep = (T.neon.letters[1] - T.neon.letters[0]) / letters.length;
@@ -467,10 +518,10 @@ function ScrollIntro() {
     <section ref={ref} aria-label="Why I take pictures" className="photos-day relative left-1/2 w-screen -translate-x-1/2" style={{ height: "500svh", marginTop: "-40svh" }}>
       {/* Pinned at the very top so the sky runs behind the glass nav. The nav reads on it
           because it switches ink per sky (html[data-pd-sky], see skyBehindNav). */}
-      <div className="sticky top-0 h-[100svh] overflow-hidden">
-        {/* Light layers: only opacity and the suns' y animate. */}
+      <div ref={stageRef} className="sticky top-0 h-[100svh] overflow-hidden">
+        {/* Light layers: opacity and the suns' y animate; layer 1 also rises in behind a mask (the horizon). */}
         <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l0, background: v("l0") }} />
-        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l1, background: v("l1") }}>
+        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l1, background: v("l1"), maskImage: l1Mask, WebkitMaskImage: l1Mask }}>
           <motion.div className={SUN} style={{ y: sunsetY, opacity: v("sunset"), background: SUN_GRADIENT }} />
         </motion.div>
         <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l2, background: v("l2") }}>
@@ -480,7 +531,7 @@ function ScrollIntro() {
 
         <div className="absolute inset-x-6 bottom-8 top-24 grid grid-cols-[minmax(0,1fr)] items-center md:inset-x-16">
           <div className="relative mx-auto grid h-full w-full max-w-6xl grid-cols-[minmax(0,1fr)] items-center">
-            <motion.h2 style={{ opacity: b1, pointerEvents: h1, color: v("t1") }} className={`${DISPLAY} col-start-1 row-start-1`}>
+            <motion.h2 ref={b1Ref} style={{ opacity: b1, pointerEvents: h1, color: v("t1"), maskImage: b1Mask, WebkitMaskImage: b1Mask }} className={`${DISPLAY} col-start-1 row-start-1`}>
               <Typed p={p} />
             </motion.h2>
 
@@ -489,7 +540,7 @@ function ScrollIntro() {
             <motion.h2
               ref={pairRef}
               data-sky={sky}
-              style={{ y: trackY, opacity: pair, pointerEvents: h2 }}
+              style={{ y: trackY, opacity: pair, pointerEvents: h2, maskImage: pairMask, WebkitMaskImage: pairMask }}
               className={`${SIZE} absolute inset-x-0 top-1/2 flex flex-col gap-[120svh]`}
             >
               <span data-half className={`${DISPLAY} pd-b2 block`}>
