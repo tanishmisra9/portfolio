@@ -574,5 +574,11 @@ function StaticIntro() {
 }
 
 export function PhotosIntro() {
-  return useReducedMotion() ? <StaticIntro /> : <ScrollIntro />;
+  // Read after mount, never during render: the server can't know the preference and renders
+  // ScrollIntro, so the first client render must too (Framer seeds useReducedMotion from
+  // matchMedia on the client, which made reduced-motion visitors hit a hydration mismatch).
+  const reduce = useReducedMotion();
+  const [staticIntro, setStaticIntro] = useState(false);
+  useEffect(() => setStaticIntro(!!reduce), [reduce]);
+  return staticIntro ? <StaticIntro /> : <ScrollIntro />;
 }

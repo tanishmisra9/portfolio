@@ -25,12 +25,20 @@ export function createIntroSound(): IntroSound {
     .then((b) => void (buf = b), () => {});
 
   const running = () => ctx.state === "running";
+  const listen = () => UNLOCK_EVENTS.forEach((e) => window.addEventListener(e, unlock, true));
+  const unlisten = () => UNLOCK_EVENTS.forEach((e) => window.removeEventListener(e, unlock, true));
   const unlock = () => {
     ctx.resume().then(() => {
-      if (running()) UNLOCK_EVENTS.forEach((e) => window.removeEventListener(e, unlock, true));
+      if (running()) unlisten();
     }, () => {});
   };
-  if (!running()) UNLOCK_EVENTS.forEach((e) => window.addEventListener(e, unlock, true));
+  // iOS suspends ("interrupted") the context on an app switch or a call, after the first
+  // unlock already removed its listeners: re-arm them so the next tap revives the sound.
+  const onState = () => {
+    if (ctx.state !== "running" && ctx.state !== "closed") listen();
+  };
+  ctx.addEventListener("statechange", onState);
+  if (!running()) listen();
 
   let pencil: { src: AudioBufferSourceNode; g: GainNode } | null = null;
   let release = 0;
@@ -64,7 +72,8 @@ export function createIntroSound(): IntroSound {
     scratch,
     dispose() {
       window.clearTimeout(release);
-      UNLOCK_EVENTS.forEach((e) => window.removeEventListener(e, unlock, true));
+      ctx.removeEventListener("statechange", onState);
+      unlisten();
       void ctx.close().catch(() => {});
     },
   };

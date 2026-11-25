@@ -27,12 +27,25 @@ async function recentFailures(ip: string): Promise<number> {
 }
 
 /** Records the attempt BEFORE the password is compared, so parallel guesses all count (a check-then-record throttle let N parallel requests all read the old count). */
-async function recordAttempt(ip: string) {
+async function recordAttempt(ip: string): Promise<number | null> {
   try {
-    await db.insert(loginAttempts).values({ ip });
+    const [row] = await db.insert(loginAttempts).values({ ip }).returning({ id: loginAttempts.id });
     await db.delete(loginAttempts).where(lt(loginAttempts.at, new Date(Date.now() - 24 * 3_600_000)));
+    return row?.id ?? null;
   } catch (e) {
     console.error("[login] could not record attempt:", e);
+    return null;
+  }
+}
+
+/** A refused attempt never reached the password check, so it must not count: otherwise every
+ *  retry while locked out slides the window forward and the lockout never ends. Every attempt
+ *  that is compared keeps its row, so at most MAX_FAILED passwords are checked per window. */
+async function dropAttempt(id: number) {
+  try {
+    await db.delete(loginAttempts).where(eq(loginAttempts.id, id));
+  } catch (e) {
+    console.error("[login] could not drop refused attempt:", e);
   }
 }
 
@@ -51,12 +64,16 @@ export async function login(_prevState: string | undefined, formData: FormData) 
     return "Enter your password.";
   }
 
-  // Vercel sets x-forwarded-for; the first entry is the client.
-  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-  await recordAttempt(ip);
-  // Counts this attempt too, so the (MAX_FAILED + 1)th attempt in the window is the first one refused.
-  if ((await recentFailures(ip)) > MAX_FAILED) {
-    return "Too many attempts. Try again in a few minutes.";
+  // Vercel always sets x-forwarded-for; the first entry is the client. Without it (local dev)
+  // there is no client to throttle: one shared "unknown" bucket would let anyone lock everyone out.
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0].trim() || null;
+  if (ip) {
+    const id = await recordAttempt(ip);
+    // Counts this attempt too, so the (MAX_FAILED + 1)th attempt in the window is the first one refused.
+    if ((await recentFailures(ip)) > MAX_FAILED) {
+      if (id !== null) await dropAttempt(id);
+      return "Too many attempts. Try again in a few minutes.";
+    }
   }
 
   const rawHash = process.env.ADMIN_PASSWORD_HASH;
@@ -82,7 +99,7 @@ export async function login(_prevState: string | undefined, formData: FormData) 
     throw new Error("ADMIN_PASSWORD_HASH is not a valid bcrypt hash.");
   }
   if (!valid) return "Incorrect password.";
-  await clearAttempts(ip);
+  if (ip) await clearAttempts(ip);
 
   const session = await getSession();
   session.isLoggedIn = true;
