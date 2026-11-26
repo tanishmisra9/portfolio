@@ -23,6 +23,17 @@ type CollectionTileProps = {
   hero: boolean;
 };
 
+// Real rendered widths (measured at 390–1440), so phones stop fetching files sized for the full viewport. The grid is the
+// viewport − 50px, capped at 1222px; other tiles sit two to a row from 640px (26px gap); strips are 4 (hero) or 3 across.
+const COVER_SIZES = {
+  hero: "(max-width: 1272px) calc(100vw - 50px), 1222px",
+  tile: "(max-width: 639px) calc(100vw - 50px), (max-width: 1272px) calc(50vw - 38px), 598px",
+};
+const STRIP_SIZES = {
+  hero: "(max-width: 1272px) calc(25vw - 17px), 300px",
+  tile: "(max-width: 639px) calc(33vw - 21px), (max-width: 1272px) calc(17vw - 17px), 195px",
+};
+
 function CollectionTile({ collection, index, hero }: CollectionTileProps) {
   return (
     <Link
@@ -39,7 +50,7 @@ function CollectionTile({ collection, index, hero }: CollectionTileProps) {
           src={collection.coverImage}
           alt=""
           fill
-          sizes={hero ? "(max-width: 640px) 100vw, 1152px" : "(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 600px"}
+          sizes={hero ? COVER_SIZES.hero : COVER_SIZES.tile}
           className="object-cover"
           quality={68}
           priority={index < 2}
@@ -49,7 +60,7 @@ function CollectionTile({ collection, index, hero }: CollectionTileProps) {
         <div className={`mt-1.5 grid gap-1.5 ${hero ? "grid-cols-4" : "grid-cols-3"}`}>
           {collection.strip.map((src) => (
             <div key={src} className="relative aspect-[4/3] overflow-hidden border border-border">
-              <Image src={src} alt="" fill sizes="(max-width: 640px) 33vw, 290px" quality={68} className="object-cover" />
+              <Image src={src} alt="" fill sizes={hero ? STRIP_SIZES.hero : STRIP_SIZES.tile} quality={68} className="object-cover" />
             </div>
           ))}
         </div>

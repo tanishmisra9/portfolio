@@ -22,6 +22,10 @@ type Props = {
 
 const DEFAULT_IMG_W = 4032;
 const DEFAULT_IMG_H = 3024;
+// The column's real width (measured: viewport − ~70px, capped at ~1067px from a ~1135px viewport up), so the browser picks
+// the right file. "100vw" on phones fetched the 1280px file for a 322px image (1080 covers 3×); "896px" undersized desktop.
+const SINGLE_SIZES = "(max-width: 1140px) calc(100vw - 72px), 1068px";
+const DUET_SIZES = "(max-width: 1140px) calc(50vw - 44px), 526px"; // two per row, 16px gap
 
 export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
   const reduceMotion = useReducedMotion();
@@ -80,7 +84,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                   width={photo.width ?? DEFAULT_IMG_W}
                   height={photo.height ?? DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
-                  sizes="(max-width: 768px) 50vw, 448px"
+                  sizes={DUET_SIZES}
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   quality={72}
@@ -97,7 +101,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                   width={photo.duetWith.width ?? DEFAULT_IMG_W}
                   height={photo.duetWith.height ?? DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
-                  sizes="(max-width: 768px) 50vw, 448px"
+                  sizes={DUET_SIZES}
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   quality={72}
@@ -121,7 +125,7 @@ export function PhotoAlbumMotion({ title, slug, description, photos }: Props) {
                   width={photo.width ?? DEFAULT_IMG_W}
                   height={photo.height ?? DEFAULT_IMG_H}
                   style={{ width: "100%", height: "auto" }}
-                  sizes="(max-width: 768px) 100vw, 896px"
+                  sizes={SINGLE_SIZES}
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
                   quality={72}
