@@ -168,8 +168,6 @@ export function AlbumTitle({ title, slug }: Props) {
 
   return (
     <div className={overflowForPhase}>
-      {/* React 19 hoists this <link> into <head>; only loaded on the Super Max route */}
-      <link rel="preload" href="/sfx/passby.mp3" as="audio" type="audio/mpeg" />
       <h1
         className={`${baseClasses} supermax-title relative whitespace-nowrap`}
         data-phase={phase}
