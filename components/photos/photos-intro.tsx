@@ -45,8 +45,13 @@ const T = {
   l0: [0, 0.03] as R, // light mode: the page dims to pre-dawn only after the stage pins (no dark slab scrolling in)
   type: [0.03, 0.095] as R, // typing starts once it is dark enough to read white text
   l1: [0.12, 0.2] as R, // the light horizon: layer 1 rises up the stage and carries beat 1 out, beat 2 in
-  sunset: [0.12, 0.42] as R, // dark mode: the sun sinks through layer 1 (golden hour)
-  sunrise: [0.38, 0.66] as R, // light mode: the sun rises through layer 2 (golden morning)
+  // The sun and the horizon it crosses (see SunAndHorizon). The horizon appears once the light horizon has passed.
+  // Dark mode: the sun sinks from high in golden hour to fully below the horizon by 0.40, just as the second phrase's
+  // ink turns white (T.sky): white text never crosses the bright disc. Light mode: it breaks the horizon at 0.40, just
+  // after the ink has turned dark, and climbs through the golden morning, fading into daylight with l3.
+  horizon: [0.2, 0.24] as R,
+  sunset: [0.2, 0.4] as R,
+  sunrise: [0.4, 0.62] as R,
   pair: { in: [0.12, 0.1201] as R, out: [0.61, 0.64] as R }, // revealed by the horizon's mask, not a fade
   anyone: { words: [0.19, 0.25] as R, select: [0.25, 0.29] as R },
   // The arrow: its curl is drawn in place, then the camera follows the pen down to the
@@ -66,8 +71,46 @@ const T = {
   para: { in: [0.77, 0.79] as R, words: [0.79, 0.94] as R },
 };
 
-const SUN = "absolute left-[62%] top-0 aspect-square w-[min(110vmax,1400px)] -translate-x-1/2";
-const SUN_GRADIENT = "radial-gradient(closest-side, #ffe3a3 0%, rgba(255,214,140,0.6) 35%, rgba(255,200,120,0) 100%)";
+/** Where the horizon sits, as a share of the stage's height (the sun is clipped at this line). */
+const HORIZON_AT = "74%";
+
+/**
+ * A sun you can read as a sun, and the horizon it crosses, so the scroll reads as a sunset (dark mode) or a sunrise
+ * (light mode). The owner only realised that was the idea much later; the old sun was a huge soft glow near the frame's
+ * edge, inside one sky layer for one beat.
+ * - The sun is a disc with a corona (`.pd-sun`), on the LEFT. The arrow's long drop runs down the right and is white in
+ *   dark mode, so a bright disc there would swallow it, and text on the left is dark ink whenever a sun is up.
+ * - It's clipped at the horizon (this holder ends at HORIZON_AT with overflow hidden), so it sets behind the line rather
+ *   than fading out.
+ * - The sun's track is the holder's full height (translateY in % of the holder): 0% puts it at the top, 100% just under
+ *   the horizon, out of sight. Transform only: no layout per frame.
+ * Theme picks which sun shows through `--pd-sunset` / `--pd-sunrise` (0 or 1); theme is never read in JS.
+ */
+function SunAndHorizon({ p }: { p: MotionValue<number> }) {
+  const horizon = useTransform(p, [T.horizon[0], T.horizon[1], T.l3[0], T.l3[1]], [0, 1, 1, 0]);
+  const sunsetY = useTransform(p, [...T.sunset], ["12%", "100%"]); // sinks below the horizon
+  const sunriseY = useTransform(p, [...T.sunrise], ["100%", "10%"]); // climbs out of it
+  const sunriseFade = useTransform(p, [...T.l3], [1, 0]); // melts into daylight
+  return (
+    <motion.div aria-hidden className="pointer-events-none absolute inset-x-0 top-0" style={{ height: HORIZON_AT, opacity: horizon }}>
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0" style={{ opacity: v("sunset") }}>
+          <motion.div className="absolute inset-0" style={{ y: sunsetY }}>
+            <div className="pd-sun" />
+          </motion.div>
+        </div>
+        <motion.div className="absolute inset-0" style={{ opacity: sunriseFade }}>
+          <div className="absolute inset-0" style={{ opacity: v("sunrise") }}>
+            <motion.div className="absolute inset-0" style={{ y: sunriseY }}>
+              <div className="pd-sun" />
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+      <div className="pd-horizon absolute inset-x-0 bottom-0" />
+    </motion.div>
+  );
+}
 
 const SIZE = "text-[clamp(2.75rem,7vw,6rem)]/[1.1]";
 const DISPLAY = `font-display font-bold tracking-tight text-balance ${SIZE} pb-[0.08em]`;
@@ -270,23 +313,32 @@ function handDrawnArrow(A: Pt, B: Pt, em: number, width: number) {
   const r = rng(11);
   const j = (amt: number) => (r() * 2 - 1) * amt * em;
   const inside = (x: number) => Math.min(width - 0.25 * em, Math.max(0.15 * em, x));
-  // The curl loops once, toward open space: right of the word, or back over it when
-  // the word ends at the column edge (phones).
+  // The pen leaves toward open space: right of the word, or back over it when the word ends at the column edge (phones).
   const dir = A[0] + 1.1 * em < width ? 1 : -1;
   const at = (base: Pt, dx: number, dy: number, amt = 0.04): Pt => [inside(base[0] + dir * dx * em + j(amt)), base[1] + dy * em + j(amt)];
-  const curl: Pt[] = [A, at(A, 0.38, -0.3), at(A, 0.88, 0.02), at(A, 0.7, 0.58), at(A, 0.28, 0.46), at(A, 0.42, 1.05)];
-  // The fall: mostly a tall drop with a loose sway, sweeping left to "since" only near
-  // the bottom, so the stroke reads vertical rather than as a diagonal across the page.
-  // A J: a tall, loosely swaying drop down the right, then a sweep left near the
-  // bottom, then straight down into "since". The camera follows the tip's height
-  // (see `tipY`), so on screen the long drop reads as a vertical stroke.
+  // The lead-out: one easy curve out and down into the drop. It replaced a six-point curl that looped up and back
+  // beside the word, the same hook on every load (owner: "a weird hook in the beginning each time").
+  const curl: Pt[] = [A, at(A, 0.32, 0.3), at(A, 0.5, 0.95)];
+  // A J: a tall, gently swaying drop down the right, then a sweep left near the bottom, then straight down into
+  // "since". The camera follows the tip's height (see `tipY`), so on screen the long drop reads as a vertical stroke.
   const start = curl[curl.length - 1];
   const sweepY = B[1] - 1.05 * em; // the sideways run, in the gap just above "since"
   const drop = sweepY - start[1];
-  const sway = [0.35, -0.25, 0.3, -0.12].map((s) => s * (0.7 + r() * 0.6));
+  // Half the old sway (±0.35em zig-zagged): the line reads straighter while still hand-drawn.
+  const dropAt = (f: number, s: number): Pt => [inside(start[0] + s * 0.5 * (0.7 + r() * 0.6) * em), start[1] + drop * f + j(0.06)];
+  // One cursive loop for fun (owner), partway down, turning toward open space (away from the text).
+  const loopR = Math.max(0.6 * em, 26) * (0.95 + r() * 0.1); // big enough to read as a flourish on a stroke this long
+  const loopFrom = dropAt(0.4, 0.1);
+  const loop = cursiveLoop(loopFrom, [0, 1], [dir, 0], loopR);
+  const resume = Math.min(0.72, 0.4 + loop.advance / Math.max(1, drop) + 0.05); // just past where the loop rejoins the drop
   const left = B[0] - 0.42 * em; // the corner the pencil rounds before turning in at "since"
   const fall: Pt[] = [
-    ...sway.map((sw, k): Pt => [inside(start[0] + sw * em), start[1] + drop * (0.15 + 0.18 * k) + j(0.1)]),
+    dropAt(0.17, 0.35),
+    dropAt(0.31, -0.2),
+    loopFrom,
+    ...loop.pts.map(([x, y]): Pt => [inside(x), y]),
+    dropAt(resume, 0.25),
+    dropAt(Math.max(resume + 0.12, 0.82), -0.1),
     [inside(start[0] - 0.6 * em), sweepY - 0.1 * em], // the turn
     [(start[0] + left) / 2 + j(0.2), sweepY + j(0.08)], // the sweep
     [left, sweepY + 0.4 * em], // rounding the corner
@@ -334,7 +386,8 @@ function handDrawnArrow(A: Pt, B: Pt, em: number, width: number) {
       acc += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
       i++;
     }
-    tipY.push(pts[i][1]);
+    // Never back up: the loop briefly climbs, and the camera following that would jerk upward mid-fall.
+    tipY.push(Math.max(pts[i][1], tipY[tipY.length - 1] ?? -Infinity));
   }
   return { body: smooth(pts) + head, curlFrac: curlLen / all, bodyFrac: total / all, tipY };
 }
@@ -366,6 +419,22 @@ function arrowHead(B: Pt, from: Pt, em: number, r: () => number) {
  * loosely swaying fall down the gap, then a short straight run so the head points straight down into the cover.
  * Same construction as the intro arrow (seeded jitter, Catmull-Rom, tiny wobble), smaller and with a fixed seed.
  */
+/**
+ * A cursive loop on a stroke: the pen runs forward, curls back over itself and carries on, crossing its own line (a
+ * prolate trochoid, forward speed k < radius R). A circle tangent to the line instead looked like a bead on a string.
+ * `P` is where it starts, `d` the unit direction of travel, `n` the unit side it turns toward. Returns the loop's
+ * points (to splice into a stroke's waypoints) and how far along `d` the stroke has advanced when it comes back.
+ */
+function cursiveLoop(P: Pt, d: Pt, n: Pt, R: number): { pts: Pt[]; advance: number } {
+  const k = 0.38 * R;
+  const at = (phi: number): Pt => {
+    const along = k * phi + R * Math.sin(phi);
+    const side = R * (1 - Math.cos(phi));
+    return [P[0] + d[0] * along + n[0] * side, P[1] + d[1] * along + n[1] * side];
+  };
+  return { pts: [1, 2, 3, 4, 5, 6, 7].map((i) => at((i / 7) * 2 * Math.PI)), advance: 2 * Math.PI * k };
+}
+
 function handDrawnPointer(A: Pt, B: Pt, em: number, width: number) {
   const r = rng(23);
   const j = (amt: number) => (r() * 2 - 1) * amt * em;
@@ -398,17 +467,9 @@ function handDrawnPointer(A: Pt, B: Pt, em: number, width: number) {
   // line: the pen runs forward, curls back over itself and carries on (a prolate trochoid: forward speed k < radius R).
   // A circle tangent to the line instead looked like beads stuck on a string. Same turning side as the first loop,
   // sizes a little uneven, like a hand.
-  const loopAt = (t: number, R: number): { pts: Pt[]; advance: number } => {
-    const P = arcAt(t);
+  const loopAt = (t: number, R: number) => {
     const d = arcDir(t);
-    const n: Pt = [-d[1] * -dir, d[0] * -dir]; // the side the loop turns toward
-    const k = 0.38 * R;
-    const at = (phi: number): Pt => {
-      const along = k * phi + R * Math.sin(phi);
-      const side = R * (1 - Math.cos(phi));
-      return [P[0] + d[0] * along + n[0] * side, P[1] + d[1] * along + n[1] * side];
-    };
-    return { pts: [1, 2, 3, 4, 5, 6, 7].map((i) => at((i / 7) * 2 * Math.PI)), advance: 2 * Math.PI * k };
+    return cursiveLoop(arcAt(t), d, [-d[1] * -dir, d[0] * -dir], R);
   };
   const loopR = (s: number) => Math.max(0.32 * em, 15) * s * (0.9 + r() * 0.2);
   const l1 = loopAt(0.35, loopR(1));
@@ -635,8 +696,6 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
   };
   const l2 = useTransform(p, [...T.l2], [0, 1]);
   const l3 = useTransform(p, [...T.l3], [0, 1]);
-  const sunsetY = useTransform(p, [...T.sunset], ["-25%", "30%"]); // sinks below the horizon
-  const sunriseY = useTransform(p, [...T.sunrise], ["35%", "-20%"]); // climbs out of it
 
   const b1 = useTransform(p, (x): number => (x < T.l1[1] ? 1 : 0)); // the horizon's mask carries it out
   const b1Mask = useTransform(p, (x) => textMask(b1Ref.current, x, false));
@@ -702,15 +761,12 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
       {/* Pinned at the very top so the sky runs behind the glass nav. The nav reads on it
           because it switches ink per sky (html[data-pd-sky], see skyBehindNav). */}
       <div ref={stageRef} className="sticky top-0 h-[100svh] overflow-hidden">
-        {/* Light layers: opacity and the suns' y animate; layer 1 also rises in behind a mask (the horizon). */}
+        {/* Light layers: their opacity animates; layer 1 also rises in behind a mask (the light horizon). */}
         <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l0, background: v("l0") }} />
-        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l1, background: v("l1"), maskImage: l1Mask, WebkitMaskImage: l1Mask }}>
-          <motion.div className={SUN} style={{ y: sunsetY, opacity: v("sunset"), background: SUN_GRADIENT }} />
-        </motion.div>
-        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l2, background: v("l2") }}>
-          <motion.div className={SUN} style={{ y: sunriseY, opacity: v("sunrise"), background: SUN_GRADIENT }} />
-        </motion.div>
+        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l1, background: v("l1"), maskImage: l1Mask, WebkitMaskImage: l1Mask }} />
+        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l2, background: v("l2") }} />
         <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l3, background: v("l3") }} />
+        <SunAndHorizon p={p} />
 
         <div className="absolute inset-x-6 bottom-8 top-24 grid grid-cols-[minmax(0,1fr)] items-center md:inset-x-16">
           <div className="relative mx-auto grid h-full w-full max-w-6xl grid-cols-[minmax(0,1fr)] items-center">
