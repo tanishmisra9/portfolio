@@ -19,6 +19,13 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "25mb",
     },
   },
+  // public/ assets had no browser cache lifetime (Vercel serves them max-age=0, must-revalidate), so every visit
+  // revalidated each file: 75+ requests before the /f1 lights ran, plus every sound and font. The names aren't
+  // versioned, so not `immutable`: a replaced file reaches visitors within a day.
+  async headers() {
+    const cache = [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }];
+    return ["/f1/:path*", "/sfx/:path*", "/fonts/:path*", "/heart.png"].map((source) => ({ source, headers: cache }));
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 896, 1080, 1280, 1536],

@@ -214,6 +214,7 @@ CPU, comparing old and new builds in alternating runs. The tools are in `scripts
 | /photos collection covers no longer `priority` (they sit ~7 screens down) | No image preloads or image fetches before the reader scrolls; fonts, JS and hydration get the bandwidth |
 | /quotes: Familjen Grotesk italic dropped (every quote treatment is upright) | /quotes fonts **14 files / 243 kB → 13 / 223 kB** |
 | Shutter counter GET cached at the CDN for 10 s (+60 s stale); POST and failed reads stay uncached | A /photos view no longer costs a serverless invocation and a Neon round trip just to seed the counter |
+| `public/` assets (/f1, /sfx, /fonts, heart.png) get a one-day browser cache (+7 days stale) | Repeat visits stop revalidating every file (75+ conditional requests before the /f1 lights ran); names aren't versioned, so a replaced file reaches visitors within a day |
 | Radio easter egg ships measured gains instead of downloading every clip per visitor | Was about **75% of the free Blob transfer quota**; a trigger now fetches only the clip it plays |
 | "Mobile photography." glow breathes on its own composited layer (opacity) instead of animating three large blurred text-shadows | GPU work while scrolling the note **−89%** (437 → 49 ms per 100 frames); collections style/layout/paint 81/59/50 → 15/1/2 |
 | Nav bar: opaque tint instead of `backdrop-filter: blur` (the radius didn't matter; the filter itself did) | Graphics pipeline **−28%**, frame drawing about **8× lighter**, buffer swaps halved on every scroll frame of every page |
