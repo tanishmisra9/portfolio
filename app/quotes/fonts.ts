@@ -31,7 +31,7 @@ export const bricolage = Bricolage_Grotesque({
 export const familjen = Familjen_Grotesk({
   subsets: ["latin"],
   weight: ["400", "700"],
-  style: ["normal", "italic"],
+  style: ["normal"], // every quote treatment is upright (quote-cloud.tsx); the italic was a preloaded file nothing used
   variable: "--font-familjen",
   display: "swap",
 });
