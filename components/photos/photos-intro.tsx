@@ -78,7 +78,7 @@ const HORIZON_AT = "74%";
  * A sun you can read as a sun, and the horizon it crosses, so the scroll reads as a sunset (dark mode) or a sunrise
  * (light mode). The owner only realised that was the idea much later; the old sun was a huge soft glow near the frame's
  * edge, inside one sky layer for one beat.
- * - The sun is a disc with a corona (`.pd-sun`), on the LEFT. The arrow's long drop runs down the right and is white in
+ * - The sun is a plain flat disc (`.pd-sun`), on the LEFT. The arrow's long drop runs down the right and is white in
  *   dark mode, so a bright disc there would swallow it, and text on the left is dark ink whenever a sun is up.
  * - It's clipped at the horizon (this holder ends at HORIZON_AT with overflow hidden), so it sets behind the line rather
  *   than fading out.
