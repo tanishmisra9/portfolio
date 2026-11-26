@@ -304,6 +304,23 @@ Several review rounds (`/code-review` medium and high, plus an audit) were fixed
   animation. It's harmless in production, and still to fix.
 - **Not pushed:** `v2` exists only locally.
 
+### Perf opportunities left alone because they'd change a deliberate choice
+
+Found in the `perf-sweep` audit; each would trade away something chosen on purpose, so they're the owner's call.
+
+| Opportunity | Would gain | Costs this deliberate choice |
+|---|---|---|
+| Lazy-load the /photos shutter and focus-beep sounds (70 kB) on first hover or press | 70 kB off every /photos load | The click sound plays instantly inside the gesture; a first-click fetch could be late or silent on iOS |
+| Defer the hero pit-stop clip (55–64 kB, one of two rolled per visit) to idle or first hover | ~60 kB off every home load | `run()` must find the audio ready inside the click (PITSTOP.md) |
+| Show the hero letters and tagline in the server HTML instead of fading them in after hydration | Home LCP no longer waits for hydration plus ~0.85 s | The scatter-in entrance of the name |
+| Same for album photos (wait for the title's entrance) and the first paragraph of each post (ScrollReveal) | Content visible at first paint | "The gallery never runs ahead of those headings" (scroll-reveal.tsx) |
+| Mount the Snowfall canvas only on click, and cap its DPR at 2 | ~12 MB less canvas memory at 3x, and one less full-screen layer while scrolling | The snow that falls when the album opens |
+| Projects "show more": animate opacity and translate instead of `height: auto` plus `filter: blur` | No layout and filter work per frame for 0.6 s | The current expand-and-unblur reveal |
+| Quote cloud: seed the layout once per mount, or wait for fonts before the first reveal | Quotes stop jumping when a late font re-runs the pack | Re-packing on font load is what prevents post-swap overlaps (`app/quotes/CLAUDE.md`) |
+| `/f1`: a small car frame set for phones (`scripts/build-f1-assets.py`, like the footage `sm` set) | About 2–3 MB less on phones | Needs the source clip (not in the repo) to rebuild the assets |
+| Lazy-load each album's effect (`FogCanvas`, `FireworkCanvas`, `NYCTitle`, `SnowfallCanvas`) with `next/dynamic` | A few kB of JS per album page | The first fog or firework click would wait on a network fetch |
+| Pause the /photos typing caret's blink once scrolled past | Negligible (it sits at opacity 0) | Nothing; not worth a change |
+
 ### Not carried over from main
 
 `main` has two commits that `v2` deliberately leaves out:
