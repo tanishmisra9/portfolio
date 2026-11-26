@@ -9,7 +9,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import {
-  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -108,29 +107,33 @@ export function SiteHeader() {
 
   const logoHref = pathname === "/" ? "#top" : "/#top";
 
-  const updateActiveSection = useCallback(() => {
+  // Scroll-spy for the home page's sections. Listens only on "/" (it used to run on every scroll event of every page just
+  // to set null), and at most once per frame: computeActiveSectionId reads six section rects.
+  useEffect(() => {
     if (pathname !== "/") {
       setActiveSectionId(null);
       return;
     }
-    const next = computeActiveSectionId();
-    setActiveSectionId((prev) => (prev === next ? prev : next));
-  }, [pathname]);
-
-  useEffect(() => {
-    updateActiveSection();
-  }, [updateActiveSection]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", updateActiveSection, { passive: true });
-    window.addEventListener("resize", updateActiveSection);
-    window.addEventListener("hashchange", updateActiveSection);
-    return () => {
-      window.removeEventListener("scroll", updateActiveSection);
-      window.removeEventListener("resize", updateActiveSection);
-      window.removeEventListener("hashchange", updateActiveSection);
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const next = computeActiveSectionId();
+      setActiveSectionId((prev) => (prev === next ? prev : next));
     };
-  }, [updateActiveSection]);
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    window.addEventListener("hashchange", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("hashchange", schedule);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     setMounted(true);
