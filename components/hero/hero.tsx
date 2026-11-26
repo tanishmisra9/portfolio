@@ -26,6 +26,7 @@ export function Hero({ subtitle }: HeroProps) {
   /** The pit stop (4 tires, one sound, drive off). Its effect has stable deps: a re-run mid-stop would strand the phase. */
   const { mv, run, isIdle } = usePitstop(reduceHeroMotion);
   const isDesktopRef = useRef(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
   const tanishMagnetRef = useRef<
     ((clientX: number, clientY: number) => void) | null
@@ -74,7 +75,7 @@ export function Hero({ subtitle }: HeroProps) {
     let lastX = 0;
     let lastY = 0;
     const move = (e: globalThis.PointerEvent) => {
-      if (!isDesktopRef.current) return;
+      if (!isDesktopRef.current || !onScreen) return;
       lastX = e.clientX;
       lastY = e.clientY;
       if (frame) return;
@@ -94,11 +95,20 @@ export function Hero({ subtitle }: HeroProps) {
       reset();
       return;
     }
+    // Only while the hero is on screen: the listener is window-wide, and reading 11 letter rects a frame while the pointer
+    // moves over Projects or Skills was wasted work. Leaving the screen lets the letters settle home.
+    let onScreen = true;
+    const io = new IntersectionObserver(([e]) => {
+      onScreen = e.isIntersecting;
+      if (!onScreen) reset();
+    });
+    if (sectionRef.current) io.observe(sectionRef.current);
     window.addEventListener("pointermove", move);
     document.documentElement.addEventListener("pointerleave", reset);
     window.addEventListener("pointercancel", reset);
     return () => {
       cancelAnimationFrame(frame);
+      io.disconnect();
       window.removeEventListener("pointermove", move);
       document.documentElement.removeEventListener("pointerleave", reset);
       window.removeEventListener("pointercancel", reset);
@@ -106,7 +116,7 @@ export function Hero({ subtitle }: HeroProps) {
   }, [isIdle, reduceHeroMotion]);
 
   return (
-    <section className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[85vh] md:items-center md:py-24">
+    <section ref={sectionRef} className="relative z-0 isolate flex min-h-0 items-start overflow-hidden px-6 pb-8 pt-16 md:min-h-[85vh] md:items-center md:py-24">
       <div className="mx-auto w-full max-w-6xl">
         <div className="mb-6 flex flex-col items-start md:mb-0">
           <HeroNameMotion>
