@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* YD Gothic 130 only — public/fonts/yd-gothic-130.woff2 */
+/* YD Gothic 130 only — public/fonts/yd-gothic-130.woff2 (989 kB)
+   The ranges stop at U+FFFF and skip the variation selectors (FE00-FE0F): the font's last glyph is U+FFE6 and it has no
+   emoji above the BMP. Claiming up to U+10FFFF made any emoji in published text (a 😘 or 🇧🇷 in an album caption)
+   download the whole 989 kB file to look for a glyph it doesn't have, before falling through to the system emoji font. */
 @font-face {
   font-family: "YD Gothic";
   src: url("/fonts/yd-gothic-130.woff2") format("woff2");
@@ -14,7 +17,7 @@
      font-sans stack). It must be Inter Tight, not a second Inter: next/font names every Inter instance "Inter", so the
      variable face would win the weight match for the light body weight and render near-invisible periods. */
   unicode-range: U+0000-0020, U+0023-0026, U+002A-002B, U+0030-0039, U+003C-003E, U+0040-005A, U+005E-007E,
-    U+00A0-2012, U+2015-2017, U+201E-2025, U+2027-10FFFF;
+    U+00A0-2012, U+2015-2017, U+201E-2025, U+2027-FDFF, U+FE10-FFFF;
 }
 
 @font-face {
@@ -27,7 +30,7 @@
      next to its light letters. Those characters fall through to Inter Tight (var(--font-inter-punct), next in the
      font-sans stack). It must be Inter Tight, not a second Inter: see "Typography" in CLAUDE.md. */
   unicode-range: U+0000-0020, U+0023-0026, U+002A-002B, U+0030-0039, U+003C-003E, U+0040-005A, U+005E-007E,
-    U+00A0-2012, U+2015-2017, U+201E-2025, U+2027-10FFFF;
+    U+00A0-2012, U+2015-2017, U+201E-2025, U+2027-FDFF, U+FE10-FFFF;
 }
 
 /*
