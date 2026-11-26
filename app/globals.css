@@ -388,6 +388,45 @@ html.dark[data-pd-sky="2"] { --nav-tint: rgb(36 54 110 / 1); }        /* blue ho
 }
 
 /* Typing caret (photos intro). Hard on/off, like a real text caret. */
+/* Hero name idle drift (HeroNameMotion): compositor-only, replaces a Framer loop that ran JS every frame forever. */
+.hero-drift {
+  animation: hero-drift 18s ease-in-out infinite;
+}
+.hero-skew {
+  animation: hero-skew 18s ease-in-out infinite;
+}
+@keyframes hero-drift {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  33.333% {
+    translate: 2.2px -1.8px;
+  }
+  66.667% {
+    translate: -1.4px 1px;
+  }
+}
+@keyframes hero-skew {
+  0%,
+  50%,
+  100% {
+    transform: skewX(0deg);
+  }
+  25% {
+    transform: skewX(0.35deg);
+  }
+  75% {
+    transform: skewX(-0.28deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-drift,
+  .hero-skew {
+    animation: none;
+  }
+}
+
 @keyframes caret {
   50% {
     opacity: 0;
