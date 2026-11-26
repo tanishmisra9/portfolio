@@ -20,6 +20,11 @@ const lastShot = new Map<string, number>();
 const reply = (count: number | null) =>
   Response.json({ count }, { headers: { "Cache-Control": "no-store" } });
 
+// The page's GET on mount may be a few seconds stale: it only seeds the counter, the title's own clicks show the POST's
+// fresh count, and the client never moves the counter backwards (Math.max). Cached at the CDN, every /photos view no
+// longer costs a function invocation and a database round trip. A failed read (null) is never cached.
+const CACHED_GET = "public, s-maxage=10, stale-while-revalidate=60";
+
 async function read() {
   const [row] = await db.select({ count: shutterCount.count }).from(shutterCount);
   return row?.count ?? 0;
@@ -27,7 +32,7 @@ async function read() {
 
 export async function GET() {
   try {
-    return reply(await read());
+    return Response.json({ count: await read() }, { headers: { "Cache-Control": CACHED_GET } });
   } catch (e) {
     console.error("shutter count read failed:", e);
     return reply(null);
