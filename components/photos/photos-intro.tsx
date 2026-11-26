@@ -92,16 +92,16 @@ function SunAndHorizon({ p }: { p: MotionValue<number> }) {
   const sunriseY = useTransform(p, [...T.sunrise], ["100%", "10%"]); // climbs out of it
   const sunriseFade = useTransform(p, [...T.l3], [1, 0]); // melts into daylight
   return (
-    <motion.div aria-hidden className="pointer-events-none absolute inset-x-0 top-0" style={{ height: HORIZON_AT, opacity: horizon }}>
+    <motion.div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 [will-change:opacity]" style={{ height: HORIZON_AT, opacity: horizon }}>
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0" style={{ opacity: v("sunset") }}>
-          <motion.div className="absolute inset-0" style={{ y: sunsetY }}>
+          <motion.div className="absolute inset-0 will-change-transform" style={{ y: sunsetY }}>
             <div className="pd-sun" />
           </motion.div>
         </div>
-        <motion.div className="absolute inset-0" style={{ opacity: sunriseFade }}>
+        <motion.div className="absolute inset-0 [will-change:opacity]" style={{ opacity: sunriseFade }}>
           <div className="absolute inset-0" style={{ opacity: v("sunrise") }}>
-            <motion.div className="absolute inset-0" style={{ y: sunriseY }}>
+            <motion.div className="absolute inset-0 will-change-transform" style={{ y: sunriseY }}>
               <div className="pd-sun" />
             </motion.div>
           </div>
@@ -188,7 +188,7 @@ function LitWord({ p, range, color, select, circle, sound, anchor, children }: {
 }) {
   const opacity = useTransform(p, [...range], [0.15, 1]);
   return (
-    <motion.span {...anchorAttr(anchor)} style={{ opacity, color, textShadow: color ? glow(color) : undefined }}>
+    <motion.span {...anchorAttr(anchor)} className="[will-change:opacity]" style={{ opacity, color, textShadow: color ? glow(color) : undefined }}>
       {select && circle ? <PencilCircle p={p} range={circle} sound={sound}>{children}</PencilCircle> : children}{" "}
     </motion.span>
   );
@@ -655,6 +655,10 @@ function PencilCircle({ p, range, sound, children }: { p?: MotionValue<number>; 
 }
 
 // ── Scrubbed version ──
+// Every element whose opacity or transform is scrubbed per frame carries `will-change`. Without its own layer, WebKit
+// repaints it on every change, and iOS re-rasterises those tiles (and the gradients and glows under them) on the CPU at
+// 3x: an iPhone recording showed the stage updating at ~10 fps while the scroll itself stayed smooth. Chromium rasters
+// on the GPU, so its measurements don't show this. Anything new that a motion value moves needs the same.
 
 function ScrollIntro({ sound }: { sound: SoundRef }) {
   const ref = useRef<HTMLElement>(null);
@@ -762,15 +766,15 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
           because it switches ink per sky (html[data-pd-sky], see skyBehindNav). */}
       <div ref={stageRef} className="sticky top-0 h-[100svh] overflow-hidden">
         {/* Light layers: their opacity animates; layer 1 also rises in behind a mask (the light horizon). */}
-        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l0, background: v("l0") }} />
-        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l1, background: v("l1"), maskImage: l1Mask, WebkitMaskImage: l1Mask }} />
-        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l2, background: v("l2") }} />
-        <motion.div aria-hidden className="absolute inset-0" style={{ opacity: l3, background: v("l3") }} />
+        <motion.div aria-hidden className="absolute inset-0 [will-change:opacity]" style={{ opacity: l0, background: v("l0") }} />
+        <motion.div aria-hidden className="absolute inset-0 [will-change:opacity]" style={{ opacity: l1, background: v("l1"), maskImage: l1Mask, WebkitMaskImage: l1Mask }} />
+        <motion.div aria-hidden className="absolute inset-0 [will-change:opacity]" style={{ opacity: l2, background: v("l2") }} />
+        <motion.div aria-hidden className="absolute inset-0 [will-change:opacity]" style={{ opacity: l3, background: v("l3") }} />
         <SunAndHorizon p={p} />
 
         <div className="absolute inset-x-6 bottom-8 top-24 grid grid-cols-[minmax(0,1fr)] items-center md:inset-x-16">
           <div className="relative mx-auto grid h-full w-full max-w-6xl grid-cols-[minmax(0,1fr)] items-center">
-            <motion.h2 ref={b1Ref} aria-label={TYPED} style={{ opacity: b1, pointerEvents: h1, color: v("t1"), maskImage: b1Mask, WebkitMaskImage: b1Mask }} className={`${DISPLAY} col-start-1 row-start-1`}>
+            <motion.h2 ref={b1Ref} aria-label={TYPED} style={{ opacity: b1, pointerEvents: h1, color: v("t1"), maskImage: b1Mask, WebkitMaskImage: b1Mask }} className={`${DISPLAY} col-start-1 row-start-1 [will-change:opacity]`}>
               <Typed p={p} />
             </motion.h2>
 
@@ -779,7 +783,7 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
             <motion.h2
               ref={pairRef}
               style={{ y: trackY, opacity: pair, pointerEvents: h2, maskImage: pairMask, WebkitMaskImage: pairMask }}
-              className={`${SIZE} absolute inset-x-0 top-1/2 flex flex-col gap-[120svh]`}
+              className={`${SIZE} absolute inset-x-0 top-1/2 flex flex-col gap-[120svh] [will-change:transform,opacity]`}
             >
               <span data-half className={`${DISPLAY} pd-b2 block`}>
                 <LitWords p={p} segs={ANYONE} range={T.anyone.words} circle={T.anyone.select} sound={sound} anchor="last" />
@@ -791,13 +795,13 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
               <ArrowSvg path={arrow} draw={draw} fade={arrowFade} sound={sound} />
             </motion.h2>
 
-            <motion.div style={{ opacity: b4, pointerEvents: h4, color: v("t4") }} className="col-start-1 row-start-1 flex flex-col gap-8 md:gap-10">
+            <motion.div style={{ opacity: b4, pointerEvents: h4, color: v("t4") }} className="col-start-1 row-start-1 flex flex-col gap-8 md:gap-10 [will-change:opacity]">
               <NeonSign signRef={signRef}>
                 {letters.map((c, i) => (
                   <NeonLetter key={i} p={p} t={T.neon.letters[0] + i * lStep}>{c}</NeonLetter>
                 ))}
               </NeonSign>
-              <motion.p style={{ opacity: para }} className={BODY}>
+              <motion.p style={{ opacity: para }} className={`${BODY} [will-change:opacity]`}>
                 <LitWords p={p} segs={PARAGRAPH} range={T.para.words} />
               </motion.p>
             </motion.div>

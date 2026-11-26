@@ -39,7 +39,8 @@ export function PencilStroke({ d, base, draw, fade, voice, className = "" }: Pro
     return v >= minFrac ? 1 : 0;
   });
 
-  // The scroll-back fade is a plain style write on the <svg>, not a Framer value on the path. Framer re-renders an SVG
+  // The scroll-back fade is a plain style write on the <svg> (its own layer, `will-change`, so iOS composites the fade
+  // instead of repainting the page under the stroke), not a Framer value on the path. Framer re-renders an SVG
   // element's whole attribute set and measures it (getBBox, a forced layout) on every change, so fading through it made
   // scrolling up cost as much as drawing (measured: forced layouts 2 → 32 per 100 frames in the note).
   useEffect(() => {
@@ -74,7 +75,7 @@ export function PencilStroke({ d, base, draw, fade, voice, className = "" }: Pro
     <svg
       ref={svgRef}
       aria-hidden
-      className={`pointer-events-none absolute inset-0 size-full overflow-visible ${className}`}
+      className={`pointer-events-none absolute inset-0 size-full overflow-visible [will-change:opacity] ${className}`}
       fill="none"
       stroke="currentColor"
       strokeWidth={base}
