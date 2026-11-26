@@ -151,16 +151,23 @@ function F1IntroRun({ onReplay, refocus }: { onReplay: (byKeyboard: boolean) => 
     let alive = true;
     (async () => {
       try {
+        // Lights-out waits for the car AND footage frame 0, so frame 0 loads alongside the car (it used to start only after
+        // all car frames had decoded, a serial step on the critical path). The rest of the footage still waits for the car.
+        const set = window.innerWidth < 900 ? "sm" : "lg";
+        const footageManifest = fetch("/f1/footage/manifest.json").then((r) => r.json() as Promise<FootageManifest>);
+        const firstFrame = footageManifest
+          .then(() => loadImage(`/f1/footage/${set}/${pad(0)}.webp`))
+          .catch(() => null);
         const m: CarManifest = await (await fetch("/f1/car/manifest.json")).json();
         const imgs = await Promise.all(m.frames.map((_, i) => loadImage(`/f1/car/${pad(i)}.webp`)));
         if (!alive) return;
         assets.current.car = { m, imgs };
 
-        const fm: FootageManifest = await (await fetch("/f1/footage/manifest.json")).json();
-        const set = window.innerWidth < 900 ? "sm" : "lg";
+        const fm = await footageManifest;
         const fimgs: (HTMLImageElement | null)[] = new Array(fm.frames.length).fill(null);
+        fimgs[0] = await firstFrame;
         assets.current.footage = { m: fm, imgs: fimgs };
-        let next = 0;
+        let next = 1;
         const worker = async () => {
           while (alive && next < fimgs.length) {
             const i = next++;
