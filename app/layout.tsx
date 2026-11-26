@@ -12,10 +12,14 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
+// Not preloaded (here or for Inter Tight below): both are fallbacks behind Poppins everywhere except the /quotes cloud, and
+// preloading put 69 kB (47 + 22) of fonts no other page paints on every page's critical path. Not preloaded, a face is
+// still declared and the browser fetches it only where text actually renders in it.
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  preload: false,
 });
 
 // Static-weight face used only for the punctuation YD Gothic is excluded from (see the @font-face unicode-range in
@@ -28,6 +32,7 @@ const interPunct = Inter_Tight({
   weight: "400",
   variable: "--font-inter-punct",
   display: "swap",
+  preload: false,
   // No generated "Inter Tight Fallback" (size-adjusted local Arial, no unicode-range): inside --font-inter-punct it would
   // catch every character Inter Tight lacks before var(--font-inter) got the chance.
   adjustFontFallback: false,
