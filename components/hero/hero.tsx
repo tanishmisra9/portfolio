@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { m as motion, useReducedMotion } from "framer-motion";
 import { useHomeIntroMarkDone } from "@/components/home-intro-gate";
 import {
   HERO_TAGLINE_ENTER_DELAY_S,

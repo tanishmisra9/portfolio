@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m as motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { PHOTOS_ENTRANCE_STAGGER_S } from "@/lib/photos-motion";
 

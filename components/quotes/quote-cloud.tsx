@@ -1,7 +1,7 @@
 "use client";
 
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
-import { motion, useReducedMotion } from "framer-motion";
+import { m as motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m as motion, useReducedMotion } from "framer-motion";
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 import { HALF_PRESS, move, type HalfPress } from "@/lib/state-machines";
 

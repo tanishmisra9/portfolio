@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Copy } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { m as motion, useReducedMotion, type Variants } from "framer-motion";
 import type { BlogPostMeta } from "@/types/content";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];

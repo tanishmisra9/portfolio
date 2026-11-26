@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { m as motion, useReducedMotion } from "framer-motion";
 import { PhotosHeader } from "@/components/photos/photos-header";
 import { PencilNote, PhotosIntro, useIntroSound } from "@/components/photos/photos-intro";
 import { photosEntranceVariants } from "@/lib/photos-motion";

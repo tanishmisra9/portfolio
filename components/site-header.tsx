@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m as motion } from "framer-motion";
 import { SITE_HEADER_FADE_DURATION_S } from "@/lib/site-motion";
 import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { Tooltip } from "@/components/ui/tooltip";

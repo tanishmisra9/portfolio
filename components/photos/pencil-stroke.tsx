@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
-import { motion, useTransform, type MotionValue } from "framer-motion";
+import { m as motion, useTransform, type MotionValue } from "framer-motion";
 import { followStroke, type PencilMove, type PencilVoice } from "pencil-voice";
 import { PENCIL_LINE } from "@/lib/pencil/config";
 

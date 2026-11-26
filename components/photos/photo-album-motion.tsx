@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { m as motion, useReducedMotion } from "framer-motion";
 import { useCallback, useRef, useState } from "react";
 import { AlbumTitle } from "@/components/photos/album-title";
 import { ScrollReveal } from "@/components/scroll-reveal";

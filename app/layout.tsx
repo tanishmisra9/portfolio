@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Inter_Tight, Poppins, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import { MotionConfig } from "framer-motion";
+import { MotionProvider } from "@/components/motion-provider";
 import { SiteChrome } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
 import { TapFill } from "@/components/ui/tap-fill";
@@ -102,12 +102,12 @@ export default async function RootLayout({
           >
             Skip to content
           </a>
-          <MotionConfig reducedMotion="user">
+          <MotionProvider>
           <SiteChrome radioSamples={radioSamples} radioGains={radioGains} radioTriggers={radioTriggers} />
           {children}
           <SiteFooter social={social} />
           <TapFill />
-          </MotionConfig>
+          </MotionProvider>
           </div>
         </ThemeProvider>
         <Analytics />

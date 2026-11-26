@@ -10,7 +10,7 @@ import {
   type ReactElement,
 } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m as motion, useReducedMotion } from "framer-motion";
 
 // ponytail: magic numbers kept local, not worth a shared constants file for a few numbers used once
 const SHOW_DELAY_MS = 500;
