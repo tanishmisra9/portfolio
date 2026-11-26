@@ -13,7 +13,7 @@ const orgPillClassName =
 
 function CoursePill({ label }: { label: string }) {
   return (
-    <li className="group relative inline-flex rounded-none border border-border-strong bg-fg/[0.06] backdrop-blur-xl px-3 py-1 font-sans text-[10px] uppercase tracking-widest text-fg select-none cursor-default transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1]">
+    <li className="group relative inline-flex rounded-none border border-border-strong bg-fg/[0.06] px-3 py-1 font-sans text-[10px] uppercase tracking-widest text-fg select-none cursor-default transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1]">
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-none opacity-0 transition-opacity duration-300 group-hover:opacity-100"

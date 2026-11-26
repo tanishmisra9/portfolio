@@ -91,7 +91,7 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
         <ul className="mt-12 space-y-5">
           {posts.map((post) => (
             <motion.li key={post.slug} variants={item}>
-              <div className="group/card relative block rounded-md border border-border bg-surface p-8 backdrop-blur-md transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-x-0.5 hover:-translate-y-0.5 hover:border-fg hover:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] has-[:focus-visible]:-translate-x-0.5 has-[:focus-visible]:-translate-y-0.5 has-[:focus-visible]:border-fg has-[:focus-visible]:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 motion-reduce:has-[:focus-visible]:translate-x-0 motion-reduce:has-[:focus-visible]:translate-y-0">
+              <div className="group/card relative block rounded-md border border-border bg-surface p-8 transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-x-0.5 hover:-translate-y-0.5 hover:border-fg hover:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] has-[:focus-visible]:-translate-x-0.5 has-[:focus-visible]:-translate-y-0.5 has-[:focus-visible]:border-fg has-[:focus-visible]:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 motion-reduce:has-[:focus-visible]:translate-x-0 motion-reduce:has-[:focus-visible]:translate-y-0">
                 <CopyLink slug={post.slug} />
                 {/* Flush with the title and description (one left axis), body face, tabular figures. */}
                 <time dateTime={post.date} className="block text-sm tabular-nums text-dim">

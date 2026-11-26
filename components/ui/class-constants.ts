@@ -1,8 +1,8 @@
 export const PILL_CLASSES =
-  "rounded-none border border-border bg-surface backdrop-blur-md px-3 py-1 text-muted select-none cursor-default";
+  "rounded-none border border-border bg-surface px-3 py-1 text-muted select-none cursor-default";
 
 export const GLASS_BUTTON_CLASSES =
-  "group relative inline-flex items-center justify-center rounded-none border border-border-strong bg-fg/[0.06] px-6 py-3 font-sans text-xs uppercase tracking-[0.2em] text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
+  "group relative inline-flex items-center justify-center rounded-none border border-border-strong bg-fg/[0.06] px-6 py-3 font-sans text-xs uppercase tracking-[0.2em] text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 export const GLASS_BUTTON_SHEEN_CLASSES =
   "pointer-events-none absolute inset-0 rounded-none opacity-0 transition-opacity duration-300 group-hover:opacity-100";
