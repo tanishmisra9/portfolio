@@ -391,6 +391,16 @@ html.dark[data-pd-sky="2"] { --nav-tint: rgb(36 54 110 / 1); }        /* blue ho
 }
 
 /* Typing caret (photos intro). Hard on/off, like a real text caret. */
+/* Site header entrance (SiteHeader): 0.24s ease-out from first paint, not from hydration. */
+.site-header-in {
+  animation: site-header-in 0.24s ease-out;
+}
+@keyframes site-header-in {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Hero name idle drift (HeroNameMotion): compositor-only, replaces a Framer loop that ran JS every frame forever. */
 .hero-drift {
   animation: hero-drift 18s ease-in-out infinite;

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { AnimatePresence, m as motion } from "framer-motion";
-import { SITE_HEADER_FADE_DURATION_S } from "@/lib/site-motion";
 import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -218,18 +217,13 @@ export function SiteHeader() {
 
   return (
     <>
-      <motion.header
+      {/* The entrance fade is CSS (site-header-in, globals.css), so it starts at first paint. As a Framer `initial` the
+          server-rendered header stayed at opacity 0 until hydration, about a second without a nav on a slow phone. */}
+      <header
         data-site-header
-        className={`relative sticky top-0 border-b border-border ${
+        className={`site-header-in relative sticky top-0 border-b border-border ${
           menuOpen ? "z-[10001]" : "z-50"
         }`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          delay: 0,
-          duration: SITE_HEADER_FADE_DURATION_S,
-          ease: "easeOut",
-        }}
       >
         {/* Glass lives on an inner layer so the sticky <header> has no background-color: Safari 26 tints its
             toolbar from a top sticky/fixed element's background-color, and this one fades on theme switch.
@@ -330,7 +324,7 @@ export function SiteHeader() {
             </button>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {mounted
         ? createPortal(
