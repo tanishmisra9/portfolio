@@ -10,6 +10,7 @@ import {
   PILL_CLASSES,
   SECTION_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
+import { SOFT_BRIGHTEN, SOFT_FILL_GROUP, SoftFill } from '@/components/ui/soft-fill';
 import { Tooltip } from '@/components/ui/tooltip';
 import type { ProjectEntry } from '@/types/content';
 import { ExternalLink, Github, Newspaper } from 'lucide-react';
@@ -24,7 +25,8 @@ const VISIBLE_COUNT = 2;
 function ProjectCard({ project }: { project: ProjectEntry }) {
   const pills = project.pills ?? [];
   return (
-    <article className="relative flex h-full min-h-[15.5rem] flex-col rounded-md border border-border bg-surface p-8 font-sans transition-colors duration-200 hover:border-hover-outline sm:min-h-[16.75rem]">
+    <article className={`${SOFT_FILL_GROUP} flex h-full min-h-[15.5rem] flex-col rounded-md border border-border bg-surface p-8 font-sans sm:min-h-[16.75rem]`}>
+      <SoftFill />
       <div className="flex items-center justify-between gap-4">
         {pills.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
@@ -73,7 +75,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
       <h3 className="mt-5 font-display text-2xl font-semibold text-fg">
         {project.title}
       </h3>
-      <p className="mt-4 flex-1 leading-relaxed text-muted">
+      <p className={`mt-4 flex-1 leading-relaxed text-muted ${SOFT_BRIGHTEN}`}>
         {project.description}
       </p>
       <ul className="mt-10 flex flex-wrap gap-2 font-sans text-[10px] uppercase tracking-widest">

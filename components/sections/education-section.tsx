@@ -1,5 +1,6 @@
 import { ScrollReveal } from '@/components/scroll-reveal';
-import { ENTRY_ITEM, ENTRY_MUTED, ENTRY_TAGS, EntryFill } from '@/components/sections/entry-style';
+import { ENTRY_ITEM, ENTRY_MUTED, ENTRY_TAGS } from '@/components/sections/entry-style';
+import { SoftFill } from '@/components/ui/soft-fill';
 import { SpotlightList } from '@/components/sections/spotlight-list';
 import { SECTION_HEADING_CLASSES } from '@/components/ui/class-constants';
 import { formatDateRange } from '@/lib/format-date-range';
@@ -27,7 +28,7 @@ export function EducationSection({ entries }: Props) {
         <SpotlightList className="mt-2 flex flex-col">
           {entries.map((edu) => (
             <li key={edu.id} className={ENTRY_ITEM}>
-              <EntryFill />
+              <SoftFill />
               <ScrollReveal>
                 <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
                   <span className={`font-sans text-sm md:pt-1 ${ENTRY_MUTED}`}>

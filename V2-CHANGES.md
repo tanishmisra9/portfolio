@@ -53,6 +53,12 @@ The whole site moved to one visual language. The rules live in `CLAUDE.md` ("v2 
 - **Link hover = outline + fill:** a foreground-coloured rectangle rises behind the text (`HoverFill`). It's used on
   the nav, the logo, the theme toggle and the footer links. On touch, `TapFill` makes the fill rise, hold and drop. It
   never sticks, because hover styles only apply where hover exists.
+- **Content hover = soft fill:** cards and entries get the same rise in a soft grey (`SoftFill`, `components/ui/soft-fill.tsx`:
+  fg at 7%, so dark grey in dark mode and light grey in light). Text doesn't invert; muted text brightens. Used on the
+  Experience and Education entries, Skills groups, certification and project cards, and the /thoughts cards. It replaced
+  the cards' outline highlight and the /thoughts lift, shadow and title rectangle. Keyboard focus inside a card raises it
+  too. The full-contrast inverted fill stays for buttons and links.
+- **The nav no longer has an About link** (PHOTOS, THOUGHTS, QUOTES, F1). The About section is still on the home page.
 - **Tooltips:** a sharp bordered box in a portal, in the system UI font. It flips above the trigger when there's no
   room and stays inside the viewport.
 - **`IconButton`:** one shared square icon button with a fill hover and a tooltip. It's used for back, replay,

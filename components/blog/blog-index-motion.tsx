@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Copy } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
+import { SOFT_BRIGHTEN, SOFT_FILL_GROUP, SoftFill } from "@/components/ui/soft-fill";
 import { m as motion, useReducedMotion, type Variants } from "framer-motion";
 import type { BlogPostMeta } from "@/types/content";
 
@@ -91,7 +92,9 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
         <ul className="mt-12 space-y-5">
           {posts.map((post) => (
             <motion.li key={post.slug} variants={item}>
-              <div className="group/card relative block rounded-md border border-border bg-surface p-8 transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-x-0.5 hover:-translate-y-0.5 hover:border-fg hover:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] has-[:focus-visible]:-translate-x-0.5 has-[:focus-visible]:-translate-y-0.5 has-[:focus-visible]:border-fg has-[:focus-visible]:shadow-[5px_5px_0_rgb(var(--fg-rgb)/0.2)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 motion-reduce:has-[:focus-visible]:translate-x-0 motion-reduce:has-[:focus-visible]:translate-y-0">
+              {/* The site's content hover (components/ui/soft-fill.tsx): a soft grey fill rises; the description brightens. */}
+              <div className={`${SOFT_FILL_GROUP} block rounded-md border border-border bg-surface p-8`}>
+                <SoftFill />
                 <CopyLink slug={post.slug} />
                 {/* Flush with the title and description (one left axis), body face, tabular figures. */}
                 <time dateTime={post.date} className="block text-sm tabular-nums text-dim">
@@ -101,33 +104,16 @@ export function BlogIndexMotion({ posts }: { posts: BlogPostMeta[] }) {
                     day: "numeric",
                   })}
                 </time>
-                {/* The card is the hover/focus target (group): an outline rectangle appears around the title instantly, and disappears instantly. */}
-                <h2 className="-ml-3 mt-1 w-fit font-display text-2xl font-bold text-fg">
+                <h2 className="mt-2.5 font-display text-2xl font-bold text-fg">
                   {/* Stretched link: its ::after covers the whole card (nearest positioned ancestor), so the card is one click target but the link's accessible name is just the title. */}
                   <Link
                     href={`/thoughts/${post.slug}`}
                     className="after:absolute after:inset-0 after:z-[1] after:rounded-md focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-fg/70"
                   >
-                    <span className="relative block px-3 py-1.5">
-                      {post.title}
-                      <svg
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0 size-full overflow-visible"
-                      >
-                        <rect
-                          width="100%"
-                          height="100%"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          pathLength={1}
-                          className="[stroke-dasharray:1] [stroke-dashoffset:1] group-hover/card:[stroke-dashoffset:0] group-has-[:focus-visible]/card:[stroke-dashoffset:0]"
-                        />
-                      </svg>
-                    </span>
+                    {post.title}
                   </Link>
                 </h2>
-                <p className="mt-2 text-muted transition-colors duration-200 group-hover/card:text-fg group-has-[:focus-visible]/card:text-fg">
+                <p className={`mt-3.5 text-muted ${SOFT_BRIGHTEN}`}>
                   {post.description}
                 </p>
               </div>

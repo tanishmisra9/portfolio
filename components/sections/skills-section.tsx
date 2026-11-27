@@ -10,6 +10,7 @@ import {
   PILL_CLASSES,
   SECTION_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
+import { SOFT_BRIGHTEN, SOFT_FILL_GROUP, SoftFill } from '@/components/ui/soft-fill';
 import { Tooltip } from '@/components/ui/tooltip';
 import type { CertificationEntry, SkillCategory } from '@/types/content';
 import { ChevronDown, ExternalLink } from 'lucide-react';
@@ -33,7 +34,8 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
   const hasPills = pills.length > 0;
 
   return (
-    <article className="relative flex h-full min-h-[12rem] flex-col rounded-md border border-border bg-surface p-8 font-sans transition-colors duration-200 hover:border-hover-outline sm:min-h-[13.5rem]">
+    <article className={`${SOFT_FILL_GROUP} flex h-full min-h-[12rem] flex-col rounded-md border border-border bg-surface p-8 font-sans sm:min-h-[13.5rem]`}>
+      <SoftFill />
       {isProgram ? (
         <div
           role="button"
@@ -201,15 +203,16 @@ export function SkillsSection({ skills, certifications }: Props) {
             const isLastOdd = index === skills.length - 1 && skills.length % 2 === 1;
             return (
             <ScrollReveal key={group.id} className={isLastOdd ? "md:col-span-2 md:w-1/2 md:mx-auto" : undefined}>
-              <section className="rounded-md border border-[var(--border)] p-6 md:p-7">
-                <h3 className="select-none font-mono text-sm uppercase tracking-[0.12em] text-[var(--muted)] md:text-base">
+              <section className={`${SOFT_FILL_GROUP} rounded-md border border-[var(--border)] p-6 md:p-7`}>
+                <SoftFill />
+                <h3 className="select-none font-display text-xl font-semibold text-fg">
                   {group.category}
                 </h3>
                 <ul className="mt-5 flex flex-wrap gap-2.5 md:gap-3">
                   {group.items.map((skill) => (
                     <li
                       key={skill}
-                      className={`${PILL_CLASSES} font-sans text-[10px] uppercase tracking-widest`}
+                      className={`${PILL_CLASSES} font-sans text-[10px] uppercase tracking-widest ${SOFT_BRIGHTEN}`}
                     >
                       {skill}
                     </li>

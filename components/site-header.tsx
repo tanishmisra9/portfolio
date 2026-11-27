@@ -18,7 +18,6 @@ import { createPortal } from "react-dom";
 type NavItem = { href: string; label: string; tip: string };
 
 const NAV: NavItem[] = [
-  { href: "#about", label: "ABOUT", tip: "About me" },
   { href: "/photos", label: "PHOTOS", tip: "Photography" },
   { href: "/thoughts", label: "THOUGHTS", tip: "Writing" },
   { href: "/quotes", label: "QUOTES", tip: "Lines worth keeping" },

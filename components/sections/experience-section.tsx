@@ -2,7 +2,8 @@
 
 import { useHomeIntroDone } from "@/components/home-intro-gate";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { ENTRY_ITEM, ENTRY_MUTED, ENTRY_TAGS, EntryFill } from "@/components/sections/entry-style";
+import { ENTRY_ITEM, ENTRY_MUTED, ENTRY_TAGS } from "@/components/sections/entry-style";
+import { SoftFill } from "@/components/ui/soft-fill";
 import { SpotlightList } from "@/components/sections/spotlight-list";
 import {
   PILL_CLASSES,
@@ -35,7 +36,7 @@ export function ExperienceSection({ entries }: Props) {
         <SpotlightList className="mt-2 flex flex-col">
           {entries.map((entry) => (
             <li key={entry.id} className={ENTRY_ITEM}>
-              <EntryFill />
+              <SoftFill />
               <ScrollReveal homeIntroComplete={homeIntroDone}>
                 <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
                   <div className={`font-sans text-sm md:pt-1 ${ENTRY_MUTED}`}>
