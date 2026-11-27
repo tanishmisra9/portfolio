@@ -975,6 +975,37 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
   const p = useMotionValue(0);
   useMotionValueEvent(progress, "change", (x) => p.set(still ? 1 : x));
   useEffect(() => p.set(still ? 1 : progress.get()), [still, p, progress]);
+  // A jump straight here ("Skip to the photos", an album's "Back to photos", any #collections link) is drawn before
+  // Framer hears about the new scroll position: the first frame (several on iOS) showed the heading unlit (0.15) and it
+  // then brightened, a visible flicker. The scroll event fires at the start of the frame that paints the new position,
+  // so on a jump (more than a screen in one event; ordinary scrolling skips this) set the progress from geometry there.
+  // Same mapping as the useScroll offset above: 0 when the section's top is at 85% of the viewport, 1 when its bottom is
+  // at 95%.
+  // Arriving already scrolled here (an album's "Back to photos": Next scrolls to the hash during mount) is the same
+  // problem, so the listener is attached at layout time and the geometry is also checked on the first frame.
+  useLayoutEffect(() => {
+    const fromGeometry = () => {
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect(), vh = innerHeight;
+      p.set(still ? 1 : clamp01((0.85 * vh - r.top) / Math.max(1, r.height - 0.1 * vh)));
+    };
+    let lastY = scrollY;
+    const onScroll = () => {
+      const y = scrollY, jumped = Math.abs(y - lastY) > innerHeight;
+      lastY = y;
+      if (jumped) fromGeometry();
+    };
+    const first = requestAnimationFrame(() => {
+      lastY = scrollY;
+      fromGeometry();
+    });
+    addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(first);
+      removeEventListener("scroll", onScroll);
+    };
+  }, [p, still]);
 
   const [path, setPath] = useState<{ d: string; width: number; curlFrac: number; bodyFrac: number; len: number } | null>(null);
   const pathRef = useRef(path);
