@@ -28,7 +28,6 @@ const NAV: NavItem[] = [
 /** DOM order — must match home page sections for scroll-spy. */
 const SECTION_SCROLL_SPY_IDS = [
   "experience",
-  "education",
   "skills",
   "certifications",
   "projects",
