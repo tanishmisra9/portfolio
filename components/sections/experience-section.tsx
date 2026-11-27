@@ -2,11 +2,11 @@
 
 import { useHomeIntroDone } from "@/components/home-intro-gate";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { ExpandableRow } from "@/components/sections/expandable-row";
 import {
   PILL_CLASSES,
   SECTION_HEADING_CLASSES,
 } from "@/components/ui/class-constants";
-import { formatDateRange } from "@/lib/format-date-range";
 import type { ExperienceEntry } from "@/types/content";
 
 type Props = { entries: ExperienceEntry[] };
@@ -30,31 +30,30 @@ export function ExperienceSection({ entries }: Props) {
             Experience
           </h2>
         </ScrollReveal>
-        <div className="mt-8 flex flex-col gap-10 md:gap-12">
+        <div className="mt-8 border-b border-border">
           {entries.map((entry) => (
             <ScrollReveal key={entry.id} homeIntroComplete={homeIntroDone}>
-              <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
-                <div className="font-mono text-sm uppercase tracking-wider text-muted">
-                  {formatDateRange(entry)}
-                </div>
-                <div>
-                  <p className="font-display text-xl font-semibold text-fg">{entry.org}</p>
-                  <p className="mt-1 text-muted">{entry.role}</p>
-                  {entry.description ? (
-                    <p className="mt-3 max-w-2xl text-muted">{entry.description}</p>
-                  ) : null}
-                  <ul className="mt-3 flex flex-wrap gap-2 md:mt-4">
-                    {entry.tags.map((tag) => (
-                      <li
-                        key={tag}
-                        className={`${PILL_CLASSES} font-sans text-[10px] uppercase tracking-widest`}
-                      >
-                        {tag}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+              <ExpandableRow dates={entry} title={entry.org} subtitle={entry.role}>
+                {entry.description || entry.tags.length ? (
+                  <>
+                    {entry.description ? (
+                      <p className="mb-4 max-w-2xl text-muted">{entry.description}</p>
+                    ) : null}
+                    {entry.tags.length ? (
+                      <ul className="flex flex-wrap gap-2">
+                        {entry.tags.map((tag) => (
+                          <li
+                            key={tag}
+                            className={`${PILL_CLASSES} font-sans text-[10px] uppercase tracking-widest`}
+                          >
+                            {tag}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </>
+                ) : null}
+              </ExpandableRow>
             </ScrollReveal>
           ))}
         </div>

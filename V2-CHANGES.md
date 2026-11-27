@@ -82,6 +82,14 @@ The whole site moved to one visual language. The rules live in `CLAUDE.md` ("v2 
   - The next stop's variant is rolled and preloaded ahead of time.
 - **Under reduced motion,** the name is plain text: no dead "Play pit-stop" button, and no clip is downloaded.
 
+### Experience and Education rows
+- **Each entry is a compact row** (date, org or school, role or credential) with a `+` that opens its tags, description,
+  activities and coursework (`components/sections/expandable-row.tsx`, shared by both sections).
+  - The open and close is a CSS height transition (no JS measuring); closed rows can't be tabbed into.
+  - A row with nothing to show (the Statistics minor) has no `+`.
+- **Dates are plain words, not caps with a dash:** "Since Jan 2026", "May to Aug 2026" (the year once when it's the
+  same), "Jun 2023 to Aug 2025".
+
 ---
 
 ## /photos
