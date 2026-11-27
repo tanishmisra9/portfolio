@@ -5,6 +5,7 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { IconButton } from "@/components/ui/icon-button";
+import { Tooltip } from "@/components/ui/tooltip";
 
 // Same shared LQIP placeholder used by /photos (components/photos/photo-album-motion.tsx).
 const BLUR_DATA_URL =
@@ -28,6 +29,7 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
   const pointerType = useRef("mouse");
   const closing = useRef(false);
   const resetZoom = useRef<() => void>(undefined); // set by Zoomable
+  const [resetKey, setResetKey] = useState(0);
   const close = () => dialog.current?.close();
 
   const image = (
@@ -101,17 +103,22 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
                 under the thumb, where the caption was (it fades out while zoomed). md+: beside the X (right-6 + 46px X + 8px). */}
             {/* Positioned by a wrapper: HOVER_FILL_LINK carries `relative`, which beats `absolute` on the button itself. */}
             <div className="invisible absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-10 -translate-x-1/2 opacity-0 transition-[opacity,visibility] duration-200 group-data-[zoomed]/preview:visible group-data-[zoomed]/preview:opacity-100 motion-reduce:transition-none md:bottom-auto md:left-auto md:right-[4.875rem] md:top-6 md:translate-x-0">
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  resetZoom.current?.();
-                }}
-                className={`${HOVER_FILL_LINK} flex h-[2.875rem] items-center border border-border bg-bg px-5 text-sm text-muted`}
-              >
-                <HoverFill>Reset</HoverFill>
-              </button>
+              {/* Keyed so each press remounts it: a tap also opens the tooltip, which would otherwise float for 1.5s over
+                  a button that has just faded out. */}
+              <Tooltip key={resetKey} label="Reset zoom">
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resetZoom.current?.();
+                    setResetKey((k) => k + 1);
+                  }}
+                  className={`${HOVER_FILL_LINK} flex h-[2.875rem] items-center border border-border bg-bg px-5 text-sm text-muted`}
+                >
+                  <HoverFill>Reset</HoverFill>
+                </button>
+              </Tooltip>
             </div>
             <div className="absolute right-4 top-4 z-10 md:right-6 md:top-6" onPointerDown={(e) => (pointerType.current = e.pointerType)}>
               <IconButton
