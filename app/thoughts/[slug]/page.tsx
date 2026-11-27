@@ -49,8 +49,11 @@ const components: Components = {
       </ScrollReveal>
     );
   },
-  a: ({ node, ...rest }) => (
+  // Post links open in a new tab, except in-page anchors (#footnote, #heading), which must stay on the page.
+  a: ({ node, href, ...rest }) => (
     <a
+      href={href}
+      {...(href?.startsWith("#") ? {} : { target: "_blank", rel: "noopener noreferrer" })}
       className="text-fg underline decoration-fg/40 underline-offset-2 hover:decoration-fg"
       {...rest}
     />
