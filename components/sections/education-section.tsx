@@ -1,5 +1,6 @@
 import { ScrollReveal } from '@/components/scroll-reveal';
-import { SPOTLIGHT_ITEM, SPOTLIGHT_TAGS, SpotlightList } from '@/components/sections/spotlight-list';
+import { ENTRY_ITEM, ENTRY_MUTED, ENTRY_TAGS, EntryFill } from '@/components/sections/entry-style';
+import { SpotlightList } from '@/components/sections/spotlight-list';
 import {
   PILL_CLASSES,
   SECTION_HEADING_CLASSES,
@@ -41,19 +42,20 @@ export function EducationSection({ entries }: Props) {
             Education
           </h2>
         </ScrollReveal>
-        <SpotlightList className="mt-8 flex flex-col gap-10 md:gap-12">
+        <SpotlightList className="mt-2 flex flex-col">
           {entries.map((edu) => (
-            <li key={edu.id} className={SPOTLIGHT_ITEM}>
+            <li key={edu.id} className={ENTRY_ITEM}>
+              <EntryFill />
               <ScrollReveal>
                 <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
-                  <span className="font-sans text-sm text-muted md:pt-1">
+                  <span className={`font-sans text-sm md:pt-1 ${ENTRY_MUTED}`}>
                     {formatDateRange(edu)}
                   </span>
                   <div>
                     <p className="font-display text-xl font-semibold text-fg">{edu.institution}</p>
-                    <p className="mt-1 text-muted">{edu.credential}</p>
+                    <p className={`mt-1 ${ENTRY_MUTED}`}>{edu.credential}</p>
                     {edu.activities?.length || edu.coursework?.length ? (
-                      <div className={`mt-4 flex flex-col gap-2 ${SPOTLIGHT_TAGS}`}>
+                      <div className={`mt-4 flex flex-col gap-2 ${ENTRY_TAGS}`}>
                         {edu.activities?.length ? (
                           <ul className="flex flex-wrap gap-2">
                             {edu.activities.map((pill) => (

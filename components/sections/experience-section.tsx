@@ -2,7 +2,8 @@
 
 import { useHomeIntroDone } from "@/components/home-intro-gate";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { SPOTLIGHT_ITEM, SPOTLIGHT_TAGS, SpotlightList } from "@/components/sections/spotlight-list";
+import { ENTRY_ITEM, ENTRY_MUTED, ENTRY_TAGS, EntryFill } from "@/components/sections/entry-style";
+import { SpotlightList } from "@/components/sections/spotlight-list";
 import {
   PILL_CLASSES,
   SECTION_HEADING_CLASSES,
@@ -31,21 +32,22 @@ export function ExperienceSection({ entries }: Props) {
             Experience
           </h2>
         </ScrollReveal>
-        <SpotlightList className="mt-8 flex flex-col gap-10 md:gap-12">
+        <SpotlightList className="mt-2 flex flex-col">
           {entries.map((entry) => (
-            <li key={entry.id} className={SPOTLIGHT_ITEM}>
+            <li key={entry.id} className={ENTRY_ITEM}>
+              <EntryFill />
               <ScrollReveal homeIntroComplete={homeIntroDone}>
                 <div className="grid gap-4 md:grid-cols-[25%_1fr] md:gap-8">
-                  <div className="font-sans text-sm text-muted md:pt-1">
+                  <div className={`font-sans text-sm md:pt-1 ${ENTRY_MUTED}`}>
                     {formatDateRange(entry)}
                   </div>
                   <div>
                     <p className="font-display text-xl font-semibold text-fg">{entry.org}</p>
-                    <p className="mt-1 text-muted">{entry.role}</p>
+                    <p className={`mt-1 ${ENTRY_MUTED}`}>{entry.role}</p>
                     {entry.description ? (
                       <p className="mt-3 max-w-2xl text-muted">{entry.description}</p>
                     ) : null}
-                    <ul className={`mt-3 flex flex-wrap gap-2 md:mt-4 ${SPOTLIGHT_TAGS}`}>
+                    <ul className={`mt-3 flex flex-wrap gap-2 md:mt-4 ${ENTRY_TAGS}`}>
                       {entry.tags.map((tag) => (
                         <li
                           key={tag}
