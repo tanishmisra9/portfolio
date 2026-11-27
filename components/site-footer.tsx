@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ChevronUp } from "lucide-react";
 import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { Tooltip } from "@/components/ui/tooltip";
+import { copyText } from "@/lib/copy-text";
 import type { SocialLink } from "@/types/content";
 
 const SOCIAL_ORDER = ["LinkedIn", "GitHub", "Instagram", "Resume", "Email"];
@@ -40,13 +41,12 @@ function CopyEmail({ email, label, href }: { email: string; label: string; href:
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(email);
+    if (await copyText(email)) {
       setCopied(true);
       clearTimeout(timer.current);
       timer.current = setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard blocked (permission, insecure context): fall back to opening the mail client.
+    } else {
+      // Both the clipboard API and the legacy copy failed: fall back to opening the mail client.
       window.location.href = href;
     }
   };

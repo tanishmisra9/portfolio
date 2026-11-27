@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
+import { copyText } from "@/lib/copy-text";
 import { SOFT_BRIGHTEN, SOFT_FILL_GROUP, SoftFill } from "@/components/ui/soft-fill";
 import { m as motion, useReducedMotion, type Variants } from "framer-motion";
 import type { BlogPostMeta } from "@/types/content";
@@ -16,15 +17,8 @@ function CopyLink({ slug }: { slug: string }) {
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
   const copy = async () => {
-    let result = "Copied!";
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/thoughts/${slug}`,
-      );
-    } catch {
-      result = "Couldn't copy";
-    }
-    setMsg(result);
+    const ok = await copyText(`${window.location.origin}/thoughts/${slug}`);
+    setMsg(ok ? "Copied!" : "Couldn't copy");
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setMsg(null), 1500);
   };
