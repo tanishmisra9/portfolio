@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { m as motion, useReducedMotion } from "framer-motion";
-import { ArrowDown } from "lucide-react";
 import { PhotosHeader } from "@/components/photos/photos-header";
-import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
+import {
+  GLASS_BUTTON_SHEEN_BACKGROUND,
+  GLASS_BUTTON_SHEEN_CLASSES,
+} from "@/components/ui/class-constants";
 import { PencilNote, PhotosIntro, useIntroSound } from "@/components/photos/photos-intro";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 
@@ -35,6 +37,11 @@ const STRIP_SIZES = {
   hero: "(max-width: 1272px) calc(25vw - 17px), 300px",
   tile: "(max-width: 639px) calc(33vw - 21px), (max-width: 1272px) calc(17vw - 17px), 195px",
 };
+
+// The bordered "Show more" button (GLASS_BUTTON_CLASSES) in sentence case, standard size and full-brightness text
+// (owner): not the small spaced caps the other glass buttons use.
+const SKIP_BUTTON =
+  "group relative inline-flex items-center justify-center rounded-none border border-border-strong bg-fg/[0.06] px-6 py-3 font-sans text-base text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
 function CollectionTile({ collection, index, hero }: CollectionTileProps) {
   return (
@@ -111,33 +118,27 @@ export function PhotosIndexMotion({ collections }: Props) {
     >
       {/* First screen = the title, so the intro starts right at the fold
           (offset = header 5rem + main's top padding). */}
-      <div className="flex min-h-[calc(100svh-8rem)] flex-col justify-center pb-[36svh] md:min-h-[calc(100svh-11rem)]">
+      <div className="relative flex min-h-[calc(100svh-8rem)] flex-col justify-center pb-[36svh] md:min-h-[calc(100svh-11rem)]">
         <motion.div variants={item}>
           <PhotosHeader />
         </motion.div>
         {/* Straight past the intro to the albums (owner). An instant anchor jump (scroll-behavior is auto): a smooth
             scroll would race through the whole scrubbed intro and fire every pencil stroke's sound on the way. */}
-        <motion.div variants={item} className="mt-10 flex justify-center md:mt-14">
-          <a
-            href="#collections"
-            onMouseDown={(e) => e.preventDefault()}
-            className={`${HOVER_FILL_LINK} inline-flex px-3 py-2 font-sans text-xs uppercase tracking-[0.2em] text-dim`}
-          >
-            <HoverFill>
-              <span className="inline-flex items-center gap-2">
-                Skip to the photos
-                <ArrowDown aria-hidden className="size-3.5" strokeWidth={1.75} />
-              </span>
-            </HoverFill>
+        {/* The site's bordered button (as "Show more"), low on the first screen (owner: "more of a button", lower), and
+            it lands on "Here's my work.", where #collections now starts (owner), not the first album. Absolute, so the title stays centred where it was. */}
+        <motion.div variants={item} className="absolute inset-x-0 bottom-[14svh] flex justify-center">
+          <a href="#collections" onMouseDown={(e) => e.preventDefault()} className={SKIP_BUTTON}>
+            <span aria-hidden className={GLASS_BUTTON_SHEEN_CLASSES} style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }} />
+            <span className="relative">Skip to the photos</span>
           </a>
         </motion.div>
       </div>
       <PhotosIntro sound={sound} />
       <PencilNote sound={sound} />
       <motion.div
-        id="collections"
+        data-collection-grid
         variants={gridSection}
-        className="grid scroll-mt-32 grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 md:gap-y-16"
+        className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 md:gap-y-16"
       >
         {collections.map((collection, index) => (
           <motion.div key={collection.slug} variants={item} className={index === 0 ? "sm:col-span-2" : undefined}>

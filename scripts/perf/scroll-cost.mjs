@@ -20,7 +20,7 @@ const metrics = async () => Object.fromEntries((await cdp.send("Performance.getM
 const sections = {
   intro: "section[aria-label='Why I take pictures']",
   note: "section[aria-labelledby='pencil-note']",
-  collections: "#collections",
+  collections: "[data-collection-grid]",
 };
 const step = (y) => page.evaluate((y) => new Promise((r) => { scrollTo({ top: y, behavior: "instant" }); requestAnimationFrame(() => requestAnimationFrame(() => r(performance.now()))); }), y);
 const rows = [];

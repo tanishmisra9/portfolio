@@ -16,7 +16,7 @@ async function fresh() {
 const sections = {
   intro: "section[aria-label='Why I take pictures']",
   note: "section[aria-labelledby='pencil-note']",
-  collections: "#collections",
+  collections: "[data-collection-grid]",
 };
 const step = (y) => page.evaluate((y) => new Promise((r) => { scrollTo({ top: y, behavior: "instant" }); requestAnimationFrame(() => requestAnimationFrame(() => r())); }), y);
 const NAMES = ["Paint", "RasterTask", "GPUTask", "Layerize", "UpdateLayer", "PrePaint"];

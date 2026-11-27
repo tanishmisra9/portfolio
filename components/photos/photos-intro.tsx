@@ -808,18 +808,22 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
     // ponytail: 500svh is a guess at pace; raise it if the beats feel rushed on a trackpad.
     // marginTop pulls the section up over the empty bottom of the first screen (the title sits in its top half, the stage is
     // transparent until the first beat), so the stage pins after ~60svh of scrolling instead of a full screen.
-    <section ref={ref} aria-label="Why I take pictures" className="photos-day relative left-1/2 w-screen -translate-x-1/2" style={{ height: "500svh", marginTop: "-40svh" }}>
+    // pointer-events-none: the section is pulled up over the bottom of the first screen (marginTop -40svh) and would
+    // swallow taps on the "Skip to the photos" button; the words that take the pointer set pointerEvents themselves.
+    <section ref={ref} aria-label="Why I take pictures" className="photos-day pointer-events-none relative left-1/2 w-screen -translate-x-1/2" style={{ height: "500svh", marginTop: "-40svh" }}>
       {/* Pinned at the very top so the sky runs behind the glass nav. The nav reads on it
           because it switches ink per sky (html[data-pd-sky], see skyBehindNav). */}
-      <div ref={stageRef} className="sticky top-0 h-[100svh] overflow-hidden">
+      <div ref={stageRef} className="pointer-events-none sticky top-0 h-[100svh] overflow-hidden">
         {/* Light layers: their opacity animates; layer 1 also rises in behind a mask (the light horizon). */}
-        <motion.div aria-hidden className="absolute inset-0 [will-change:opacity]" style={{ opacity: l0, background: v("l0") }} />
-        <motion.div aria-hidden className="absolute inset-0 [will-change:opacity]" style={{ opacity: l1, background: v("l1"), maskImage: l1Mask, WebkitMaskImage: l1Mask }} />
-        <motion.div aria-hidden className="absolute inset-0 [will-change:opacity]" style={{ opacity: l2, background: v("l2") }} />
-        <motion.div aria-hidden className="absolute inset-0 [will-change:opacity]" style={{ opacity: l3, background: v("l3") }} />
+        <motion.div aria-hidden className="pointer-events-none absolute inset-0 [will-change:opacity]" style={{ opacity: l0, background: v("l0") }} />
+        <motion.div aria-hidden className="pointer-events-none absolute inset-0 [will-change:opacity]" style={{ opacity: l1, background: v("l1"), maskImage: l1Mask, WebkitMaskImage: l1Mask }} />
+        <motion.div aria-hidden className="pointer-events-none absolute inset-0 [will-change:opacity]" style={{ opacity: l2, background: v("l2") }} />
+        <motion.div aria-hidden className="pointer-events-none absolute inset-0 [will-change:opacity]" style={{ opacity: l3, background: v("l3") }} />
         <SunAndHorizon p={p} />
 
-        <div className="absolute inset-x-6 bottom-8 top-24 grid grid-cols-[minmax(0,1fr)] items-center md:inset-x-16">
+        {/* Pass-through: the stage overlaps the bottom of the first screen (marginTop -40svh) and would swallow taps on the
+            "Skip to the photos" button there. The words that take the pointer set pointerEvents themselves. */}
+        <div className="pointer-events-none absolute inset-x-6 bottom-8 top-24 grid grid-cols-[minmax(0,1fr)] items-center md:inset-x-16">
           <div className="relative mx-auto grid h-full w-full max-w-6xl grid-cols-[minmax(0,1fr)] items-center">
             <motion.h2 ref={b1Ref} aria-label={TYPED} style={{ opacity: b1, pointerEvents: h1, color: v("t1"), maskImage: b1Mask, WebkitMaskImage: b1Mask }} className={`${DISPLAY} col-start-1 row-start-1 [will-change:opacity]`}>
               <Typed p={p} />
@@ -1026,7 +1030,7 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
   const { draw, fade } = usePencilInk(useTransform(p, (x) => noteDrawAt(x, pathRef.current)));
 
   return (
-    <section ref={ref} aria-labelledby="pencil-note" className="relative pb-[60svh] pt-[22svh] md:pb-[95svh]">
+    <section ref={ref} id="collections" aria-labelledby="pencil-note" className="relative pb-[60svh] pt-[22svh] md:pb-[95svh]">
       <h2 id="pencil-note" className={`${DISPLAY} text-fg`}>
         <LitWords p={p} segs={NOTE} range={N.words} anchor="last" />
       </h2>
