@@ -11,8 +11,11 @@ const file = process.argv[2];
 if (!file) throw new Error("usage: node scripts/perf/recording-stalls.mjs <recording.mp4>");
 const probe = execFileSync("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate", "-of", "csv=p=0", file]).toString().trim().split(",");
 const [W, H] = [+probe[0], +probe[1]];
-const fps = eval(probe[2]); // "60/1"
-const raw = (vf) => execFileSync("ffmpeg", ["-v", "error", "-i", file, "-vf", `${vf},format=gray`, "-f", "rawvideo", "-"], { maxBuffer: 2 ** 31 });
+const srcFps = eval(probe[2]); // "60/1"
+// ProMotion recordings are 120 fps while the page updates at most at 60 Hz, so every other frame repeats and frozen runs
+// came out interleaved (.x.x.x) and never counted. Sample at 60 Hz so a repeat means a missed page update.
+const fps = Math.min(60, srcFps);
+const raw = (vf) => execFileSync("ffmpeg", ["-v", "error", "-i", file, "-vf", `fps=${fps},${vf},format=gray`, "-f", "rawvideo", "-"], { maxBuffer: 2 ** 31 });
 
 // Content: the page minus the scrollbar column, the status bar and Safari's toolbar, downscaled.
 const cw = Math.round(W * 0.94), cy = Math.round(H * 0.1), ch = Math.round(H * 0.77);
@@ -40,13 +43,16 @@ const moving = (i) => bar[i] != null && bar[i - 1] != null && Math.abs(bar[i] - 
 
 let map = "";
 for (let i = 1; i < N; i++) map += changed[i - 1] < FROZEN ? (moving(i) ? "x" : ".") : "o";
-console.log(`${file}\n${W}x${H} @ ${fps} fps, ${N} frames. o = page updated, x = page frozen while scrolling, . = still\n`);
+console.log(`${file}\n${W}x${H} @ ${srcFps} fps (analysed at ${fps}), ${N} frames. o = page updated, x = page frozen while scrolling, . = still\n`);
 for (let s = 0; s < map.length; s += 60) console.log(`${(s / fps).toFixed(2).padStart(6)}s ${map.slice(s, s + 60)}`);
 
-const runs = [...map.matchAll(/x{3,}/g)].map((m) => ({ at: (m.index + 1) / fps, frames: m[0].length }));
+// Direction from the scrollbar: it moves down the screen while the page scrolls down.
+const dir = (from, n) => { let d = 0; for (let i = from; i < from + n; i++) if (moving(i)) d += bar[i] - bar[i - 1]; return d > 0 ? "down" : "up"; };
+const runs = [...map.matchAll(/x{3,}/g)].map((m) => ({ at: (m.index + 1) / fps, frames: m[0].length, dir: dir(m.index + 1, m[0].length) }));
 const xs = (map.match(/x/g) ?? []).length, scrolling = xs + [...map].filter((c, k) => c === "o" && moving(k + 1)).length;
 console.log(`\nstalls (>= 3 frozen frames while scrolling): ${runs.length}`);
-for (const r of runs) console.log(`  ${r.at.toFixed(2)}s  ${r.frames} frames (${((r.frames / fps) * 1000).toFixed(0)} ms)`);
+for (const r of runs) console.log(`  ${r.at.toFixed(2)}s  ${r.frames} frames (${((r.frames / fps) * 1000).toFixed(0)} ms) scrolling ${r.dir}`);
+for (const d of ["down", "up"]) { const rs = runs.filter((r) => r.dir === d); console.log(`  ${d}: ${rs.length} stalls, ${rs.reduce((a, r) => a + r.frames, 0)} frozen frames`); }
 console.log(`frozen while scrolling: ${xs} of ${scrolling} scrolling frames (${((100 * xs) / Math.max(1, scrolling)).toFixed(1)}%)`);
 console.log(runs.length ? "FAIL: the page stalled while scrolling" : "PASS: no stalls while scrolling");
 process.exitCode = runs.length ? 1 : 0;
