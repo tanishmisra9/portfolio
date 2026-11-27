@@ -3,7 +3,7 @@
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Copy } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
 import { SOFT_BRIGHTEN, SOFT_FILL_GROUP, SoftFill } from "@/components/ui/soft-fill";
 import { m as motion, useReducedMotion, type Variants } from "framer-motion";
@@ -30,7 +30,8 @@ function CopyLink({ slug }: { slug: string }) {
   };
   return (
     <span className="absolute right-4 top-4 z-10">
-      <IconButton icon={<Copy />} label={msg ?? "Copy link"} onClick={copy} />
+      {/* A tick for the 1.5s after a successful copy, then back to the copy icon. */}
+      <IconButton icon={msg === "Copied!" ? <Check /> : <Copy />} label={msg ?? "Copy link"} onClick={copy} />
       <span role="status" className="sr-only">
         {msg}
       </span>
