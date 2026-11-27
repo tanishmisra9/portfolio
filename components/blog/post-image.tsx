@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
-import { X } from "lucide-react";
+import { X, ZoomOut } from "lucide-react";
 import { IconButton } from "@/components/ui/icon-button";
 
 // Same shared LQIP placeholder used by /photos (components/photos/photo-album-motion.tsx).
@@ -26,6 +26,10 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
   const [open, setOpen] = useState(false);
   const pointerType = useRef("mouse");
   const closing = useRef(false);
+  const resetZoom = useRef<() => void>(undefined); // set by Zoomable
+  // Remounting the reset button drops the tooltip a tap opens on it, which would otherwise float for 1.5s over a button
+  // that has just hidden itself.
+  const [resetKey, setResetKey] = useState(0);
   const close = () => dialog.current?.close();
 
   const image = (
@@ -67,12 +71,13 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
         onClick={(e) => {
           if (!(e.target as Element).closest("[data-zoom], button")) close();
         }}
-        className="post-image-dialog m-0 h-dvh max-h-none w-screen max-w-none touch-none bg-bg p-0 text-fg outline-none backdrop:bg-transparent"
+        // group/preview: Zoomable sets data-zoomed on the dialog past 1x (named, so HoverFill's own `group` is unaffected).
+        className="post-image-dialog group/preview m-0 h-dvh max-h-none w-screen max-w-none touch-none bg-bg p-0 text-fg outline-none backdrop:bg-transparent"
       >
         {open && (
           <div className="flex h-full flex-col items-center justify-center overflow-hidden p-4 md:p-10">
             <figure className="flex min-h-0 max-w-full flex-col items-center">
-              <Zoomable>
+              <Zoomable resetRef={resetZoom}>
                 <Image
                   src={src}
                   alt={alt}
@@ -87,10 +92,27 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
                   className="h-auto max-h-[80dvh] w-auto max-w-full select-none object-contain"
                 />
               </Zoomable>
-              {caption && <figcaption className="relative mt-4 text-center text-muted">{caption}</figcaption>}
+              {caption && (
+                <figcaption className="relative mt-4 text-center text-muted transition-opacity duration-200 group-data-[zoomed]/preview:pointer-events-none group-data-[zoomed]/preview:opacity-0 motion-reduce:transition-none">
+                  {caption}
+                </figcaption>
+              )}
             </figure>
             {/* After the figure so the zoomed image (a transformed, later-painted layer otherwise) never covers it. */}
-            <div className="absolute right-4 top-4 z-10 md:right-6 md:top-6" onPointerDown={(e) => (pointerType.current = e.pointerType)}>
+            <div className="absolute right-4 top-4 z-10 flex gap-2 md:right-6 md:top-6" onPointerDown={(e) => (pointerType.current = e.pointerType)}>
+              {/* Only while zoomed; `invisible` also takes it out of the Tab order at 1x. */}
+              <div className="invisible opacity-0 transition-[opacity,visibility] duration-200 group-data-[zoomed]/preview:visible group-data-[zoomed]/preview:opacity-100 motion-reduce:transition-none">
+                <IconButton
+                  key={resetKey}
+                  icon={<ZoomOut />}
+                  label="Reset zoom"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resetZoom.current?.();
+                    setResetKey((k) => k + 1);
+                  }}
+                />
+              </div>
               <IconButton
                 icon={<X />}
                 label="Close"
@@ -115,7 +137,7 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
 /** Pinch, drag-to-pan, tap/click to toggle zoom, and trackpad pinch (Chrome/Firefox ctrl+wheel, Safari gesture
  *  events). State lives in closure variables and is written straight to style.transform, so no React render per move.
  *  Mounted only while the dialog is open, so every open starts at 1x. */
-function Zoomable({ children }: { children: ReactNode }) {
+function Zoomable({ children, resetRef }: { children: ReactNode; resetRef: React.RefObject<(() => void) | undefined> }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -133,6 +155,7 @@ function Zoomable({ children }: { children: ReactNode }) {
       node.style.transition = animate && !reduced() ? "transform 200ms ease-out" : "none";
       node.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
       node.style.cursor = s > 1 ? "grab" : "zoom-in";
+      dlg.toggleAttribute("data-zoomed", s > 1); // fades the caption out and the reset button in
     };
     // The untransformed centre in viewport coordinates (offset* ignore transforms; the offsetParent is the fixed dialog).
     const centre = () => {
@@ -225,6 +248,10 @@ function Zoomable({ children }: { children: ReactNode }) {
     };
 
     apply(false);
+    resetRef.current = () => {
+      s = 1;
+      apply(true);
+    };
     node.addEventListener("pointerdown", onDown);
     node.addEventListener("pointermove", onMove);
     node.addEventListener("pointerup", onUp);
@@ -241,7 +268,7 @@ function Zoomable({ children }: { children: ReactNode }) {
       dlg.removeEventListener("gesturestart", onGestureStart);
       dlg.removeEventListener("gesturechange", onGestureChange);
     };
-  }, []);
+  }, [resetRef]);
 
   return (
     <div ref={ref} data-zoom className="flex min-h-0 max-w-full justify-center">
