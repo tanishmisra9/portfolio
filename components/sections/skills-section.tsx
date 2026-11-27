@@ -10,6 +10,7 @@ import {
   PILL_CLASSES,
   SECTION_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
+import { IconButton } from '@/components/ui/icon-button';
 import { SOFT_BRIGHTEN, SOFT_FILL_GROUP, SoftFill } from '@/components/ui/soft-fill';
 import { Tooltip } from '@/components/ui/tooltip';
 import type { CertificationEntry, SkillCategory } from '@/types/content';
@@ -104,17 +105,14 @@ function CertCard({ cert }: { cert: CertificationEntry }) {
             ) : (
               <span />
             )}
-            <Tooltip label="View credential">
-              <a
+            {cert.credentialUrl ? (
+              <IconButton
                 href={cert.credentialUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
+                label="View credential"
                 aria-label={`View credential for ${cert.title}`}
-              >
-                <ExternalLink className="h-4 w-4" strokeWidth={1.8} aria-hidden />
-              </a>
-            </Tooltip>
+                icon={<ExternalLink />}
+              />
+            ) : null}
           </div>
           <h4 className="mt-5 font-display text-xl font-semibold text-fg">
             {cert.title}

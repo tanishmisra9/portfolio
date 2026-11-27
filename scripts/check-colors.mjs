@@ -82,15 +82,12 @@ for (const [file, snippet] of DIM_TOKEN_SITES) {
   check(`${file} — "${snippet}"`, content.includes(snippet));
 }
 
-// projects-section.tsx uses the same snippet twice (two link icons) — check count.
-const projectsFile = read("components/sections/projects-section.tsx");
-const dimIconSnippet =
-  'className="text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"';
-const projectsDimCount = projectsFile.split(dimIconSnippet).length - 1;
-check(
-  `components/sections/projects-section.tsx — "${dimIconSnippet}" (x2)`,
-  projectsDimCount === 2,
-);
+// Project-card and certificate link icons are IconButtons (the site's square icon control, which owns their colour);
+// they used to be bare dim icons pinned here. Guard against a bare <a> icon link coming back.
+for (const file of ["components/sections/projects-section.tsx", "components/sections/skills-section.tsx"]) {
+  const src = read(file);
+  check(`${file} — link icons use <IconButton>`, src.includes("<IconButton") && !src.includes("-m-1.5 p-1.5"));
+}
 
 // 3. tailwind.config.ts must still map every color token to its CSS variable.
 console.log("\ntailwind.config.ts token mapping:");

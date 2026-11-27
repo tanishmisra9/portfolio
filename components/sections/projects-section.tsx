@@ -11,7 +11,7 @@ import {
   SECTION_HEADING_CLASSES,
 } from '@/components/ui/class-constants';
 import { SOFT_BRIGHTEN, SOFT_FILL_GROUP, SoftFill } from '@/components/ui/soft-fill';
-import { Tooltip } from '@/components/ui/tooltip';
+import { IconButton } from '@/components/ui/icon-button';
 import type { ProjectEntry } from '@/types/content';
 import { ExternalLink, Github, Newspaper } from 'lucide-react';
 
@@ -42,34 +42,13 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
         ) : (
           <span />
         )}
-        <div className="flex items-center gap-8">
+        {/* The site's square icon buttons (IconButton: border, button fill on hover, tooltip). */}
+        <div className="flex items-center gap-2">
           {project.links?.map(({ label, url, icon }) => {
             const Icon = LINK_ICONS[icon ?? 'external'];
-            return (
-              <Tooltip key={url} label={label}>
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
-                  aria-label={label}
-                >
-                  <Icon className="h-4 w-4" strokeWidth={1.8} aria-hidden />
-                </a>
-              </Tooltip>
-            );
+            return <IconButton key={url} href={url} label={label} icon={<Icon />} />;
           })}
-          <Tooltip label="GitHub">
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-dim transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70 -m-1.5 p-1.5"
-              aria-label={`${project.title} on GitHub`}
-            >
-              <Github className="h-4 w-4" strokeWidth={1.8} aria-hidden />
-            </a>
-          </Tooltip>
+          <IconButton href={project.githubUrl} label="GitHub" aria-label={`${project.title} on GitHub`} icon={<Github />} />
         </div>
       </div>
       <h3 className="mt-5 font-display text-2xl font-semibold text-fg">
