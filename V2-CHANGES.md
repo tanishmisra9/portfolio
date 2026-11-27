@@ -8,7 +8,7 @@
 - [Before you deploy](#before-you-deploy)
 - [Design system](#design-system)
 - [Home: the hero pit stop](#home-the-hero-pit-stop)
-- [Home: the Timeline (a commit graph)](#home-the-timeline-a-commit-graph)
+- [Home: the Timeline](#home-the-timeline)
 - [/photos](#photos)
 - [/thoughts (was /blog)](#thoughts-was-blog)
 - [/f1](#f1)
@@ -85,21 +85,18 @@ The whole site moved to one visual language. The rules live in `CLAUDE.md` ("v2 
 
 ---
 
-## Home: the Timeline (a commit graph)
+## Home: the Timeline
 
-Experience and Education are one section, "Timeline", drawn like `git log --graph`, newest first.
-- **The shape comes from the data.** A trunk, and one branch per role or school: it forks off where it starts and
-  merges back where it ends. Ongoing ones run up to **HEAD · now**, and Purdue shows a dashed stub with "expected Dec 2028".
-  - Overlaps are real: today four branches run side by side, and last summer Toyota made five.
-  - **Filled square = work, hollow = school.** The B.S. and the minor share one branch (same school, same dates).
-  - **Rows are ordinal,** like git, not time-proportional, so four things starting in Aug 2025 don't collide.
-- **`--grep`:** pressing a tag (Python, SQL…) lights every role that used it and dims the rest. The prompt line above
-  the heading reads `git log --graph --grep="Python" · 3 matches · clear`.
-- **Hover a card** (mouse) or focus inside it: its branch lights. On touch there's nothing to get stuck.
-- **Entrance:** the lines draw down row by row once, when the section first comes into view (CSS transitions, not
-  scroll-driven; 0 rAF callbacks once done). Reduced motion: drawn from the start.
-- Layout: `lib/career-graph.ts`, checked by `npm run check:graph` (it fails if the lane allocator is broken).
-  No data or admin change.
+Experience and Education are one section, "Timeline" (`components/sections/timeline-section.tsx`): a single line with
+a square marker per entry, newest start first.
+- **Filled marker = still going** (end "Present", or an end date after the month the page was built, e.g. Purdue's
+  Dec 2028); hollow = finished.
+- **Order comes from the dates,** not the admin's list order (that only breaks ties between entries starting the same
+  month). A degree and a minor with the same school and dates share one entry.
+- **Entrance:** the line draws down once when the section first comes into view (CSS transitions, not scroll-driven).
+  Reduced motion: drawn from the start.
+- No data or admin change. A commit-graph version (branches per role, `--grep` on tags) was tried and dropped as too
+  fiddly to read.
 
 ---
 
