@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { m as motion, useReducedMotion } from "framer-motion";
+import { ArrowDown } from "lucide-react";
 import { PhotosHeader } from "@/components/photos/photos-header";
+import { HOVER_FILL_LINK, HoverFill } from "@/components/ui/hover-fill";
 import { PencilNote, PhotosIntro, useIntroSound } from "@/components/photos/photos-intro";
 import { photosEntranceVariants } from "@/lib/photos-motion";
 
@@ -113,12 +115,22 @@ export function PhotosIndexMotion({ collections }: Props) {
         <motion.div variants={item}>
           <PhotosHeader />
         </motion.div>
-        <a
-          href="#collections"
-          className="sr-only focus:not-sr-only focus:font-mono focus:text-sm focus:text-fg"
-        >
-          Skip to collections
-        </a>
+        {/* Straight past the intro to the albums (owner). An instant anchor jump (scroll-behavior is auto): a smooth
+            scroll would race through the whole scrubbed intro and fire every pencil stroke's sound on the way. */}
+        <motion.div variants={item} className="mt-10 flex justify-center md:mt-14">
+          <a
+            href="#collections"
+            onMouseDown={(e) => e.preventDefault()}
+            className={`${HOVER_FILL_LINK} inline-flex px-3 py-2 font-sans text-xs uppercase tracking-[0.2em] text-dim`}
+          >
+            <HoverFill>
+              <span className="inline-flex items-center gap-2">
+                Skip to the photos
+                <ArrowDown aria-hidden className="size-3.5" strokeWidth={1.75} />
+              </span>
+            </HoverFill>
+          </a>
+        </motion.div>
       </div>
       <PhotosIntro sound={sound} />
       <PencilNote sound={sound} />
