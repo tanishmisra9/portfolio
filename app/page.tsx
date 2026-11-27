@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { HomeIntroGateProvider } from "@/components/home-intro-gate";
 import { Hero } from "@/components/hero/hero";
 import { AboutContactSection } from "@/components/sections/about-contact-section";
-import { CareerLog } from "@/components/sections/career-log";
+import { EducationSection } from "@/components/sections/education-section";
+import { ExperienceSection } from "@/components/sections/experience-section";
 import { ProjectsSection } from "@/components/sections/projects-section";
 import { SkillsSection } from "@/components/sections/skills-section";
 import { getPublishedData } from "@/lib/site-content";
@@ -28,12 +29,8 @@ export default async function HomePage() {
     <HomeIntroGateProvider>
       <main id="main-content" tabIndex={-1} className="relative z-0 isolate">
         <Hero subtitle={portfolio.heroSubtitle} />
-        {/* ponytail: "now" is the month this page was rendered; a role ending since then shows as running until the next render. */}
-        <CareerLog
-          experience={portfolio.experience}
-          education={portfolio.education}
-          now={new Date().toISOString().slice(0, 7)}
-        />
+        <ExperienceSection entries={portfolio.experience} />
+        <EducationSection entries={portfolio.education} />
         <SkillsSection
           skills={portfolio.skills}
           certifications={portfolio.certifications}

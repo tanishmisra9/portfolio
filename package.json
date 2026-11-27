@@ -16,7 +16,6 @@
     "check:states": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-states.mjs",
     "check:botch": "node scripts/check-botch.mjs",
     "check:admin": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-admin.mjs",
-    "check:graph": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-career-graph.mjs",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "admin:hash-password": "node scripts/hash-password.mjs"
