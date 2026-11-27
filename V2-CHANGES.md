@@ -83,8 +83,10 @@ The whole site moved to one visual language. The rules live in `CLAUDE.md` ("v2 
 - **Under reduced motion,** the name is plain text: no dead "Play pit-stop" button, and no clip is downloaded.
 
 ### Experience and Education: a reading light
-- **The entry crossing the middle of the screen is lit;** the others rest dimmed with their tags hidden, so a light
-  moves down the list as you scroll (`components/sections/spotlight-list.tsx`, shared by both sections).
+- **Desktop (mouse): hover an entry to light it;** the others dim and hide their tags. At rest nothing is dimmed, and
+  leaving the list undims everything.
+- **Phone (touch): the entry crossing the middle of the screen is lit;** the others rest dimmed with their tags hidden,
+  so a light moves down the list as you scroll (`components/sections/spotlight-list.tsx`, shared by both sections).
   - It's an IntersectionObserver on a band across the middle of the screen: no scroll handler, 0 rAF when idle.
   - Tags keep their space while hidden, so nothing shifts as the light moves.
   - The first entry is lit until another reaches the middle. Reduced motion, or no JS: nothing is dimmed.
