@@ -14,7 +14,12 @@ import { AnimatePresence, m as motion, useReducedMotion } from "framer-motion";
 
 // ponytail: magic numbers kept local, not worth a shared constants file for a few numbers used once
 const SHOW_DELAY_MS = 500;
+/** After a visible tooltip hides, a hover within this window shows the next one at once (moving along the nav). */
+const SKIP_DELAY_MS = 400;
 const TAP_AUTO_HIDE_MS = 1500;
+
+// Shared by every Tooltip: when the last visible one hid. Infinity-ago until one has shown.
+let lastHiddenAt = -Infinity;
 const GAP = 8;
 const MARGIN = 8;
 
@@ -65,6 +70,8 @@ export function Tooltip({
   const autoHideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const wrapperRef = useRef<HTMLSpanElement>(null);
   const bubbleRef = useRef<HTMLSpanElement>(null);
+  const openRef = useRef(false);
+  openRef.current = open;
 
   // The bubble lives in a portal on <body>, so it needs the document: render it only after mount.
   useEffect(() => setMounted(true), []);
@@ -84,8 +91,11 @@ export function Tooltip({
   const hide = () => {
     clearTimeout(showTimer.current);
     clearTimeout(autoHideTimer.current);
+    if (openRef.current) lastHiddenAt = performance.now();
     setOpen(false);
   };
+  // Warm: a tooltip just hid (or is still up), so the next hover skips the delay.
+  const hoverDelay = () => (performance.now() - lastHiddenAt < SKIP_DELAY_MS ? 0 : SHOW_DELAY_MS);
   const tap = () => {
     clearTimeout(showTimer.current);
     setOpen(true);
@@ -136,7 +146,7 @@ export function Tooltip({
     <span
       ref={wrapperRef}
       className={`relative inline-flex${className ? ` ${className}` : ""}`}
-      onMouseEnter={() => show(SHOW_DELAY_MS)}
+      onMouseEnter={() => show(hoverDelay())}
       onMouseLeave={hide}
       onFocusCapture={() => show(0)}
       onBlurCapture={hide}
