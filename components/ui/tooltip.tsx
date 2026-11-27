@@ -33,9 +33,11 @@ function place(
   a: DOMRect,
   b: DOMRect,
   align: Align,
+  inDialog: boolean,
 ): { left: number; top: number } {
-  const sx = window.scrollX;
-  const sy = window.scrollY;
+  // Inside a modal <dialog> (fixed, fills the viewport) the bubble is positioned against the dialog, i.e. the viewport.
+  const sx = inDialog ? 0 : window.scrollX;
+  const sy = inDialog ? 0 : window.scrollY;
   const vw = document.documentElement.clientWidth;
   const pref =
     align === "start" ? a.left : align === "end" ? a.right - b.width : (a.left + a.right) / 2 - b.width / 2;
@@ -110,7 +112,7 @@ export function Tooltip({
     const wrapper = wrapperRef.current;
     const bubble = bubbleRef.current;
     if (!wrapper || !bubble) return;
-    setPos(place(wrapper.getBoundingClientRect(), bubble.getBoundingClientRect(), align));
+    setPos(place(wrapper.getBoundingClientRect(), bubble.getBoundingClientRect(), align, !!wrapper.closest("dialog")));
   }, [open, label, align]);
 
   // The portal is anchored to document coordinates, so a trigger in a sticky element (the header)
@@ -176,7 +178,8 @@ export function Tooltip({
               </motion.span>
             )}
           </AnimatePresence>,
-          document.body,
+          // A modal <dialog> is in the top layer, above all of <body>: a bubble portalled to body would sit behind it.
+          wrapperRef.current?.closest("dialog") ?? document.body,
         )}
     </span>
   );
