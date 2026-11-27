@@ -43,6 +43,39 @@ const STRIP_SIZES = {
 const SKIP_BUTTON =
   "group relative inline-flex items-center justify-center rounded-none border border-border-strong bg-fg/[0.06] px-6 py-3 font-sans text-base text-fg shadow-[inset_0_1px_0_0_rgba(255,255,255,0.18),0_10px_30px_-12px_rgba(0,0,0,0.6)] transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70";
 
+const DIP_IN_MS = 90;
+const DIP_HOLD_MS = 80; // lets iOS paint the destination (~4500px away, never drawn yet) before the cover lifts
+const DIP_OUT_MS = 200;
+
+/**
+ * "Skip to the photos" as a dip, the theme switch's pattern (theme-toggle.tsx): a cover in the page's background colour
+ * fades in, the jump happens underneath, and the cover fades out. A bare jump still flickered on the owner's iPhone after
+ * the note was fixed to draw lit on the first frame (probe: heading at full opacity from that frame): iOS shows a
+ * never-painted region a beat before its pixels are ready. The cover sits below the sticky nav (z-50), which doesn't
+ * change. Timers, not rAF (a hidden tab would strand the cover). Reduced motion: a plain jump.
+ */
+function dipJump(target: HTMLElement) {
+  const jump = () => {
+    target.scrollIntoView({ block: "start" });
+    history.pushState(null, "", "#collections");
+  };
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return jump();
+  const cover = document.createElement("div");
+  cover.setAttribute("aria-hidden", "true");
+  cover.style.cssText = `position:fixed;inset:0;z-index:40;pointer-events:none;opacity:0;background:${getComputedStyle(document.body).backgroundColor};transition:opacity ${DIP_IN_MS}ms ease-out`;
+  document.body.appendChild(cover);
+  cover.getBoundingClientRect(); // commit opacity 0 so the change below transitions
+  cover.style.opacity = "1";
+  window.setTimeout(() => {
+    jump();
+    window.setTimeout(() => {
+      cover.style.transition = `opacity ${DIP_OUT_MS}ms ease-in`;
+      cover.style.opacity = "0";
+      window.setTimeout(() => cover.remove(), DIP_OUT_MS + 30);
+    }, DIP_HOLD_MS);
+  }, DIP_IN_MS + 20);
+}
+
 function CollectionTile({ collection, index, hero }: CollectionTileProps) {
   return (
     <Link
@@ -127,7 +160,17 @@ export function PhotosIndexMotion({ collections }: Props) {
         {/* The site's bordered button (as "Show more"), low on the first screen (owner: "more of a button", lower), and
             it lands on "Here's my work.", where #collections now starts (owner), not the first album. Absolute, so the title stays centred where it was. */}
         <motion.div variants={item} className="absolute inset-x-0 bottom-[14svh] flex justify-center">
-          <a href="#collections" onMouseDown={(e) => e.preventDefault()} className={SKIP_BUTTON}>
+          <a
+            href="#collections"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              const target = document.getElementById("collections");
+              if (!target) return; // no JS-side target: let the plain anchor jump
+              e.preventDefault();
+              dipJump(target);
+            }}
+            className={SKIP_BUTTON}
+          >
             <span aria-hidden className={GLASS_BUTTON_SHEEN_CLASSES} style={{ background: GLASS_BUTTON_SHEEN_BACKGROUND }} />
             <span className="relative">Skip to the photos</span>
           </a>
