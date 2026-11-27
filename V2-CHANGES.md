@@ -82,11 +82,12 @@ The whole site moved to one visual language. The rules live in `CLAUDE.md` ("v2 
   - The next stop's variant is rolled and preloaded ahead of time.
 - **Under reduced motion,** the name is plain text: no dead "Play pit-stop" button, and no clip is downloaded.
 
-### Experience and Education rows
-- **Each entry is a compact row** (date, org or school, role or credential) with a `+` that opens its tags, description,
-  activities and coursework (`components/sections/expandable-row.tsx`, shared by both sections).
-  - The open and close is a CSS height transition (no JS measuring); closed rows can't be tabbed into.
-  - A row with nothing to show (the Statistics minor) has no `+`.
+### Experience and Education: a reading light
+- **The entry crossing the middle of the screen is lit;** the others rest dimmed with their tags hidden, so a light
+  moves down the list as you scroll (`components/sections/spotlight-list.tsx`, shared by both sections).
+  - It's an IntersectionObserver on a band across the middle of the screen: no scroll handler, 0 rAF when idle.
+  - Tags keep their space while hidden, so nothing shifts as the light moves.
+  - The first entry is lit until another reaches the middle. Reduced motion, or no JS: nothing is dimmed.
 - **Dates are plain words, not caps with a dash:** "Since Jan 2026", "May to Aug 2026" (the year once when it's the
   same), "Jun 2023 to Aug 2025".
 
