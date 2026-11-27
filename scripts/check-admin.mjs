@@ -108,7 +108,8 @@ for (const k of keys) assert.ok(LOCKED_COLLECTION_SLUGS.includes(k), `${k} is ef
     const tree = unified().use(remarkParse).parse(md);
     remarkImageMeta()(tree);
     const out = [];
-    const walk = (n) => (n.type === "image" ? out.push(n.data?.hProperties ?? {}) : (n.children ?? []).forEach(walk));
+    const walk = (n) =>
+      n.type === "image" || n.type === "imageReference" ? out.push(n.data?.hProperties ?? {}) : (n.children ?? []).forEach(walk);
     walk(tree);
     return out;
   };
@@ -118,6 +119,12 @@ for (const k of keys) assert.ok(LOCKED_COLLECTION_SLUGS.includes(k), `${k} is ef
   assert.equal(meta("![a](x.png)")[0]["data-caption"], undefined);
   assert.equal(meta("[![a](x.png)](https://e.com)")[0]["data-linked"], "true");
   assert.equal(meta("![a](x.png)")[0]["data-linked"], undefined);
+  // An italic phrase that starts a prose line is not a caption; a hard line break (two spaces) still separates one.
+  assert.equal(meta("![a](x.png)\n*Note:* the rest of this explains it.")[0]["data-caption"], undefined);
+  assert.equal(meta("![a](x.png)  \n*Hard break.*")[0]["data-caption"], "Hard break.");
+  // Reference-style: a linked image via [..][ref] is linked (no preview button inside its <a>); ![a][ref] gets its caption.
+  assert.equal(meta("[![a](x.png)][src]\n\n[src]: https://e.com")[0]["data-linked"], "true");
+  assert.equal(meta("![a][img]\n*Ref caption.*\n\n[img]: x.png")[0]["data-caption"], "Ref caption.");
 }
 
 console.log("check-admin: ok");

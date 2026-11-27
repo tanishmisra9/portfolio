@@ -27,7 +27,6 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
   const pointerType = useRef("mouse");
-  const closing = useRef(false);
   const resetZoom = useRef<() => void>(undefined); // set by Zoomable
   const [resetKey, setResetKey] = useState(0);
   const close = () => dialog.current?.close();
@@ -52,10 +51,10 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
     <>
       <button
         type="button"
-        aria-label={caption ? `Enlarge image: ${caption}` : "Enlarge image"}
+        // The label replaces the img's own name, so it must carry the alt (what the image shows) or screen readers lose it.
+        aria-label={alt || caption ? `Enlarge image: ${alt || caption}` : "Enlarge image"}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => {
-          closing.current = false;
           setOpen(true);
           dialog.current?.showModal();
         }}
@@ -65,12 +64,10 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
       </button>
       <dialog
         ref={dialog}
-        aria-label={caption ?? alt ?? "Image"}
+        aria-label={caption || alt || "Image"}
         onClose={() => setOpen(false)}
-        // The image zooms on click; anywhere else (backdrop, caption) closes. The X handles its own click.
-        onClick={(e) => {
-          if (!(e.target as Element).closest("[data-zoom], button")) close();
-        }}
+        // Taps are classified on pointerup by Zoomable (image → zoom, elsewhere → close on the following click), not by
+        // the click alone: a click after a drag lands on whatever is under the release point and closed mid-pan.
         // group/preview: Zoomable sets data-zoomed on the dialog past 1x (named, so HoverFill's own `group` is unaffected).
         className="post-image-dialog group/preview m-0 h-dvh max-h-none w-screen max-w-none touch-none bg-bg p-0 text-fg outline-none backdrop:bg-transparent"
       >
@@ -89,11 +86,12 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
                   draggable={false}
                   placeholder="blur"
                   blurDataURL={BLUR_DATA_URL}
-                  className="h-auto max-h-[80dvh] w-auto max-w-full select-none object-contain"
+                  // Short screens (a phone in landscape): a smaller image so a long caption still fits below it.
+                  className="h-auto max-h-[80dvh] w-auto max-w-full select-none object-contain [@media(max-height:500px)]:max-h-[60dvh]"
                 />
               </Zoomable>
               {caption && (
-                <figcaption className="relative mt-4 text-center text-muted transition-opacity duration-200 group-data-[zoomed]/preview:pointer-events-none group-data-[zoomed]/preview:opacity-0 motion-reduce:transition-none">
+                <figcaption className="relative mt-4 max-h-[25dvh] touch-pan-y overflow-y-auto text-center text-muted transition-opacity duration-200 group-data-[zoomed]/preview:pointer-events-none group-data-[zoomed]/preview:opacity-0 motion-reduce:transition-none">
                   {caption}
                 </figcaption>
               )}
@@ -109,8 +107,7 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
                 <button
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={() => {
                     resetZoom.current?.();
                     setResetKey((k) => k + 1);
                   }}
@@ -125,12 +122,11 @@ export function PostImage({ src, alt, width, height, caption, linked }: Props) {
                 icon={<X />}
                 label="Close"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  if (closing.current) return;
                   // A tap closes in ~80ms, before HoverFill's 200ms rise shows (TapFill sets it on pointerdown): wait
                   // for the fill. Mouse (already filled by hover), keyboard (detail 0) and reduced motion close at once.
+                  // No "closing" flag: a second tap just schedules a second close(), a no-op on a closed dialog, and the
+                  // page can't be reopened within those 220ms because the dialog still covers it.
                   if (pointerType.current === "mouse" || e.detail === 0 || reduced()) return close();
-                  closing.current = true;
                   setTimeout(close, FILL_MS);
                 }}
               />
@@ -184,18 +180,27 @@ function Zoomable({ children, resetRef }: { children: ReactNode; resetRef: React
     let pinch: { d: number; mx: number; my: number; s: number; x: number; y: number } | null = null;
     let down = { x: 0, y: 0 };
     let moved = false;
+    let onImage = false;
+    let closeOnClick = false; // set by a still tap off the image; the click that follows closes
     let lastTap = -Infinity;
     const mid = () => {
       const [a, b] = [...pts.values()];
       return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
     };
 
+    // Listeners sit on the whole dialog, so a pinch can start with a finger on the backdrop (a small image leaves most
+    // of the screen as backdrop). The X and Reset buttons handle their own clicks, so their presses are skipped.
     const onDown = (e: PointerEvent) => {
-      node.setPointerCapture(e.pointerId);
+      const target = e.target as Element;
+      if (target.closest("button")) return;
+      if (e.pointerType === "mouse" && e.button !== 0) return; // right/middle click: the context menu, not a zoom
+      dlg.setPointerCapture(e.pointerId);
+      closeOnClick = false;
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pts.size === 1) {
         down = { x: e.clientX, y: e.clientY };
         moved = false;
+        onImage = node.contains(target);
         if (s > 1) node.style.cursor = "grabbing";
       } else if (pts.size === 2) {
         moved = true; // a pinch is never a tap
@@ -221,7 +226,11 @@ function Zoomable({ children, resetRef }: { children: ReactNode; resetRef: React
       if (pts.size < 2) pinch = null;
       if (pts.size > 0) return;
       apply(false); // restores the grab cursor
+      // Only a press that didn't move counts: a pan or pinch never closes or toggles, wherever it is released.
       if (e.type !== "pointerup" || moved) return;
+      // Backdrop or caption: close on the click that follows, not here. Closing on pointerup let that click land on the
+      // page underneath, and in landscape the image's enlarge button sits there, so the preview reopened at once.
+      if (!onImage) return void (closeOnClick = true);
       const now = performance.now();
       if (now - lastTap < DOUBLE_TAP_MS) return;
       lastTap = now;
@@ -231,13 +240,15 @@ function Zoomable({ children, resetRef }: { children: ReactNode; resetRef: React
     // Trackpad pinch arrives as ctrl+wheel in Chrome/Firefox; a plain wheel pans while zoomed. Non-passive, so the page
     // itself doesn't zoom or scroll.
     const onWheel = (e: WheelEvent) => {
+      // Firefox reports a mouse wheel in lines (deltaMode 1, ~3 per notch), not pixels.
+      const k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? dlg.clientHeight : 1;
       if (e.ctrlKey) {
         e.preventDefault();
-        zoomTo(s * Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY);
+        zoomTo(s * Math.exp(-e.deltaY * k * 0.01), e.clientX, e.clientY);
       } else if (s > 1) {
         e.preventDefault();
-        x -= e.deltaX;
-        y -= e.deltaY;
+        x -= e.deltaX * k;
+        y -= e.deltaY * k;
         apply(false);
       }
     };
@@ -260,21 +271,30 @@ function Zoomable({ children, resetRef }: { children: ReactNode; resetRef: React
       s = 1;
       apply(true);
     };
-    node.addEventListener("pointerdown", onDown);
-    node.addEventListener("pointermove", onMove);
-    node.addEventListener("pointerup", onUp);
-    node.addEventListener("pointercancel", onUp);
+    const onClick = () => {
+      if (!closeOnClick) return;
+      closeOnClick = false;
+      dlg.close();
+    };
+    dlg.addEventListener("click", onClick);
+    dlg.addEventListener("pointerdown", onDown);
+    dlg.addEventListener("pointermove", onMove);
+    dlg.addEventListener("pointerup", onUp);
+    dlg.addEventListener("pointercancel", onUp);
     dlg.addEventListener("wheel", onWheel, { passive: false });
     dlg.addEventListener("gesturestart", onGestureStart);
     dlg.addEventListener("gesturechange", onGestureChange);
     return () => {
-      node.removeEventListener("pointerdown", onDown);
-      node.removeEventListener("pointermove", onMove);
-      node.removeEventListener("pointerup", onUp);
-      node.removeEventListener("pointercancel", onUp);
+      dlg.removeEventListener("click", onClick);
+      dlg.removeEventListener("pointerdown", onDown);
+      dlg.removeEventListener("pointermove", onMove);
+      dlg.removeEventListener("pointerup", onUp);
+      dlg.removeEventListener("pointercancel", onUp);
       dlg.removeEventListener("wheel", onWheel);
       dlg.removeEventListener("gesturestart", onGestureStart);
       dlg.removeEventListener("gesturechange", onGestureChange);
+      // The dialog outlives this component: a stale flag made the next open flash Reset and fade the caption in.
+      dlg.removeAttribute("data-zoomed");
     };
   }, [resetRef]);
 

@@ -52,6 +52,9 @@ export function extractHeadings(content: string): PostHeading[] {
 
 type MdNode = { type: string; value?: string; children?: MdNode[]; data?: { hProperties?: Record<string, unknown> } };
 const isBlank = (n?: MdNode) => n?.type === "text" && !n.value?.trim();
+const isLineBreak = (n?: MdNode) => isBlank(n) || n?.type === "break"; // soft newline, or a hard break (two trailing spaces)
+const isImage = (n: MdNode) => n.type === "image" || n.type === "imageReference"; // ![a](x) and ![a][ref]
+const isLink = (n: MdNode) => n.type === "link" || n.type === "linkReference"; // [..](x) and [..][ref]
 const isOnlyEmphasis = (p?: MdNode) => p?.type === "paragraph" && p.children?.length === 1 && p.children[0].type === "emphasis";
 
 /** react-markdown plugin: stamps each image with `data-caption` (the italic line written under it, either on the next line
@@ -62,10 +65,10 @@ export function remarkImageMeta() {
     const walk = (node: MdNode, inLink: boolean, next?: MdNode) => {
       const kids = node.children ?? [];
       kids.forEach((child, i) => {
-        if (child.type !== "image") return walk(child, inLink || child.type === "link", kids[i + 1]);
+        if (!isImage(child)) return walk(child, inLink || isLink(child), kids[i + 1]);
         const caption =
-          isBlank(kids[i + 1]) && kids[i + 2]?.type === "emphasis"
-            ? kids[i + 2] // same paragraph: image, line break, *caption*
+          isLineBreak(kids[i + 1]) && kids[i + 2]?.type === "emphasis" && kids.slice(i + 3).every(isBlank)
+            ? kids[i + 2] // same paragraph: image, line break, *caption* — and nothing after it (else it's prose)
             : node.type === "paragraph" && kids.length === 1 && isOnlyEmphasis(next)
               ? next!.children![0] // image-only paragraph, then a *caption* paragraph
               : undefined;
