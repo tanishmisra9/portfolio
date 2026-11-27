@@ -12,6 +12,9 @@ import type { BlogPostMeta } from "@/types/content";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
+const ICON_SWAP = "transition-[opacity,filter,transform] duration-200 ease-out motion-reduce:transition-none";
+const ICON_OUT = "scale-75 opacity-0 blur-[3px]";
+
 function CopyLink({ slug }: { slug: string }) {
   const [msg, setMsg] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -24,8 +27,18 @@ function CopyLink({ slug }: { slug: string }) {
   };
   return (
     <span className="absolute right-4 top-4 z-10">
-      {/* A tick for the 1.5s after a successful copy, then back to the copy icon. */}
-      <IconButton icon={msg === "Copied!" ? <Check /> : <Copy />} label={msg ?? "Copy link"} onClick={copy} />
+      {/* A tick for the 1.5s after a successful copy, then back to the copy icon. Both icons share one grid cell and
+          blur-fade into each other (CSS, 200ms); reduced motion swaps instantly. */}
+      <IconButton
+        icon={
+          <span className="grid [&>*]:col-start-1 [&>*]:row-start-1">
+            <Copy className={`${ICON_SWAP} ${msg === "Copied!" ? ICON_OUT : ""}`} />
+            <Check className={`${ICON_SWAP} ${msg === "Copied!" ? "" : ICON_OUT}`} />
+          </span>
+        }
+        label={msg ?? "Copy link"}
+        onClick={copy}
+      />
       <span role="status" className="sr-only">
         {msg}
       </span>
