@@ -1,33 +1,15 @@
 import { ScrollReveal } from '@/components/scroll-reveal';
 import { ENTRY_ITEM, ENTRY_MUTED, ENTRY_TAGS, EntryFill } from '@/components/sections/entry-style';
 import { SpotlightList } from '@/components/sections/spotlight-list';
-import {
-  PILL_CLASSES,
-  SECTION_HEADING_CLASSES,
-} from '@/components/ui/class-constants';
+import { SECTION_HEADING_CLASSES } from '@/components/ui/class-constants';
 import { formatDateRange } from '@/lib/format-date-range';
 import type { EducationEntry } from '@/types/content';
 
 type Props = { entries: EducationEntry[] };
 
-const orgPillClassName =
-  `${PILL_CLASSES} font-sans text-[10px] uppercase tracking-widest`;
-
-function CoursePill({ label }: { label: string }) {
-  return (
-    <li className="group relative inline-flex rounded-none border border-border-strong bg-fg/[0.06] px-3 py-1 font-sans text-[10px] uppercase tracking-widest text-fg select-none cursor-default transition-[border-color,background-color,transform] duration-300 hover:-translate-y-[1px] hover:border-fg/30 hover:bg-fg/[0.1]">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-none opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background:
-            'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.13) 0%, transparent 70%)',
-        }}
-      />
-      <span className="relative">{label}</span>
-    </li>
-  );
-}
+/** One look for every Education tag (activities and coursework alike), no hover. */
+const TAG_CLASSES =
+  'rounded-none border border-border-strong bg-fg/[0.06] px-3 py-1 font-sans text-[10px] uppercase tracking-widest text-fg select-none cursor-default';
 
 export function EducationSection({ entries }: Props) {
   return (
@@ -59,7 +41,7 @@ export function EducationSection({ entries }: Props) {
                         {edu.activities?.length ? (
                           <ul className="flex flex-wrap gap-2">
                             {edu.activities.map((pill) => (
-                              <li key={`${edu.id}-activity-${pill}`} className={orgPillClassName}>
+                              <li key={`${edu.id}-activity-${pill}`} className={TAG_CLASSES}>
                                 {pill}
                               </li>
                             ))}
@@ -68,7 +50,9 @@ export function EducationSection({ entries }: Props) {
                         {edu.coursework?.length ? (
                           <ul className="flex flex-wrap gap-2">
                             {edu.coursework.map((pill) => (
-                              <CoursePill key={`${edu.id}-course-${pill}`} label={pill} />
+                              <li key={`${edu.id}-course-${pill}`} className={TAG_CLASSES}>
+                                {pill}
+                              </li>
                             ))}
                           </ul>
                         ) : null}
