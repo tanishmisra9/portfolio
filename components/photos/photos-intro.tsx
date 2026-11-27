@@ -558,6 +558,53 @@ function ArrowSvg({ path, draw, fade, sound }: { path: ArrowPath | null; draw: M
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
 
+/**
+ * Scroll progress that keeps moving between iOS's scroll updates.
+ *
+ * During momentum scrolling (after the finger lifts), iOS Safari scrolls in its UI process and hands the page a new
+ * scroll position only about every 6th frame (~10 Hz). A pinned, JS-scrubbed stage then froze for 5-6 frames and
+ * jumped, while the iOS scrollbar moved smoothly. Measured on an iPhone 17 Pro Max with an on-device probe: the page
+ * drew at a steady 60 Hz with ~2 ms of work per frame, yet scrollY was stale in 27% of scrolling frames.
+ *
+ * Between updates this coasts at the last measured speed (slightly damped, since momentum decelerates) for at most
+ * COAST_MS, and when a real update lands behind the prediction it eases toward it instead of jumping back. While the
+ * finger is down, updates arrive every frame, so there's nothing to predict. On the phone: frozen frames 27% -> 2.9%,
+ * trailing the known scroll by a median 0.1% of a screen. A spring (useSpring) also removed the freezes, but trailed
+ * by 4.3% (p90 12%), and the owner felt that lag. The rAF loop runs only while scrolling or settling, never at idle.
+ */
+const COAST_MS = 120; // coast at most ~1.5 iOS update intervals past the last real position
+const COAST_STALE_MS = 160; // no update for this long: the scroll has stopped, settle on the real value
+const COAST_DAMP = 0.85;
+function useCoastingProgress(src: MotionValue<number>) {
+  const out = useMotionValue(src.get());
+  useEffect(() => {
+    let last = src.get(), lastT = performance.now(), v = 0, shown = last, raf = 0;
+    out.set(last);
+    const tick = () => {
+      raf = 0;
+      const age = performance.now() - lastT;
+      const target = age > COAST_STALE_MS ? last : last + v * Math.min(age, COAST_MS) * COAST_DAMP;
+      // Never snap backwards: a real update behind the prediction is eased toward.
+      const ahead = (target - shown) * Math.sign(v || target - shown);
+      shown = ahead >= 0 || v === 0 ? target : shown + (target - shown) * 0.25;
+      out.set(clamp01(shown));
+      if (age <= COAST_STALE_MS || Math.abs(shown - last) > 1e-6) raf = requestAnimationFrame(tick);
+    };
+    const off = src.on("change", (x) => {
+      const t = performance.now(), dt = t - lastT;
+      v = dt > 0 && dt < 250 ? (x - last) / dt : 0; // a jump after a pause (an anchor link, a reload) doesn't coast
+      last = x;
+      lastT = t;
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+    return () => {
+      off();
+      cancelAnimationFrame(raf);
+    };
+  }, [src, out]);
+  return out;
+}
+
 /** Below this the stroke counts as scrolled all the way back to its start (fully faded). */
 const INK_GONE = 0.001;
 
@@ -663,10 +710,10 @@ function PencilCircle({ p, range, sound, children }: { p?: MotionValue<number>; 
 function ScrollIntro({ sound }: { sound: SoundRef }) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  // Identity transform on purpose: it keeps every downstream useTransform on the JS path.
-  // Fed straight from scrollYProgress, Framer 12 hands opacity to a native ScrollTimeline
-  // and multi-stop keyframes came out wrong (a beat at 0.25 opacity at 90% scroll).
-  const p = useTransform(scrollYProgress, (v) => v);
+  // Coasting progress (see useCoastingProgress): glides through iOS's ~10 Hz momentum-scroll updates. Being a plain JS
+  // motion value it also keeps every downstream useTransform on the JS path: fed straight from scrollYProgress, Framer 12
+  // hands opacity to a native ScrollTimeline and multi-stop keyframes came out wrong (a beat at 0.25 opacity at 90%).
+  const p = useCoastingProgress(scrollYProgress);
 
   const l0 = useTransform(p, [...T.l0], [0, 1]);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -919,8 +966,8 @@ export function PencilNote({ sound }: { sound: SoundRef }) {
   // (the cover's top) at the bottom of the screen (95%). The heading scrolls away during the long fall; the line then
   // reads as coming from above, like the intro's arrow. Landing any lower would put the head below the fold.
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.85", "end 0.95"] });
-  // Identity transform (see ScrollIntro): keeps every downstream transform on the JS path.
-  const progress = useTransform(scrollYProgress, (v) => v);
+  // Coasting progress, like ScrollIntro's (iOS momentum updates), and on the JS path for the same reason.
+  const progress = useCoastingProgress(scrollYProgress);
   const p = useMotionValue(0);
   useMotionValueEvent(progress, "change", (x) => p.set(still ? 1 : x));
   useEffect(() => p.set(still ? 1 : progress.get()), [still, p, progress]);
