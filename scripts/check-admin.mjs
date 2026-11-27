@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { parseFrontmatter, imageRefs, rewriteImageDestinations } from "../lib/admin/markdown-import.ts";
 import { isBlobImageUrl, getRemoteImageDimensions } from "../lib/image-dimensions.ts";
-import { extractHeadings } from "../lib/post-headings.ts";
+import { extractHeadings, remarkImageMeta } from "../lib/post-headings.ts";
+import remarkParse from "remark-parse";
+import { unified } from "unified";
 import { LOCKED_COLLECTION_SLUGS } from "../lib/slug.ts";
 
 // SEC-001: executable frontmatter is rejected and never evaluated.
@@ -99,5 +101,23 @@ const effectMap = /effectMap[^{]*\{([\s\S]*?)\n\s*\}/.exec(src)?.[1] ?? "";
 const keys = [...effectMap.matchAll(/^\s*["']?([a-z0-9-]+)["']?\s*:/gm)].map((m) => m[1]);
 assert.ok(keys.length >= 4, "could not read effectMap keys");
 for (const k of keys) assert.ok(LOCKED_COLLECTION_SLUGS.includes(k), `${k} is effect-keyed but not locked`);
+
+// Post image preview: the caption is the italic line under an image (next line or after a blank line).
+{
+  const meta = (md) => {
+    const tree = unified().use(remarkParse).parse(md);
+    remarkImageMeta()(tree);
+    const out = [];
+    const walk = (n) => (n.type === "image" ? out.push(n.data?.hProperties ?? {}) : (n.children ?? []).forEach(walk));
+    walk(tree);
+    return out;
+  };
+  assert.equal(meta("![a](x.png)\n*Next line.*")[0]["data-caption"], "Next line.");
+  assert.equal(meta("![a](x.png)\n\n*After a blank.*")[0]["data-caption"], "After a blank.");
+  assert.equal(meta("![a](x.png)\n\nPlain text, *not* a caption.")[0]["data-caption"], undefined);
+  assert.equal(meta("![a](x.png)")[0]["data-caption"], undefined);
+  assert.equal(meta("[![a](x.png)](https://e.com)")[0]["data-linked"], "true");
+  assert.equal(meta("![a](x.png)")[0]["data-linked"], undefined);
+}
 
 console.log("check-admin: ok");

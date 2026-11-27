@@ -1,7 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import type { PostHeading } from "@/lib/post-headings";
+
+/* Below xl, where PostToc is hidden: a native <select>, so phones open their own picker (iOS's menu, Android's sheet).
+   Options can't be padded on iOS, so depth is shown with non-breaking spaces. The value snaps back to "" so the box
+   keeps reading "Jump to…" and the same section can be picked twice. */
+export function PostJump({ headings }: { headings: PostHeading[] }) {
+  return (
+    <div className="relative xl:hidden">
+      <select
+        aria-label="Jump to section"
+        value=""
+        onChange={(e) => {
+          const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          document.getElementById(e.target.value)?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
+        }}
+        className="w-full cursor-pointer appearance-none rounded-none border border-border bg-bg py-3 pl-4 pr-11 text-sm text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg/70"
+      >
+        <option value="" disabled>
+          Jump to…
+        </option>
+        {headings.map((h) => (
+          <option key={h.id} value={h.id}>
+            {"   ".repeat(h.depth) + h.text}
+          </option>
+        ))}
+      </select>
+      <ChevronDown aria-hidden className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-muted" />
+    </div>
+  );
+}
 
 /* "On this page" nav, xl+ only. A section is current once its heading is well inside the viewport (top above
    LINE_FRACTION of the height), not when it is about to scroll off under the sticky header. A clicked entry lands at

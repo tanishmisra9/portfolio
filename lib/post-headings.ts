@@ -49,3 +49,32 @@ export function extractHeadings(content: string): PostHeading[] {
   const top = Math.min(...all.map(({ node }) => node.depth));
   return all.map(({ node, id, text }) => ({ id, text, depth: Math.min(node.depth - top, 2) as 0 | 1 | 2 }));
 }
+
+type MdNode = { type: string; value?: string; children?: MdNode[]; data?: { hProperties?: Record<string, unknown> } };
+const isBlank = (n?: MdNode) => n?.type === "text" && !n.value?.trim();
+const isOnlyEmphasis = (p?: MdNode) => p?.type === "paragraph" && p.children?.length === 1 && p.children[0].type === "emphasis";
+
+/** react-markdown plugin: stamps each image with `data-caption` (the italic line written under it, either on the next line
+ *  or after a blank line, which is how posts caption images) and `data-linked` (the image sits inside a link). The italic
+ *  line still renders in the post as before; only the click-preview reads the attribute. */
+export function remarkImageMeta() {
+  return (tree: Root) => {
+    const walk = (node: MdNode, inLink: boolean, next?: MdNode) => {
+      const kids = node.children ?? [];
+      kids.forEach((child, i) => {
+        if (child.type !== "image") return walk(child, inLink || child.type === "link", kids[i + 1]);
+        const caption =
+          isBlank(kids[i + 1]) && kids[i + 2]?.type === "emphasis"
+            ? kids[i + 2] // same paragraph: image, line break, *caption*
+            : node.type === "paragraph" && kids.length === 1 && isOnlyEmphasis(next)
+              ? next!.children![0] // image-only paragraph, then a *caption* paragraph
+              : undefined;
+        const props: Record<string, unknown> = {};
+        if (caption) props["data-caption"] = toString(caption as Parameters<typeof toString>[0]);
+        if (inLink) props["data-linked"] = "true";
+        child.data = { ...child.data, hProperties: { ...child.data?.hProperties, ...props } };
+      });
+    };
+    walk(tree as MdNode, false);
+  };
+}

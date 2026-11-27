@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
 import type { Components } from "react-markdown";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { CONTENT_SUBTITLE_CLASSES, CONTENT_TITLE_CLASSES } from "@/components/ui/class-constants";
 import { BackButton } from "@/components/ui/back-button";
-import { PostToc } from "@/components/blog/post-toc";
-import { extractHeadings, remarkHeadingIds } from "@/lib/post-headings";
+import { PostImage } from "@/components/blog/post-image";
+import { PostJump, PostToc } from "@/components/blog/post-toc";
+import { extractHeadings, remarkHeadingIds, remarkImageMeta } from "@/lib/post-headings";
 import { getImageDimensions } from "@/lib/image-dimensions";
 import { getPublishedData } from "@/lib/site-content";
 
 type Props = { params: Promise<{ slug: string }> };
-
-// Same shared LQIP placeholder used by /photos (components/photos/photo-album-motion.tsx).
-const BLOG_IMAGE_BLUR_DATA_URL =
-  "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AJQAB/9k=";
 
 const DEFAULT_IMG_W = 1600;
 const DEFAULT_IMG_H = 900;
@@ -103,22 +99,19 @@ const components: Components = {
       />
     </ScrollReveal>
   ),
-  img: async ({ src, alt }) => {
+  img: async ({ src, alt, ...rest }) => {
     if (typeof src !== "string" || !src) return null;
     const dims = await getImageDimensions(src);
+    const meta = rest as { "data-caption"?: string; "data-linked"?: string }; // stamped by remarkImageMeta
     return (
       <ScrollReveal variant="slide" className="my-6">
-        <Image
+        <PostImage
           src={src}
           alt={alt ?? ""}
           width={dims?.width ?? DEFAULT_IMG_W}
           height={dims?.height ?? DEFAULT_IMG_H}
-          style={{ width: "100%", height: "auto" }}
-          sizes="(max-width: 768px) 100vw, 768px"
-          placeholder="blur"
-          blurDataURL={BLOG_IMAGE_BLUR_DATA_URL}
-          quality={72}
-          className="rounded-lg border border-border"
+          caption={meta["data-caption"]}
+          linked={meta["data-linked"] === "true"}
         />
       </ScrollReveal>
     );
@@ -183,7 +176,8 @@ export default async function BlogPostPage({ params }: Props) {
           <div className={`mt-12 ${hasToc ? "xl:grid xl:grid-cols-[13rem_minmax(0,1fr)] xl:gap-12" : ""}`}>
             {hasToc && <PostToc headings={headings} />}
             <div className={`space-y-6 text-fg ${hasToc ? "xl:col-start-2" : ""}`}>
-              <Markdown remarkPlugins={[remarkGfm, remarkHeadingIds]} components={components}>
+              {hasToc && <PostJump headings={headings} />}
+              <Markdown remarkPlugins={[remarkGfm, remarkHeadingIds, remarkImageMeta]} components={components}>
                 {post.content}
               </Markdown>
             </div>

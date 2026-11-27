@@ -401,6 +401,16 @@ html.dark[data-pd-sky="2"] { --nav-tint: rgb(36 54 110 / 1); }        /* blue ho
   }
 }
 
+/* Thought post image preview (components/blog/post-image.tsx): the page behind a modal <dialog> doesn't scroll. */
+html:has(dialog.post-image-dialog[open]) {
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .post-image-dialog[open] {
+    animation: site-header-in 0.2s ease-out;
+  }
+}
+
 /* Hero name idle drift (HeroNameMotion): compositor-only, replaces a Framer loop that ran JS every frame forever. */
 .hero-drift {
   animation: hero-drift 18s ease-in-out infinite;
