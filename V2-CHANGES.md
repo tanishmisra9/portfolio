@@ -1,7 +1,7 @@
 # v2: what changed since v1 (`main`)
 
-`v2` is a redesign of the whole site plus a rebuilt /photos experience. It is **139 commits** ahead of `main`
-(22–25 Nov 2026) and touches **138 files** (+6,979 / −2,863 lines). `main` has **2 commits that `v2` does not**
+`v2` is a redesign of the whole site plus a rebuilt /photos experience. As of `4ab3acd` it is **197 commits** ahead of
+`main` (22–27 Nov 2026) and touches **153 files** (+8,778 / −3,206 lines), not counting this update. `main` has **2 commits that `v2` does not**
 (they re-add the EXPERIENCE/SKILLS/PROJECTS nav links and re-centre the hero); see
 [Not carried over from main](#not-carried-over-from-main).
 
@@ -10,6 +10,7 @@
 - [Home: the hero pit stop](#home-the-hero-pit-stop)
 - [/photos](#photos)
 - [/thoughts (was /blog)](#thoughts-was-blog)
+- [/quotes](#quotes)
 - [/f1](#f1)
 - [Admin](#admin)
 - [Performance](#performance)
@@ -31,7 +32,7 @@
   - `radio_samples.rms`: measured loudness for the radio easter egg. After pushing, open /admin/radio and run
     **Analyze loudness** once, then **Publish**.
 - **New dependencies:**
-  - `pencil-voice` (installed from GitHub, `github:tanishmisra9/pencil-voice#v0.1.1`);
+  - `pencil-voice` (installed from GitHub, `github:tanishmisra9/pencil-voice#v0.1.2`);
   - `unified`, `remark-parse` and `mdast-util-to-string`.
 
   No new environment variables.
@@ -60,9 +61,12 @@ The whole site moved to one visual language. The rules live in `CLAUDE.md` ("v2 
   too. The full-contrast inverted fill stays for buttons and links.
 - **The nav no longer has an About link** (PHOTOS, THOUGHTS, QUOTES, F1). The About section is still on the home page.
 - **Tooltips:** a sharp bordered box in a portal, in the system UI font. It flips above the trigger when there's no
-  room and stays inside the viewport.
+  room and stays inside the viewport. The first one waits 500ms; for 400ms after one hides, the next shows at once, so
+  moving along the nav labels each without a pause.
 - **`IconButton`:** one shared square icon button with a fill hover and a tooltip. It's used for back, replay,
-  copy-link and the admin controls. Back buttons are a chevron.
+  copy-link, the project and certificate links, and the admin controls. Back buttons are a chevron.
+- **Copy works over plain http too** (a phone on the LAN dev server): `copyText` (`lib/copy-text.ts`) falls back to the
+  legacy copy command. Before, the /thoughts button failed there and the footer email opened Mail.
 - **Theme switch is a cover-dip:** a full-screen cover in the old background fades in, the theme swaps underneath,
   and the cover fades out. The old per-element colour fade let text vanish mid-switch, and WebKit ghosted the hero
   letters. The toggle's tooltip says what it switches to ("Switch to dark mode").
@@ -115,6 +119,10 @@ The page became an experience rather than a grid.
   a plain crossfade.
 - **Beat 2:** "I think *anyone* can be a photographer / since the best camera is the one in your *pocket.*" A pencil
   arrow carries the reader from one phrase to the next, and the camera follows the pencil tip's height.
+  - **The camera moves continuously.** It used to move in stair steps: one 1px scroll could throw the text up to
+    **42px** on desktop (30px on an emulated iPhone 13), because it rounded to a coarse table of tip heights. It now
+    interpolates, and the worst step is 18.5px / 12.3px. What's left is the camera's real speed mid-drop. A longer
+    intro (700svh, 900svh) was tried first and reverted; it's still 500svh.
   - Pencil circles loop "anyone" and "pocket.", different on every load. They replaced an iOS Live Text selection.
   - In light mode the arrow turns from white to dark exactly where both inks read equally on the blue→gold blend
     (measured).
@@ -163,6 +171,7 @@ The page became an experience rather than a grid.
 ### Collections
 - **Contact-sheet tiles:** a cover plus a strip of frames and a frame count.
 - **Back to photos** on an album lands on the collections, not the top of the intro.
+- **The skip link** still opens in a new tab or window on a modified click (⌘, Ctrl, Shift, Alt).
 
 ---
 
@@ -170,15 +179,41 @@ The page became an experience rather than a grid.
 
 - **Route renamed** `/blog` → `/thoughts`, with 308 redirects.
 - **Cards:**
-  - a lift hover with a hard offset shadow;
-  - a rectangle that traces itself around the title;
+  - the soft-fill hover (see [Design system](#design-system));
   - a dateline;
-  - a "⋯" copy-link button.
-- **"On this page":** posts get a section nav with scroll-spy on wide screens (xl and up). Short posts without
-  headings drop the empty column.
+  - a copy-link icon button that blur-fades to a tick for 1.5s after a successful copy.
+- **"On this page":** posts get a section nav with scroll-spy on wide screens (xl and up). Below that, a native
+  "Jump to…" select does the job with the phone's own picker. Short posts without headings drop the empty column.
+- **Image preview:** a post image opens full-screen with its caption (the italic line under it) in a native dialog.
+  It zooms by tap, pinch, drag and trackpad pinch, with a Reset button once zoomed. Linked images stay plain links.
+- **Links in posts open in a new tab;** in-page `#anchors` stay in place.
 - **Unique heading IDs:** a `sec-` prefix and a used-set allocator, so they never collide with `#top` or with each
   other.
 - **Linked images** no longer nest a `div` inside a `p`.
+
+---
+
+## /quotes
+
+- **Phones get the quote cloud** (mixed sizes and typefaces, white and grey, a staggered fade-in) in place of a plain
+  list with captions. At phone width quotes don't share a row, so it reads as a staggered column. The only
+  phone-specific setting is a tighter gap.
+- **Tap for the author:** a tooltip-style tag opens under the quote (above if there's no room). A mouse still hovers.
+  The choice follows the input type, not the screen width, so touch tablets tap too.
+- **The Verstappen quote on touch** names the author on the first tap and opens Super Max on the second. Mouse and
+  keyboard open it at once.
+- **Reshuffle button:** a shuffle `IconButton` under the title deals a new cloud and replays the entrance, with its
+  delays cut to 40%.
+- **The subtitle flicks through seven typefaces** from load, one every 100ms, serif and sans alternating
+  (`components/quotes/quote-subtitle.tsx`). Only faces the page already loads are used.
+  - Tap or click it to pause or resume. It also stops while off screen or in a hidden tab.
+  - Every face is stacked in one box, so the cloud below never moves. Screen readers get the plain sentence once.
+  - Under reduced motion it stays on one face and isn't a button.
+- **Quote taps don't trigger the radio:** quick taps to reveal authors no longer count towards its triple tap.
+- **No accidental reshuffles:** the layout is seeded, and only the button deals a new one, so a font load or no-op
+  resize leaves it unchanged. A real width change re-fits it, and the reader's scroll position is held. Before, any of
+  these dealt a new cloud.
+- **Long words wrap** instead of running off a narrow phone.
 
 ---
 
@@ -235,7 +270,7 @@ CPU, comparing old and new builds in alternating runs. The tools are in `scripts
 | `public/` assets (/f1, /sfx, /fonts, heart.png) get a one-day browser cache (+7 days stale) | Repeat visits stop revalidating every file (75+ conditional requests before the /f1 lights ran); names aren't versioned, so a replaced file reaches visitors within a day |
 | Removed `backdrop-blur` from public pills, cards, glass buttons, thoughts cards, error and 404 (they only blurred the flat page background) | Home **124 → 0** backdrop-filter elements (an extra render pass each), /thoughts 3 → 0; screenshots differ by at most 1 colour level of 255 (rounding) |
 | YD Gothic's `unicode-range` stops at the font's real coverage (BMP, minus variation selectors) instead of U+10FFFF | An emoji in published text no longer downloads the **989 kB** fallback font: Super Max album fonts **1,056 → 65 kB**; emoji render the same (system emoji font) |
-| Framer Motion's slim `m` component + `LazyMotion features={domAnimation}` site-wide (drag and layout projection were bundled into every page; only admin uses them) | First-load JS **−29 kB** on /photos (178 → 150), albums (168 → 139), /thoughts (157 → 128), posts (161 → 132), /quotes (156 → 126), /f1 (157 → 128); home unchanged (its hero needs the animation engine anyway). A/B smoke test identical |
+| Framer Motion's slim `m` component + `LazyMotion features={domAnimation}` site-wide (drag and layout projection were bundled into every page; only admin uses them. The home Skills and Projects sections, which had missed the switch, now use it too) | First-load JS **−29 kB** on /photos (178 → 150), albums (168 → 139), /thoughts (157 → 128), posts (161 → 132), /quotes (156 → 126), /f1 (157 → 128); home unchanged (its hero needs the animation engine anyway). A/B smoke test identical |
 | Header scroll-spy listens only on the home page, once per frame | Other pages no longer run a scroll handler on every scroll event; home's six section-rect reads are coalesced to one pass per frame |
 | Hero magnet paused while the hero is off screen (IntersectionObserver); letters settle when it leaves | Moving the pointer over the rest of the home page: **330 → 0** letter-rect reads per 30 moves; the pull near the name is unchanged |
 | /f1: footage manifest and frame 0 load alongside the car (lights-out waits for both); the rest of the footage still waits for the car | On a 6 Mbps / 150 ms phone connection, ready for lights-out **~9.2 s → ~8.6 s**; car frames no slower |
@@ -256,12 +291,15 @@ CPU, comparing old and new builds in alternating runs. The tools are in `scripts
 
 ## Accessibility
 
+- **Reduced motion no longer hides content.** Post text could stay invisible, and content could stay shifted
+  sideways, because the server-rendered starting style stayed on the page. Both now jump straight to their end state.
 - **Reduced motion is honoured everywhere:**
   - a static /photos intro (strokes fully drawn, never faded);
   - the hero as plain text;
   - no flash or neon stutter;
   - no audio context;
-  - the hero magnet effect off.
+  - the hero magnet effect off;
+  - the /quotes subtitle stays on one typeface.
 - **Contrast:** dim text and the smallest quote tier at ≥ 4.5:1 (checked by `check:colors`), and every /photos sky
   pair at ≥ 4.5:1. The daylight neon is 4.81:1.
 - **Keyboard:** the title effects and the Verstappen link are reachable. The camera title's half-press works with
@@ -298,12 +336,12 @@ Several review rounds (`/code-review` medium and high, plus an audit) were fixed
 - `npm run check:admin`: the admin safety rails, the markdown importer, unique heading IDs, the streaming
   image-dimension reader, and the locked collection slugs.
 - `npm run check:botch`: ties the botched pit stop's visuals to its baked sound clip.
-- `npm run check:states`: every UI state machine (`lib/state-machines.ts`), including the new `HERO_PHASE` and
-  `HALF_PRESS`. Forbidden edges are tested, and raw state writes are grepped out.
+- `npm run check:states`: every UI state machine (`lib/state-machines.ts`), including the new `HERO_PHASE`,
+  `HALF_PRESS` and `TITLE_PHASE` (the /quotes subtitle). Forbidden edges are tested, and raw state writes are grepped out.
 - `npm run check:colors`: now also asserts WCAG contrast ratios.
 - `scripts/perf/` (dev-only, needs Playwright): scroll cost and GPU per section in both directions, the nav-blur cost
   in headed Chromium, a React-commit counter, and the pencil fade check.
-- **`pencil-voice`** has its own test suite: 19 unit tests that fail when a rule is broken, and a browser test that
+- **`pencil-voice`** has its own test suite: 20 unit tests that fail when a rule is broken, and a browser test that
   drives the demo and checks the synth really plays.
 
 ---
@@ -316,12 +354,16 @@ Several review rounds (`/code-review` medium and high, plus an audit) were fixed
 - **Real-device checks still worth doing:**
   - the iPhone long-press callout on the camera title;
   - the pencil sound over https on a phone;
-  - the Safari toolbar tint with the theme cover-dip.
+  - the Safari toolbar tint with the theme cover-dip;
+  - the /quotes tap tags and re-fit on rotation (tested only in emulated Chromium and WebKit);
+  - pinch zoom in the post image preview.
 - **Untested in a browser:** the "New Post" flip after a rename was fixed from a code trace; renaming a post once
   would confirm it.
 - **Pre-existing:** under reduced motion, the dev console logs a hydration warning from the /photos entrance
   animation. It's harmless in production, and still to fix.
-- **Not pushed:** `v2` exists only locally.
+- **Not pushed:** there is no `v2` branch on GitHub. Two feature branches there hold parts of its history:
+  `origin/v2-post-image-preview` (up to `7ef28e0`) and `origin/v2-longer-photos-intro` (up to `662650e`). Later
+  commits exist only locally.
 
 ### Perf opportunities left alone because they'd change a deliberate choice
 
@@ -335,7 +377,6 @@ Found in the `perf-sweep` audit; each would trade away something chosen on purpo
 | Same for album photos (wait for the title's entrance) and the first paragraph of each post (ScrollReveal) | Content visible at first paint | "The gallery never runs ahead of those headings" (scroll-reveal.tsx) |
 | Mount the Snowfall canvas only on click, and cap its DPR at 2 | ~12 MB less canvas memory at 3x, and one less full-screen layer while scrolling | The snow that falls when the album opens |
 | Projects "show more": animate opacity and translate instead of `height: auto` plus `filter: blur` | No layout and filter work per frame for 0.6 s | The current expand-and-unblur reveal |
-| Quote cloud: seed the layout once per mount, or wait for fonts before the first reveal | Quotes stop jumping when a late font re-runs the pack | Re-packing on font load is what prevents post-swap overlaps (`app/quotes/CLAUDE.md`) |
 | `/f1`: a small car frame set for phones (`scripts/build-f1-assets.py`, like the footage `sm` set) | About 2–3 MB less on phones | Needs the source clip (not in the repo) to rebuild the assets |
 | Lazy-load each album's effect (`FogCanvas`, `FireworkCanvas`, `NYCTitle`, `SnowfallCanvas`) with `next/dynamic` | A few kB of JS per album page | The first fog or firework click would wait on a network fetch |
 | Pause the /photos typing caret's blink once scrolled past | Negligible (it sits at opacity 0) | Nothing; not worth a change |
