@@ -42,8 +42,8 @@ const PARAGRAPH: Seg[] = [
 // ── Timeline (fractions of the section's scroll distance) ──
 type R = readonly [number, number];
 const T = {
-  l0: [0, 0.03] as R, // light mode: the page dims to pre-dawn only after the stage pins (no dark slab scrolling in)
-  type: [0.03, 0.095] as R, // typing starts once it is dark enough to read white text
+  l0: [0, 0.02] as R, // light mode: the page dims to pre-dawn only after the stage pins (no dark slab scrolling in)
+  type: [0.02, 0.095] as R, // typing starts once it is dark enough to read white text; 0.02 of 600svh = 12svh after the pin
   l1: [0.12, 0.2] as R, // the light horizon: layer 1 rises up the stage and carries beat 1 out, beat 2 in
   // The sun and the horizon it crosses (see SunAndHorizon). The horizon appears once the light horizon has passed.
   // Dark mode: the sun sinks from high in golden hour to fully below the horizon by 0.40, just as the second phrase's
@@ -805,12 +805,13 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
 
   return (
     // Full-bleed breakout: the light has to fill the viewport, not the 6xl column.
-    // ponytail: 500svh is a guess at pace; raise it if the beats feel rushed on a trackpad.
+    // The height is the pace knob: every beat in T is a fraction of it, so taller = each scroll is worth less. If it
+    // changes, rescale T.l0 / T.type[0] so the first text still appears 12svh after the stage pins.
     // marginTop pulls the section up over the empty bottom of the first screen (the title sits in its top half, the stage is
     // transparent until the first beat), so the stage pins after ~60svh of scrolling instead of a full screen.
     // pointer-events-none: the section is pulled up over the bottom of the first screen (marginTop -40svh) and would
     // swallow taps on the "Skip to the photos" button; the words that take the pointer set pointerEvents themselves.
-    <section ref={ref} aria-label="Why I take pictures" className="photos-day pointer-events-none relative left-1/2 w-screen -translate-x-1/2" style={{ height: "500svh", marginTop: "-40svh" }}>
+    <section ref={ref} aria-label="Why I take pictures" className="photos-day pointer-events-none relative left-1/2 w-screen -translate-x-1/2" style={{ height: "700svh", marginTop: "-40svh" }}>
       {/* Pinned at the very top so the sky runs behind the glass nav. The nav reads on it
           because it switches ink per sky (html[data-pd-sky], see skyBehindNav). */}
       <div ref={stageRef} className="pointer-events-none sticky top-0 h-[100svh] overflow-hidden">
@@ -1076,7 +1077,7 @@ export function PhotosIntro({ sound }: { sound: SoundRef }) {
   // matchMedia on the client, which made reduced-motion visitors hit a hydration mismatch).
   const reduce = useReducedMotion();
   const [staticIntro, setStaticIntro] = useState(false);
-  // A layout effect, so the swap lands before the first paint: the 500svh scroll stage is never shown, and the
+  // A layout effect, so the swap lands before the first paint: the tall scroll stage is never shown, and the
   // page height settles before the browser restores a reload's scroll position against it.
   useLayoutEffect(() => setStaticIntro(!!reduce), [reduce]);
   return staticIntro ? <StaticIntro /> : <ScrollIntro sound={sound} />;
