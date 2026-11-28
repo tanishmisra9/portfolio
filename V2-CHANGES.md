@@ -93,15 +93,12 @@ The whole site moved to one visual language. The rules live in `CLAUDE.md` ("v2 
   - The next stop's variant is rolled and preloaded ahead of time.
 - **Under reduced motion,** the name is plain text: no dead "Play pit-stop" button, and no clip is downloaded.
 
-### Experience and Education: a reading light
-- **Desktop (mouse): nothing ever dims.** Hovering an entry raises a soft grey fill from its bottom edge (the button
-  fill's rise at low contrast: dark grey in dark mode, light grey in light; the text doesn't invert), and its date and
-  role brighten (`components/sections/entry-style.tsx`).
-- **Phone (touch): the entry crossing the middle of the screen is lit;** the others rest dimmed with their tags hidden,
-  so a light moves down the list as you scroll (`components/sections/spotlight-list.tsx`, shared by both sections).
-  - It's an IntersectionObserver on a band across the middle of the screen: no scroll handler, 0 rAF when idle.
-  - Tags keep their space while hidden, so nothing shifts as the light moves.
-  - The first entry is lit until another reaches the middle. Reduced motion, or no JS: nothing is dimmed.
+### Experience and Education
+- **Hovering an entry (mouse)** raises a soft grey fill from its bottom edge (the button fill's rise at low contrast:
+  dark grey in dark mode, light grey in light; the text doesn't invert), and its date and role brighten
+  (`components/sections/entry-style.tsx`).
+- **Nothing dims on any device.** Entries slide in as they're reached, and their tags are always shown. A phone-only
+  scroll "reading light" (dim all but the centred entry, hide the others' tags) was built and then removed.
 - **Dates are plain words, not caps with a dash:** "Since Jan 2026", "May to Aug 2026" (the year once when it's the
   same), "Jun 2023 to Aug 2025".
 

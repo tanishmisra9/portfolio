@@ -2,9 +2,8 @@
 
 import { useHomeIntroDone } from "@/components/home-intro-gate";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { ENTRY_ITEM, ENTRY_MUTED, ENTRY_TAGS } from "@/components/sections/entry-style";
+import { ENTRY_ITEM, ENTRY_MUTED } from "@/components/sections/entry-style";
 import { SoftFill } from "@/components/ui/soft-fill";
-import { SpotlightList } from "@/components/sections/spotlight-list";
 import {
   PILL_CLASSES,
   SECTION_HEADING_CLASSES,
@@ -33,7 +32,7 @@ export function ExperienceSection({ entries }: Props) {
             Experience
           </h2>
         </ScrollReveal>
-        <SpotlightList className="mt-2 flex flex-col">
+        <ol className="mt-2 flex flex-col">
           {entries.map((entry) => (
             <li key={entry.id} className={ENTRY_ITEM}>
               <SoftFill />
@@ -48,7 +47,7 @@ export function ExperienceSection({ entries }: Props) {
                     {entry.description ? (
                       <p className="mt-3 max-w-2xl text-muted">{entry.description}</p>
                     ) : null}
-                    <ul className={`mt-3 flex flex-wrap gap-2 md:mt-4 ${ENTRY_TAGS}`}>
+                    <ul className="mt-3 flex flex-wrap gap-2 md:mt-4">
                       {entry.tags.map((tag) => (
                         <li
                           key={tag}
@@ -63,7 +62,7 @@ export function ExperienceSection({ entries }: Props) {
               </ScrollReveal>
             </li>
           ))}
-        </SpotlightList>
+        </ol>
       </div>
     </section>
   );

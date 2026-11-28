@@ -1,7 +1,6 @@
 import { ScrollReveal } from '@/components/scroll-reveal';
-import { ENTRY_ITEM, ENTRY_MUTED, ENTRY_TAGS } from '@/components/sections/entry-style';
+import { ENTRY_ITEM, ENTRY_MUTED } from '@/components/sections/entry-style';
 import { SoftFill } from '@/components/ui/soft-fill';
-import { SpotlightList } from '@/components/sections/spotlight-list';
 import { SECTION_HEADING_CLASSES } from '@/components/ui/class-constants';
 import { formatDateRange } from '@/lib/format-date-range';
 import type { EducationEntry } from '@/types/content';
@@ -25,7 +24,7 @@ export function EducationSection({ entries }: Props) {
             Education
           </h2>
         </ScrollReveal>
-        <SpotlightList className="mt-2 flex flex-col">
+        <ol className="mt-2 flex flex-col">
           {entries.map((edu) => (
             <li key={edu.id} className={ENTRY_ITEM}>
               <SoftFill />
@@ -38,7 +37,7 @@ export function EducationSection({ entries }: Props) {
                     <p className="font-display text-xl font-semibold text-fg">{edu.institution}</p>
                     <p className={`mt-1 ${ENTRY_MUTED}`}>{edu.credential}</p>
                     {edu.activities?.length || edu.coursework?.length ? (
-                      <div className={`mt-4 flex flex-col gap-2 ${ENTRY_TAGS}`}>
+                      <div className="mt-4 flex flex-col gap-2">
                         {edu.activities?.length ? (
                           <ul className="flex flex-wrap gap-2">
                             {edu.activities.map((pill) => (
@@ -64,7 +63,7 @@ export function EducationSection({ entries }: Props) {
               </ScrollReveal>
             </li>
           ))}
-        </SpotlightList>
+        </ol>
       </div>
     </section>
   );
