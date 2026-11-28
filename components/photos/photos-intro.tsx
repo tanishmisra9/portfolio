@@ -42,8 +42,8 @@ const PARAGRAPH: Seg[] = [
 // ── Timeline (fractions of the section's scroll distance) ──
 type R = readonly [number, number];
 const T = {
-  l0: [0, 0.02] as R, // light mode: the page dims to pre-dawn only after the stage pins (no dark slab scrolling in)
-  type: [0.02, 0.095] as R, // typing starts once it is dark enough to read white text; 0.02 of 600svh = 12svh after the pin
+  l0: [0, 0.015] as R, // light mode: the page dims to pre-dawn only after the stage pins (no dark slab scrolling in)
+  type: [0.015, 0.095] as R, // typing starts once it is dark enough to read white text; 0.015 of 800svh = 12svh after the pin
   l1: [0.12, 0.2] as R, // the light horizon: layer 1 rises up the stage and carries beat 1 out, beat 2 in
   // The sun and the horizon it crosses (see SunAndHorizon). The horizon appears once the light horizon has passed.
   // Dark mode: the sun sinks from high in golden hour to fully below the horizon by 0.40, just as the second phrase's
@@ -811,7 +811,7 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
     // transparent until the first beat), so the stage pins after ~60svh of scrolling instead of a full screen.
     // pointer-events-none: the section is pulled up over the bottom of the first screen (marginTop -40svh) and would
     // swallow taps on the "Skip to the photos" button; the words that take the pointer set pointerEvents themselves.
-    <section ref={ref} aria-label="Why I take pictures" className="photos-day pointer-events-none relative left-1/2 w-screen -translate-x-1/2" style={{ height: "700svh", marginTop: "-40svh" }}>
+    <section ref={ref} aria-label="Why I take pictures" className="photos-day pointer-events-none relative left-1/2 w-screen -translate-x-1/2" style={{ height: "900svh", marginTop: "-40svh" }}>
       {/* Pinned at the very top so the sky runs behind the glass nav. The nav reads on it
           because it switches ink per sky (html[data-pd-sky], see skyBehindNav). */}
       <div ref={stageRef} className="pointer-events-none sticky top-0 h-[100svh] overflow-hidden">
