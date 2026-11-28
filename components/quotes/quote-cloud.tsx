@@ -110,8 +110,9 @@ function EggLink({ on, label, children }: { on: boolean; label: string; children
 /** Wrap bound per size tier (ch resolves against each quote's own font size). */
 const TIER_MAX_WIDTHS_CH = [14, 20, 26, 32] as const;
 
-/** Uniform gutter between packed blocks (px). */
+/** Uniform gutter between packed blocks (px). Phones are tighter. */
 const PACK_GUTTER_PX = 44;
+const PACK_GUTTER_PHONE_PX = 28;
 
 /** Placement jitter: any candidate within this of the lowest top is eligible. */
 const PACK_JITTER_Y_PX = 24;
@@ -143,6 +144,17 @@ interface QuoteAssignment {
 
 function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/** Seeded PRNG (mulberry32): the packer replays the same sequence on every re-pack. */
+function seededRandom(seed: number): () => number {
+  let a = seed;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 function shuffle<T>(arr: readonly T[]): T[] {
@@ -261,6 +273,7 @@ function packOnce(
   containerWidth: number,
   gutter: number,
   minSameAuthorDist: number,
+  random: () => number,
 ): PackResult {
   const fieldWidth = containerWidth + gutter;
   let skyline: SkylineSegment[] = [{ x: 0, width: fieldWidth, y: 0 }];
@@ -348,14 +361,14 @@ function packOnce(
         (c) => nearestSameAuthor(c) >= minSameAuthorDist,
       );
       if (farEnough.length > 0) {
-        choice = farEnough[Math.floor(Math.random() * farEnough.length)];
+        choice = farEnough[Math.floor(random() * farEnough.length)];
       } else {
         choice = near.reduce((a, b) =>
           nearestSameAuthor(b) > nearestSameAuthor(a) ? b : a,
         );
       }
     } else {
-      choice = near[Math.floor(Math.random() * near.length)];
+      choice = near[Math.floor(random() * near.length)];
     }
 
     positions.set(block.id, {
@@ -473,7 +486,11 @@ function packBlocks(
   blocks: PackBlock[],
   containerWidth: number,
   gutter: number,
+  seed: number,
 ): PackResult {
+  // Restarted from the seed on every call: the same blocks and width always give the same cloud, so a font load or a
+  // no-op resize doesn't deal a new one.
+  const random = seededRandom(seed);
   const minDist = containerWidth * SAME_AUTHOR_DIST_FRACTION;
   // Score on same-author spacing only — not height — so the shuffled order's
   // taller, intermixed layout is kept rather than compacted toward shortest.
@@ -483,7 +500,7 @@ function packBlocks(
   let best: PackResult | null = null;
   let bestCost = Infinity;
   for (let i = 0; i < PACK_ATTEMPTS; i++) {
-    const attempt = packOnce(blocks, containerWidth, gutter, minDist);
+    const attempt = packOnce(blocks, containerWidth, gutter, minDist, random);
     const cost = costOf(attempt);
     if (cost < bestCost) {
       best = attempt;
@@ -522,10 +539,12 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
   // Latch: once revealed, resize re-packs must not replay the entrance.
   const [hasRevealed, setHasRevealed] = useState(false);
 
+  const seedRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const blockRefs = useRef(new Map<string, HTMLElement>());
 
   useEffect(() => {
+    seedRef.current = Math.floor(Math.random() * 2 ** 32);
     setAssignments(generateAssignments(quotes));
     setHasRevealed(false);
   }, [quotes]);
@@ -553,7 +572,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
   }, []);
 
   useEffect(() => {
-    if (!isDesktop || !assignments) return;
+    if (isDesktop === null || !assignments) return;
     const el = containerRef.current;
     if (!el) return;
     const observer = new ResizeObserver((entries) => {
@@ -575,7 +594,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
   // dimensions (transform-independent) so the 0.96 entrance scale can't skew
   // measurement, +1px slack so integer rounding never re-wraps a line.
   useLayoutEffect(() => {
-    if (layout !== null || !isDesktop || !assignments) return;
+    if (layout !== null || isDesktop === null || !assignments) return;
     const width = containerRef.current?.offsetWidth ?? 0;
     if (width <= 0) return;
 
@@ -597,10 +616,10 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
         author: a.quote.attribution,
       });
     }
-    setLayout(packBlocks(blocks, width, PACK_GUTTER_PX));
+    setLayout(packBlocks(blocks, width, isDesktop ? PACK_GUTTER_PX : PACK_GUTTER_PHONE_PX, seedRef.current));
   }, [layout, isDesktop, assignments]);
 
-  const revealStarted = layout !== null || isDesktop === false;
+  const revealStarted = layout !== null;
 
   useEffect(() => {
     if (revealStarted) setHasRevealed(true);
@@ -608,17 +627,25 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
 
   const reveal = revealStarted || hasRevealed;
 
-  // Cursor-following author tooltip. Author persists through fade-out (only
-  // `visible` toggles) so the label doesn't blank mid-transition.
-  const [tip, setTip] = useState<{ author: string; visible: boolean }>({
-    author: "",
-    visible: false,
-  });
+  // Author tag. A mouse hovers it (it follows the cursor); touch and pen tap it open. Chosen by input type, not width,
+  // so wide tablets tap too. Author persists through fade-out (only `visible` toggles) so the label doesn't blank.
+  const [tip, setTip] = useState<{
+    id: string;
+    author: string;
+    x: number;
+    y: number;
+    visible: boolean;
+    /** Set for a tapped tag: the quote's screen edges. */
+    quote?: { top: number; bottom: number };
+  }>({ id: "", author: "", x: 0, y: 0, visible: false });
   const tooltipRef = useRef<HTMLDivElement>(null);
+  // Set on pointerdown, consumed by the click: a keyboard click has none, so it never counts as touch.
+  const pressRef = useRef<string | null>(null);
 
   // Position via direct DOM writes (not state) so pointer moves don't re-render
-  // the whole cloud. Offset from the cursor and clamped to the viewport.
-  const positionTooltip = useCallback((clientX: number, clientY: number) => {
+  // the whole cloud. Offset from the cursor and clamped to the viewport. With `quote` (a tap) it sits under that quote
+  // instead, centred on the tap, or above when there's no room, so it never covers the words it names.
+  const positionTooltip = useCallback((clientX: number, clientY: number, quote?: { top: number; bottom: number }) => {
     const el = tooltipRef.current;
     if (!el) return;
     const gap = 18;
@@ -631,15 +658,45 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
       window.innerHeight - h - 8,
     );
     if (left + w > window.innerWidth - 8) left = clientX - gap - w; // flip near right edge
+    if (quote) {
+      const below = quote.bottom + 8;
+      const y = below + h <= window.innerHeight - 8 ? below : Math.max(8, quote.top - 8 - h);
+      const x = Math.max(8, Math.min(clientX - w / 2, document.documentElement.clientWidth - w - 8));
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      return;
+    }
     el.style.transform = `translate3d(${Math.max(8, left)}px, ${top}px, 0)`;
   }, []);
 
+  // Placed after render, so the clamp measures the new author's width (a tap gets no follow-up pointermove).
+  useLayoutEffect(() => {
+    if (tip.visible) positionTooltip(tip.x, tip.y, tip.quote);
+  }, [tip, positionTooltip]);
+
   useEffect(() => {
     if (!tip.visible) return;
-    const onMove = (e: PointerEvent) => positionTooltip(e.clientX, e.clientY);
-    window.addEventListener("pointermove", onMove);
-    return () => window.removeEventListener("pointermove", onMove);
-  }, [tip.visible, positionTooltip]);
+    const hide = () => setTip((t) => ({ ...t, visible: false }));
+    if (!tip.quote) {
+      const onMove = (e: PointerEvent) => positionTooltip(e.clientX, e.clientY);
+      window.addEventListener("pointermove", onMove);
+      return () => window.removeEventListener("pointermove", onMove);
+    }
+    // A tapped tag is fixed to the screen: drop it on scroll or on a press outside any quote.
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target as Element).closest("[data-quote]")) hide();
+    };
+    window.addEventListener("scroll", hide, { passive: true });
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      window.removeEventListener("scroll", hide);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [tip.visible, tip.quote, positionTooltip]);
+
+  // A re-fit (rotation, window resize) moves the quote out from under its tag.
+  useEffect(() => {
+    setTip((t) => (t.visible ? { ...t, visible: false } : t));
+  }, [containerWidth]);
 
   return (
     <main
@@ -664,7 +721,6 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
           )}
         </motion.header>
         {assignments && isDesktop !== null ? (
-          isDesktop ? (
           <div
             ref={containerRef}
             className="relative"
@@ -683,23 +739,37 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                   }}
                   role="figure"
                   aria-label={label}
-                  className="select-none"
-                  onPointerEnter={
-                    isDesktop && a.quote.attribution
-                      ? (e) => {
-                          setTip({
-                            author: a.quote.attribution as string,
-                            visible: true,
-                          });
-                          positionTooltip(e.clientX, e.clientY);
-                        }
-                      : undefined
-                  }
-                  onPointerLeave={
-                    isDesktop
-                      ? () => setTip((t) => ({ ...t, visible: false }))
-                      : undefined
-                  }
+                  data-quote=""
+                  // cursor-pointer: iOS only sends clicks from non-links that have it.
+                  className={`select-none ${a.quote.attribution ? "cursor-pointer [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:cursor-auto" : ""}`}
+                  onPointerDown={(e) => {
+                    pressRef.current = e.pointerType;
+                  }}
+                  onPointerEnter={(e) => {
+                    const author = a.quote.attribution;
+                    if (e.pointerType !== "mouse" || !author) return;
+                    setTip({ id: a.quote.id, author, x: e.clientX, y: e.clientY, visible: true });
+                  }}
+                  onPointerLeave={(e) => {
+                    // Leaving closes a hover tag only; a tapped one stays until its own hide paths.
+                    if (e.pointerType === "mouse") setTip((t) => (t.quote ? t : { ...t, visible: false }));
+                  }}
+                  onClickCapture={(e) => {
+                    const press = pressRef.current;
+                    pressRef.current = null;
+                    const author = a.quote.attribution;
+                    if ((press !== "touch" && press !== "pen") || !author) return;
+                    // Only a tapped tag counts as open. A hover tag can appear unasked before a tap (WebKit sends a mouse hover
+                    // after a scroll; so does a tablet trackpad), and the tap must not toggle that one shut.
+                    const open = tip.visible && tip.quote !== undefined && tip.id === a.quote.id;
+                    if (author === EASTER_EGG_AUTHOR) {
+                      // First tap names the author; the second lets the link through.
+                      if (open) return;
+                      e.preventDefault();
+                    }
+                    const { top, bottom } = e.currentTarget.getBoundingClientRect();
+                    setTip({ id: a.quote.id, author, x: e.clientX, y: e.clientY, visible: !open, quote: { top, bottom } });
+                  }}
                   initial={
                     reduceMotion
                       ? { opacity: 0 }
@@ -724,17 +794,13 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                           ease: "easeOut",
                         }
                   }
-                  style={
-                    isDesktop
-                      ? {
-                          position: "absolute",
-                          left: pos?.left ?? 0,
-                          top: pos?.top ?? 0,
-                          width: pos?.width,
-                          visibility: pos ? "visible" : "hidden",
-                        }
-                      : { position: "relative" }
-                  }
+                  style={{
+                    position: "absolute",
+                    left: pos?.left ?? 0,
+                    top: pos?.top ?? 0,
+                    width: pos?.width,
+                    visibility: pos ? "visible" : "hidden",
+                  }}
                 >
                   <EggLink on={a.quote.attribution === EASTER_EGG_AUTHOR} label={label}>
                   <blockquote
@@ -748,9 +814,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                       color: layout?.colors.get(a.quote.id) ?? QUOTE_WHITE,
                       textTransform: a.uppercase ? "uppercase" : undefined,
                       letterSpacing: a.letterSpacing,
-                      maxWidth: isDesktop
-                        ? `${TIER_MAX_WIDTHS_CH[a.tier]}ch`
-                        : undefined,
+                      maxWidth: `${TIER_MAX_WIDTHS_CH[a.tier]}ch`,
                     }}
                   >
                     {a.quote.text}
@@ -760,57 +824,6 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
               );
             })}
           </div>
-          ) : (
-            // Mobile: a vertical stack carrying each quote's own font treatment,
-            // ordered by the same per-load shuffle. Just scroll.
-            <ul className="flex flex-col gap-12">
-              {assignments.map((a) => (
-                <motion.li
-                  key={a.quote.id}
-                  className="select-none"
-                  initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-                  whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "0px 0px -10% 0px" }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                >
-                  <figure
-                    role="figure"
-                    aria-label={
-                      a.quote.attribution
-                        ? `${a.quote.text} — ${a.quote.attribution}`
-                        : a.quote.text
-                    }
-                  >
-                    <EggLink on={a.quote.attribution === EASTER_EGG_AUTHOR} label={a.quote.text}>
-                    <blockquote
-                      aria-hidden="true"
-                      className="text-fg"
-                      style={{
-                        fontFamily: a.fontFamily,
-                        fontStyle: a.fontStyle,
-                        fontWeight: a.fontWeight,
-                        textTransform: a.uppercase ? "uppercase" : undefined,
-                        letterSpacing: a.letterSpacing,
-                        fontSize: "clamp(1.5rem, 5.5vw, 2.1rem)",
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {a.quote.text}
-                    </blockquote>
-                    {a.quote.attribution ? (
-                      <figcaption
-                        aria-hidden="true"
-                        className="mt-3 font-mono text-xs uppercase tracking-[0.2em] text-dim"
-                      >
-                        {a.quote.attribution}
-                      </figcaption>
-                    ) : null}
-                    </EggLink>
-                  </figure>
-                </motion.li>
-              ))}
-            </ul>
-          )
         ) : (
           <>
             <div className="min-h-[70vh]" aria-hidden="true" />

@@ -70,7 +70,6 @@ const DIM_TOKEN_SITES = [
   ["components/blog/blog-index-motion.tsx", 'className="block text-sm tabular-nums text-dim">'],
   ["components/hero/hero.tsx", '-mt-3 text-dim md:mt-4"'],
   ["components/hero/scatter-name.tsx", '"text-fg" : "text-dim";'],
-  ["components/quotes/quote-cloud.tsx", 'tracking-[0.2em] text-dim"'],
   ["components/sections/skills-section.tsx", '<span className="text-dim transition-colors group-hover:text-fg">'],
   ["components/sections/skills-section.tsx", 'h-4 w-4 shrink-0 text-dim transition-colors'],
   ["components/site-header.tsx", '"text-dim hover:text-fg",'],
