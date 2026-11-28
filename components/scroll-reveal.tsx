@@ -54,34 +54,6 @@ export function ScrollReveal({
   const albumAfterIntro = isAlbumRow && photoAlbumIntroComplete === true;
   const homeFrozen = homeIntroComplete === false;
 
-  if (reducedMotion) {
-    if (isAlbumRow) {
-      return (
-        <div
-          className={className}
-          style={
-            photoAlbumIntroComplete === false
-              ? { opacity: 0, pointerEvents: "none" }
-              : undefined
-          }
-        >
-          {children}
-        </div>
-      );
-    }
-    if (homeIntroComplete === false) {
-      return (
-        <div
-          className={className}
-          style={{ opacity: 0, pointerEvents: "none" }}
-        >
-          {children}
-        </div>
-      );
-    }
-    return <div className={className}>{children}</div>;
-  }
-
   /**
    * Album: tighter viewport than before so rows below the fold wait for scroll; still px/% only
    * for Safari IntersectionObserver.
@@ -101,6 +73,24 @@ export function ScrollReveal({
         : { opacity: 0, x: -40 };
   const slideTarget =
     variant === "fade" ? { opacity: 1 } : { opacity: 1, x: 0 };
+
+  // Reduced motion: the same motion.div, jumping straight to its end state. The server can't know the preference, so
+  // it renders `initial` (hidden, offset). Returning a plain div here left that style on the hydrated node for good
+  // (React doesn't patch a mismatched style), and the content stayed invisible. `initial` must not depend on it either.
+  if (reducedMotion) {
+    const frozen = albumFrozen || homeFrozen;
+    return (
+      <motion.div
+        className={className}
+        initial={slideInitial}
+        animate={{ opacity: frozen ? 0 : 1, x: 0 }}
+        transition={{ duration: 0 }}
+        style={frozen ? { pointerEvents: "none" } : undefined}
+      >
+        {children}
+      </motion.div>
+    );
+  }
 
   const albumTransitionBase = {
     opacity: {

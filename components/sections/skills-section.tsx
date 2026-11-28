@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, m as motion, useReducedMotion } from 'framer-motion';
 import { ScrollReveal } from '@/components/scroll-reveal';
 import {
   GLASS_BUTTON_CLASSES,

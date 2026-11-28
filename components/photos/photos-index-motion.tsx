@@ -164,6 +164,7 @@ export function PhotosIndexMotion({ collections }: Props) {
             href="#collections"
             onMouseDown={(e) => e.preventDefault()}
             onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // open in a new tab/window
               const target = document.getElementById("collections");
               if (!target) return; // no JS-side target: let the plain anchor jump
               e.preventDefault();

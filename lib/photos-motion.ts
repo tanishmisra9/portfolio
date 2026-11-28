@@ -35,12 +35,9 @@ export function photosEntranceVariants(reduceMotion: boolean | null): {
         },
       },
       item: instant,
-      gridSection: {
-        hidden: {},
-        show: {
-          transition: { staggerChildren: 0, delayChildren: 0 },
-        },
-      },
+      // Must animate x back to 0 too: the server can't know the preference and renders the offset `hidden` style,
+      // which stays on the hydrated node unless something moves it.
+      gridSection: instant,
       albumGridSlot: {
         hidden: {},
         show: {

@@ -23,7 +23,8 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 function isInteractiveTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
-  return target.closest('a, button, [role="button"], input, textarea, select, article') !== null;
+  // [data-quote]: a /quotes figure, tapped to see its author; quick taps there must not count towards the triple tap.
+  return target.closest('a, button, [role="button"], input, textarea, select, article, [data-quote]') !== null;
 }
 
 function normalizeKey(key: string): string | null {
