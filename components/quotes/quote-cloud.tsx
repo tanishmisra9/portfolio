@@ -541,6 +541,9 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
 
   const seedRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Held while a re-pack measures: collapsing the container would clamp the reader's scroll back up the page.
+  const lastHeightRef = useRef(0);
+  if (layout) lastHeightRef.current = layout.height;
   const blockRefs = useRef(new Map<string, HTMLElement>());
 
   useEffect(() => {
@@ -639,7 +642,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
     quote?: { top: number; bottom: number };
   }>({ id: "", author: "", x: 0, y: 0, visible: false });
   const tooltipRef = useRef<HTMLDivElement>(null);
-  // Set on pointerdown, consumed by the click: a keyboard click has none, so it never counts as touch.
+  // The last press's pointerType, read by its click.
   const pressRef = useRef<string | null>(null);
 
   // Position via direct DOM writes (not state) so pointer moves don't re-render
@@ -677,9 +680,20 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
     if (!tip.visible) return;
     const hide = () => setTip((t) => ({ ...t, visible: false }));
     if (!tip.quote) {
-      const onMove = (e: PointerEvent) => positionTooltip(e.clientX, e.clientY);
+      const onMove = (e: PointerEvent) => {
+        if (e.pointerType === "mouse") positionTooltip(e.clientX, e.clientY);
+      };
+      // No mouseleave is coming from a finger, so any touch ends a hover tag. (Not scroll: that would drop a desktop
+      // tag on a wheel nudge.)
+      const onTouch = (e: PointerEvent) => {
+        if (e.pointerType !== "mouse") hide();
+      };
       window.addEventListener("pointermove", onMove);
-      return () => window.removeEventListener("pointermove", onMove);
+      document.addEventListener("pointerdown", onTouch);
+      return () => {
+        window.removeEventListener("pointermove", onMove);
+        document.removeEventListener("pointerdown", onTouch);
+      };
     }
     // A tapped tag is fixed to the screen: drop it on scroll or on a press outside any quote.
     const onDown = (e: PointerEvent) => {
@@ -693,10 +707,10 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
     };
   }, [tip.visible, tip.quote, positionTooltip]);
 
-  // A re-fit (rotation, window resize) moves the quote out from under its tag.
+  // A re-fit (rotation, window resize, font load) can move the quote out from under its tag.
   useEffect(() => {
     setTip((t) => (t.visible ? { ...t, visible: false } : t));
-  }, [containerWidth]);
+  }, [layout]);
 
   return (
     <main
@@ -724,7 +738,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
           <div
             ref={containerRef}
             className="relative"
-            style={layout ? { height: layout.height } : { minHeight: "70vh" }}
+            style={layout ? { height: layout.height } : { minHeight: lastHeightRef.current || "70vh" }}
           >
             {assignments.map((a) => {
               const pos = layout?.positions.get(a.quote.id);
@@ -739,7 +753,7 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                   }}
                   role="figure"
                   aria-label={label}
-                  data-quote=""
+                  data-quote={a.quote.attribution ? "" : undefined}
                   // cursor-pointer: iOS only sends clicks from non-links that have it.
                   className={`select-none ${a.quote.attribution ? "cursor-pointer [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:cursor-auto" : ""}`}
                   onPointerDown={(e) => {
@@ -747,7 +761,8 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                   }}
                   onPointerEnter={(e) => {
                     const author = a.quote.attribution;
-                    if (e.pointerType !== "mouse" || !author) return;
+                    // any-hover: a phone with nothing that can hover still gets WebKit's after-scroll mouse hover.
+                    if (e.pointerType !== "mouse" || !author || !window.matchMedia("(any-hover: hover)").matches) return;
                     setTip({ id: a.quote.id, author, x: e.clientX, y: e.clientY, visible: true });
                   }}
                   onPointerLeave={(e) => {
@@ -758,7 +773,8 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                     const press = pressRef.current;
                     pressRef.current = null;
                     const author = a.quote.attribution;
-                    if ((press !== "touch" && press !== "pen") || !author) return;
+                    // detail 0 = keyboard. A touch that ended in a scroll or long-press leaves its pointerType behind.
+                    if (e.detail === 0 || (press !== "touch" && press !== "pen") || !author) return;
                     // Only a tapped tag counts as open. A hover tag can appear unasked before a tap (WebKit sends a mouse hover
                     // after a scroll; so does a tablet trackpad), and the tap must not toggle that one shut.
                     const open = tip.visible && tip.quote !== undefined && tip.id === a.quote.id;
@@ -805,6 +821,8 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
                   <EggLink on={a.quote.attribution === EASTER_EGG_AUTHOR} label={label}>
                   <blockquote
                     aria-hidden="true"
+                    // A word wider than a phone breaks instead of running off the page.
+                    className="[overflow-wrap:anywhere]"
                     style={{
                       fontFamily: a.fontFamily,
                       fontStyle: a.fontStyle,
