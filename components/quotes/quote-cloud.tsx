@@ -2,10 +2,13 @@
 
 import { PAGE_TITLE_CLASSES } from "@/components/ui/class-constants";
 import { m as motion, useReducedMotion } from "framer-motion";
+import { Shuffle } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { QuoteEntry } from "@/types/content";
+import { QuoteSubtitle } from "@/components/quotes/quote-subtitle";
+import { IconButton } from "@/components/ui/icon-button";
 import {
   MAX_START_DELAY_MS,
   QUOTE_FADE_DURATION_S,
@@ -82,6 +85,9 @@ const MAX_TIER_ONE_PER_RENDER = 1;
 
 /** Reveal cascade: each tier starts ~this much later, so the hero leads. */
 const TIER_DELAY_STEP_MS = 420;
+
+/** A reshuffle replays the entrance with its delays shortened to this share: the first load's cascade is too slow to repeat. */
+const RESHUFFLE_DELAY_SCALE = 0.4;
 
 /** Two-value contrast only: bright white or dark grey, nothing in between.
  * Colour is assigned after packing (see assignSpreadColors) so neighbours
@@ -538,6 +544,8 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
   const [fontsTick, setFontsTick] = useState(0);
   // Latch: once revealed, resize re-packs must not replay the entrance.
   const [hasRevealed, setHasRevealed] = useState(false);
+  // Keys the cloud, so each reshuffle remounts it and the entrance plays again.
+  const [deal, setDeal] = useState(0);
 
   const seedRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -551,6 +559,14 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
     setAssignments(generateAssignments(quotes));
     setHasRevealed(false);
   }, [quotes]);
+
+  const reshuffle = () => {
+    seedRef.current = Math.floor(Math.random() * 2 ** 32);
+    setAssignments(generateAssignments(quotes).map((a) => ({ ...a, delayMs: a.delayMs * RESHUFFLE_DELAY_SCALE })));
+    setLayout(null);
+    setHasRevealed(false);
+    setDeal((d) => d + 1);
+  };
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -723,19 +739,24 @@ export function QuoteCloud({ quotes, subtitle }: { quotes: QuoteEntry[]; subtitl
           initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mb-16 text-center md:mb-24"
+          className="mb-12 text-center md:mb-16"
         >
           <h1 className={PAGE_TITLE_CLASSES}>
             Quotes
           </h1>
-          {subtitle && (
-            <p className="mt-6 select-none text-[1.375rem] leading-snug text-muted md:mt-8">
-              &ldquo; {subtitle} &rdquo;
-            </p>
-          )}
+          {subtitle && <QuoteSubtitle key={subtitle} text={subtitle} />}
+          {/* Disabled only before the first layout: disabling during a re-pack would drop keyboard focus. */}
+          <IconButton
+            icon={<Shuffle />}
+            label="Reshuffle quotes"
+            onClick={reshuffle}
+            disabled={lastHeightRef.current === 0}
+            className="mx-auto mt-5 md:mt-6"
+          />
         </motion.header>
         {assignments && isDesktop !== null ? (
           <div
+            key={deal}
             ref={containerRef}
             className="relative"
             style={layout ? { height: layout.height } : { minHeight: lastHeightRef.current || "70vh" }}

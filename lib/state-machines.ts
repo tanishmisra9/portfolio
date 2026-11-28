@@ -66,6 +66,15 @@ export const SAVE_STATUS = {
 } as const satisfies Edges<string>;
 export type SaveStatus = keyof typeof SAVE_STATUS;
 
+/** The /quotes subtitle (components/quotes/quote-subtitle.tsx): the line keeps changing typeface until paused. `still` (reduced motion) is terminal. */
+export const TITLE_PHASE = {
+  waiting: ["cycling", "still"],
+  cycling: ["paused"],
+  paused: ["cycling"],
+  still: [],
+} as const satisfies Edges<string>;
+export type TitlePhase = keyof typeof TITLE_PHASE;
+
 /** Half-pressed shutter on the /photos title (components/photos/photos-header.tsx; CSS keys off data-half). Releasing at any point goes back to off (the click then takes the shot); a lock only comes after focusing. */
 export const HALF_PRESS = {
   off: ["focusing"],
