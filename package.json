@@ -35,7 +35,7 @@
     "mdast-util-to-string": "^4.0.0",
     "next": "^15.2.4",
     "next-themes": "^0.4.6",
-    "pencil-voice": "github:tanishmisra9/pencil-voice#v0.1.1",
+    "pencil-voice": "github:tanishmisra9/pencil-voice#v0.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
