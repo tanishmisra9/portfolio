@@ -376,7 +376,8 @@ function handDrawnArrow(A: Pt, B: Pt, em: number, width: number) {
 
   const { d: head, len: headLen } = arrowHead(B, pts[pts.length - 3], em, r);
   const all = total + headLen;
-  // The tip's height at each 1% of the stroke, so the camera can follow the pencil.
+  // The tip's height at each 1% of the stroke, so the camera can follow the pencil. Interpolated along the segment (and
+  // again between entries, in trackY): snapping to a vertex or an entry made the text jump up to 42px per 1px scrolled.
   const tipY: number[] = [];
   let acc = 0;
   let i = 1;
@@ -386,8 +387,10 @@ function handDrawnArrow(A: Pt, B: Pt, em: number, width: number) {
       acc += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
       i++;
     }
+    const [a, b] = [pts[i - 1], pts[i]];
+    const t = clamp01((want - acc) / (Math.hypot(b[0] - a[0], b[1] - a[1]) || 1));
     // Never back up: the loop briefly climbs, and the camera following that would jerk upward mid-fall.
-    tipY.push(Math.max(pts[i][1], tipY[tipY.length - 1] ?? -Infinity));
+    tipY.push(Math.max(a[1] + (b[1] - a[1]) * t, tipY[tipY.length - 1] ?? -Infinity));
   }
   return { body: smooth(pts) + head, curlFrac: curlLen / all, bodyFrac: total / all, tipY };
 }
@@ -763,7 +766,8 @@ function ScrollIntro({ sound }: { sound: SoundRef }) {
     const g = arrowRef.current;
     if (!g) return 0;
     const f = clamp01(drawAt(x, g) / g.bodyFrac); // fraction of the line (not the head) drawn
-    const y = g.tipY[Math.round(f * 100)];
+    const k = Math.min(99, Math.floor(f * 100));
+    const y = g.tipY[k] + (g.tipY[k + 1] - g.tipY[k]) * (f * 100 - k);
     const [y0, y1] = [g.tipY[0], g.tipY[100]];
     return -(g.halves[0] + (g.halves[1] - g.halves[0]) * clamp01((y - y0) / (y1 - y0 || 1)));
   });
