@@ -116,7 +116,8 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
           )}
         </div>
 
-        <div className="md:relative md:-top-[75px] md:justify-self-center">
+        {/* Phones stack the columns: the chevron goes first, so it sits centred above the footer as it does on desktop. */}
+        <div className="order-first justify-self-center md:order-none md:relative md:-top-[75px]">
           <Tooltip label="Back to top">
             <button
               type="button"
