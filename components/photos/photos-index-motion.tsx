@@ -95,7 +95,7 @@ function CollectionTile({ collection, index, hero }: CollectionTileProps) {
           sizes={hero ? COVER_SIZES.hero : COVER_SIZES.tile}
           className="object-cover"
           quality={68}
-          // No `priority`: the collections sit below the title, the 900svh intro and the note (~11 screens down), so preloading
+          // No `priority`: the collections sit below the title, the 500svh intro and the note (~7 screens down), so preloading
           // the first two covers at high priority only competed with fonts, JS and hydration. The page's LCP is the title.
         />
       </div>
