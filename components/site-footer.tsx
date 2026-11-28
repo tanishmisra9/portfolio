@@ -100,24 +100,9 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
     <footer className="px-6 pb-10 pt-20 md:pt-28">
       <div className="mx-auto max-w-6xl">
       <div className="grid gap-y-10 md:grid-cols-[1fr_auto_1fr] md:items-start md:gap-x-8">
-        {/* min-w-0 + xl:flex-nowrap: at xl+ the whole row (incl. the email) stays on one line and may run under the back-to-top chevron, which sits 75px above it. */}
-        <div className="min-w-0">
-          {links.length > 0 && (
-            <>
-          <p className="font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">Stay in touch</p>
-          <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:text-lg xl:w-max xl:flex-nowrap">
-            {[...links].sort((a, b) => rank(a) - rank(b)).map((link) => (
-              <li key={link.id}>
-                <SocialItem link={link} />
-              </li>
-            ))}
-          </ul>
-            </>
-          )}
-        </div>
-
-        {/* Phones stack the columns: the chevron goes first, so it sits centred above the footer as it does on desktop. */}
-        <div className="order-first justify-self-center md:order-none md:relative md:-top-[75px]">
+        {/* First in the markup, so on stacked phones it's centred above the footer and Tab / VoiceOver reach it in the
+            order it's seen. On desktop it's placed in the middle column; every column names its cell. */}
+        <div className="justify-self-center md:relative md:-top-[75px] md:col-start-2 md:row-start-1">
           <Tooltip label="Back to top">
             <button
               type="button"
@@ -133,7 +118,23 @@ export function SiteFooter({ social }: { social: SocialLink[] }) {
           </Tooltip>
         </div>
 
-        <div className="md:text-right">
+        {/* min-w-0 + xl:flex-nowrap: at xl+ the whole row (incl. the email) stays on one line and may run under the back-to-top chevron, which sits 75px above it. */}
+        <div className="min-w-0 md:col-start-1 md:row-start-1">
+          {links.length > 0 && (
+            <>
+          <p className="font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">Stay in touch</p>
+          <ul className="-mx-3 mt-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:text-lg xl:w-max xl:flex-nowrap">
+            {[...links].sort((a, b) => rank(a) - rank(b)).map((link) => (
+              <li key={link.id}>
+                <SocialItem link={link} />
+              </li>
+            ))}
+          </ul>
+            </>
+          )}
+        </div>
+
+        <div className="md:col-start-3 md:row-start-1 md:text-right">
           {/* Invisible twin of the "Stay in touch" heading so both link rows share one baseline at any heading size. */}
           <p aria-hidden className="invisible hidden font-display text-3xl font-extrabold tracking-tight md:block md:text-4xl">&nbsp;</p>
           <ul className="-mx-3 flex flex-wrap gap-x-1 gap-y-1 text-base text-muted md:mt-3 md:justify-end md:text-lg">
