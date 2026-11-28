@@ -1,7 +1,7 @@
 // The /photos pencil strokes' sound comes from the pencil-voice package (github.com/tanishmisra9/pencil-voice, installed
 // from a pinned GitHub tag). This file holds this site's settings for it, so tuning stays a local edit with no release.
 // Every knob, its unit and what it sounds like: pencil-voice's docs/tuning.md. The package default is its `graphite`
-// preset (fitted to public/sfx/pencil.mp3); the values below are the ones tuned by ear for this page.
+// preset (fitted to a pencil recording kept locally as public/sfx/pencil.mp3, not in the repo); the values below are the ones tuned by ear for this page.
 
 import type { PencilConfig } from "pencil-voice";
 

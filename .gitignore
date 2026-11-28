@@ -69,3 +69,5 @@ CLAUDE.md
 
 # Brag video output
 brag-output/
+# Pencil reference recording (unverified licence): kept locally for pencil-voice's fit tool, never deployed.
+public/sfx/pencil.mp3

@@ -25,7 +25,8 @@
 
 - **Node ≥ 22.18** is now required (`engines` in package.json). The check scripts run on Node's native TypeScript
   stripping.
-- **Database:** v2 adds two tables and a column. Run `npm run db:push` against production once.
+- **Database:** v2 adds two tables and a column. `shutter_count` already existed; `login_attempts` and
+  `radio_samples.rms` were added to the database on 28 Nov 2026, before the push to `main`.
   - `login_attempts`: the per-IP admin login throttle. Until it exists, the throttle silently does nothing.
   - `shutter_count`: the /photos global shot counter. It already exists in the current database. Until it exists,
     the counter just stays hidden.
@@ -348,9 +349,10 @@ Several review rounds (`/code-review` medium and high, plus an audit) were fixed
 
 ## Known gaps and open items
 
-- **Sound licences:** `public/sfx/pencil.mp3` (the pencil reference recording) and `public/sfx/focus-beep.mp3` (the
-  half-press beep) came from YouTube SFX uploads with unverified licences. Confirm or replace them before production.
-  `pencil-voice` ships only fitted numbers, never the audio.
+- **Sound licences:** `public/sfx/focus-beep.mp3` (the half-press beep) came from a YouTube SFX upload with an
+  unverified licence and ships as is; confirm or replace it. The pencil reference recording (`pencil.mp3`, same kind of
+  source) is no longer in the repo or deployed, though earlier commits still contain it. `pencil-voice` ships only
+  fitted numbers, never the audio.
 - **Real-device checks still worth doing:**
   - the iPhone long-press callout on the camera title;
   - the pencil sound over https on a phone;
@@ -361,9 +363,8 @@ Several review rounds (`/code-review` medium and high, plus an audit) were fixed
   would confirm it.
 - **Pre-existing:** under reduced motion, the dev console logs a hydration warning from the /photos entrance
   animation. It's harmless in production, and still to fix.
-- **Not pushed:** there is no `v2` branch on GitHub. Two feature branches there hold parts of its history:
-  `origin/v2-post-image-preview` (up to `7ef28e0`) and `origin/v2-longer-photos-intro` (up to `662650e`). Later
-  commits exist only locally.
+- **Released:** `v2` went to `main` on 28 Nov 2026. `main`'s two commits that `v2` leaves out are merged into history
+  without their changes (see below).
 
 ### Perf opportunities left alone because they'd change a deliberate choice
 
